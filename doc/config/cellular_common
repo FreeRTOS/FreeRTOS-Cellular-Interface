@@ -1,0 +1,26 @@
+# Include common configuration options.
+@INCLUDE_PATH = doc/config
+@INCLUDE = common
+
+# Basic project information.
+PROJECT_NAME = "Cellular common Library"
+PROJECT_BRIEF = "Cellular common Library"
+
+# Library documentation output directory.
+HTML_OUTPUT = cellular_common
+
+# Generate Doxygen tag file for this library.
+GENERATE_TAGFILE = doc/output/cellular_common.tag
+ENABLE_PREPROCESSING = YES
+MACRO_EXPANSION = YES
+PREDEFINED="CK_DECLARE_FUNCTION(return, name)=return name"
+
+# Directories containing library source code.
+INPUT = doc \
+        doc/lib \
+        common/include
+
+# Library file names.
+FILE_PATTERNS = *cellular*.c *cellular*.h cellular_common.txt
+
+EXTRACT_ALL = YES

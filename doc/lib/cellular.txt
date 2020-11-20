@@ -1,0 +1,353 @@
+/**
+ * @mainpage
+ * @brief Cellular HAL library provides cellular network connectivity. 
+ * <br>
+ * This library contains the following three components in three folders.
+ * | Cellular HAL folders | High Level Description |
+ * | :--------------------| :--------------------- |
+ * | include              | Cellular HAL APIs definitions help to abstract the control of cellular module. |
+ * | common               | Cellular HAL APIs implemenation with 3GPP TS v27.007 AT commands. |
+ * | modules              | Cellular HAL APIs implemenation with cellular module specific AT commands. |
+ * 
+ * Three cellular modules are supported in this library.
+ * | Cellular module |
+ * | :--------------------|
+ * | quectel BG96         |
+ * | Sierra HL7802        |
+ * | Ublox SARA R4 series |
+ * New cellular module can reference these module porting to be integrated into cellular HAL library.
+ */
+
+/**
+ * @page comm_if Cellular communication interface
+ * @brief Cellular communication interface
+ *
+ * Cellular HAL library use communication interface to communicate with cellular modules.<br>
+ * The porting of communication should create a instance of CellularCommInterface
+ * and pass it to Cellular_Init function as paremeters.
+ *
+ * CellularCommInterface includes the following four function pointers.
+ * Reference the document page for prototype.
+ *
+ * - @subpage CellularCommInterfaceOpen_t
+ * @copybrief CellularCommInterfaceOpen_t
+ * - @subpage CellularCommInterfaceSend_t
+ * @copybrief CellularCommInterfaceSend_t
+ * - @subpage CellularCommInterfaceRecv_t
+ * @copybrief CellularCommInterfaceRecv_t
+ * - @subpage CellularCommInterfaceClose_t
+ * @copybrief CellularCommInterfaceClose_t
+ *
+ * The following communication interface implementation can be used as reference.
+ * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/pc/boards/windows/ports/comm_if/comm_if_windows.c">FreeRTOS windows simulator comm interface </a>
+ * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_uart.c"> Amazon-FreeRTOS common IO UART comm interface </a>
+ * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c"> STM32 L475 discovery board comm interface </a>
+ * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c"> Sierra sensorhub board comm interface </a>
+ *
+ * <b></b>
+ * @image html comm_interaction.png width=80%
+ */
+
+/**
+ * @paramstructs_group{cellular_HAL}
+ * @paramstructs_brief{cellular_HAL,cellular_HAL}
+ */
+ 
+/**
+ * @handles_group{cellular_HAL}
+ * @handles_brief{cellular_HAL library}
+ */
+ 
+/**
+ * @functionpointers_group{cellular_HAL}
+ * @functionpointers_brief{cellular_HAL library}
+ */
+ 
+/**
+ * @enums_group{cellular_HAL}
+ * @enums_brief{cellular_HAL library}
+ */
+
+/**
+ * @page cellular_hal_config Configuration
+ * @brief Configuration settings of cellular HAL
+ *
+ * @section CELLULAR_MCC_MAX_SIZE
+ *
+ * Mobile country code max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 3
+ *
+ * @section CELLULAR_MNC_MAX_SIZE
+ *
+ * Mobile network code max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 3
+ *
+ * @section CELLULAR_ICCID_MAX_SIZE
+ *
+ * Integrate circuit card identity max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 20
+ *
+ * @section CELLULAR_IMSI_MAX_SIZE
+ *
+ * International Mobile Subscriber Identity max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 15
+ *
+ * @section CELLULAR_FW_VERSION_MAX_SIZE
+ *
+ * Cellular module firmware version max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 32
+ *
+ * @section CELLULAR_HW_VERSION_MAX_SIZE
+ *
+ * Cellular module hardware version max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 12
+ *
+ * @section CELLULAR_SERIAL_NUM_MAX_SIZE
+ *
+ * Cellular module serial number max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 12
+ *
+ * @section CELLULAR_IMEI_MAX_SIZE
+ *
+ * International Mobile Equipment Identity number max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 15
+ *
+ * @section CELLULAR_NETWORK_NAME_MAX_SIZE
+ *
+ * Registered network operator name max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 32
+ *
+ * @section CELLULAR_APN_MAX_SIZE
+ *
+ * Access point name max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 32
+ *
+ * @section CELLULAR_PDN_USERNAME_MAX_SIZE
+ *
+ * Packet data network username max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 32
+ *
+ * @section CELLULAR_PDN_PASSWORD_MAX_SIZE
+ *
+ * Packet data network password max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 32
+ *
+ * @section CELLULAR_IP_ADDRESS_MAX_SIZE
+ *
+ * Cellular data network IP address max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 40
+ *
+ * @section CELLULAR_AT_CMD_MAX_SIZE
+ *
+ * Cellular AT command max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 200
+ *
+ * @section CELLULAR_NUM_SOCKET_MAX
+ *
+ * Cellular module number of socket max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 12
+ *
+ * @section CELLULAR_MANUFACTURE_ID_MAX_SIZE
+ *
+ * Cellular module manufacture ID max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 20
+ *
+ * @section CELLULAR_MODEL_ID_MAX_SIZE
+ *
+ * Cellular module ID max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 10
+ *
+ * @section CELLULAR_EDRX_LIST_MAX_SIZE
+ *
+ * Cellular EDRX list max size
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 4
+ *
+ * @section CELLULAR_PDN_CONTEXT_ID_MIN
+ *
+ * Cellular PDN context ID min value
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1
+ *
+ * @section CELLULAR_PDN_CONTEXT_ID_MAX
+ *
+ * Cellular PDN context ID max value
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1
+ *
+ * @section CELLULAR_MAX_RAT_PRIORITY_COUNT
+ *
+ * Cellular RAT ( radio access technology ) priority count
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1
+ *
+ * @section CELLULAR_MAX_SEND_DATA_LEN
+ *
+ * Cellular socket max send data length. 
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1460
+ *
+ * @section CELLULAR_MAX_RECV_DATA_LEN
+ *
+ * Cellular socket max receive data length
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1500
+ *
+ * @section CELLULAR_SUPPORT_GETHOSTBYNAME
+ *
+ * Cellular module support getHostByName
+ *
+ * @configpossible `0 or 1`<br>
+ * @configdefault 1
+ *
+ * @section CELLULAR_COMM_IF_SEND_TIMEOUT_MS
+ *
+ * Cellular comm interface send timeout in MS
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1000
+ *
+ * @section CELLULAR_COMM_IF_RECV_TIMEOUT_MS
+ *
+ * Cellular comm interface receive timeout in MS
+ *
+ * @configpossible `Any positive integer`<br>
+ * @configdefault 1000
+ *
+ * @section CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
+ *
+ * Cellular HAL use static context
+ *
+ * @configpossible `0 or 1`<br>
+ * @configdefault 0
+ *
+ * @section CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT
+ *
+ * Cellular comm interface use static context
+ *
+ * @configpossible `0 or 1`<br>
+ * @configdefault 0
+ */
+
+/**
+ * @functions_page{cellular_HAL,cellular_HAL}
+ * @functions_brief{cellular_HAL}
+ * - @function_name{Cellular_Init}
+ * @function_brief{Cellular_Init}
+ * - @function_name{Cellular_Cleanup}
+ * @function_brief{Cellular_Cleanup}
+ * - @function_name{Cellular_SetRatPriority}
+ * @function_brief{Cellular_SetRatPriority}
+ * - @function_name{Cellular_GetRatPriority}
+ * @function_brief{Cellular_GetRatPriority}
+ * - @function_name{Cellular_RfOn}
+ * @function_brief{Cellular_RfOn}
+ * - @function_name{Cellular_RfOff}
+ * @function_brief{Cellular_RfOff}
+ * - @function_name{Cellular_GetSimCardStatus}
+ * @function_brief{Cellular_GetSimCardStatus}
+ * - @function_name{Cellular_GetSimCardInfo}
+ * @function_brief{Cellular_GetSimCardInfo}
+ * - @function_name{Cellular_GetModemInfo}
+ * @function_brief{Cellular_GetModemInfo}
+ * - @function_name{Cellular_GetRegisteredNetwork}
+ * @function_brief{Cellular_GetRegisteredNetwork}
+ * - @function_name{Cellular_GetNetworkTime}
+ * @function_brief{Cellular_GetNetworkTime}
+ * - @function_name{Cellular_GetSignalInfo}
+ * @function_brief{Cellular_GetSignalInfo}
+ * - @function_name{Cellular_GetServiceStatus}
+ * @function_brief{Cellular_GetServiceStatus}
+ * - @function_name{Cellular_SetPdnConfig}
+ * @function_brief{Cellular_SetPdnConfig}
+ * - @function_name{Cellular_GetPdnStatus}
+ * @function_brief{Cellular_GetPdnStatus}
+ * - @function_name{Cellular_ActivatePdn}
+ * @function_brief{Cellular_ActivatePdn}
+ * - @function_name{Cellular_DeactivatePdn}
+ * @function_brief{Cellular_DeactivatePdn}
+ * - @function_name{Cellular_GetIPAddress}
+ * @function_brief{Cellular_GetIPAddress}
+ * - @function_name{Cellular_SetDns}
+ * @function_brief{Cellular_SetDns}
+ * - @function_name{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+ * @function_brief{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+ * - @function_name{Cellular_RegisterUrcPdnEventCallback}
+ * @function_brief{Cellular_RegisterUrcPdnEventCallback}
+ * - @function_name{Cellular_RegisterUrcSignalStrengthChangedCallback}
+ * @function_brief{Cellular_RegisterUrcSignalStrengthChangedCallback}
+ * - @function_name{Cellular_RegisterModemEventCallback}
+ * @function_brief{Cellular_RegisterModemEventCallback}
+ * - @function_name{Cellular_RegisterUrcGenericCallback}
+ * @function_brief{Cellular_RegisterUrcGenericCallback}
+ * - @function_name{Cellular_GetPsmSettings}
+ * @function_brief{Cellular_GetPsmSettings}
+ * - @function_name{Cellular_SetPsmSettings}
+ * @function_brief{Cellular_SetPsmSettings}
+ * - @function_name{Cellular_GetEidrxSettings}
+ * @function_brief{Cellular_GetEidrxSettings}
+ * - @function_name{Cellular_SetEidrxSettings}
+ * @function_brief{Cellular_SetEidrxSettings}
+ * - @function_name{Cellular_ATCommandRaw}
+ * @function_brief{Cellular_ATCommandRaw}
+ * - @function_name{Cellular_CreateSocket}
+ * @function_brief{Cellular_CreateSocket}
+ * - @function_name{Cellular_SocketConnect}
+ * @function_brief{Cellular_SocketConnect}
+ * - @function_name{Cellular_SocketSend}
+ * @function_brief{Cellular_SocketSend}
+ * - @function_name{Cellular_SocketRecv}
+ * @function_brief{Cellular_SocketRecv}
+ * - @function_name{Cellular_SocketClose}
+ * @function_brief{Cellular_SocketClose}
+ * - @function_name{Cellular_GetHostByName}
+ * @function_brief{Cellular_GetHostByName}
+ * - @function_name{Cellular_SocketSetSockOpt}
+ * @function_brief{Cellular_SocketSetSockOpt}
+ * - @function_name{Cellular_SocketRegisterSocketOpenCallback}
+ * @function_brief{Cellular_SocketRegisterSocketOpenCallback}
+ * - @function_name{Cellular_SocketRegisterDataReadyCallback}
+ * @function_brief{Cellular_SocketRegisterDataReadyCallback}
+ * - @function_name{Cellular_SocketRegisterClosedCallback}
+ * @function_brief{Cellular_SocketRegisterClosedCallback}
+ */ 
