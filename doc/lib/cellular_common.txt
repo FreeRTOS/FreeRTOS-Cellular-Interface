@@ -1,26 +1,34 @@
 /**
  * @mainpage
- * @brief Cellular common library provide 3GPP TS v27.007 default implementation of cellular HAL APIs.<br>
- * AT command handling and parsing functions are also provided in cellular common to help cellular module
- * implement cellular HAL APIs with module specific AT commands.
+ * @brief Cellular common library<br>
+ *
+ * Cellular common library provides the following functions to help cellular module implementing cellular HAL APIs.<br>
+ *  - 3GPP TS v27.007 default implementation AT commands of cellular HAL APIs.
+ *  - AT command handling and parsing functions to help cellular module implement cellular HAL APIs with module specific AT commands.
  * <br>
  *
+ * The following diagram illustrates the relation between cellular common and cellular module porting.<br>
+ * Reference @ref porting_cellular_module for detail porting information.
  * @image html cellular_common_module.png width=70%
+ * <br>
  */
 
 /**
  * @page porting_cellular_module Porting cellular module
- * @brief porting cellular module with cellular common portable.<br>
- * <b> Create a folder in modules with the following files. </b>
- * - cellular_<module_name>.c : @subpage cellular_module <br>
- * @copybrief cellular_module
- * - cellular_<module_name>_api.c : @subpage cellular_module_api <br>
- * @copybrief cellular_module_api
- * - cellular_<module_name>_urc_handler.c : @subpage cellular_module_urc_handler <br>
- * @copybrief cellular_module_urc_handler
- * - cellular_<module_name>_wrapper.c <br>
- * Create cellular HAL APIs implemented with (3GPP TS v27.007 AT commands @ref cellular_common_api.h). <br>
- *
+ * @brief Porting cellular module with cellular common portable with the following steps.<br>
+ * -# <b>Create a folder in modules with the following files. </b>
+ *  - modules/(module_name)/cellular_(module_name).c
+ *  - modules/(module_name)/cellular_(module_name)_api.c
+ *  - modules/(module_name)/cellular_(module_name)_urc_handler.c
+ *  - modules/(module_name)/cellular_(module_name)_wrapper.c
+ * -# <b>Implement cellular module porting interface @ref cellular_common_portable.h in cellular_(module_name).c </b><br>
+ * Reference @subpage cellular_module for detail information.
+ * -# <b>Implement cellular HAL API with cellular module specific AT commands in cellular_(module_name)_api.c </b><br>
+ * Reference @subpage cellular_module_api for detail information.
+ * -# <b>mplement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
+ * Reference @subpage cellular_module_urc_handler for detail information.
+ * -# <b>Create cellular HAL APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
+
  * <b>Cellular module porting examples</b><br>
  * Three cellular module portings can be referenced.
  * - <a href="">BG96</a>
@@ -47,7 +55,6 @@
  *   - @ref CellularUrcTokenWoPrefixTable : URC token without prefix "+". These tokens are used in URC handler tables.<br>
  *     ( E.X "APP READY", "POWER ON" )
  *   - @ref CellularUrcTokenWoPrefixTableSize
-
  */
  
 /**

@@ -1,7 +1,13 @@
 /**
  * @mainpage
- * @brief Cellular HAL library provides cellular network connectivity. 
+ * @brief Cellular HAL library provides cellular network connectivity.
  * <br>
+ * This documentation provides the following information about cellular HAL library.
+ *  - API documentation for users of cellular HAL library
+ *  - Porting guide about cellular HAL library for developers who want to port the library to new platform<br>
+ *
+ * Cellular HAL library
+ *  - <b>Repository structure</b><br>
  * This library contains the following three components in three folders.
  * | Cellular HAL folders | High Level Description |
  * | :--------------------| :--------------------- |
@@ -9,13 +15,20 @@
  * | common               | Cellular HAL APIs implemenation with 3GPP TS v27.007 AT commands. |
  * | modules              | Cellular HAL APIs implemenation with cellular module specific AT commands. |
  * 
+ *  - <b>Supported cellular modules</b><br>
  * Three cellular modules are supported in this library.
  * | Cellular module |
  * | :--------------------|
  * | quectel BG96         |
  * | Sierra HL7802        |
  * | Ublox SARA R4 series |
- * New cellular module can reference these module porting to be integrated into cellular HAL library.
+ * New cellular module can reference these module porting to be integrated into cellular HAL library.<br>
+ * Please reference cellular common library document for detail information about porting new cellular module.
+ *
+ *  - <b>Porting cellular HAL library</b><br>
+ *   - Implement @ref comm_if
+ *   - Implement @ref cellular_platform related APIs and data structures in <b>cellular_platform.h</b>
+ *
  */
 
 /**
@@ -23,7 +36,7 @@
  * @brief Cellular communication interface
  *
  * Cellular HAL library use communication interface to communicate with cellular modules.<br>
- * The porting of communication should create a instance of CellularCommInterface
+ * Users of cellular HAL library should create a instance of CellularCommInterface
  * and pass it to Cellular_Init function as paremeters.
  *
  * CellularCommInterface includes the following four function pointers.
@@ -46,6 +59,66 @@
  *
  * <b></b>
  * @image html comm_interaction.png width=80%
+ */
+
+/**
+ * @page cellular_platform Cellular platform dependency
+ * @brief Cellular platform depndency
+ *
+ * Cellular HAL library makes use of the following OS platform functions.<br>
+ * <b>"cellular_platform.h"</b> is referenced during cellular HAL library compilation.<br>
+ * User of cellular HAL libraries should provide these APIs and data structures in "cellular_platform.h".<br>
+ * A default implementation with FreeRTOS is provided in FreeRTOS Labs cellular demo.
+ *
+ * - <b>Logging</b><br>The following printf style logging functions should be provided in cellular_platform.h
+```
+#define CellularLogError( ... )
+#define CellularLogWarn( ... )
+#define CellularLogInfo( ... )
+#define CellularLogDebug( ... )
+```
+ * - <b>Threads</b><br>The following APIs and macros should be provided in cellular_platform.h
+```
+
+bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
+                                    void * pArgument,
+                                    int32_t priority,
+                                    size_t stackSize );
+
+#define PLATFORM_THREAD_DEFAULT_STACK_SIZE    ( 2048U )
+#define PLATFORM_THREAD_DEFAULT_PRIORITY      ( 5U )
+```
+ * - <b>Mutex</b><br>The following APIs and data structure should be provided in cellular_platform.h.<br>
+ Cellular HAL use static mutex allocation. Data fields in PlatformMutex can be defined by developers.
+```
+typedef struct PlatformMutex
+{
+    ...
+} PlatformMutex_t;
+
+bool PlatformMutex_Create( PlatformMutex_t * pNewMutex,
+                           bool recursive );
+void PlatformMutex_Destroy( PlatformMutex_t * pMutex );
+void PlatformMutex_Lock( PlatformMutex_t * pMutex );
+bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
+void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
+```
+ * - <b>Memory</b><br>The following malloc/free style APIs should be provided in cellular_platform.h.
+```
+#define Platform_Malloc
+#define Platform_Free
+```
+ * - <b>EventGroup</b><br>The following APIs and handle should be provided in cellular_platform.h.
+```
+#define PlatformEventGroupHandle_t
+#define PlatformEventGroup_Delete
+#define PlatformEventGroup_ClearBits
+#define PlatformEventGroup_Create
+#define PlatformEventGroup_GetBits
+#define PlatformEventGroup_SetBits
+#define PlatformEventGroup_SetBitsFromISR
+#define PlatformEventGroup_WaitBits
+```
  */
 
 /**
