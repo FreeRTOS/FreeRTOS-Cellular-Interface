@@ -6,7 +6,7 @@
  *  - API documentation for users of cellular HAL library
  *  - Porting guide about cellular HAL library for developers who want to port the library to new platform<br>
  *
- * Cellular HAL library
+ * <b>Cellular HAL library</b>
  *  - <b>Repository structure</b><br>
  * This library contains the following three components in three folders.
  * | Cellular HAL folders | High Level Description |
@@ -24,10 +24,17 @@
  * | Ublox SARA R4 series |
  * New cellular module can reference these module porting to be integrated into cellular HAL library.<br>
  * Please reference cellular common library document for detail information about porting new cellular module.
+ *  - <b>Currently Supported Features in cellular HAL library</b>
+ *   - User of cellular HAL library is able to use Cat-M1 cellular technology to connect to network.
+ *   - User of cellular HAL library is able to perform control plane operations like (initialize modem, register on a network etc.) in a vendor agnostic way.
+ *   - User of cellular HAL library is able to send and receive data using TCP/IP in a vendor agnostic way given that TCP/IP stack is running on the cellular modem.
+ *   - User of cellular HAL library is able to put the modem in different low power modes (PSM and eDRX) in a vendor agnostic way.
+ *   - User of cellular HAL library is able to receive asynchronous notifications about various events like "disconnected", "signal strength changed" etc. to enable them to take appropriate action as desired.
+ *   - User of cellular HAL library is able to use the existing application protocol clients (MQTT, HTTP) over cellular seamlessly. i.e. any existing user application using MQTT which works over WiFi/Ethernet shall work over Cellular given the underlying cellular technology permits that.<br>
  *
- *  - <b>Porting cellular HAL library</b><br>
- *   - Implement @ref comm_if
- *   - Implement @ref cellular_platform related APIs and data structures in <b>cellular_platform.h</b>
+ * <b>Porting cellular HAL library</b><br>
+ *  - Implement @ref comm_if
+ *  - Implement @ref cellular_platform related APIs and data structures in <b>cellular_platform.h</b>
  *
  */
 
@@ -103,21 +110,26 @@ void PlatformMutex_Lock( PlatformMutex_t * pMutex );
 bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
 void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 ```
- * - <b>Memory</b><br>The following malloc/free style APIs should be provided in cellular_platform.h.
+ * - <b>Memory</b><br>The following malloc/free style APIs should be provided in cellular_platform.h.<br>
+ * The <a href="https://www.freertos.org/a00111.html">FreeRTOS memory management document</a> can be referenced for these APIs.
 ```
-#define Platform_Malloc
-#define Platform_Free
+// Example implementation of FreeRTOS malloc/free
+#define Platform_Malloc    pvPortMalloc
+#define Platform_Free      vPortFree
 ```
- * - <b>EventGroup</b><br>The following APIs and handle should be provided in cellular_platform.h.
+ * - <b>EventGroup</b><br>The following APIs and handle should be provided in cellular_platform.h.<br>
+ * Please reference <a href="https://www.freertos.org/event-groups-API.html">FreeRTOS EvengGroup function prototypes</a>.
 ```
-#define PlatformEventGroupHandle_t
-#define PlatformEventGroup_Delete
-#define PlatformEventGroup_ClearBits
-#define PlatformEventGroup_Create
-#define PlatformEventGroup_GetBits
-#define PlatformEventGroup_SetBits
-#define PlatformEventGroup_SetBitsFromISR
-#define PlatformEventGroup_WaitBits
+// Example implementation of FreeRTOS EvengGroup
+#define PlatformEventGroupHandle_t           EventGroupHandle_t
+#define PlatformEventGroup_Delete            vEventGroupDelete
+#define PlatformEventGroup_ClearBits         xEventGroupClearBits
+#define PlatformEventGroup_Create            xEventGroupCreate
+#define PlatformEventGroup_GetBits           xEventGroupGetBits
+#define PlatformEventGroup_SetBits           xEventGroupSetBits
+#define PlatformEventGroup_SetBitsFromISR    xEventGroupSetBitsFromISR
+#define PlatformEventGroup_WaitBits          xEventGroupWaitBits
+
 ```
  */
 

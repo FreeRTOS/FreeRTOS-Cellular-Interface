@@ -62,8 +62,8 @@
  * @brief Implement cellular HAL API with cellular module specific AT commands. <br>
  *  - Create cellular HAL APIs implemented with module specific AT commands with cellular_common.h and cellular_at_core.h
  *  - AT command related data structure
- *   - @ref CellularAtReq : AT command request data structure
- *   - @ref CellularAtDataReq : Data send data structure
+ *   - @ref CellularAtReq_t : AT command request data structure
+ *   - @ref CellularAtDataReq_t : Data send data structure
  *  - Send AT command APIs
  *   - @ref _Cellular_AtcmdRequestWithCallback : Default timeout
  *   - @ref _Cellular_TimeoutAtcmdRequestWithCallback : Custom timeout
