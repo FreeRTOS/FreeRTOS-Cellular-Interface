@@ -25,7 +25,7 @@
  * Reference @subpage cellular_module for detail information.
  * -# <b>Implement cellular HAL API with cellular module specific AT commands in cellular_(module_name)_api.c </b><br>
  * Reference @subpage cellular_module_api for detail information.
- * -# <b>mplement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
+ * -# <b>Implement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
  * Reference @subpage cellular_module_urc_handler for detail information.
  * -# <b>Create cellular HAL APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
 
