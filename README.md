@@ -6,13 +6,13 @@ The Cellular HAL libraries expose the capability of a few popular cellular modem
 * Sierra HL7802
 * Ublox SARA R4 series
 
-The current version of the Cellular HAL libraries encapsulate the TCP stack offered by those cellular modems. They all implement the same uniform [API](http://ec2-52-36-17-39.us-west-2.compute.amazonaws.com/cellular/index.html). The API hides the AT commands interface, and expose a socket-like interface for C programmers.  
+The current version of the Cellular HAL libraries encapsulate the TCP stack offered by those cellular modems.  They all implement the same uniform [API](http://ec2-52-36-17-39.us-west-2.compute.amazonaws.com/cellular/index.html).  The API hides the complexity of AT commands, and exposes a socket-like interface to C programmers.  
 
-Even though applications can choose to use the Cellular HAL API directly, it is not designed for such a purpose.  In a typical FreeRTOS system, applications use high level libraries, such as the [coreMQTT](https://github.com/FreeRTOS/coreMQTT) library and the [coreHTTP](https://github.com/FreeRTOS/coreHTTP) library, to communicate with other end points.  Those high level libraries use an abstract interface, [Transport Interface](https://github.com/FreeRTOS/coreMQTT/blob/main/source/interface/transport_interface.h), to send and receive data.  A Transport Interface can be implemented on top of the Cellular HAL libraries.  The F[reeRTOS Cellular Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project offers such an implementation.
+Even though applications can choose to use the Cellular HAL API directly, it is not designed for such a purpose.  In a typical FreeRTOS system, applications use high level libraries, such as the [coreMQTT](https://github.com/FreeRTOS/coreMQTT) library and the [coreHTTP](https://github.com/FreeRTOS/coreHTTP) library, to communicate with other end points.  Those high level libraries use an abstract interface, the [Transport Interface](https://github.com/FreeRTOS/coreMQTT/blob/main/source/interface/transport_interface.h), to send and receive data.  A Transport Interface can be implemented on top of the Cellular HAL libraries.  The [FreeRTOS Cellular Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project offers such an implementation.
 
-Most cellular modems offer implementations of the AT commands defined by the 3GPP TS v27.007 standard.  This project offers an implementation of such standard AT commands in a reusable component (see [Cellular Common Library](http://ec2-52-36-17-39.us-west-2.compute.amazonaws.com/cellular_common/index.html)).  The three Cellular HAL libraries in this project all use that common code.  The library for each modem only implements the vendor-specific AT commands, then exposes the complete Cellular HAL API.
+Most cellular modems implement more or less the AT commands defined by the 3GPP TS v27.007 standard.  This project offers an implementation of such standard AT commands in a reusable [common component](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL/tree/master/common) (see [documentation here](http://ec2-52-36-17-39.us-west-2.compute.amazonaws.com/cellular_common/index.html)).  The three Cellular HAL libraries in this project all use that common code.  The library for each modem only implements the vendor-specific AT commands, then exposes the complete Cellular HAL API.
 
-This [common component](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL/tree/master/common) that implements the 3GPP TS v27.007 standard has been written in compliance to these standards:
+The [common component](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL/tree/master/common) that implements the 3GPP TS v27.007 standard has been written in compliance to these standards:
 
 * GNU Complexity scores are not over 8
 * MISRA coding standard.  Any deviations from the MISRA C:2012 guidelines are documented in source code comments marked by “`coverity`”.
@@ -33,12 +33,12 @@ git clone git@github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL.git
 
 # Repository structure
 
-The root of this repository contains these folders.
+At the root of this repository are these folders:
 
 * include : cellular HAL API definitions
 * common : reusable common code that implements the AT commands defined by 3GPP TS v27.007
-* modules : vendor-specific code that implement non-3GPP AT commands
-* doc : documentation of the Cellular HAL Libraries
+* modules : vendor-specific code that implements non-3GPP AT commands for each cellular modem
+* doc : documentations
 
 # API documentation
 
@@ -50,7 +50,7 @@ doxygen doc/config/cellular
 
 The generated documents are under "doc/output/cellular".
 
-There is dedicated documentation for the common code that implements the AT commands defined by 3GPP TS v27.007.
+There is dedicated documentation for the common component that implements the AT commands defined by 3GPP TS v27.007.
 
 ```
 doxygen doc/config/cellular_common
@@ -60,16 +60,16 @@ The generated documents are under "doc/output/cellular_common".
 
 # Configure and build this library
 
-The Cellular HAL libraries are used as part of an applications.  In order to build the libraries, certain configurations must be provided.  The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project provides [an example](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_config.h) of how to configure the build.  Also see doxygen-generated file "doc/output/cellular/cellular_hal_config.html". 
+The Cellular HAL libraries are used as part of an applications.  In order to build a librarie as part of an application, certain configurations must be provided.  The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project provides [an example](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_config.h) of how to configure the build.  Also see doxygen-generated file "doc/output/cellular/cellular_hal_config.html". 
 
-Please refer to the [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project for more information.
+Please refer to the README of [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project for more information.
 
 # Integrate Cellular HAL libraries with MCU platforms
 
 > I am a MCU vendor. I want to integrate a cellular modem with my MCU platform.
 
 
-The Cellular HAL libraries use an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL/blob/master/include/cellular_comm_interface.h), to communicate with cellular modems.  A Comm Interface must be implemented on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware.  Please refer to doxygen documentation ( doc/output/cellular/comm_if.html ) for definition of the Comm Interface. The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project has example implementations:
+The Cellular HAL libraries use an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-HAL/blob/master/include/cellular_comm_interface.h), to communicate with cellular modems.  A Comm Interface must be implemented on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware.  Please refer to doxygen documentations ( doc/output/cellular/comm_if.html ) for definition of the Comm Interface. The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project has example implementations:
 
 * [FreeRTOS windows simulator comm interface](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/comm_if_windows.c)
 * [Amazon-FreeRTOS common IO UART comm interface](https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_uart.c)
