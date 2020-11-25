@@ -293,7 +293,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     }
 
     /* Some driver required wait for a minimum of delay before sending data. */
-    vTaskDelay( pdMS_TO_TICKS( interDelayMS ) );
+    Platform_Delay( interDelayMS );
 
     /* End pattern for specific modem. */
     if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) && ( dataReq.pEndPattern != NULL ) )

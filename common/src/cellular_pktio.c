@@ -1298,7 +1298,7 @@ void _Cellular_PktioShutdown( CellularContext_t * pContext )
 
             while( ( uxBits & ( EventBits_t ) PKTIO_EVT_MASK_ABORTED ) != ( ( EventBits_t ) PKTIO_EVT_MASK_ABORTED ) )
             {
-                vTaskDelay( pdMS_TO_TICKS( PKTIO_SHUTDOWN_WAIT_INTERVAL_MS ) );
+                Platform_Delay( PKTIO_SHUTDOWN_WAIT_INTERVAL_MS );
                 uxBits = PlatformEventGroup_GetBits( pContext->pPktioCommEvent );
             }
 

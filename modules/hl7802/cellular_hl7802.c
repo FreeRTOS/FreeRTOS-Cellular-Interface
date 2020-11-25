@@ -66,11 +66,11 @@ uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable
 
 /* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-const char * CellularUrcTokenWoPrefixTable[] =
-{ "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
+const char * CellularUrcTokenWoPrefixTable[] = { 0 };
+
 /* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
+uint32_t CellularUrcTokenWoPrefixTableSize = 0;
 
 /*-----------------------------------------------------------*/
 
@@ -193,14 +193,47 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Disable RTS/CTS hardware flow control. */
+            /* Enable RTS/CTS hardware flow control. */
             atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
+        /* Set Radio Access Technology. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            atReqGetNoResult.pAtCmd = "AT+CFUN=1";
+            /* In the Write format, <mode>=0 is used to switch to the first RAT
+             * in the preferred RAT list (PRL), and fall back to subsequent RATS
+             * in the PRL if cell coverage is lost. If the PRL is empty, switch to
+             * CAT-M1. To set the PRL, see AT+KSELACQ. */
+            atReqGetNoResult.pAtCmd = "AT+KSRAT=0";
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+        }
+
+        /* Set Default Radio Access Technology. */
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            switch( CELLULAR_CONFIG_DEFAULT_RAT )
+            {
+            case CELLULAR_RAT_CATM1:
+                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,1";
+                break;
+            case CELLULAR_RAT_NBIOT:
+                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,2";
+                break;
+            case CELLULAR_RAT_GSM:
+                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,3";
+                break;
+            default:
+                break;
+            }
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+        }
+
+        /* Set Configured LTE Band. */
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            /* Enable all bands. */
+            atReqGetNoResult.pAtCmd = "AT+KBNDCFG=0,0002000000000F0F1B9F";
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
@@ -209,6 +242,21 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         {
             atReqGetNoResult.pAtCmd = "AT+KSLEEP=2";
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+        }
+
+        /* Force initialization of radio to consider new configured bands. */
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            atReqGetNoResult.pAtCmd = "AT+CFUN=1,1";
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+        }
+        Platform_Delay( CELLULAR_HL7802_RESET_DELAY_MS );
+
+        /* Disable echo after reboot device. */
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            atReqGetWithResult.pAtCmd = "ATE0";
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWithResult );
         }
     }
 

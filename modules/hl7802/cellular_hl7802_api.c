@@ -1865,7 +1865,7 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         }
         else
         {
-            CellularLogError( "Packet switch attached" );
+            CellularLogInfo( "Packet switch attached" );
         }
 
         /* Check the current attach status. If not activated, activate the PDN context ID. */

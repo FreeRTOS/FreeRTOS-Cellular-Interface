@@ -131,6 +131,13 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 #define PlatformEventGroup_WaitBits          xEventGroupWaitBits
 
 ```
+ * - <b>Delay</b><br>The following API should be provided in cellular_platform.h.<br>
+ * Please reference <a href="https://www.freertos.org/a00127.html">FreeRTOS Task Control function prototypes</a>.
+```
+// Example implementation of FreeRTOS Task Control
+#define Platform_Delay( delayMs )           vTaskDelay( pdMS_TO_TICKS( delayMs ) )
+
+```
  */
 
 /**
@@ -352,6 +359,13 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
  *
  * @configpossible `0 or 1`<br>
  * @configdefault 0
+ *
+ * @section CELLULAR_CONFIG_DEFAULT_RAT
+ *
+ * Default radio access technoloyg
+ *
+ * @configpossible `Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t ) <br>
+ * @configdefault CELLULAR_RAT_CATM1
  */
 
 /**

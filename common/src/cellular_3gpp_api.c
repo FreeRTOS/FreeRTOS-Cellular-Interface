@@ -1429,7 +1429,7 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
         /* Added below +CGREG support as some modems also support GSM/EDGE network. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Ignoe the network status query return value with CGREG. Some modem
+            /* Ignore the network status query return value with CGREG. Some modem
             * may not support EDGE or GSM. In this case, psRegStatus is not stored
             * in libAtData. CEREG will be used to query the ps network status. */
             ( void ) queryNetworkStatus( pContext, "AT+CGREG?", "+CGREG", CELLULAR_REG_TYPE_CGREG );

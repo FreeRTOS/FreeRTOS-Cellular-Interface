@@ -273,7 +273,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
 
     CellularLogInfo( "rebootCellularModem: Rebooting Modem." );
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    vTaskDelay( pdMS_TO_TICKS( ENBABLE_MODULE_UE_REBOOT_POLL_TIME ) );
+    Platform_Delay( ENBABLE_MODULE_UE_REBOOT_POLL_TIME );
     count = count + ENBABLE_MODULE_UE_REBOOT_POLL_TIME;
 
     /* wait for modem after reboot*/
@@ -290,7 +290,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
         {
             CellularLogInfo( "rebootCellularModem: Modem is now available." );
 
-            vTaskDelay(pdMS_TO_TICKS(ENBABLE_MODULE_UE_REBOOT_POLL_TIME * 3));
+            Platform_Delay( ENBABLE_MODULE_UE_REBOOT_POLL_TIME * 3 );
 
             /* Query current PSM settings. */
             atReqGetNoResult.pAtCmd = "AT+CPSMS?";
