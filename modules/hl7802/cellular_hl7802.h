@@ -33,7 +33,7 @@
 #define INVALID_SOCKET_INDEX        ( UINT32_MAX )
 
 /* Delay after AT+CFUN=1,1 commands. */
-#define CELLULAR_HL7802_RESET_DELAY_MS  ( 1000U )
+#define CELLULAR_HL7802_RESET_DELAY_MS  ( 3000U )
 
 /*-----------------------------------------------------------*/
 
