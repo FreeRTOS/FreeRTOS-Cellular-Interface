@@ -1531,7 +1531,7 @@ CellularError_t Cellular_SetRatPriority( CellularHandle_t cellularHandle,
     else
     {
         /* In case of +UMNOPROF=0, AT+URAT set commad is not allowed */
-        if( CELLULAR_CONFIG_SET_MNO_PROFILE != 0 )
+        if( CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE != 0 )
         {
             ( void ) strcpy( cmdBuf, "AT+CFUN=4;+URAT=" );
 
@@ -1708,7 +1708,7 @@ CellularError_t Cellular_GetRatPriority( CellularHandle_t cellularHandle,
     else
     {
         /* In case of +UMNOPROF=0, AT+URAT? read commad is not allowed */
-        if( CELLULAR_CONFIG_SET_MNO_PROFILE != 0 )
+        if( CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE != 0 )
         {
             pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetRatPriority );
 

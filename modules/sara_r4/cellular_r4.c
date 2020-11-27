@@ -344,6 +344,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         NULL,
         0
     };
+    char pAtCmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { 0 };
 
     if( pContext != NULL )
     {
@@ -381,14 +382,15 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             MNOProfileType_t currentMNOProfile = MNO_PROFILE_NOT_SET;
             cellularStatus = _Cellular_GetCurrentMNOProfile( pContext, &currentMNOProfile );
 
-            CellularLogInfo( "Cellular_ModuleEnableUE: currentMNOProfile = [%d], desiredProfile = [%d]", currentMNOProfile, CELLULAR_CONFIG_SET_MNO_PROFILE );
+            CellularLogInfo( "Cellular_ModuleEnableUE: currentMNOProfile = [%d], desiredProfile = [%d]", currentMNOProfile, CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE );
 
             if( cellularStatus == CELLULAR_SUCCESS )
             {
                 /* Set MNO profile if not set already */
-                if( ( currentMNOProfile != CELLULAR_CONFIG_SET_MNO_PROFILE ) && ( CELLULAR_CONFIG_SET_MNO_PROFILE != MNO_PROFILE_NOT_SET ) )
+                if( ( currentMNOProfile != CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE ) && ( CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE != MNO_PROFILE_NOT_SET ) )
                 {
-                    ( void ) snprintf( ( char * ) atReqGetNoResult.pAtCmd, CELLULAR_AT_CMD_MAX_SIZE, "%s%d", "AT+COPS=2;+UMNOPROF=", CELLULAR_CONFIG_SET_MNO_PROFILE );
+                    atReqGetNoResult.pAtCmd = pAtCmdBuf;
+                    ( void ) snprintf( ( char * ) atReqGetNoResult.pAtCmd, CELLULAR_AT_CMD_MAX_SIZE, "%s%d", "AT+COPS=2;+UMNOPROF=", CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE );
                     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
 
                     if( cellularStatus == CELLULAR_SUCCESS )

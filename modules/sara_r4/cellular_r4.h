@@ -58,12 +58,12 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
 typedef enum MNOProfileType
 {
     MNO_PROFILE_SW_DEFAULT = 0,
-    MNO_PROFILE_SIM_ICCID_IMSI_SELECT,
-    MNO_PROFILE_ATT,
-    MNO_PROFILE_VERIZON,
-    MNO_PROFILE_TELSTRA,
-    MNO_PROFILE_TMOBILE,
-    MNO_PROFILE_CHINA_TELECOM,
+    MNO_PROFILE_SIM_ICCID_IMSI_SELECT = 1,
+    MNO_PROFILE_ATT = 2,
+    MNO_PROFILE_VERIZON = 3,
+    MNO_PROFILE_TELSTRA = 4,
+    MNO_PROFILE_TMOBILE = 5,
+    MNO_PROFILE_CHINA_TELECOM = 6,
     MNO_PROFILE_SPRINT = 8,
     MNO_PROFILE_VODAFONE = 19,
     MNO_PROFILE_GLOBAL = 90,
@@ -74,7 +74,9 @@ typedef enum MNOProfileType
 /*-----------------------------------------------------------*/
 
 /* Select network MNO profile. Default value is MNO_PROFILE_NOT_SET */
-#define CELLULAR_CONFIG_SET_MNO_PROFILE                ( MNO_PROFILE_NOT_SET )
+#ifndef CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE
+    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE                ( MNO_PROFILE_NOT_SET )
+#endif
 
 /*
  * By default socket is closed in normal mode i.e. <async_close> flag is 0.
