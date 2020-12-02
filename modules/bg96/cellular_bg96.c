@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS CELLULAR Preview Release
+ * FreeRTOS Cellular Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -269,6 +269,8 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                 atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",01,1";
                 break;
             default:
+                /* Configure RAT Searching Sequence to automatic. */
+                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",00,1";
                 break;
             }
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );

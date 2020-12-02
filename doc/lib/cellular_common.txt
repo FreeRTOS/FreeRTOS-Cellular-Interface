@@ -15,7 +15,15 @@
 
 /**
  * @page porting_cellular_module Porting cellular module
- * @brief Porting cellular module with cellular common portable with the following steps.<br>
+ * @brief Introduction to cellular module porting<br>
+ *
+ * Cellular common library provides APIS and URC handler implemented with 3GPP v27.007 AT commands.<br>
+ * These APIs and URC handler can be reused when porting cellular module. <br>
+ * Reference the following pages for detail information.
+ * - @subpage cellular_common_APIs
+ * - @subpage cellular_common_URC_handlers
+ *
+ * Porting cellular module with cellular common portable with the following steps.<br>
  * -# <b>Create a folder in modules with the following files. </b>
  *  - modules/(module_name)/cellular_(module_name).c
  *  - modules/(module_name)/cellular_(module_name)_api.c
@@ -28,12 +36,89 @@
  * -# <b>Implement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
  * Reference @subpage cellular_module_urc_handler for detail information.
  * -# <b>Create cellular HAL APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
-
+ *
  * <b>Cellular module porting examples</b><br>
- * Three cellular module portings can be referenced.
+ * Three cellular module portings can be referenced.<br>
+ * It is recommended that you start by cloning the implementation of one of the existing modems,<br>
+ * then make modifications where your modem's vendor-specific (non-3GPP) AT commands are different. <br>
  * - <a href="">BG96</a>
  * - <a href="">HL7802</a>
  * - <a href="">SARA R4 series</a>
+ */
+
+/**
+ * @page cellular_common_APIs Cellular common APIs
+ * @brief Cellular common supported APIs
+ *
+ * <b>Cellular common supported APIs</b><br>
+ * Cellular common library has 3GPP AT command implemented APIs.<br>
+ * They can be used to minimize porting efforts when implement cellular HAL APIs.<br>
+ * | Cellular HAL APIs                                       | Cellular common supported |
+ * | :-------------------------------------------------------| :-----------------------: |
+ * | Cellular_Init                                           | O                         |
+ * | Cellular_Cleanup                                        | O                         |
+ * | Cellular_SetRatPriority                                 |                           |
+ * | Cellular_GetRatPriority                                 |                           |
+ * | Cellular_RfOn                                           | O                         |
+ * | Cellular_RfOff                                          | O                         |
+ * | Cellular_GetSimCardStatus                               |                           |
+ * | Cellular_GetSimCardInfo                                 | O                         |
+ * | Cellular_GetModemInfo                                   | O                         |
+ * | Cellular_GetRegisteredNetwork                           | O                         |
+ * | Cellular_GetNetworkTime                                 | O                         |
+ * | Cellular_GetSignalInfo                                  |                           |
+ * | Cellular_GetServiceStatus                               | O                         |
+ * | Cellular_SetPdnConfig                                   | O                         |
+ * | Cellular_GetPdnStatus                                   |                           |
+ * | Cellular_ActivatePdn                                    |                           |
+ * | Cellular_DeactivatePdn                                  |                           |
+ * | Cellular_GetIPAddress                                   | O                         |
+ * | Cellular_SetDns                                         |                           |
+ * | Cellular_RegisterUrcNetworkRegistrationEventCallback    | O                         |
+ * | Cellular_RegisterUrcPdnEventCallback                    | O                         |
+ * | Cellular_RegisterUrcSignalStrengthChangedCallback       |                           |
+ * | Cellular_RegisterModemEventCallback                     | O                         |
+ * | Cellular_RegisterUrcGenericCallback                     | O                         |
+ * | Cellular_GetPsmSettings                                 | O                         |
+ * | Cellular_SetPsmSettings                                 | O                         |
+ * | Cellular_GetEidrxSettings                               | O                         |
+ * | Cellular_SetEidrxSettings                               | O                         |
+ * | Cellular_ATCommandRaw                                   | O                         |
+ * | Cellular_CreateSocket                                   | O                         |
+ * | Cellular_SocketConnect                                  |                           |
+ * | Cellular_SocketSend                                     |                           |
+ * | Cellular_SocketRecv                                     |                           |
+ * | Cellular_SocketClose                                    |                           |
+ * | Cellular_GetHostByName                                  |                           |
+ * | Cellular_SocketSetSockOpt                               | O                         |
+ * | Cellular_SocketRegisterSocketOpenCallback               | O                         |
+ * | Cellular_SocketRegisterDataReadyCallback                | O                         |
+ * | Cellular_SocketRegisterClosedCallback                   | O                         |
+ */
+
+/**
+ * @page cellular_common_URC_handlers Cellular common URC handlers
+ * @brief Cellular common supported URC handlers
+ *
+ * <b>Cellular common supported URC handler</b><br>
+ * Cellular HAL APIs callback function is called in URC handler. <br>
+ * 3GPP URC handlers are also provided by cellular common library. <br>
+ * They can be used to reduce porting effort. <br>
+ * | Cellular HAL callback functions                      | Event                                      | Cellular common supported |
+ * | :----------------------------------------------------| :----------------------------------------- | :-----------------------: |
+ * | Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION | O                         |
+ * | Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION | O                         |
+ * | Cellular_RegisterUrcPdnEventCallback                 | CELLULAR_URC_EVENT_PDN_ACTIVATED           |                           |
+ * | Cellular_RegisterUrcPdnEventCallback                 | CELLULAR_URC_EVENT_PDN_DEACTIVATED         |                           |
+ * | Cellular_RegisterUrcSignalStrengthChangedCallback    | CELLULAR_URC_EVENT_SIGNAL_CHANGED          |                           |
+ * | Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT      |                           |
+ * | Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_POWERED_DOWN          |                           |
+ * | Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_PSM_ENTER             |                           |
+ * | Cellular_SocketRegisterSocketOpenCallback            | CELLULAR_URC_SOCKET_OPENED                 |                           |
+ * | Cellular_SocketRegisterSocketOpenCallback            | CELLULAR_URC_SOCKET_OPEN_FAILED            |                           |
+ * | Cellular_SocketRegisterDataReadyCallback             | None                                       |                           |
+ * | Cellular_SocketRegisterClosedCallback                | None                                       |                           |
+ *
  */
 
 /**

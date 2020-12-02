@@ -60,7 +60,6 @@
  *
  * The following communication interface implementation can be used as reference.
  * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/pc/boards/windows/ports/comm_if/comm_if_windows.c">FreeRTOS windows simulator comm interface </a>
- * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_uart.c"> Amazon-FreeRTOS common IO UART comm interface </a>
  * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c"> STM32 L475 discovery board comm interface </a>
  * - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c"> Sierra sensorhub board comm interface </a>
  *
