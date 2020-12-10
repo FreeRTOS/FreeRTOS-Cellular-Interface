@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL common AT command parsing functions.
+ * @brief FreeRTOS Cellular Library common AT command parsing functions.
  */
 
 #include <stdlib.h>

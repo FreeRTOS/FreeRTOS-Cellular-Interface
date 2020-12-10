@@ -54,7 +54,7 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 /* Try to Keep this map in Alphabetical order. */
-/* Cellular HAL common porting interface. */
+/* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
@@ -65,7 +65,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "KTCP_NOTIF", _cellular_UrcProcessKtcpNotif  }          /* TCP connection failure. */
 };
 
-/* Cellular HAL common porting interface. */
+/* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
 

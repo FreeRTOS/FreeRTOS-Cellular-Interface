@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL common packet handler functions to dispatch packet.
+ * @brief FreeRTOS Cellular Library common packet handler functions to dispatch packet.
  */
 
 #include "cellular_config.h"

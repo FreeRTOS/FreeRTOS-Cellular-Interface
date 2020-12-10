@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL API implemenation with 3GPP AT command.
+ * @brief FreeRTOS Cellular Library API implemenation with 3GPP AT command.
  */
 
 /* Standard includes. */
@@ -505,7 +505,7 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetNetworkTime( CellularContext_t * pContext,
                                                              const CellularATCommandResponse_t * pAtResp,
@@ -556,7 +556,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkTime( CellularContext_t *
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetFirmwareVersion( CellularContext_t * pContext,
                                                                  const CellularATCommandResponse_t * pAtResp,
@@ -605,7 +605,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetFirmwareVersion( CellularContext
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetImei( CellularContext_t * pContext,
                                                       const CellularATCommandResponse_t * pAtResp,
@@ -654,7 +654,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetImei( CellularContext_t * pConte
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetModelId( CellularContext_t * pContext,
                                                          const CellularATCommandResponse_t * pAtResp,
@@ -703,7 +703,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetModelId( CellularContext_t * pCo
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetManufactureId( CellularContext_t * pContext,
                                                                const CellularATCommandResponse_t * pAtResp,
@@ -754,7 +754,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetManufactureId( CellularContext_t
 
 static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * pContext,
                                                             const CellularATCommandResponse_t * pAtResp,
-                                                            /* Cellular HAL prototype. */
+                                                            /* FreeRTOS Cellular Library prototype. */
                                                             /* coverity[misra_c_2012_rule_8_13_violation] */
                                                             void * pData,
                                                             uint16_t dataLen )
@@ -998,7 +998,7 @@ static bool _parseCopsRatToken( const char * pToken,
 /*-----------------------------------------------------------*/
 
 /* internal function of _Cellular_RecvFuncUpdateMccMnc to reduce complexity. */
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularATError_t _parseCops( char * pCopsResponse,
                                      cellularOperatorInfo_t * pOperatorInfo )
@@ -1071,7 +1071,7 @@ static CellularATError_t _parseCops( char * pCopsResponse,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncUpdateMccMnc( CellularContext_t * pContext,
                                                            const CellularATCommandResponse_t * pAtResp,
@@ -1135,7 +1135,7 @@ static CellularPktStatus_t _Cellular_RecvFuncUpdateMccMnc( CellularContext_t * p
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pContext,
                                                         const CellularATCommandResponse_t * pAtResp,
@@ -1317,7 +1317,7 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t * pContext,
                                                                const CellularATCommandResponse_t * pAtResp,
@@ -1853,7 +1853,7 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 CellularError_t Cellular_CommonGetNetworkTime( CellularHandle_t cellularHandle,
                                                CellularTime_t * pNetworkTime )
@@ -1999,7 +1999,7 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
 
 CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
                                              uint8_t contextId,
-                                             /* Cellular HAL prototype. pBuffer is passed to _Cellular_AtcmdRequestWithCallback. */
+                                             /* FreeRTOS Cellular Library prototype. pBuffer is passed to _Cellular_AtcmdRequestWithCallback. */
                                              /* coverity[misra_c_2012_rule_8_13_violation] */
                                              char * pBuffer,
                                              uint32_t bufferLength )
@@ -2128,7 +2128,7 @@ void _Cellular_InitAtData( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL API. */
+/* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
                                              uint8_t contextId,
@@ -2284,7 +2284,7 @@ static CellularSimCardLockState_t _getSimLockState( char * pToken )
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL types. */
+/* FreeRTOS Cellular Library types. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetSimLockStatus( CellularContext_t * pContext,
                                                                const CellularATCommandResponse_t * pAtResp,
@@ -2452,7 +2452,7 @@ static bool _parseHplmn( char * pToken,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL types. */
+/* FreeRTOS Cellular Library types. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetHplmn( CellularContext_t * pContext,
                                                        const CellularATCommandResponse_t * pAtResp,
@@ -2550,7 +2550,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetHplmn( CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL types. */
+/* FreeRTOS Cellular Library types. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pContext,
                                                        const CellularATCommandResponse_t * pAtResp,
@@ -2609,7 +2609,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL types. */
+/* FreeRTOS Cellular Library types. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetImsi( CellularContext_t * pContext,
                                                       const CellularATCommandResponse_t * pAtResp,
@@ -2662,7 +2662,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetImsi( CellularContext_t * pConte
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL API. */
+/* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHandle,
                                                      CellularSimCardStatus_t * pSimCardStatus )
@@ -2712,7 +2712,7 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL API. */
+/* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
                                                CellularSimCardInfo_t * pSimCardInfo )
@@ -2826,7 +2826,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL API. */
+/* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
                                                const CellularPsmSettings_t * pPsmSettings )
@@ -2962,7 +2962,7 @@ static CellularATError_t parseGetPsmToken( char * pToken,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL types. */
+/* FreeRTOS Cellular Library types. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t * pContext,
                                                              const CellularATCommandResponse_t * pAtResp,
@@ -3042,7 +3042,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL API. */
+/* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_CommonGetPsmSettings( CellularHandle_t cellularHandle,
                                                CellularPsmSettings_t * pPsmSettings )

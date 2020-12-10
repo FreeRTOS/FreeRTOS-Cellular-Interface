@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL common AT commnad library.
+ * @brief FreeRTOS Cellular Library common AT commnad library.
  */
 
 #include "cellular_config.h"

@@ -64,7 +64,7 @@ typedef void ( * _pPktioShutdownCallback_t ) ( CellularContext_t * pContext );
 /**
  * @brief Packet IO init function.
  *
- * This function init the packet IO in cellular HAL common.
+ * This function init the packet IO in FreeRTOS Cellular Library common.
  * Packet IO thread is created in this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
@@ -79,7 +79,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
 /**
  * @brief Packet IO shutdown function.
  *
- * This function shutdown the packet IO in cellular HAL common.
+ * This function shutdown the packet IO in FreeRTOS Cellular Library common.
  * Packet IO thread is shutdown in this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.

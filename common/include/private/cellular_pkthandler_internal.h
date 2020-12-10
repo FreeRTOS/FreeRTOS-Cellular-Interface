@@ -77,7 +77,7 @@ void _Cellular_DestroyPktResponseMutex( CellularContext_t * pContext );
 /**
  * @brief Packet handler init function.
  *
- * This function init the packet handler in cellular HAL common.
+ * This function init the packet handler in FreeRTOS Cellular Library common.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  *
@@ -89,7 +89,7 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext );
 /**
  * @brief Packet handler cleanup function.
  *
- * This function cleanup the pakcet handler in cellular HAL common.
+ * This function cleanup the pakcet handler in FreeRTOS Cellular Library common.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  */

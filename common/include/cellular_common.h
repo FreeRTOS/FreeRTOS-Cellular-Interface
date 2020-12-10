@@ -283,7 +283,7 @@ void _Cellular_ModemEventCallback( const CellularContext_t * pContext,
 /**
  * @brief Check Library Status.
  *
- * This Functions checks if the HAL library is already opened and set up
+ * This Functions checks if the FreeRTOS Cellular Library is already opened and set up
  * for cellular modem operation for control and data plane function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.

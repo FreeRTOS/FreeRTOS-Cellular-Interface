@@ -3,8 +3,8 @@
 @INCLUDE = common
 
 # Basic project information.
-PROJECT_NAME = "Cellular HAL Library"
-PROJECT_BRIEF = "Cellular HAL Library"
+PROJECT_NAME = "FreeRTOS Cellular Library"
+PROJECT_BRIEF = "FreeRTOS Cellular Library"
 
 # Library documentation output directory.
 HTML_OUTPUT = cellular

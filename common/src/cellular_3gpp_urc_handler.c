@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL URC handler implemenation with 3GPP URC.
+ * @brief FreeRTOS Cellular Library URC handler implemenation with 3GPP URC.
  */
 
 

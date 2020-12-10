@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL APIs implementation without AT commands.
+ * @brief FreeRTOS Cellular Library APIs implementation without AT commands.
  */
 
 /* The config header is always included first. */
@@ -135,7 +135,7 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
         .cellularSrcExtraTokenSuccessTableSize = 0
     };
 
-    /* Init the Cellular HAL common. */
+    /* Init the common library. */
     cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, &tokenTable );
 
     /* Init the module. */
@@ -161,7 +161,7 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular HAL prototype. */
+/* FreeRTOS Cellular Library prototype. */
 /* coverity[misra_c_2012_rule_8_13_violation] */
 CellularError_t Cellular_CommonCleanup( CellularHandle_t cellularHandle )
 {

@@ -32,20 +32,20 @@
 /*-----------------------------------------------------------*/
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_Init in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
                                      const CellularCommInterface_t * pCommInterface );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_Cleanup in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonCleanup( CellularHandle_t cellularHandle );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RegisterUrcNetworkRegistrationEventCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( CellularHandle_t cellularHandle,
@@ -53,7 +53,7 @@ CellularError_t Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( Cell
                                                                             void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RegisterUrcPdnEventCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cellularHandle,
@@ -61,7 +61,7 @@ CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cel
                                                             void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RegisterUrcSignalStrengthChangedCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( CellularHandle_t cellularHandle,
@@ -69,7 +69,7 @@ CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( Cellula
                                                                          void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RegisterUrcGenericCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRegisterUrcGenericCallback( CellularHandle_t cellularHandle,
@@ -77,7 +77,7 @@ CellularError_t Cellular_CommonRegisterUrcGenericCallback( CellularHandle_t cell
                                                            void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RegisterModemEventCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRegisterModemEventCallback( CellularHandle_t cellularHandle,
@@ -85,7 +85,7 @@ CellularError_t Cellular_CommonRegisterModemEventCallback( CellularHandle_t cell
                                                            void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_ATCommandRaw in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
@@ -97,7 +97,7 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
                                              uint16_t dataLen );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_CreateSocket in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonCreateSocket( CellularHandle_t cellularHandle,
@@ -108,7 +108,7 @@ CellularError_t Cellular_CommonCreateSocket( CellularHandle_t cellularHandle,
                                              CellularSocketHandle_t * pSocketHandle );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_SocketSetSockOpt in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle,
@@ -119,7 +119,7 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
                                                  uint32_t optionValueLength );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_SocketRegisterDataReadyCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSocketRegisterDataReadyCallback( CellularHandle_t cellularHandle,
@@ -128,7 +128,7 @@ CellularError_t Cellular_CommonSocketRegisterDataReadyCallback( CellularHandle_t
                                                                 void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_SocketRegisterSocketOpenCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSocketRegisterSocketOpenCallback( CellularHandle_t cellularHandle,
@@ -137,7 +137,7 @@ CellularError_t Cellular_CommonSocketRegisterSocketOpenCallback( CellularHandle_
                                                                  void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_SocketRegisterClosedCallback in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSocketRegisterClosedCallback( CellularHandle_t cellularHandle,
@@ -146,19 +146,19 @@ CellularError_t Cellular_CommonSocketRegisterClosedCallback( CellularHandle_t ce
                                                              void * pCallbackContext );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RfOn in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRfOn( CellularHandle_t cellularHandle );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_RfOff in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonRfOff( CellularHandle_t cellularHandle );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetIPAddress in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
@@ -167,49 +167,49 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
                                              uint32_t bufferLength );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetModemInfo in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
                                              CellularModemInfo_t * pModemInfo );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetEidrxSettings in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetEidrxSettings( CellularHandle_t cellularHandle,
                                                  CellularEidrxSettingsList_t * pEidrxSettingsList );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_SetEidrxSettings in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle,
                                                  const CellularEidrxSettings_t * pEidrxSettings );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetRegisteredNetwork in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHandle,
                                                      CellularPlmnInfo_t * pNetworkInfo );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetNetworkTime in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetNetworkTime( CellularHandle_t cellularHandle,
                                                CellularTime_t * pNetworkTime );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetServiceStatus in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle,
                                                  CellularServiceStatus_t * pServiceStatus );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetServiceStatus in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
@@ -217,21 +217,21 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
                                              const CellularPdnConfig_t * pPdnConfig );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetServiceStatus in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetPsmSettings( CellularHandle_t cellularHandle,
                                                CellularPsmSettings_t * pPsmSettings );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetServiceStatus in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
                                                const CellularPsmSettings_t * pPsmSettings );
 
 /**
- * @brief This function is the implementationof cellular HAL API.
+ * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_GetServiceStatus in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
@@ -250,11 +250,11 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
                                                      CellularSimCardStatus_t * pSimCardStatus );
 
 /**
- * @brief 3GPP URC AT+CEREG handler for cellular HAL common.
+ * @brief 3GPP URC AT+CEREG handler for FreeRTOS Cellular Library.
  *
  * This function handles the incoming URC and callback function.
  *
- * @param[in,out] pContext cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
  */
@@ -262,11 +262,11 @@ void Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
                                      char * pInputLine );
 
 /**
- * @brief 3GPP URC AT+CGREG handler for cellular HAL common.
+ * @brief 3GPP URC AT+CGREG handler for FreeRTOS Cellular Library.
  *
  * This function handles the incoming URC and callback function.
  *
- * @param[in,out] pContext cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
  */
@@ -274,11 +274,11 @@ void Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
                                      char * pInputLine );
 
 /**
- * @brief 3GPP URC AT+CREG handler for cellular HAL common.
+ * @brief 3GPP URC AT+CREG handler for FreeRTOS Cellular Library.
  *
  * This function handles the incoming URC and callback function.
  *
- * @param[in,out] pContext cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
  */

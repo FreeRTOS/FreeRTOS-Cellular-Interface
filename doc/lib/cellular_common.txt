@@ -1,10 +1,11 @@
 /**
  * @mainpage
- * @brief Cellular common library<br>
+ * @brief FreeRTOS Cellular Common Library<br>
  *
- * Cellular common library provides the following functions to help cellular module implementing cellular HAL APIs.<br>
- *  - 3GPP TS v27.007 default implementation AT commands of cellular HAL APIs.
- *  - AT command handling and parsing functions to help cellular module implement cellular HAL APIs with module specific AT commands.
+ * 
+ * FreeRTOS Cellular Common Library provides the following functions to help cellular module implementing FreeRTOS Cellular Library APIs.<br>
+ *  - FreeRTOS Cellular Library APIs implementation with 3GPP TS v27.007 AT commands.
+ *  - AT command functions to help implementing FreeRTOS Cellular Library APIs with vendor specific AT commands.
  * <br>
  *
  * The following diagram illustrates the relation between cellular common and cellular module porting.<br>
@@ -31,11 +32,11 @@
  *  - modules/(module_name)/cellular_(module_name)_wrapper.c
  * -# <b>Implement cellular module porting interface @ref cellular_common_portable.h in cellular_(module_name).c </b><br>
  * Reference @subpage cellular_module for detail information.
- * -# <b>Implement cellular HAL API with cellular module specific AT commands in cellular_(module_name)_api.c </b><br>
+ * -# <b>Implement FreeRTOS Cellular Library API with cellular module specific AT commands in cellular_(module_name)_api.c </b><br>
  * Reference @subpage cellular_module_api for detail information.
  * -# <b>Implement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
  * Reference @subpage cellular_module_urc_handler for detail information.
- * -# <b>Create cellular HAL APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
+ * -# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
  *
  * <b>Cellular module porting examples</b><br>
  * Three cellular module portings can be referenced.<br>
@@ -52,8 +53,8 @@
  *
  * <b>Cellular common supported APIs</b><br>
  * Cellular common library has 3GPP AT command implemented APIs.<br>
- * They can be used to minimize porting efforts when implement cellular HAL APIs.<br>
- * | Cellular HAL APIs                                       | Cellular common supported |
+ * They can be used to minimize porting efforts when implement FreeRTOS Cellular Library APIs.<br>
+ * | FreeRTOS Cellular Library APIs                                       | Cellular common supported |
  * | :-------------------------------------------------------| :-----------------------: |
  * | Cellular_Init                                           | O                         |
  * | Cellular_Cleanup                                        | O                         |
@@ -101,10 +102,10 @@
  * @brief Cellular common supported URC handlers
  *
  * <b>Cellular common supported URC handler</b><br>
- * Cellular HAL APIs callback function is called in URC handler. <br>
+ * FreeRTOS Cellular Library APIs callback function is called in URC handler. <br>
  * 3GPP URC handlers are also provided by cellular common library. <br>
  * They can be used to reduce porting effort. <br>
- * | Cellular HAL callback functions                      | Event                                      | Cellular common supported |
+ * | FreeRTOS Cellular Library callback functions                      | Event                                      | Cellular common supported |
  * | :----------------------------------------------------| :----------------------------------------- | :-----------------------: |
  * | Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION | O                         |
  * | Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION | O                         |
@@ -144,8 +145,8 @@
  
 /**
  * @page cellular_module_api cellular_module_api
- * @brief Implement cellular HAL API with cellular module specific AT commands. <br>
- *  - Create cellular HAL APIs implemented with module specific AT commands with cellular_common.h and cellular_at_core.h
+ * @brief Implement FreeRTOS Cellular Library API with cellular module specific AT commands. <br>
+ *  - Create FreeRTOS Cellular Library APIs implemented with module specific AT commands with cellular_common.h and cellular_at_core.h
  *  - AT command related data structure
  *   - @ref CellularAtReq_t : AT command request data structure
  *   - @ref CellularAtDataReq_t : Data send data structure
@@ -158,7 +159,7 @@
  *   - @ref _Cellular_TimeoutAtcmdDataSendRequestWithCallback : Basic data send API
  *   - @ref _Cellular_AtcmdDataSend : Prefix callback function to indicate data mode start
  *   - @ref _Cellular_TimeoutAtcmdDataSendSuccessToken : Extra success token to indicate AT commnad success
- * @image html cellular_HAL_API_implementation.png width=80%
+ * @image html cellular_API_implementation.png width=80%
  *
  */
  
@@ -178,7 +179,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 }
 uint32_t CellularUrcHandlerTableSize = 4;
 ```
- * @image html cellular_HAL_URC_handler_implementation.png width=80%
+ * @image html cellular_URC_handler_implementation.png width=80%
  */
 
 /**
@@ -200,7 +201,7 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * @functions_page{cellular_common,cellular_common}
  * @functions_brief{cellular_common}
  *
- * <b>The following APIs are 3GPP v27.007 AT command implemented cellular HAL APIs.</b><br>
+ * <b>The following APIs are 3GPP v27.007 AT command implemented FreeRTOS Cellular Library APIs.</b><br>
  * - @function_name{Cellular_CommonInit}
  * @function_brief{Cellular_CommonInit}
  * - @function_name{Cellular_CommonCleanup}
@@ -256,7 +257,7 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * - @function_name{Cellular_CommonGetSimCardLockStatus}
  * @function_brief{Cellular_CommonGetSimCardLockStatus}
  *
- * The following APIs can be used when implementating cellular HAL APIs with module specific AT command.<br>
+ * The following APIs can be used when implementating FreeRTOS Cellular Library APIs with module specific AT command.<br>
  * <b>AT command parsing functions</b><br> 
  * - @function_name{Cellular_ATRemovePrefix}
  * @function_brief{Cellular_ATRemovePrefix}

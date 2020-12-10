@@ -77,7 +77,7 @@ static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pCo
 /*-----------------------------------------------------------*/
 
 /* Try to Keep this map in Alphabetical order. */
-/* Cellular HAL common porting interface. */
+/* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
@@ -93,7 +93,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "UUSORD", _cellular_UrcProcessUusord     }                /* Socket receive URC. */
 };
 
-/* Cellular HAL common porting interface. */
+/* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
 

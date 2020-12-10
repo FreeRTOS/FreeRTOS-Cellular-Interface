@@ -36,7 +36,7 @@
  *
  * This function is called in Cellular_CommonInit to setup cellular module context.
  *
- * @param[in,out] pContext Cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] ppModuleContext Cellular module context can be obtained with _Cellular_GetModuleContext.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
@@ -50,7 +50,7 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
  *
  * This function cleans up the module context.
  *
- * @param[in,out] pContext Cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -62,7 +62,7 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext );
  *
  * This function setups the user equipment of the cellular module.
  *
- * @param[in,out] pContext Cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -74,7 +74,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
  *
  * This function enable the unsolicited result code of the cellular module.
  *
- * @param[in,out] pContext Cellular HAL context created in Cellular_Init.
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.

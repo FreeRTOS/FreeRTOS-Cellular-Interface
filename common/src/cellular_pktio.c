@@ -24,7 +24,7 @@
  */
 
 /**
- * @brief cellular HAL common packet I/O functions to assemble packet from comm interface.
+ * @brief FreeRTOS Cellular Library common packet I/O functions to assemble packet from comm interface.
  */
 
 #include "cellular_config.h"
