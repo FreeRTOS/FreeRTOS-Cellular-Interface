@@ -5,9 +5,9 @@
 The FreeRTOS Cellular Library exposes the capability of cellular modems with AT command interface. This guide provides a method to integrate FreeRTOS Cellular Library with FreeRTOS AWS. We use windows simulator and BG96 cellular module as an example. FreeRTOS Cellular Library is sub-moduled in vendor’s porting folder. To communicate with cellular modem, an implementation of comm interface is required. There are some comm interface implementations can be referenced to reduced porting effort. An example implementation of secure sockets with FreeRTOS cellular APIs is also provided in this guide. FreeRTOS AWS demo application can make use of secure sockets cellular to connect to AWS IoT Core.
 
 
-> Windows simulator and FreeRTOS AWS 202012.00 is used in this example. User may need to adapt to different platform or FreeRTOS AWS version.
+> Windows simulator and FreeRTOS AWS 202012.00 are used in this example. User may need to adapt to different platform or FreeRTOS AWS version.
 
-> This document provides only an example about the porting. User doesn't need to follow this porting method if the have their own implementation.
+> This document is provided as an example. User doesn't need to follow this porting method if the have their own implementation.
 
 ## Porting steps
 
@@ -54,7 +54,7 @@ Reference implementation of these files
 
 This section provides description from AFR modules point of view. AFR::cellular represents the cellular library. It has three dependencies, AFR::cellular_module, AFR::cellular::mcu_port and AFR::cellular_platform. The AFR::cellular_module defines the cellular module to use. BG96 is used in this example. BG96 porting makes use of the AFR::cellular_common module, which is the common 3GPP implementation. The AFR::cellular::mcu_port defines the comm interface to send and receive AT commands. It is implemented with UART interface in this example while other communication interfaces are also possible for different platforms. The AFR::cellular_platform defines the platform APIs required by FreeRTOS cellular library. FreeRTOS APIs are used to implement AFR::cellular_platform module. The AFR::secure_sockets::mcu_port defines the secure sockets cellular implementation. Demo application make use of coreMQTT to connect to AWS IoT Core. The underneath transport interface of coreMQTT uses secure sockets cellular to send and receive data.
 
-<p align="center"><img src="https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/blob/main/doc/plantuml/images/cellular_common_module.png" width="70%"><br>
+<p align="center"><img src="https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/blob/main/doc/plantuml/images/PortingToFreeRTOSAWS.png" width="70%"><br>
 
 
 ## Sample codes
@@ -289,7 +289,7 @@ void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
 
 ## 
 
-## Appendix : comm interface implementation
+## Appendix : example comm interface implementation
 
 * [FreeRTOS windows simulator comm interface](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/main/source/cellular/comm_if_windows.c)
 * [FreeRTOS Common IO UART comm interface](https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_uart.c)
