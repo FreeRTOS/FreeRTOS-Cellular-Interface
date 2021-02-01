@@ -70,7 +70,7 @@
 
 /*-----------------------------------------------------------*/
 
-/* Secure socket needs application provide the cellular handle and pdn context id. */
+/* Secure socket needs the application to provide the cellular handle and pdn context id. */
 /* User of secure sockets cellular should provide this variable. */
 /* coverity[misra_c_2012_rule_8_6_violation] */
 extern CellularHandle_t CellularHandle;
@@ -976,7 +976,7 @@ static int32_t prvCheckSetSockOptParams( Socket_t xSocket,
     _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
     int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
         ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
@@ -1208,7 +1208,7 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 
     ( void ) xAddressLength;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
         ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
@@ -1323,7 +1323,7 @@ int32_t SOCKETS_Recv( Socket_t xSocket,
     int32_t retRecvLength = SOCKETS_ERROR_NONE;
     BaseType_t bytesRecv = 0;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
         ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
@@ -1394,7 +1394,7 @@ int32_t SOCKETS_Send( Socket_t xSocket,
     int32_t retSentLength = SOCKETS_ERROR_NONE;
     BaseType_t bytesSent = 0;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
         ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
@@ -1470,7 +1470,7 @@ int32_t SOCKETS_Shutdown( Socket_t xSocket,
     int32_t retShutdown = SOCKETS_ERROR_NONE;
     _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
         ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
@@ -1514,7 +1514,7 @@ int32_t SOCKETS_Close( Socket_t xSocket )
     _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
     CellularSocketHandle_t tcpSocket = NULL;
 
-    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* xSocket needs to be checked against SOCKET_INVALID_SOCKET. */
     /* coverity[misra_c_2012_rule_11_4_violation] */
     if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) )
     {
