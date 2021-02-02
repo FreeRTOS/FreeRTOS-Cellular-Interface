@@ -321,6 +321,7 @@ static void libClose( CellularContext_t * pContext )
         {
             /* Shut down the utilities. */
             _Cellular_PktioShutdown( pContext );
+            _Cellular_PktHandlerCleanup( pContext );
         }
 
         PlatformMutex_Lock( &pContext->libStatusMutex );
