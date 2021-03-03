@@ -17,6 +17,7 @@ The FreeRTOS Cellular Library exposes the capability of a few popular cellular m
 * [Quectel BG96](https://www.quectel.com/product/bg96.htm)
 * [Sierra Wireless HL7802](https://www.sierrawireless.com/products-and-solutions/embedded-solutions/products/hl7802/)
 * [U-Blox Sara-R4](https://www.u-blox.com/en/product/sara-r4-series)
+* [SIMCOM SIM7080](https://cn.simcom.com/product/SIM7080G.html)
 
 The current version of the FreeRTOS Cellular Library encapsulates the TCP stack offered by those cellular modems.  They all implement the same uniform [Cellular Library API](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/raw/main/doc/document/cellular.zip).  That API hides the complexity of AT commands, and exposes a socket-like interface to C programmers.
 
@@ -99,4 +100,5 @@ It is recommended that you start by cloning the implementation of one of the exi
 * [Quectel BG96](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/master/modules/bg96)
 * [Sierra Wireless HL7802](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/main/modules/hl7802)
 * [U-Blox Sara-R4](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/main/modules/sara_r4)
+* [SIMCOM SIM7080](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/master/modules/sim70x0)
 
