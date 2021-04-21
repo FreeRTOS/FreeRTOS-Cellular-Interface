@@ -68,11 +68,6 @@ static CellularATError_t validateString( const char * pString,
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     size_t stringLength = 0U;
 
-    if( ( pString == NULL ) || ( pStringValidationResult == NULL ) )
-    {
-        atStatus = CELLULAR_AT_BAD_PARAMETER;
-    }
-
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         /* The strnlen() function returns strlen(s), if that is less than maxlen,
@@ -83,7 +78,6 @@ static CellularATError_t validateString( const char * pString,
          * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
          * character.*/
         stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
-
         if( stringLength == 0U )
         {
             *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;
@@ -111,7 +105,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
     char * ptrPrefixChar = NULL;
     char * ptrChar = NULL;
 
-    if( pResult == NULL )
+    if( pResult == NULL || pString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -119,13 +113,13 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         atStatus = validateString( pString, &stringValidationResult );
+    }
 
-        if( atStatus == CELLULAR_AT_SUCCESS )
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
-            if( stringValidationResult != CELLULAR_AT_STRING_VALID )
-            {
-                atStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -168,7 +162,7 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
     const char * pTempString = pString;
     const char * pTempPrefix = pPrefix;
 
-    if( pResult == NULL )
+    if( pResult == NULL || pString == NULL || pPrefix == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -176,13 +170,13 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         atStatus = validateString( pTempString, &stringValidationResult );
+    }
 
-        if( atStatus == CELLULAR_AT_SUCCESS )
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
-            if( stringValidationResult != CELLULAR_AT_STRING_VALID )
-            {
-                atStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -226,7 +220,15 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    atStatus = validateString( *ppString, &stringValidationResult );
+    if ( ppString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( *ppString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -265,7 +267,15 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    atStatus = validateString( *ppString, &stringValidationResult );
+    if ( ppString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( *ppString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -300,7 +310,15 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
     char * p = NULL;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    atStatus = validateString( pString, &stringValidationResult );
+    if ( pString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( pString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -341,7 +359,15 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
     uint16_t ind = 0;
     char * pTempString = pString;
 
-    atStatus = validateString( pTempString, &stringValidationResult );
+    if ( pString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( pTempString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -386,7 +412,15 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     char * p = NULL;
 
-    atStatus = validateString( *ppString, &stringValidationResult );
+    if ( ppString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( *ppString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -429,7 +463,15 @@ CellularATError_t Cellular_ATRemoveAllDoubleQuote( char * pString )
     uint16_t ind = 0;
     char * pTempString = pString;
 
-    atStatus = validateString( pTempString, &stringValidationResult );
+    if ( pString == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( pTempString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -468,7 +510,15 @@ CellularATError_t Cellular_ATGetNextTok( char ** ppString,
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     const char * pDelimiter = ",";
 
-    atStatus = Cellular_ATGetSpecificNextTok( ppString, pDelimiter, ppTokOutput );
+    if ( ppString == NULL || ppTokOutput == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if ( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = Cellular_ATGetSpecificNextTok( ppString, pDelimiter, ppTokOutput );
+    }
 
     return atStatus;
 }
@@ -484,7 +534,15 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
     uint16_t tokStrLen = 0, dataStrlen = 0;
     char * tok = NULL;
 
-    atStatus = validateString( *ppString, &stringValidationResult );
+    if ( ppString == NULL || pDelimiter == NULL || ppTokOutput == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if ( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( *ppString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -506,11 +564,6 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
         else
         {
             tok = strtok( *ppString, pDelimiter );
-        }
-
-        if( tok == NULL )
-        {
-            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -572,7 +625,15 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
     const char * p;
     uint8_t firstNibble = 0, secondNibble = 0;
 
-    atStatus = validateString( pString, &stringValidationResult );
+    if ( pString == NULL || ppHexData == NULL )
+    {
+        atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+
+    if ( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        atStatus = validateString( pString, &stringValidationResult );
+    }
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
@@ -619,7 +680,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     const char * pTempString = pString;
 
-    if( pResult == NULL )
+    if( pResult == NULL || pString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -627,13 +688,13 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         atStatus = validateString( pTempString, &stringValidationResult );
+    }
 
-        if( atStatus == CELLULAR_AT_SUCCESS )
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
-            if( stringValidationResult != CELLULAR_AT_STRING_VALID )
-            {
-                atStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -673,7 +734,7 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     bool tmpResult;
 
-    if( pResult == NULL )
+    if( pInputBuf == NULL || ppKeyList == NULL || pResult == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -681,13 +742,13 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         atStatus = validateString( pInputBuf, &stringValidationResult );
+    }
 
-        if( atStatus == CELLULAR_AT_SUCCESS )
+    if( atStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
-            if( stringValidationResult != CELLULAR_AT_STRING_VALID )
-            {
-                atStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -760,11 +821,11 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
     }
     else
     {
-        /* MISRA C 2012 Directive 4.7 – If a function returns error information, then
+        /* MISRA C 2012 Directive 4.7 ï¿½ If a function returns error information, then
          * that error information shall be tested.
-         * MISRA C 2012 Rule 22.8 – The errno variable must be "zero" before calling
+         * MISRA C 2012 Rule 22.8 ï¿½ The errno variable must be "zero" before calling
          * strtol function.
-         * MISRA C 2012 Rule 22.9 – The errno must be tested after strtol function is
+         * MISRA C 2012 Rule 22.9 ï¿½ The errno must be tested after strtol function is
          * called.
          *
          * The following line violates MISRA rule 4.7 because return value of strtol()
