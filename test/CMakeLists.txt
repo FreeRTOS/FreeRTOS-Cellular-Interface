@@ -41,14 +41,11 @@ set( CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS ${MODULE_ROOT_DIR}/common/include/priv
 add_library( coverity_analysis
              ${CELLULAR_COMMON_SOURCE}/cellular_at_core.c )
 
-# Build MQTT library target without custom config dependency.
-target_compile_definitions( coverity_analysis PUBLIC MQTT_DO_NOT_USE_CUSTOM_CONFIG=1 )
-
 # Cellular include path.
 target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} )
 
 # Cellular private include path.
-target_include_directories( coverity_analysis PRIVATE ${CELLULAR_INCLUDE_PRIVATE_DIRS} )
+target_include_directories( coverity_analysis PRIVATE ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS} )
 
 #  ====================================  Test Configuration ========================================
 
