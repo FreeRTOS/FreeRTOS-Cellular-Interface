@@ -21,8 +21,8 @@
  */
 
 /**
- * @file cellular_3gpp_api_utest.c
- * @brief Unit tests for functions in cellular_common_api.h.
+ * @file cellular_at_core_utest.c
+ * @brief Unit tests for functions in cellular_at_core.h.
  */
 
 #include <string.h>
