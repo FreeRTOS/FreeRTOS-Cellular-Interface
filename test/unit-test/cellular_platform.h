@@ -31,17 +31,6 @@
 
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Parameters involved in maintaining the context for the modem.
- */
-typedef struct CellularContext
-{
-    /* PktIo data handling. */
-    uint32_t dataLength;
-    uint32_t partialDataRcvdLen;
-} CellularContext_t;
-
-
 
 /**
  * @brief Cellular library platform event group APIs.

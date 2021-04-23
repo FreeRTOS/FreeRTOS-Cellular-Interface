@@ -34,16 +34,6 @@
 /* This is a project specific file and is used to override config values defined
  * in cellular_config_defaults.h. */
 
-/**
- * Cellular comm interface make use of COM port on computer to communicate with
- * cellular module on windows simulator, for example "COM5".
- * #define CELLULAR_COMM_INTERFACE_PORT    "...insert here..."
- */
-
-/*
- * Default APN for network registartion.
- * #define CELLULAR_APN                    "...insert here..."
- */
 
 /*
  * PDN context id for cellular network.
