@@ -206,7 +206,7 @@ void test_Cellular_ATRemovePrefix_Happy_Path( void )
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
-    /* Check that CELLULAR_BAD_PARAMETER is returned if the parameter ppString set to sample string is passed. */
+    /* Check that CELLULAR_AT_SUCCESS is returned . */
     cellularStatus = Cellular_ATRemovePrefix( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
@@ -381,7 +381,7 @@ void test_Cellular_ATRemoveOutermostDoubleQuote_Happy_Path( void )
     char * pStringSource = pString;
     strcpy( pString, CELLULAR_SAMPLE_STRING_DOUBLE_QUOTE );
 
-    /* Check that CELLULAR_BAD_PARAMETER is returned if the parameter ppString set to sample string is passed. */
+    /* Check that CELLULAR_AT_SUCCESS is returned. */
     cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
@@ -823,7 +823,7 @@ void test_Cellular_ATStrtoi_Error_Path( void )
     int32_t base = 10;
     int32_t Result;
 
-    /* Check that CELLULAR_AT_BAD_PARAMETER is returned. */
+    /* Check that CELLULAR_AT_ERROR is returned. */
     cellularStatus = Cellular_ATStrtoi( pStr, base, &Result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_ERROR, cellularStatus );
     free(pStr);

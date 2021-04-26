@@ -56,43 +56,38 @@ typedef enum CellularATStringValidationResult
 
 /*-----------------------------------------------------------*/
 
-static CellularATError_t validateString( const char * pString,
-                                         CellularATStringValidationResult_t * pStringValidationResult );
+static void validateString( const char * pString,
+                            CellularATStringValidationResult_t * pStringValidationResult );
 static uint8_t _charToNibble( char c );
 
 /*-----------------------------------------------------------*/
 
-static CellularATError_t validateString( const char * pString,
-                                         CellularATStringValidationResult_t * pStringValidationResult )
+static void validateString( const char * pString,
+                            CellularATStringValidationResult_t * pStringValidationResult )
 {
-    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     size_t stringLength = 0U;
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
+    /* The strnlen() function returns strlen(s), if that is less than maxlen,
+        * or maxlen if there is no null terminating ('\0') among the first
+        * maxlen characters pointed to by s.
+        *
+        * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
+        * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
+        * character.*/
+    stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
+    if( stringLength == 0U )
     {
-        /* The strnlen() function returns strlen(s), if that is less than maxlen,
-         * or maxlen if there is no null terminating ('\0') among the first
-         * maxlen characters pointed to by s.
-         *
-         * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
-         * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
-         * character.*/
-        stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
-        if( stringLength == 0U )
-        {
-            *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;
-        }
-        else if( stringLength > CELLULAR_AT_MAX_STRING_SIZE )
-        {
-            *pStringValidationResult = CELLULAR_AT_STRING_TOO_LARGE;
-        }
-        else
-        {
-            *pStringValidationResult = CELLULAR_AT_STRING_VALID;
-        }
+        *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;
+    }
+    else if( stringLength > CELLULAR_AT_MAX_STRING_SIZE )
+    {
+        *pStringValidationResult = CELLULAR_AT_STRING_TOO_LARGE;
+    }
+    else
+    {
+        *pStringValidationResult = CELLULAR_AT_STRING_VALID;
     }
 
-    return atStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -112,11 +107,8 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pString, &stringValidationResult );
-    }
+        validateString( pString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -169,11 +161,8 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pTempString, &stringValidationResult );
-    }
+        validateString( pTempString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -182,14 +171,11 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pTempPrefix, &stringValidationResult );
+        validateString( pTempPrefix, &stringValidationResult );
 
-        if( atStatus == CELLULAR_AT_SUCCESS )
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
-            if( stringValidationResult != CELLULAR_AT_STRING_VALID )
-            {
-                atStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
 
@@ -227,11 +213,8 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( *ppString, &stringValidationResult );
-    }
+        validateString( *ppString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -274,11 +257,8 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( *ppString, &stringValidationResult );
-    }
+        validateString( *ppString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -317,11 +297,8 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pString, &stringValidationResult );
-    }
+        validateString( pString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -366,11 +343,8 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pTempString, &stringValidationResult );
-    }
+        validateString( pTempString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -419,11 +393,8 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( *ppString, &stringValidationResult );
-    }
+        validateString( *ppString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -470,11 +441,8 @@ CellularATError_t Cellular_ATRemoveAllDoubleQuote( char * pString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pTempString, &stringValidationResult );
-    }
+        validateString( pTempString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -539,13 +507,10 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
 
-    if ( atStatus == CELLULAR_AT_SUCCESS )
-    {
-        atStatus = validateString( *ppString, &stringValidationResult );
-    }
-
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
+        validateString( *ppString, &stringValidationResult );
+
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -630,13 +595,10 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
 
-    if ( atStatus == CELLULAR_AT_SUCCESS )
-    {
-        atStatus = validateString( pString, &stringValidationResult );
-    }
-
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
+        validateString( pString, &stringValidationResult );
+
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -687,11 +649,8 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pTempString, &stringValidationResult );
-    }
+        validateString( pTempString, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -741,11 +700,8 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        atStatus = validateString( pInputBuf, &stringValidationResult );
-    }
+        validateString( pInputBuf, &stringValidationResult );
 
-    if( atStatus == CELLULAR_AT_SUCCESS )
-    {
         if( stringValidationResult != CELLULAR_AT_STRING_VALID )
         {
             atStatus = CELLULAR_AT_BAD_PARAMETER;
