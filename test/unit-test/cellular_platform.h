@@ -37,7 +37,7 @@
  *
  * Cellular library use platform event group for process synchronization.
  *
- * The EventGroup functions in the following link can be refernced as function prototype.
+ * The EventGroup functions in the following link can be referenced as function prototype.
  * https://www.freertos.org/event-groups-API.html
  *
  */
@@ -115,7 +115,7 @@ typedef StaticQueue_t StaticSemaphore_t;
  *
  * Cellular library use platform mutex to protect resource.
  *
- * The IotMutex_ functions can be refernced as function prototype for
+ * The IotMutex_ functions can be referenced as function prototype for
  * PlatfromMutex_ prefix function in the following link.
  * https://docs.aws.amazon.com/freertos/latest/lib-ref/c-sdk/platform/platform_threads_functions.html
  *

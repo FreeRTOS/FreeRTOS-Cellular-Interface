@@ -1,11 +1,3 @@
-# Include filepaths for source and include.
-# include( ${MODULE_ROOT_DIR}/mqttFilePaths.cmake )
-# Set the source path and include path
-# set( CELLULAR_COMMON_SOURCE ${MODULE_ROOT_DIR}/common/src )
-# set( CELLULAR_INCLUDE_DIRS  ${MODULE_ROOT_DIR}/include )
-# set( CELLULAR_COMMON_INCLUDE_DIRS ${MODULE_ROOT_DIR}/common/include )
-# set( CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS ${MODULE_ROOT_DIR}/common/include/private )
-
 # ====================  Define your project name (edit) ========================
 set(project_name "cellular")
 

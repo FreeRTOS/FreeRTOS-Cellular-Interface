@@ -28,8 +28,8 @@
  * @brief cellular config options.
  */
 
-#ifndef __CELLULAR_CONFIG_H__
-#define __CELLULAR_CONFIG_H__
+#ifndef CELLULAR_CONFIG_H_
+#define CELLULAR_CONFIG_H_
 
 /* This is a project specific file and is used to override config values defined
  * in cellular_config_defaults.h. */
@@ -54,4 +54,4 @@
  */
 #define CELLULAR_IP_ADDRESS_MAX_SIZE                    ( 64U )
 
-#endif /* __CELLULAR_CONFIG_H__ */
+#endif /* CELLULAR_CONFIG_H_ */
