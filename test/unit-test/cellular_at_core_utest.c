@@ -41,7 +41,8 @@
 #define CELLULAR_SAMPLE_PREFIX_STRING_INPUT               "+CPIN:READY"
 
 /**
- * @brief Cellular sample prefix string wron input.
+ * @brief Cellular sample prefix string wrong input.
+
  */
 #define CELLULAR_SAMPLE_PREFIX_STRING_WRONG_INPUT          "+CPINREADY"
 
