@@ -102,7 +102,8 @@
 #define CELLULAR_SAMPLE_STRING_DELIMTER_FIRST              ",TEST_TOKENTOKEN1TOKEN2"
 
 /**
- * @brief Cellular sample string delimter first.
+ * @brief Cellular sample string wrong delimiter first.
+
  */
 #define CELLULAR_SAMPLE_WRONG_STRING_DELIMTER_FIRST        "TEST_TOKENTOKEN1TOKEN2"
 
