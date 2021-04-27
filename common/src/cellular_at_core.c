@@ -68,12 +68,12 @@ static void validateString( const char * pString,
     size_t stringLength = 0U;
 
     /* The strnlen() function returns strlen(s), if that is less than maxlen,
-        * or maxlen if there is no null terminating ('\0') among the first
-        * maxlen characters pointed to by s.
-        *
-        * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
-        * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
-        * character.*/
+     * or maxlen if there is no null terminating ('\0') among the first
+     * maxlen characters pointed to by s.
+     *
+     * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
+     * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
+     * character.*/
     stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
     if( stringLength == 0U )
     {
