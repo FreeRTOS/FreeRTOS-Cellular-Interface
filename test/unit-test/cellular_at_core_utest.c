@@ -569,10 +569,10 @@ void test_Cellular_ATHexStrToHex_Happy_Path_Uppercase_Hex_String( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char pString[] = CELLULAR_SAMPLE_HEX_STRING;
-    uint8_t * ppHexData[3];
+    uint8_t hexData[3];
     uint16_t hexDataLen = 3;
 
-    cellularStatus = Cellular_ATHexStrToHex( pString, ppHexData, hexDataLen );
+    cellularStatus = Cellular_ATHexStrToHex( pString, hexData, hexDataLen );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 }
 
@@ -583,10 +583,10 @@ void test_Cellular_ATHexStrToHex_Happy_Path_Lowercase_Hex_String( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char pLowerCaseString[] = CELLULAR_SAMPLE_HEX_LOWER_CASE_STRING;
-    uint8_t * ppHexData[3];
+    uint8_t hexData[3];
     uint16_t hexDataLen = 3;
 
-    cellularStatus = Cellular_ATHexStrToHex( pLowerCaseString, ppHexData, hexDataLen );
+    cellularStatus = Cellular_ATHexStrToHex( pLowerCaseString, hexData, hexDataLen );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 }
 

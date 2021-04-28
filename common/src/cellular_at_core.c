@@ -581,7 +581,7 @@ static uint8_t _charToNibble( char c )
 /* AT core helper API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularATError_t Cellular_ATHexStrToHex( const char * pString,
-                                          uint8_t * const * const ppHexData,
+                                          uint8_t * pHexData,
                                           uint16_t hexDataLen )
 {
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
@@ -590,7 +590,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
     const char * p;
     uint8_t firstNibble = 0, secondNibble = 0;
 
-    if ( pString == NULL || ppHexData == NULL )
+    if ( pString == NULL || pHexData == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -623,7 +623,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
         {
             firstNibble = _charToNibble( *p ) << 4;
             secondNibble = _charToNibble( p[ 1 ] );
-            ( *ppHexData )[ i ] = firstNibble | secondNibble;
+            ( pHexData )[ i ] = firstNibble | secondNibble;
             p = &p[ 2 ];
         }
     }
