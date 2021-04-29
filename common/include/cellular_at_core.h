@@ -294,14 +294,14 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
  * Decimal 16 is 0x10 and decimal 171 is 0xAB.
  *
  * @param[in] pString The hex string to convert to HEX.
- * @param[in] ppHexData The buffer to return the converted HEX data into.
+ * @param[out] pHexData The buffer to return the converted HEX data into.
  * @param[in] hexDataLen The length of the buffer.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
  * error code indicating the cause of the error.
  */
 CellularATError_t Cellular_ATHexStrToHex( const char * pString,
-                                          uint8_t * const * const ppHexData,
+                                          uint8_t * pHexData,
                                           uint16_t hexDataLen );
 
 /**
