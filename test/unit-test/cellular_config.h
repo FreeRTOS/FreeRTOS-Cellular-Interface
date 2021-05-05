@@ -54,4 +54,24 @@
  */
 #define CELLULAR_IP_ADDRESS_MAX_SIZE                    ( 64U )
 
-#endif /* CELLULAR_CONFIG_H_ */
+#define TEST
+#ifndef LOOP_FOREVER
+  #ifdef TEST
+    extern int NumLoops;
+    #define LOOP_FOREVER() NumLoops--
+  #else
+    #define LOOP_FOREVER() true
+  #endif
+#endif
+
+/* Macro UNIT_TEST will be defined in test\unit-test\CMakeLists.txt for mock library.*/
+#ifdef UNIT_TEST
+typedef struct CellularContext
+{
+    int test1;
+    int test2;
+    int test3;
+} CellularContext_t;
+#endif
+
+#endif /* __CELLULAR_CONFIG_H__ */
