@@ -377,10 +377,6 @@ void test_Cellular_ATRemoveOutermostDoubleQuote_Happy_Path( void )
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = malloc( sizeof( char ) * ( strlen( CELLULAR_SAMPLE_STRING_DOUBLE_QUOTE ) + 1 ) );
     char * pStringSource = pString;
-<<<<<<< HEAD
-
-=======
->>>>>>> frtos/main
     strcpy( pString, CELLULAR_SAMPLE_STRING_DOUBLE_QUOTE );
 
     cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pString );
@@ -420,10 +416,6 @@ void test_Cellular_ATRemoveAllDoubleQuote_Happy_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = malloc( sizeof( char ) * ( strlen( CELLULAR_SAMPLE_STRING_TWO_DOUBLE_QUOTE ) + 1 ) );
-<<<<<<< HEAD
-
-=======
->>>>>>> frtos/main
     strcpy( pString, CELLULAR_SAMPLE_STRING_TWO_DOUBLE_QUOTE );
 
     cellularStatus = Cellular_ATRemoveAllDoubleQuote( pString );

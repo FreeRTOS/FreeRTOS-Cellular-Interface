@@ -22,7 +22,7 @@
 
 /**
  * @file cellular_pkthandler_utest.c
- * @brief Unit tests for functions in cellular_at_core.h.
+ * @brief Unit tests for functions in cellular_pkthandler_internal.h.
  */
 
 #include <string.h>
