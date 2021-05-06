@@ -27,6 +27,8 @@
 #ifndef __CELLULAR_PKTIO_INTERNAL_H__
 #define __CELLULAR_PKTIO_INTERNAL_H__
 
+#include "cellular_config.h"
+#include "cellular_config_defaults.h"
 #include "cellular_types.h"
 
 /*-----------------------------------------------------------*/

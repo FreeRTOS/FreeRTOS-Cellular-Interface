@@ -30,6 +30,8 @@
 #include <stdbool.h>
 
 /* Cellular includes. */
+#include "cellular_config.h"
+#include "cellular_config_defaults.h"
 #include "cellular_platform.h"
 #include "cellular_comm_interface.h"
 #include "cellular_types.h"
