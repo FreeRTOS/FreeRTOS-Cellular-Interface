@@ -86,6 +86,6 @@ add_subdirectory( unit-test )
 # Add a target for running coverage on tests.
 add_custom_target( coverage
     COMMAND ${CMAKE_COMMAND} -P ${MODULE_ROOT_DIR}/tools/cmock/coverage.cmake
-    DEPENDS cmock unity cellular_at_core_utest cellular_pktio_utest cellular_pkthandler_utest
+    DEPENDS cmock unity cellular_at_core_utest cellular_pktio_utest cellular_pkthandler_utest cellular_common_api_utest
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )

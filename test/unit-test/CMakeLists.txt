@@ -8,6 +8,7 @@ list(APPEND mock_list
             "${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}/cellular_pktio_internal.h"
             "${CELLULAR_COMMON_INCLUDE_DIRS}/cellular_common.h"
             "${CELLULAR_COMMON_INCLUDE_DIRS}/cellular_at_core.h"
+            "${CELLULAR_COMMON_INCLUDE_DIRS}/cellular_common_portable.h"
         )
 
 # list the directories your mocks need
@@ -29,6 +30,7 @@ list(APPEND real_source_files
             ${CELLULAR_COMMON_SOURCE}/cellular_at_core.c
             ${CELLULAR_COMMON_SOURCE}/cellular_pktio.c
             ${CELLULAR_COMMON_SOURCE}/cellular_pkthandler.c
+            ${CELLULAR_COMMON_SOURCE}/cellular_common_api.c
         )
 # list the directories the module under test includes
 list(APPEND real_include_directories
@@ -76,6 +78,15 @@ list(APPEND utest_dep_list
 
 set(utest_name "${project_name}_pkthandler_utest")
 set(utest_source "${project_name}_pkthandler_utest.c")
+create_test(${utest_name}
+            ${utest_source}
+            "${utest_link_list}"
+            "${utest_dep_list}"
+            "${test_include_directories}"
+        )
+
+set(utest_name "${project_name}_common_api_utest")
+set(utest_source "${project_name}_common_api_utest.c")
 create_test(${utest_name}
             ${utest_source}
             "${utest_link_list}"
