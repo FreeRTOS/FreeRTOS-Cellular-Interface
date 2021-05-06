@@ -256,7 +256,7 @@ bool MockxQueueReceive( int32_t * queue,
     }
 }
 
-void PlatformMutex_Destroy( PlatformMutex_t * pMutex )
+void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
 {
     pMutex->created = false;
 }
