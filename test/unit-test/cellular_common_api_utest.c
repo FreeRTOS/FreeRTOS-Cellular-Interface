@@ -101,6 +101,12 @@ void testCallback( void )
 {
 }
 
+void cellularUrcNetworkRegistrationCallback( CellularUrcEvent_t urcEvent,
+                                             const CellularServiceStatus_t * pServiceStatus,
+                                             void * pCallbackContext )
+{
+}
+
 /* ============================   UNITY FIXTURES ============================ */
 
 /* Called before each test method. */
@@ -341,9 +347,11 @@ void test_Cellular_CommonRegisterUrcNetworkRegistrationEventCallback_Happy_Path(
     CellularContext_t context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    cellularStatus = Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( ( CellularHandle_t ) &context, NULL, NULL );
+    cellularStatus = Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( ( CellularHandle_t ) &context, cellularUrcNetworkRegistrationCallback, testCallback );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( context.cbEvents.networkRegistrationCallback, cellularUrcNetworkRegistrationCallback );
+    TEST_ASSERT_EQUAL( context.cbEvents.pNetworkRegistrationCallbackContext, testCallback );
 }
 
 /**
@@ -485,6 +493,25 @@ void test_Cellular_CommonATCommandRaw_Null_AtCmdPayload( void )
     cellularStatus = Cellular_CommonATCommandRaw( &context, NULL, NULL, 0, NULL, NULL, 0 );
 
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that _Cellular_AtcmdRequestWithCallback return CELLULAR_PKT_STATUS_BAD_REQUEST case for Cellular_CommonATCommandRaw.
+ */
+void test_Cellular_CommonATCommandRaw_AtCmd_Bad_Request( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+    char pPrefix[] = "AtTSest";
+    char pData[] = "Test Data";
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_REQUEST );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0 );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
 /**

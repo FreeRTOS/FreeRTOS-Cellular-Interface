@@ -139,16 +139,7 @@
 #endif
 
 #ifndef CELLULAR_CONFIG_DEFAULT_RAT
-    #define CELLULAR_CONFIG_DEFAULT_RAT     ( 8 )  /* Set default RAT to CELLULAR_RAT_CATM1 @ref CellularRat_t. */
-#endif
-
-#ifndef LOOP_FOREVER
-  #ifdef TEST
-    extern int NumLoops;
-    #define LOOP_FOREVER() NumLoops--
-  #else
-    #define LOOP_FOREVER()1
-  #endif
+    #define CELLULAR_CONFIG_DEFAULT_RAT    ( 8 )   /* Set default RAT to CELLULAR_RAT_CATM1 @ref CellularRat_t. */
 #endif
 
 #endif /* __CELLULAR_CONFIG_DEFAULTS_H__ */

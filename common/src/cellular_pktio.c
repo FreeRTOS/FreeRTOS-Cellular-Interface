@@ -38,9 +38,7 @@
 #include "cellular_types.h"
 #include "cellular_internal.h"
 #include "cellular_pktio_internal.h"
-#ifdef TEST
-    #include "cellular_common_internal.h"
-#endif
+#include "cellular_common_internal.h"
 
 /*-----------------------------------------------------------*/
 

@@ -230,6 +230,10 @@ bool MockxQueueSend( int32_t * queue,
     }
 }
 
+/* This function mock the API xQueueReceive, by reading the byte value of the queueReturnFail.
+ * The first byte value of queueReturnFail means the return value when xQueueReceive called at first time, and
+ * the second byte value of queueReturnFail means the return value when xQueueReceive called, and etc.
+ */
 bool MockxQueueReceive( int32_t * queue,
                         void * data,
                         int32_t time )
@@ -353,9 +357,9 @@ void test__Cellular_HandlePacket_Null_Buffer_AT_SOLICITED( void )
 }
 
 /**
- * @brief Test that AT_SOLICITED failure case for _Cellular_HandlePacket.
+ * @brief Test that AT_SOLICITED false At Resp failure case for _Cellular_HandlePacket.
  */
-void test__Cellular_HandlePacket_AT_SOLICITED_Failure( void )
+void test__Cellular_HandlePacket_AT_SOLICITED_False_AtResp_Failure( void )
 {
     CellularContext_t context;
     CellularATCommandLine_t testATCmdLine;
@@ -369,9 +373,23 @@ void test__Cellular_HandlePacket_AT_SOLICITED_Failure( void )
 
     pktStatus = _Cellular_HandlePacket( &context, AT_SOLICITED, ( void * ) &atResp );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
+}
 
+/**
+ * @brief Test that AT_SOLICITED xQueueSend failure case for _Cellular_HandlePacket.
+ */
+void test__Cellular_HandlePacket_AT_SOLICITED_xQueueSend_Failure( void )
+{
+    CellularContext_t context;
+    CellularATCommandLine_t testATCmdLine;
+    CellularATCommandResponse_t atResp;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
+    testATCmdLine.pLine = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
+    testATCmdLine.pNext = NULL;
+    atResp.pItm = &testATCmdLine;
     atResp.status = true;
+
     queueReturnFail = 1;
     pktStatus = _Cellular_HandlePacket( &context, AT_SOLICITED, ( void * ) &atResp );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
@@ -416,9 +434,9 @@ void test__Cellular_HandlePacket_Null_PARAM_AT_UNSOLICITED( void )
 }
 
 /**
- * @brief Test that bad string case for _Cellular_HandlePacket.
+ * @brief Test that start with + but no token string case for _Cellular_HandlePacket.
  */
-void test__Cellular_HandlePacket_AT_UNSOLICITED_Bad_String( void )
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Start_Plus_No_Token_String( void )
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -429,6 +447,18 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Bad_String( void )
     _Cellular_GenericCallback_Ignore();
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_PLUS_TOKEN_ONLY_STRING );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+}
+
+/**
+ * @brief Test that too large string case for _Cellular_HandlePacket.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Too_Large_String( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularATCommandLine_t testATCmdLine;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
     _Cellular_GenericCallback_Ignore();
@@ -470,6 +500,18 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
     _Cellular_GenericCallback_Ignore();
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that handle input string greater than urc token case for _Cellular_HandlePacket.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Greater_Than_Urc_Token_Path( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularATCommandLine_t testATCmdLine;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the greater string size in comparison function. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
@@ -477,6 +519,20 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
     _Cellular_GenericCallback_Ignore();
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_GREATER_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that handle input string less than urc token case for _Cellular_HandlePacket.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Less_Than_Urc_Token_Path( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularATCommandLine_t testATCmdLine;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Test the smaller string size in comparison function. */
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
@@ -491,12 +547,13 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
 void test__Cellular_HandlePacket_Wrong_RespType( void )
 {
     CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
-    _Cellular_HandlePacket( &context, AT_UNDEFINED, NULL );
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED, NULL );
 
-    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, queueData );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
 
 /**
@@ -574,6 +631,28 @@ void test__Cellular_AtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_OK(
     queueData = CELLULAR_PKT_STATUS_OK;
     pktStatus = _Cellular_AtcmdRequestWithCallback( &context, atReqGetMccMnc );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that return expected rsp code from xQueueReceive for _Cellular_AtcmdRequestWithCallback.
+ */
+void test__Cellular_AtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_Expected_RspCode_From_xQueueReceive( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReqGetMccMnc =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_BAD_PARAM. */
     queueData = CELLULAR_PKT_STATUS_BAD_PARAM;
@@ -702,22 +781,11 @@ void test__Cellular_AtcmdDataSend_Happy_Path( void )
 }
 
 /**
- * @brief Test that calling _Cellular_DataSendWithTimeoutDelayRaw failure case for _Cellular_AtcmdDataSend.
+ * @brief Test that Test dataReq.pData or dataReq.pSentDataLength null case for _Cellular_AtcmdDataSend.
  */
-void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Failure( void )
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_DataReq_Null_Failure( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    uint32_t sentDataLength = 0;
-    CellularAtDataReq_t atDataReq =
-    {
-        dataBuf,
-        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-        &sentDataLength,
-        pEndPattern,
-        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
-    };
 
     CellularAtDataReq_t atDataReqNullParam =
     {
@@ -746,14 +814,78 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Fai
     /* Test dataReq.pData or dataReq.pSentDataLength case. */
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReqNullParam, NULL, NULL, 0, 0, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+}
 
-    /* Test return unexpected *dataReq.pSentDataLength size from _Cellular_PktioSendData. */
+/**
+ * @brief Test that unexpected unexpected size failure case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Unexpected_DataReq_Size_Failure( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
+    CellularAtDataReq_t atDataReq =
+    {
+        dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        pEndPattern,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtReq_t atReq =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Test return unexpected dataReq.pSentDataLength size from _Cellular_PktioSendData. */
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
     queueData = CELLULAR_PKT_STATUS_OK;
     _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - 2 );
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_SEND_ERROR, pktStatus );
+}
+
+/**
+ * @brief Test that return unexpected sendEndPatternLen size failure case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Unexpected_SendEndPatternLen_Size_Failure( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
+    CellularAtDataReq_t atDataReq =
+    {
+        dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        pEndPattern,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtReq_t atReq =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test return unexpected sendEndPatternLen size from _Cellular_PktioSendData. */
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
@@ -763,6 +895,38 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Fai
     _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - 2 );
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_SEND_ERROR, pktStatus );
+}
+
+/**
+ * @brief Test xQueueReceive return ok, but the data is not CELLULAR_PKT_STATUS_OK failure case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Failure( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
+    CellularAtDataReq_t atDataReq =
+    {
+        dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        pEndPattern,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtReq_t atReq =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test xQueueReceive return ok, but the data is not CELLULAR_PKT_STATUS_OK. */
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
@@ -773,8 +937,39 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Fai
     queueData = queueData | ( CELLULAR_PKT_STATUS_BAD_PARAM << 8 );
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
 
-    /* Test xQueueReceive return failed. */
+/**
+ * @brief Test that xQueueReceive return false failure case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_xQueueReceive_Return_False_Failure( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
+    CellularAtDataReq_t atDataReq =
+    {
+        dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        pEndPattern,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtReq_t atReq =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
     queueData = CELLULAR_PKT_STATUS_OK;

@@ -75,6 +75,7 @@ static void validateString( const char * pString,
      * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
      * character.*/
     stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
+
     if( stringLength == 0U )
     {
         *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;

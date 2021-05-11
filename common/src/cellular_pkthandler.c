@@ -529,6 +529,7 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
                 break;
 
             default:
+                pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
                 CellularLogError( "_Cellular_HandlePacket Callback type (%d) error", atRespType );
                 break;
         }

@@ -20,7 +20,7 @@ list(APPEND mock_include_list
         )
 #list the definitions of your mocks to control what to be included
 list(APPEND mock_define_list
-            "UNIT_TEST=1"
+            "MOCK_LIB_TEST=1"
         )
 
 # ================= Create the library under test here (edit) ==================
