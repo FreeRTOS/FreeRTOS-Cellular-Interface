@@ -1368,9 +1368,9 @@ void test__Cellular_PktioSetShutdownCallback( void )
 }
 
 /**
- * @brief Test that any NULL parameter for _Cellular_PktioSendAtCmd..
+ * @brief Test that any NULL context for _Cellular_PktioSendAtCmd.
  */
-void test__Cellular_PktioSendAtCmd_Invalid_Param( void )
+void test__Cellular_PktioSendAtCmd_Null_Context( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1392,6 +1392,28 @@ void test__Cellular_PktioSendAtCmd_Invalid_Param( void )
                                           atReqSetRatPriority.atCmdType,
                                           atReqSetRatPriority.pAtRspPrefix );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+}
+
+/**
+ * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd.
+ */
+void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    CellularCommInterfaceHandle_t commInterfaceHandle;
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "AT+QCFG=\"nwscanseq\"",
+        CELLULAR_AT_WITH_PREFIX,
+        "+QCFG",
+        NULL,
+        NULL,
+        NULL,
+    };
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.pCommIntf = NULL;
     context.hPktioCommIntf = NULL;
@@ -1399,6 +1421,28 @@ void test__Cellular_PktioSendAtCmd_Invalid_Param( void )
                                           atReqSetRatPriority.atCmdType,
                                           atReqSetRatPriority.pAtRspPrefix );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+}
+
+/**
+ * @brief Test that any NULL at command for _Cellular_PktioSendAtCmd.
+ */
+void test__Cellular_PktioSendAtCmd_Null_AtCmd( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    CellularCommInterfaceHandle_t commInterfaceHandle;
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "AT+QCFG=\"nwscanseq\"",
+        CELLULAR_AT_WITH_PREFIX,
+        "+QCFG",
+        NULL,
+        NULL,
+        NULL,
+    };
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = commInterfaceHandle;
@@ -1409,7 +1453,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_Param( void )
 }
 
 /**
- * @brief Test that invalid string for _Cellular_PktioSendAtCmd..
+ * @brief Test that invalid string for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Invalid_String( void )
 {
@@ -1436,7 +1480,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
 }
 
 /**
- * @brief Test that happy path for _Cellular_PktioSendAtCmd..
+ * @brief Test that happy path for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Happy_Path( void )
 {
@@ -1463,7 +1507,7 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
 }
 
 /**
- * @brief Test that any NULL parameter for _Cellular_PktioSendData..
+ * @brief Test that any NULL parameter for _Cellular_PktioSendData.
  */
 void test__Cellular_PktioSendData_Invalid_Param( void )
 {
@@ -1494,7 +1538,7 @@ void test__Cellular_PktioSendData_Invalid_Param( void )
 }
 
 /**
- * @brief Test that happy path for _Cellular_PktioSendData..
+ * @brief Test that happy path for _Cellular_PktioSendData.
  */
 void test__Cellular_PktioSendData_Happy_Path( void )
 {
@@ -1516,7 +1560,7 @@ void test__Cellular_PktioSendData_Happy_Path( void )
 }
 
 /**
- * @brief Test that any NULL parameter for _Cellular_PktioShutdown..
+ * @brief Test that any NULL parameter for _Cellular_PktioShutdown.
  */
 void test__Cellular_PktioShutdown_Happy_Path( void )
 {
