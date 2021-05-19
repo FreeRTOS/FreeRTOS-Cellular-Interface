@@ -75,6 +75,7 @@ static void validateString( const char * pString,
      * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
      * character.*/
     stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
+
     if( stringLength == 0U )
     {
         *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;
@@ -87,7 +88,6 @@ static void validateString( const char * pString,
     {
         *pStringValidationResult = CELLULAR_AT_STRING_VALID;
     }
-
 }
 
 /*-----------------------------------------------------------*/
@@ -100,7 +100,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
     char * ptrPrefixChar = NULL;
     char * ptrChar = NULL;
 
-    if( pResult == NULL || pString == NULL )
+    if( ( pResult == NULL ) || ( pString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -154,7 +154,7 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
     const char * pTempString = pString;
     const char * pTempPrefix = pPrefix;
 
-    if( pResult == NULL || pString == NULL || pPrefix == NULL )
+    if( ( pResult == NULL ) || ( pString == NULL ) || ( pPrefix == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -206,7 +206,7 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if ( ppString == NULL )
+    if( ppString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -250,7 +250,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if ( ppString == NULL )
+    if( ppString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -290,7 +290,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
     char * p = NULL;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if ( pString == NULL )
+    if( pString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -336,7 +336,7 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
     uint16_t ind = 0;
     char * pTempString = pString;
 
-    if ( pString == NULL )
+    if( pString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -386,7 +386,7 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     char * p = NULL;
 
-    if ( ppString == NULL )
+    if( ppString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -434,7 +434,7 @@ CellularATError_t Cellular_ATRemoveAllDoubleQuote( char * pString )
     uint16_t ind = 0;
     char * pTempString = pString;
 
-    if ( pString == NULL )
+    if( pString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -478,12 +478,12 @@ CellularATError_t Cellular_ATGetNextTok( char ** ppString,
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     const char * pDelimiter = ",";
 
-    if ( ppString == NULL || ppTokOutput == NULL )
+    if( ( ppString == NULL ) || ( ppTokOutput == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
 
-    if ( atStatus == CELLULAR_AT_SUCCESS )
+    if( atStatus == CELLULAR_AT_SUCCESS )
     {
         atStatus = Cellular_ATGetSpecificNextTok( ppString, pDelimiter, ppTokOutput );
     }
@@ -502,7 +502,7 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
     uint16_t tokStrLen = 0, dataStrlen = 0;
     char * tok = NULL;
 
-    if ( ppString == NULL || pDelimiter == NULL || ppTokOutput == NULL )
+    if( ( ppString == NULL ) || ( pDelimiter == NULL ) || ( ppTokOutput == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -590,7 +590,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
     const char * p;
     uint8_t firstNibble = 0, secondNibble = 0;
 
-    if ( pString == NULL || pHexData == NULL )
+    if( ( pString == NULL ) || ( pHexData == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -642,7 +642,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     const char * pTempString = pString;
 
-    if( pResult == NULL || pString == NULL )
+    if( ( pResult == NULL ) || ( pString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -693,7 +693,7 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     bool tmpResult;
 
-    if( pInputBuf == NULL || ppKeyList == NULL || pResult == NULL )
+    if( ( pInputBuf == NULL ) || ( ppKeyList == NULL ) || ( pResult == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }

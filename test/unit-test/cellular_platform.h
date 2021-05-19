@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 /*-----------------------------------------------------------*/
 
@@ -42,14 +43,50 @@
  *
  */
 
-#define PlatformEventGroupHandle_t           
-#define PlatformEventGroup_Delete            
-#define PlatformEventGroup_ClearBits         
-#define PlatformEventGroup_Create            
-#define PlatformEventGroup_GetBits           
+#define CellularLogError
+#define CellularLogDebug
+#define CellularLogWarn
+#define CellularLogInfo
+
+#define configASSERT
+
+#define Platform_Delay
+
+typedef void * PVOID;
+
+#define PlatformEventGroupHandle_t          uint16_t
+#define PlatformEventGroup_Delete           MockPlatformEventGroup_Delete
+#define PlatformEventGroup_ClearBits        MockPlatformEventGroup_ClearBits
+#define PlatformEventGroup_Create           MockPlatformEventGroup_Create
+#define PlatformEventGroup_GetBits          MockPlatformEventGroup_GetBits
 #define PlatformEventGroup_SetBits           
-#define PlatformEventGroup_SetBitsFromISR    
-#define PlatformEventGroup_WaitBits          
+#define PlatformEventGroup_SetBitsFromISR   MockPlatformEventGroup_SetBitsFromISR
+#define PlatformEventGroup_WaitBits         MockPlatformEventGroup_WaitBits
+#define PlatformEventGroup_EventBits        uint32_t
+
+#define vQueueDelete                        MockvQueueDelete
+#define xQueueSend                          MockxQueueSend
+#define xQueueReceive                       MockxQueueReceive
+#define xQueueCreate                        MockxQueueCreate
+
+#define PlatformMutex_Create                MockPlatformMutex_Create
+#define PlatformMutex_Destroy               MockPlatformMutex_Destroy
+#define PlatformMutex_Lock                  MockPlatformMutex_Lock
+#define PlatformMutex_TryLock               MockPlatformMutex_TryLock
+#define PlatformMutex_Unlock                MockPlatformMutex_Unlock
+
+#define pdFALSE ( 0x0UL )
+#define pdTRUE  ( 0x1UL )
+#define pdPASS  ( 0x1UL )
+
+#define PlatformTickType                    uint32_t
+
+/* Converts a time in milliseconds to a time in ticks.  This macro can be
+ * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
+ * definition here is not suitable for your application. */
+#ifndef pdMS_TO_TICKS
+    #define pdMS_TO_TICKS( xTimeInMs )    ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) 1000 ) / ( TickType_t ) 1000U ) )
+#endif
 
 /**
  * @brief Cellular library platform thread API and configuration.
@@ -67,7 +104,7 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
                                     size_t stackSize );
 
 #define PLATFORM_THREAD_DEFAULT_STACK_SIZE    ( 2048U )
-#define PLATFORM_THREAD_DEFAULT_PRIORITY      ( tskIDLE_PRIORITY + 5U )
+#define PLATFORM_THREAD_DEFAULT_PRIORITY      ( 5U )
 
 /*-----------------------------------------------------------*/
 
@@ -76,7 +113,7 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
  * Items are queued by copy, not reference.  See the following link for the
  * rationale: https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  */
-typedef struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
     int8_t * pcHead;           /*< Points to the beginning of the queue storage area. */
     int8_t * pcWriteTo;        /*< Points to the free next place in the storage area. */
@@ -125,6 +162,7 @@ typedef struct PlatformMutex
 {
     StaticSemaphore_t xMutex; /**< FreeRTOS mutex. */
     BaseType_t recursive;     /**< Type; used for indicating if this is reentrant or normal. */
+    bool created;
 } PlatformMutex_t;
 
 bool PlatformMutex_Create( PlatformMutex_t * pNewMutex,
@@ -148,5 +186,13 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 
 #define Platform_Malloc    malloc
 #define Platform_Free      free
+
+#if( configUSE_16_BIT_TICKS == 1 )
+	typedef uint16_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffff
+#else
+	typedef uint32_t TickType_t;
+	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+#endif
 
 #endif /* __CELLULAR_PLATFORM_H__ */

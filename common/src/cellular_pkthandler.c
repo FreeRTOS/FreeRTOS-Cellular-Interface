@@ -43,7 +43,7 @@
 
 /*-----------------------------------------------------------*/
 
-#define MAX( a, b )    ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
+#define MIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
 
 /* Windows simulator implementation. */
 #if defined( _WIN32 ) || defined( _WIN64 )
@@ -54,12 +54,12 @@
 
 /*-----------------------------------------------------------*/
 
-static void _convertAndQueueRespPacket( CellularContext_t * pContext,
-                                        const void * pBuf );
+static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pContext,
+                                                       const void * pBuf );
 static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
                                           char * pInputLine );
-static void _processUrcPacket( CellularContext_t * pContext,
-                               const char * pBuf );
+static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
+                                              const char * pBuf );
 static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( CellularContext_t * pContext,
                                                                          CellularAtReq_t atReq,
                                                                          uint32_t timeoutMS );
@@ -81,13 +81,13 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static void _convertAndQueueRespPacket( CellularContext_t * pContext,
-                                        const void * pBuf )
+static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pContext,
+                                                       const void * pBuf )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularATCommandResponse_t * pAtResp = NULL;
 
-    if( ( pContext != NULL ) && ( pBuf != NULL ) )
+    if( ( pBuf != NULL ) )
     {
         pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
         PlatformMutex_Lock( &pContext->PktRespMutex );
@@ -109,11 +109,18 @@ static void _convertAndQueueRespPacket( CellularContext_t * pContext,
         /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
+            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             CellularLogError( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" );
         }
 
         PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -127,32 +134,22 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
      * if string not start with "+", then pTokenPtr = pSavePtr = pInputPtr. */
     char * pSavePtr = pInputLine, * pTokenPtr = pInputLine;
 
-    if( pContext == NULL )
-    {
-        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
-    }
-    else if( pInputLine == NULL )
-    {
-        pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
-    }
-    else
-    {
-        CellularLogDebug( "Next URC token to parse [%s]", pInputLine );
 
-        /* First check for + at the beginning and advance to point to the next
-         * byte. Use that string to pass to strtok and retrieve the token. Once the
-         * token use is retrieved, get the function handler map and call that
-         * function. */
-        if( *pSavePtr == '+' )
+    CellularLogDebug( "Next URC token to parse [%s]", pInputLine );
+
+    /* First check for + at the beginning and advance to point to the next
+     * byte. Use that string to pass to strtok and retrieve the token. Once the
+     * token use is retrieved, get the function handler map and call that
+     * function. */
+    if( *pSavePtr == '+' )
+    {
+        pSavePtr++;
+        pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );
+
+        if( pTokenPtr == NULL )
         {
-            pSavePtr++;
-            pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );
-
-            if( pTokenPtr == NULL )
-            {
-                CellularLogError( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine );
-                pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
-            }
+            CellularLogError( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine );
+            pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
         }
     }
 
@@ -170,26 +167,35 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
 /**
  * @brief copy the URC log in the buffer to a heap memory and process it.
  */
-static void _processUrcPacket( CellularContext_t * pContext,
-                               const char * pBuf )
+static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
+                                              const char * pBuf )
 {
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     char * payload = NULL;
 
     if( pBuf != NULL )
     {
-        ( void ) Cellular_ATStrDup( &payload, pBuf );
+        atStatus = Cellular_ATStrDup( &payload, pBuf );
 
-        if( payload != NULL )
+        if( atStatus == CELLULAR_AT_SUCCESS )
         {
             /* The payload is null terminated. */
-            ( void ) urcParseToken( pContext, ( char * ) payload );
+            pktStatus = urcParseToken( pContext, ( char * ) payload );
             Platform_Free( payload );
         }
         else
         {
+            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             CellularLogWarn( "Couldn't Allocate memory of %d for urc", strlen( pBuf ) );
         }
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -202,11 +208,7 @@ static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( Cellula
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     BaseType_t qRet = pdFALSE;
 
-    if( pContext == NULL )
-    {
-        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
-    }
-    else if( atReq.pAtCmd == NULL )
+    if( atReq.pAtCmd == NULL )
     {
         CellularLogError( "PKT_STATUS_BAD_REQUEST, null AT param" );
         pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
@@ -268,12 +270,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     BaseType_t qStatus = pdFALSE;
     uint32_t sendEndPatternLen = 0U;
 
-    /* Check the pContext. */
-    if( pContext == NULL )
-    {
-        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-    }
-    else if( ( dataReq.pData == NULL ) || ( dataReq.pSentDataLength == NULL ) )
+    if( ( dataReq.pData == NULL ) || ( dataReq.pSentDataLength == NULL ) )
     {
         CellularLogError( "_Cellular_DataSendWithTimeoutDelayRaw, null input" );
         pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
@@ -381,7 +378,7 @@ static int _searchCompareFunc( const void * pInputToken,
 
     compareValue = strncmp( pToken,
                             pBasePtr->pStrValue,
-                            MAX( tokenLen, strLen ) );
+                            MIN( tokenLen, strLen ) );
 
     /* To avoid undefined behavior, the table should not contain duplicated item and
      * compareValue is 0 only if the string is exactly the same. */
@@ -423,7 +420,7 @@ static int _sortCompareFunc( const void * pElem1Ptr,
 
     compareValue = strncmp( pElement1Ptr->pStrValue,
                             pElement2Ptr->pStrValue,
-                            MAX( element1PtrLen, element2PtrLen ) );
+                            MIN( element1PtrLen, element2PtrLen ) );
 
     /* To avoid undefined behavior, the table should not contain duplicated item and
      * compareValue is 0 only if the string is exactly the same. */
@@ -447,14 +444,7 @@ static int _sortCompareFunc( const void * pElem1Ptr,
 static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
                                          const char * pInputLine )
 {
-    if( pContext == NULL )
-    {
-        CellularLogWarn( "_Cellular_ProcessGenericUrc: Context not set" );
-    }
-    else
-    {
-        _Cellular_GenericCallback( pContext, pInputLine );
-    }
+    _Cellular_GenericCallback( pContext, pInputLine );
 }
 
 /*-----------------------------------------------------------*/
@@ -520,31 +510,36 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
-void _Cellular_HandlePacket( CellularContext_t * pContext,
-                             _atRespType_t atRespType,
-                             const void * pBuf )
+CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
+                                            _atRespType_t atRespType,
+                                            const void * pBuf )
 {
-    if( pContext == NULL )
-    {
-        CellularLogError( "_Cellular_HandlePacket : Invalid cellular context" );
-    }
-    else
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    if( pContext != NULL )
     {
         switch( atRespType )
         {
             case AT_SOLICITED:
-                _convertAndQueueRespPacket( pContext, pBuf );
+                pktStatus = _convertAndQueueRespPacket( pContext, pBuf );
                 break;
 
             case AT_UNSOLICITED:
-                _processUrcPacket( pContext, pBuf );
+                pktStatus = _processUrcPacket( pContext, pBuf );
                 break;
 
             default:
+                pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
                 CellularLogError( "_Cellular_HandlePacket Callback type (%d) error", atRespType );
                 break;
         }
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -738,13 +733,14 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
-void _Cellular_AtParseInit( const CellularContext_t * pContext )
+CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 {
     uint32_t i = 0;
     bool finit = true;
     const CellularAtParseTokenMap_t * pTokenMap = NULL;
     uint32_t tokenMapSize = 0;
     int32_t result = 0;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
     if( ( pContext != NULL ) && ( pContext->tokenTable.pCellularUrcHandlerTable != NULL ) &&
         ( pContext->tokenTable.cellularPrefixToParserMapSize > 0U ) )
@@ -783,6 +779,7 @@ void _Cellular_AtParseInit( const CellularContext_t * pContext )
         #else /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
             if( finit != true )
             {
+                pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
                 CellularLogError( "AtParseFail URC token table is not sorted" );
             }
 
@@ -791,11 +788,21 @@ void _Cellular_AtParseInit( const CellularContext_t * pContext )
             configASSERT( finit == true );
         #endif /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
 
+        /* coverity[misra_c_2012_rule_10_4_violation] */
+        /* coverity[misra_c_2012_rule_10_5_violation] */
+        configASSERT( finit == true );
+
         for( i = 0; i < tokenMapSize; i++ )
         {
             CellularLogDebug( "Callbacks setup for %u : %s", i, pTokenMap[ i ].pStrValue );
         }
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
