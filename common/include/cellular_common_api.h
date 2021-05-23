@@ -257,9 +257,11 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
  * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-void Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
-                                     char * pInputLine );
+CellularPktStatus_t Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
+                                                    char * pInputLine );
 
 /**
  * @brief 3GPP URC AT+CGREG handler for FreeRTOS Cellular Library.
@@ -269,9 +271,11 @@ void Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
  * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-void Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
-                                     char * pInputLine );
+CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
+                                                    char * pInputLine );
 
 /**
  * @brief 3GPP URC AT+CREG handler for FreeRTOS Cellular Library.
@@ -281,8 +285,10 @@ void Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
  * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  * @param[in] pInputLine the input URC string.
  *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-void Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
-                                    char * pInputLine );
+CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
+                                                   char * pInputLine );
 
 #endif /* __CELLULAR_COMMON_API_H__ */

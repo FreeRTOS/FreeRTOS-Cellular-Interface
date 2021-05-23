@@ -1073,17 +1073,6 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
-void _Cellular_PktioSetShutdownCallback( CellularContext_t * pContext,
-                                         _pPktioShutdownCallback_t shutdownCb )
-{
-    if( pContext != NULL )
-    {
-        pContext->pPktioShutdownCB = shutdownCb;
-    }
-}
-
-/*-----------------------------------------------------------*/
-
 CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
                                          _pPktioHandlePacketCallback_t handlePacketCb )
 {

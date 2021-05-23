@@ -547,19 +547,7 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 /* This function is provided as common code to cellular module porting.
  * Vendor may choose to use this function or use their implementation. */
 /* coverity[misra_c_2012_rule_8_7_violation]. */
-CellularPktStatus_t _Cellular_AtcmdRequestWithCallback( CellularContext_t * pContext,
-                                                        CellularAtReq_t atReq )
-{
-    /* Parameters are checked in this function. */
-    return _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReq, PACKET_REQ_TIMEOUT_MS );
-}
-
-/*-----------------------------------------------------------*/
-
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
-CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t * pContext,
+CellularPktStatus_t _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( CellularContext_t * pContext,
                                                                CellularAtReq_t atReq,
                                                                uint32_t timeoutMS )
 {

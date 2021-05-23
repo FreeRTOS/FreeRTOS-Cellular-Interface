@@ -184,7 +184,10 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
-
+void * mock_malloc( size_t size )
+{
+    return ( void * ) malloc( size );
+}
 
 uint16_t MockPlatformEventGroup_Delete()
 {
@@ -1354,21 +1357,7 @@ void test__Cellular_PktioInit_No_UrcToken_Prefix_Table( void )
 }
 
 /**
- * @brief Test the assignment of shutdown callback function.
- */
-void test__Cellular_PktioSetShutdownCallback( void )
-{
-    CellularContext_t context;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-
-    _Cellular_PktioSetShutdownCallback( &context, _shutdownCallback );
-
-    TEST_ASSERT_EQUAL( context.pPktioShutdownCB, _shutdownCallback );
-}
-
-/**
- * @brief Test that any NULL context for _Cellular_PktioSendAtCmd.
+ * @brief Test that any NULL context for _Cellular_PktioSendAtCmd..
  */
 void test__Cellular_PktioSendAtCmd_Null_Context( void )
 {
@@ -1395,7 +1384,7 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
 }
 
 /**
- * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd.
+ * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd..
  */
 void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
 {

@@ -447,7 +447,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
 static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
                                                CellularTime_t * pTimeInfo )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char * pToken = NULL;
     bool timeZoneSignNegative = false;
@@ -820,15 +820,8 @@ static CellularError_t queryNetworkStatus( CellularContext_t * pContext,
         sizeof( CellularNetworkRegType_t )
     };
 
-    if( pContext == NULL )
-    {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetResult );
-        cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-    }
+    pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetResult );
+    cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
     return cellularStatus;
 }
@@ -1355,13 +1348,8 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
         {
             pInputLine = pCommnadItem->pLine;
 
-            if( pInputLine == NULL )
-            {
-                CellularLogError( "GetEidrx: Invalid input line" );
-                pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            }
-            else if( ( strcmp( "+CEDRXS: 0", pInputLine ) == 0 ) ||
-                     ( strcmp( "+CEDRXS:", pInputLine ) == 0 ) )
+            if( ( strcmp( "+CEDRXS: 0", pInputLine ) == 0 ) ||
+                ( strcmp( "+CEDRXS:", pInputLine ) == 0 ) )
             {
                 CellularLogDebug( "GetEidrx: empty EDRXS setting %s", pInputLine );
             }
@@ -1418,37 +1406,30 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     const cellularAtData_t * pLibAtData = NULL;
     CellularNetworkRegistrationStatus_t psRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
 
-    if( pContext == NULL )
-    {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        cellularStatus = queryNetworkStatus( pContext, "AT+CREG?", "+CREG", CELLULAR_REG_TYPE_CREG );
+    cellularStatus = queryNetworkStatus( pContext, "AT+CREG?", "+CREG", CELLULAR_REG_TYPE_CREG );
 
-        #ifndef CELLULAR_MODEM_NO_GSM_NETWORK
-            /* Added below +CGREG support as some modems also support GSM/EDGE network. */
-            if( cellularStatus == CELLULAR_SUCCESS )
-            {
-                /* Ignore the network status query return value with CGREG. Some modem
-                 * may not support EDGE or GSM. In this case, psRegStatus is not stored
-                 * in libAtData. CEREG will be used to query the ps network status. */
-                ( void ) queryNetworkStatus( pContext, "AT+CGREG?", "+CGREG", CELLULAR_REG_TYPE_CGREG );
-            }
-
-            /* Check if modem acquired GPRS Registration. */
-            /* Query CEREG only if the modem did not already acquire PS registration. */
-            _Cellular_LockAtDataMutex( pContext );
-            psRegStatus = pContext->libAtData.psRegStatus;
-            _Cellular_UnlockAtDataMutex( pContext );
-        #endif /* ifndef CELLULAR_MODEM_NO_GSM_NETWORK */
-
-        if( ( cellularStatus == CELLULAR_SUCCESS ) &&
-            ( psRegStatus != CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_HOME ) &&
-            ( psRegStatus != CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_ROAMING ) )
+    #ifndef CELLULAR_MODEM_NO_GSM_NETWORK
+        /* Added below +CGREG support as some modems also support GSM/EDGE network. */
+        if( cellularStatus == CELLULAR_SUCCESS )
         {
-            cellularStatus = queryNetworkStatus( pContext, "AT+CEREG?", "+CEREG", CELLULAR_REG_TYPE_CEREG );
+            /* Ignore the network status query return value with CGREG. Some modem
+             * may not support EDGE or GSM. In this case, psRegStatus is not stored
+             * in libAtData. CEREG will be used to query the ps network status. */
+            ( void ) queryNetworkStatus( pContext, "AT+CGREG?", "+CGREG", CELLULAR_REG_TYPE_CGREG );
         }
+
+        /* Check if modem acquired GPRS Registration. */
+        /* Query CEREG only if the modem did not already acquire PS registration. */
+        _Cellular_LockAtDataMutex( pContext );
+        psRegStatus = pContext->libAtData.psRegStatus;
+        _Cellular_UnlockAtDataMutex( pContext );
+    #endif /* ifndef CELLULAR_MODEM_NO_GSM_NETWORK */
+
+    if( ( cellularStatus == CELLULAR_SUCCESS ) &&
+        ( psRegStatus != CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_HOME ) &&
+        ( psRegStatus != CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_ROAMING ) )
+    {
+        cellularStatus = queryNetworkStatus( pContext, "AT+CEREG?", "+CEREG", CELLULAR_REG_TYPE_CEREG );
     }
 
     /* Get the service status from lib AT data. */
@@ -1963,25 +1944,34 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetImei );
-
-        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetImei );
+
+            if( pktStatus != CELLULAR_PKT_STATUS_OK )
+            {
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
         }
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetModelId );
-
-        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetModelId );
+
+            if( pktStatus != CELLULAR_PKT_STATUS_OK )
+            {
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
         }
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetManufactureId );
-
-        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetManufactureId );
+
+            if( pktStatus != CELLULAR_PKT_STATUS_OK )
+            {
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
         }
 
         if( cellularStatus == CELLULAR_SUCCESS )
@@ -2301,26 +2291,20 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSimLockStatus( CellularContext_t
         CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: pContext is invalid" );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
-    else if( ( pData == NULL ) || ( dataLen != sizeof( CellularSimCardLockState_t ) ) )
-    {
-        CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: pData is invalid or dataLen is wrong" );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
         CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: Response pData is invalid" );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else if( ( pData == NULL ) || ( dataLen != sizeof( CellularSimCardLockState_t ) ) )
+    {
+        CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: pData is invalid or dataLen is wrong" );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
     {
         pInputStr = pAtResp->pItm->pLine;
         pSimLockState = ( CellularSimCardLockState_t * ) pData;
-
-        if( strlen( pInputStr ) == 0U )
-        {
-            CellularLogError( "Get SIM lock State: Input pData is invalid" );
-            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-        }
     }
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
@@ -2414,7 +2398,7 @@ static bool _parseHplmn( char * pToken,
     bool parseStatus = true;
     CellularPlmnInfo_t * plmn = ( CellularPlmnInfo_t * ) pData;
 
-    if( ( pToken == NULL ) || ( pData == NULL ) )
+    if( pToken == NULL )
     {
         CellularLogError( "_parseHplmn: pToken is NULL or pData is NULL" );
         parseStatus = false;
@@ -2877,20 +2861,13 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
 
         CellularLogDebug( "PSM setting: %s ", cmdBuf );
 
-        if( cmdBufLen < CELLULAR_AT_CMD_MAX_SIZE )
-        {
-            /* Query the PSMsettings from the network. */
-            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetPsm );
+        /* Query the PSMsettings from the network. */
+        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetPsm );
 
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                CellularLogError( "Cellular_SetPsmSettings: couldn't set PSM settings" );
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
-        }
-        else
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = CELLULAR_NO_MEMORY;
+            CellularLogError( "Cellular_SetPsmSettings: couldn't set PSM settings" );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
 
