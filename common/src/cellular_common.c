@@ -188,9 +188,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
             #else
                 {
                     pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
-                    #ifdef WSL_TEST
-                        pContext = ( void * ) ( ( uint64_t ) pContext & 0x7FFFFFFFFFFF );
-                    #endif
                 }
             #endif
 
@@ -594,9 +591,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
             #else
                 {
                     pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
-                    #ifdef WSL_TEST
-                        pSocketData = ( void * ) ( ( uint64_t ) pSocketData & 0x7FFFFFFFFFFF );
-                    #endif
                 }
             #endif
 

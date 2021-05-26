@@ -78,9 +78,9 @@ typedef void * PVOID;
 #define taskENTER_CRITICAL()    PVOID
 #define taskEXIT_CRITICAL()     PVOID
 
-#define pdFALSE             ( 0x0UL )
-#define pdTRUE              ( 0x1UL )
-#define pdPASS              ( 0x1UL )
+#define pdFALSE             ( 0x0 )
+#define pdTRUE              ( 0x1 )
+#define pdPASS              ( 0x1 )
 
 #define PlatformTickType    uint32_t
 
@@ -197,7 +197,5 @@ void * mock_malloc( size_t size );
     typedef uint32_t TickType_t;
     #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 #endif
-
-#define WSL_TEST
 
 #endif /* __CELLULAR_PLATFORM_H__ */

@@ -743,9 +743,6 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         *ppDst = ( char * ) Platform_Malloc( sizeof( char ) * ( strlen( pTempSrc ) + 1U ) );
-        #ifdef WSL_TEST
-            *ppDst = ( void * ) ( ( uint64_t ) *ppDst & 0x7FFFFFFFFFFF );
-        #endif
 
         if( *ppDst != NULL )
         {
