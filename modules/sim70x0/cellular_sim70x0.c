@@ -57,7 +57,8 @@ const char * CellularSrcTokenSuccessTable[] =
 uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * );
 
 const char * CellularUrcTokenWoPrefixTable[] =
-{ "+APP PDP: 0,ACTIVE", "+APP PDP: 0,DEACTIVE", "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
+//{ "+APP PDP: 0,ACTIVE", "+APP PDP: 0,DEACTIVE", "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
+{ "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
 uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
 
 
