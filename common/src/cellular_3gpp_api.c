@@ -768,14 +768,14 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
     {
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
-    else if( ( pData == NULL ) || ( dataLen != sizeof( CellularNetworkRegType_t ) ) )
-    {
-        CellularLogError( "_Cellular_RecvFuncGetPsreg: ppData is invalid or dataLen is wrong" );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
         CellularLogError( "_Cellular_RecvFuncGetPsreg: response is invalid" );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else if( ( pData == NULL ) || ( dataLen != sizeof( CellularNetworkRegType_t ) ) )
+    {
+        CellularLogError( "_Cellular_RecvFuncGetPsreg: ppData is invalid or dataLen is wrong" );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -809,6 +809,8 @@ static CellularError_t queryNetworkStatus( CellularContext_t * pContext,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularNetworkRegType_t recvRegType = regType;
+
+    configASSERT( pContext != NULL );
 
     CellularAtReq_t atReqGetResult =
     {
@@ -1406,6 +1408,8 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     const cellularAtData_t * pLibAtData = NULL;
     CellularNetworkRegistrationStatus_t psRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
 
+    configASSERT( pContext != NULL );
+
     cellularStatus = queryNetworkStatus( pContext, "AT+CREG?", "+CREG", CELLULAR_REG_TYPE_CREG );
 
     #ifndef CELLULAR_MODEM_NO_GSM_NETWORK
@@ -1939,42 +1943,26 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
         ( void ) memset( pModemInfo, 0, sizeof( CellularModemInfo_t ) );
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetFirmwareVersion );
 
-        if( pktStatus != CELLULAR_PKT_STATUS_OK )
-        {
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        }
-
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
             pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetImei );
-
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
         }
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
             pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetModelId );
-
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
         }
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
             pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetManufactureId );
-
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
         }
 
-        if( cellularStatus == CELLULAR_SUCCESS )
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        {
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+        }
+        else
         {
             CellularLogDebug( "ModemInfo: hwVer:%s, fwVer:%s, serialNum:%s, IMEI:%s, manufactureId:%s, modelId:%s ",
                               pModemInfo->hardwareVersion, pModemInfo->firmwareVersion, pModemInfo->serialNumber, pModemInfo->imei,

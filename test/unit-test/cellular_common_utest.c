@@ -60,7 +60,7 @@ typedef struct signalBarsTable
     uint8_t bars;
 } signalBarsTable_t;
 
-static int malloc_alloc_fail = 0;
+static int mallocAllocFail = 0;
 
 static int mockPlatformMutexCreateFlag = 0;
 
@@ -68,7 +68,7 @@ static int eventData = 0;
 
 static char * pData;
 
-CellularHandle_t g_cellularHandle = NULL;
+CellularHandle_t gCellularHandle = NULL;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -189,7 +189,7 @@ static const signalBarsTable_t lteNBIotSignalBarsTable[] =
 /* Called before each test method. */
 void setUp()
 {
-    malloc_alloc_fail = 0;
+    mallocAllocFail = 0;
     eventData = 0;
     mockPlatformMutexCreateFlag = 0;
 }
@@ -323,7 +323,7 @@ void cellularModemEventCallback( CellularModemEvent_t modemEvent,
 
 void * mock_malloc( size_t size )
 {
-    if( malloc_alloc_fail == 1 )
+    if( mallocAllocFail == 1 )
     {
         return NULL;
     }
@@ -484,7 +484,7 @@ void test__Cellular_CreateSocketData_Mem_Alloc_Fail( void )
     CellularContext_t context;
     CellularSocketHandle_t socketHandle;
 
-    malloc_alloc_fail = 1;
+    mallocAllocFail = 1;
     memset( &context, 0, sizeof( CellularContext_t ) );
     pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
                                             CELLULAR_SOCKET_TYPE_DGRAM,
@@ -1106,7 +1106,7 @@ void test__Cellular_LibInit_Memory_Allocation_Failure( void )
     CellularHandle_t CellularHandle = NULL;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
-    malloc_alloc_fail = 1;
+    mallocAllocFail = 1;
 
     cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
 
@@ -1220,7 +1220,7 @@ void test__Cellular_LibInit_Happy_Path( void )
     _Cellular_PktioInit_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
     cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
-    g_cellularHandle = CellularHandle;
+    gCellularHandle = CellularHandle;
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
@@ -1241,7 +1241,7 @@ void test__Cellular_LibCleanup_Null_Context( void )
  */
 void test__Cellular_LibCleanup_Happy_Path( void )
 {
-    CellularContext_t * pContext = ( CellularContext_t * ) g_cellularHandle;
+    CellularContext_t * pContext = ( CellularContext_t * ) gCellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     int i = rand() % CELLULAR_NUM_SOCKET_MAX;
     CellularSocketContext_t * pSocketData = ( CellularSocketContext_t * ) malloc( sizeof( CellularSocketContext_t ) );
@@ -1290,7 +1290,7 @@ void test__Cellular_AtcmdRequestWithCallback_Happy_Path( void )
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_PktHandler_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     pktStatus = _Cellular_AtcmdRequestWithCallback( &context, atReqGetResult );
 
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );

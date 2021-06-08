@@ -94,7 +94,6 @@ static int higherPriorityTaskWokenReturn = 1;
 static int isSendDataPrefixCbkSuccess = 1;
 static int pktDataPrefixCBReturn = 0;
 
-static int memoryFail = 0;
 static int recvDataLenFail = 0;
 static int recvCommFail = 0;
 
@@ -160,7 +159,6 @@ void setUp()
     isWrongString = 0;
     isSendDataPrefixCbkSuccess = 1;
     pktDataPrefixCBReturn = 0;
-    memoryFail = 0;
     recvDataLenFail = 0;
     tokenTableType = 0;
     recvCommFail = 0;
@@ -1197,7 +1195,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_TOKEN_TABLE_SUCCESS_TOKEN_MEM
     tokenTableType = 1;
     NumLoops = 2;
     recvCount = 2;
-    memoryFail = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -1357,7 +1354,7 @@ void test__Cellular_PktioInit_No_UrcToken_Prefix_Table( void )
 }
 
 /**
- * @brief Test that any NULL context for _Cellular_PktioSendAtCmd..
+ * @brief Test that any NULL context for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Null_Context( void )
 {
@@ -1384,7 +1381,7 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
 }
 
 /**
- * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd..
+ * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
 {

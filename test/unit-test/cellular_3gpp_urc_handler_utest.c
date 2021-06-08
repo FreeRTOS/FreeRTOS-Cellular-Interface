@@ -99,19 +99,105 @@ void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
 }
 
-CellularATError_t MOCK_Cellular_ATStrtoi_CALLBACK( const char * pStr,
+CellularATError_t Mock_Cellular_ATStrtoi_Callback( const char * pStr,
                                                    int32_t base,
                                                    int32_t * pResult,
-                                                   int cmock_num_calls )
+                                                   int cmockNumCalls )
 {
     *pResult = atoi( pStr );
 
     return CELLULAR_AT_SUCCESS;
 }
 
-CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
+void handleNextTok_parseRegStatusCase( char ** ppTokOutput,
+                                       int32_t parseRegStatusCase )
+{
+    if( parseRegStatusCase == 1 )
+    {
+        char pTestString[] = "10";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRegStatusCase == 2 )
+    {
+        char pTestString[] = "5";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRegStatusCase == 3 )
+    {
+        char pTestString[] = "3";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRegStatusCase == 4 )
+    {
+        char pTestString[] = "8";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+}
+
+void handleNextTok_parseRatInfoInRegCase( char ** ppTokOutput,
+                                          int32_t parseRatInfoInRegCase )
+{
+    if( parseRatInfoInRegCase == 1 )
+    {
+        char pTestString[] = "10";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRatInfoInRegCase == 2 )
+    {
+        char pTestString[] = "7";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRatInfoInRegCase == 3 )
+    {
+        char pTestString[] = "1";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+}
+
+void handleNextTok_parseRejectTypeInRegCase( char ** ppTokOutput,
+                                             int32_t parseRejectTypeInRegCase )
+{
+    if( parseRejectTypeInRegCase == 1 )
+    {
+        char pTestString[] = "256";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRejectTypeInRegCase == 2 )
+    {
+        char pTestString[] = "3";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+}
+
+void handleNextTok_parseRejectCauseInRegCase( char ** ppTokOutput,
+                                              int32_t parseRejectCauseInRegCase )
+{
+    if( parseRejectCauseInRegCase == 1 )
+    {
+        char pTestString[] = "256";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+    else if( parseRejectCauseInRegCase == 2 )
+    {
+        char pTestString[] = "3";
+        *ppTokOutput = malloc( sizeof( pTestString ) );
+        memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+    }
+}
+
+CellularATError_t Mock_Cellular_ATGetNextTok_Callback( char ** ppString,
                                                        char ** ppTokOutput,
-                                                       int cmock_num_calls )
+                                                       int cmockNumCalls )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char pFitNum[] = "1";
@@ -122,33 +208,13 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
         *ppTokOutput = NULL;
     }
 
-    if( cmock_num_calls < 7 )
+    if( cmockNumCalls < 7 )
     {
-        if( cmock_num_calls == 1 )
+        if( cmockNumCalls == 1 )
         {
-            if( parseRegStatusCase == 1 )
+            if( parseRegStatusCase > 0 )
             {
-                char pTestString[] = "10";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRegStatusCase == 2 )
-            {
-                char pTestString[] = "5";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRegStatusCase == 3 )
-            {
-                char pTestString[] = "3";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRegStatusCase == 4 )
-            {
-                char pTestString[] = "8";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+                handleNextTok_parseRegStatusCase( ppTokOutput, parseRegStatusCase );
             }
             else
             {
@@ -156,7 +222,7 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
                 memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
             }
         }
-        else if( cmock_num_calls == 2 )
+        else if( cmockNumCalls == 2 )
         {
             if( parseLacTacInRegCase == 1 )
             {
@@ -170,7 +236,7 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
                 memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
             }
         }
-        else if( cmock_num_calls == 3 )
+        else if( cmockNumCalls == 3 )
         {
             if( parseCellIdInRegCase == 1 )
             {
@@ -184,25 +250,11 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
                 memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
             }
         }
-        else if( cmock_num_calls == 4 )
+        else if( cmockNumCalls == 4 )
         {
-            if( parseRatInfoInRegCase == 1 )
+            if( parseRatInfoInRegCase > 0 )
             {
-                char pTestString[] = "10";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRatInfoInRegCase == 2 )
-            {
-                char pTestString[] = "7";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRatInfoInRegCase == 3 )
-            {
-                char pTestString[] = "1";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+                handleNextTok_parseRatInfoInRegCase( ppTokOutput, parseRatInfoInRegCase );
             }
             else
             {
@@ -211,19 +263,11 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
                 memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
             }
         }
-        else if( cmock_num_calls == 5 )
+        else if( cmockNumCalls == 5 )
         {
-            if( parseRejectTypeInRegCase == 1 )
+            if( parseRejectTypeInRegCase > 0 )
             {
-                char pTestString[] = "256";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRejectTypeInRegCase == 2 )
-            {
-                char pTestString[] = "3";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+                handleNextTok_parseRejectTypeInRegCase( ppTokOutput, parseRejectTypeInRegCase );
             }
             else
             {
@@ -231,19 +275,11 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
                 memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
             }
         }
-        else if( cmock_num_calls == 6 )
+        else if( cmockNumCalls == 6 )
         {
-            if( parseRejectCauseInRegCase == 1 )
+            if( parseRejectCauseInRegCase > 0 )
             {
-                char pTestString[] = "256";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
-            }
-            else if( parseRejectCauseInRegCase == 2 )
-            {
-                char pTestString[] = "3";
-                *ppTokOutput = malloc( sizeof( pTestString ) );
-                memcpy( *ppTokOutput, pTestString, sizeof( pTestString ) );
+                handleNextTok_parseRejectCauseInRegCase( ppTokOutput, parseRejectCauseInRegCase );
             }
             else
             {
@@ -265,8 +301,8 @@ CellularATError_t MOCK_Cellular_ATGetNextTok_CALLBACK( char ** ppString,
     return atCoreStatus;
 }
 
-CellularPktStatus_t MOCK__Cellular_TranslateAtCoreStatus_CALLBACK( CellularATError_t status,
-                                                                   int cmock_num_calls )
+CellularPktStatus_t Mock__Cellular_TranslateAtCoreStatus_Callback( CellularATError_t status,
+                                                                   int cmockNumCalls )
 {
     CellularPktStatus_t pktStatus;
 
@@ -303,7 +339,7 @@ void cellularUrcNetworkRegistrationCallback( CellularUrcEvent_t urcEvent,
 /* ========================================================================== */
 
 /**
- * @brief Test that any NULL handler case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that any NULL handler case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_FAILURE.
  */
 void test_Cellular_ParseRegStatus_Null_Handler( void )
 {
@@ -314,7 +350,7 @@ void test_Cellular_ParseRegStatus_Null_Handler( void )
 }
 
 /**
- * @brief Test that any NULL RegPayload case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that any NULL RegPayload case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_BAD_PARAM.
  */
 void test_Cellular_ParseRegStatus_Null_RegPayload( void )
 {
@@ -326,7 +362,7 @@ void test_Cellular_ParseRegStatus_Null_RegPayload( void )
 }
 
 /**
- * @brief Test that reject type/case for CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that reject type/case for CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_REJ_TYPE_Cause_Registration_Denied( void )
 {
@@ -336,9 +372,9 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_REJ_TYPE_Cause_Registration_D
     context.libAtData.csRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED;
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRegStatusCase = 3;
     parseRatInfoInRegCase = 3;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CREG: 2", false, CELLULAR_REG_TYPE_CREG );
@@ -346,7 +382,7 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_REJ_TYPE_Cause_Registration_D
 }
 
 /**
- * @brief Test that CELLULAR_REG_POS_RAT invalid value case to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_POS_RAT invalid value case to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_RAT_Invalid_Value( void )
 {
@@ -355,16 +391,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_RAT_Invalid_Value( void )
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRatInfoInRegCase = 3;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CREG: 2", false, CELLULAR_REG_TYPE_CREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that register out of range case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that register out of range case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_FAILURE.
  */
 void test_Cellular_ParseRegStatus_Regs_OutOfRange( void )
 {
@@ -373,9 +409,9 @@ void test_Cellular_ParseRegStatus_Regs_OutOfRange( void )
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRegStatusCase = 1;
     parseLacTacInRegCase = 1;
     parseCellIdInRegCase = 1;
@@ -387,7 +423,7 @@ void test_Cellular_ParseRegStatus_Regs_OutOfRange( void )
 }
 
 /**
- * @brief Test that CELLULAR_REG_POS_RAT CELLULAR_RAT_LTE case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_POS_RAT CELLULAR_RAT_LTE case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_RAT_Status_CELLULAR_RAT_LTE( void )
 {
@@ -396,16 +432,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_RAT_Status_CELLULAR_RAT_LTE( 
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRatInfoInRegCase = 2;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CEREG: 2", false, CELLULAR_REG_TYPE_CEREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_CEREG clear atlib data case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_CEREG clear atlib data case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Clear_AtLib_Data( void )
 {
@@ -414,16 +450,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Clear_AtLib_Dat
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRegStatusCase = 4;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CEREG: 2", false, CELLULAR_REG_TYPE_CEREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_CEREG status registration denied case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_CEREG status registration denied case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Registration_Denied( void )
 {
@@ -432,16 +468,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Registration_De
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRegStatusCase = 3;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CEREG: 2", false, CELLULAR_REG_TYPE_CEREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_CEREG status registration roaming case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_CEREG status registration roaming case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Registration_Roaming( void )
 {
@@ -450,16 +486,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Status_Registration_Ro
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
     parseRegStatusCase = 2;
     packetStatus = _Cellular_ParseRegStatus( &context, "+CEREG: 2", false, CELLULAR_REG_TYPE_CEREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_CEREG happy path case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_CEREG happy path case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Happy_Path( void )
 {
@@ -470,16 +506,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CEREG_Happy_Path( void )
     _Cellular_NetworkRegistrationCallback_Ignore();
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
 
     packetStatus = _Cellular_ParseRegStatus( &context, "+CEREG: 2", false, CELLULAR_REG_TYPE_CEREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_CREG happy path case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_CREG happy path case _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CREG_Happy_Path( void )
 {
@@ -490,16 +526,17 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_CREG_Happy_Path( void )
     _Cellular_NetworkRegistrationCallback_Ignore();
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
 
     packetStatus = _Cellular_ParseRegStatus( &context, "+CREG: 2", false, CELLULAR_REG_TYPE_CREG );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that CELLULAR_REG_TYPE_UNKNOWN happy path case _Cellular_ParseRegStatus to return CELLULAR_INVALID_HANDLE.
+ * @brief Test that CELLULAR_REG_TYPE_UNKNOWN case for _Cellular_ParseRegStatus to return CELLULAR_PKT_STATUS_OK.
+ *
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_UNKNOWN( void )
 {
@@ -508,16 +545,16 @@ void test_Cellular_ParseRegStatus_CELLULAR_REG_TYPE_UNKNOWN( void )
 
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    Cellular_ATGetNextTok_StubWithCallback( MOCK_Cellular_ATGetNextTok_CALLBACK );
-    Cellular_ATStrtoi_StubWithCallback( MOCK_Cellular_ATStrtoi_CALLBACK );
-    _Cellular_TranslateAtCoreStatus_StubWithCallback( MOCK__Cellular_TranslateAtCoreStatus_CALLBACK );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi_Callback );
+    _Cellular_TranslateAtCoreStatus_StubWithCallback( Mock__Cellular_TranslateAtCoreStatus_Callback );
 
     packetStatus = _Cellular_ParseRegStatus( &context, "123456789", false, CELLULAR_REG_TYPE_UNKNOWN );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, packetStatus );
 }
 
 /**
- * @brief Test that happy path case case Cellular_CommonUrcProcessCreg to return CELLULAR_PKT_STATUS_OK.
+ * @brief Test that failure path case case Cellular_CommonUrcProcessCreg to return CELLULAR_PKT_STATUS_FAILURE.
  */
 void test_Cellular_CommonUrcProcessCreg_AtCmd_Failure_Path( void )
 {
@@ -533,7 +570,7 @@ void test_Cellular_CommonUrcProcessCreg_AtCmd_Failure_Path( void )
 }
 
 /**
- * @brief Test that happy path case case Cellular_CommonUrcProcessCgreg to return CELLULAR_PKT_STATUS_OK.
+ * @brief Test that failure path case case Cellular_CommonUrcProcessCgreg to return CELLULAR_PKT_STATUS_FAILURE.
  */
 void test_Cellular_CommonUrcProcessCgreg_AtCmd_Failure_Path( void )
 {
@@ -548,7 +585,7 @@ void test_Cellular_CommonUrcProcessCgreg_AtCmd_Failure_Path( void )
 }
 
 /**
- * @brief Test that happy path case case Cellular_CommonUrcProcessCereg to return CELLULAR_PKT_STATUS_OK.
+ * @brief Test that happy path case case Cellular_CommonUrcProcessCereg to return CELLULAR_PKT_STATUS_FAILURE.
  */
 void test_Cellular_CommonUrcProcessCereg_AtCmd_Failure_Path( void )
 {

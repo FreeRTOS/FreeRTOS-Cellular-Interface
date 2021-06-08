@@ -251,6 +251,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
+    configASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &pContext->libStatusMutex );
 
@@ -299,6 +300,8 @@ static void libClose( CellularContext_t * pContext )
 {
     bool bOpened = false;
     uint8_t i = 0;
+
+    configASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &pContext->libStatusMutex );
     bOpened = pContext->bLibOpened;
@@ -982,6 +985,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     bool bLibStatusMutexCreateSuccess = false;
     bool bAtDataMutexCreateSuccess = false;
     bool bPktRequestMutexCreateSuccess = false;
+    bool bPktResponseMutexCreateSuccess = false;
 
     cellularStatus = checkInitParameter( pCellularHandle, pCommInterface, pTokenTable );
 
@@ -1055,6 +1059,10 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
             CellularLogError( "Could not create CELLULAR Pkt Resp mutex " );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
+        else
+        {
+            bPktResponseMutexCreateSuccess = true;
+        }
     }
 
     /* Configure the library. */
@@ -1065,6 +1073,11 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
+        if( bPktResponseMutexCreateSuccess == true )
+        {
+            _Cellular_DestroyPktResponseMutex( pContext );
+        }
+
         if( bPktRequestMutexCreateSuccess == true )
         {
             _Cellular_DestroyPktRequestMutex( pContext );
@@ -1141,7 +1154,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t
                                                                CellularAtReq_t atReq,
                                                                uint32_t timeoutMS )
 {
-    return _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( pContext, atReq, timeoutMS );
+    return _Cellular_PktHandler_AtcmdRequestWithCallback( pContext, atReq, timeoutMS );
 }
 
 /*-----------------------------------------------------------*/

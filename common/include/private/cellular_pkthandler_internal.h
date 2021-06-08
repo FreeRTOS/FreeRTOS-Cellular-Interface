@@ -135,8 +135,8 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext );
  * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
  * code indicating the cause of the error.
  */
-CellularPktStatus_t _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( CellularContext_t * pContext,
-                                                                          CellularAtReq_t atReq,
-                                                                          uint32_t timeoutMS );
+CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularContext_t * pContext,
+                                                                   CellularAtReq_t atReq,
+                                                                   uint32_t timeoutMS );
 
 #endif /* __CELLULAR_PKTHANDLER_INTERNAL_H__ */

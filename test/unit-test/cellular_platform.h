@@ -160,7 +160,7 @@ typedef StaticQueue_t StaticSemaphore_t;
  * https://docs.aws.amazon.com/freertos/latest/lib-ref/c-sdk/platform/platform_threads_functions.html
  *
  */
-typedef long          BaseType_t;
+typedef long BaseType_t;
 typedef struct PlatformMutex
 {
     StaticSemaphore_t xMutex; /**< FreeRTOS mutex. */

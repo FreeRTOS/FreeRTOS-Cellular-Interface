@@ -294,9 +294,6 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         *ppDst = ( char * ) Platform_Malloc( sizeof( char ) * ( strlen( pTempSrc ) + 1U ) );
-        #ifdef TEST
-            *ppDst = ( void * ) ( ( uint64_t ) *ppDst & 0x7FFFFFFFFFFF );
-        #endif
 
         if( *ppDst != NULL )
         {
@@ -565,23 +562,23 @@ void test__Cellular_HandlePacket_Wrong_RespType( void )
 }
 
 /**
- * @brief Test that null Context case for _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback.
+ * @brief Test that null Context case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_NULL_Context( void )
+void test__Cellular_PktHandler_AtcmdRequestWithCallback_NULL_Context( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReq;
 
     memset( &atReq, 0, sizeof( CellularAtReq_t ) );
 
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( NULL, atReq, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( NULL, atReq, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
 }
 
 /**
- * @brief Test that null atReq case for _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback.
+ * @brief Test that null atReq case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_NULL_atReq( void )
+void test__Cellular_PktHandler_AtcmdRequestWithCallback_NULL_atReq( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReq;
@@ -589,14 +586,14 @@ void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_NULL_atReq( void 
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     memset( &atReq, 0, sizeof( CellularAtReq_t ) );
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( &context, atReq, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( &context, atReq, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
 }
 
 /**
- * @brief Test that _Cellular_PktioSendAtCmd return fail case for _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback.
+ * @brief Test that _Cellular_PktioSendAtCmd return fail case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_Fail( void )
+void test__Cellular_PktHandler_AtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_Fail( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReqGetMccMnc =
@@ -612,14 +609,14 @@ void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback__Cellular_PktioSe
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
 
 /**
- * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback.
+ * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_OK( void )
+void test__Cellular_PktHandler_AtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_OK( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReqGetMccMnc =
@@ -637,7 +634,7 @@ void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback__Cellular_PktioSe
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
     queueData = CELLULAR_PKT_STATUS_OK;
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
@@ -664,14 +661,14 @@ void test__Cellular_AtcmdRequestWithCallback__Cellular_PktioSendAtCmd_Return_Exp
 
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_BAD_PARAM. */
     queueData = CELLULAR_PKT_STATUS_BAD_PARAM;
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
 
 /**
- * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback.
+ * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_xQueueReceive_Return_Fail( void )
+void test__Cellular_PktHandler_AtcmdRequestWithCallback_xQueueReceive_Return_Fail( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReqGetMccMnc =
@@ -689,7 +686,7 @@ void test__Cellular_PktHandler_TimeoutAtcmdRequestWithCallback_xQueueReceive_Ret
     /* xQueueReceive failed. */
     queueReturnFail = 1;
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
-    pktStatus = _Cellular_PktHandler_TimeoutAtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_PktHandler_AtcmdRequestWithCallback( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_TIMED_OUT, pktStatus );
 }
 
