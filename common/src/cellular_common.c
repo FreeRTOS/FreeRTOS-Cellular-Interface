@@ -90,6 +90,9 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
                                            const CellularCommInterface_t * pCommInterface,
                                            const CellularTokenTable_t * pTokenTable );
 
+static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
+                                           _pPktioShutdownCallback_t shutdownCb );
+
 /*-----------------------------------------------------------*/
 
 #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
@@ -248,55 +251,45 @@ static CellularError_t libOpen( CellularContext_t * pContext )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    if( pContext == NULL )
+    configASSERT( pContext != NULL );
+
+    PlatformMutex_Lock( &pContext->libStatusMutex );
+
+    if( cellularStatus == CELLULAR_SUCCESS )
     {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        PlatformMutex_Lock( &pContext->libStatusMutex );
+        _Cellular_AtParseInit( pContext );
+        _Cellular_LockAtDataMutex( pContext );
+        _Cellular_InitAtData( pContext, 0 );
+        _Cellular_UnlockAtDataMutex( pContext );
+        _Cellular_SetShutdownCallback( pContext, _shutdownCallback );
+        pktStatus = _Cellular_PktHandlerInit( pContext );
 
-        if( ( pContext->bLibOpened == true ) || ( pContext->bLibClosing == true ) )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = CELLULAR_LIBRARY_ALREADY_OPEN;
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            _Cellular_AtParseInit( pContext );
-            _Cellular_LockAtDataMutex( pContext );
-            _Cellular_InitAtData( pContext, 0 );
-            _Cellular_UnlockAtDataMutex( pContext );
-            _Cellular_PktioSetShutdownCallback( pContext, _shutdownCallback );
-            pktStatus = _Cellular_PktHandlerInit( pContext );
-
-            if( pktStatus == CELLULAR_PKT_STATUS_OK )
-            {
-                pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
-
-                if( pktStatus != CELLULAR_PKT_STATUS_OK )
-                {
-                    CellularLogError( "pktio failed to initialize" );
-                    _Cellular_PktioShutdown( pContext );
-                    _Cellular_PktHandlerCleanup( pContext );
-                }
-            }
+            pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+                CellularLogError( "pktio failed to initialize" );
+                _Cellular_PktioShutdown( pContext );
+                _Cellular_PktHandlerCleanup( pContext );
             }
         }
 
-        if( cellularStatus == CELLULAR_SUCCESS )
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            /* CellularLib open finished. */
-            pContext->bLibOpened = true;
-            pContext->bLibShutdown = false;
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
-
-        PlatformMutex_Unlock( &pContext->libStatusMutex );
     }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* CellularLib open finished. */
+        pContext->bLibOpened = true;
+        pContext->bLibShutdown = false;
+    }
+
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
 
     return cellularStatus;
 }
@@ -308,44 +301,43 @@ static void libClose( CellularContext_t * pContext )
     bool bOpened = false;
     uint8_t i = 0;
 
-    if( pContext != NULL )
+    configASSERT( pContext != NULL );
+
+    PlatformMutex_Lock( &pContext->libStatusMutex );
+    bOpened = pContext->bLibOpened;
+
+    /* Indicate that CellularLib is in the process of closing. */
+    pContext->bLibClosing = true;
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
+
+    if( bOpened == true )
     {
-        PlatformMutex_Lock( &pContext->libStatusMutex );
-        bOpened = pContext->bLibOpened;
-
-        /* Indicate that CellularLib is in the process of closing. */
-        pContext->bLibClosing = true;
-        PlatformMutex_Unlock( &pContext->libStatusMutex );
-
-        if( bOpened == true )
-        {
-            /* Shut down the utilities. */
-            _Cellular_PktioShutdown( pContext );
-            _Cellular_PktHandlerCleanup( pContext );
-        }
-
-        PlatformMutex_Lock( &pContext->libStatusMutex );
-        pContext->bLibShutdown = false;
-        pContext->bLibOpened = false;
-        pContext->bLibClosing = false;
-
-        /* Remove all created sockets. */
-        for( i = 0; i < CELLULAR_NUM_SOCKET_MAX; i++ )
-        {
-            if( pContext->pSocketData[ i ] != NULL )
-            {
-                #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
-                    {
-                        Platform_Free( pContext->pSocketData[ i ] );
-                    }
-                #endif
-                pContext->pSocketData[ i ] = NULL;
-            }
-        }
-
-        PlatformMutex_Unlock( &pContext->libStatusMutex );
-        CellularLogDebug( "CELLULARLib closed" );
+        /* Shut down the utilities. */
+        _Cellular_PktioShutdown( pContext );
+        _Cellular_PktHandlerCleanup( pContext );
     }
+
+    PlatformMutex_Lock( &pContext->libStatusMutex );
+    pContext->bLibShutdown = false;
+    pContext->bLibOpened = false;
+    pContext->bLibClosing = false;
+
+    /* Remove all created sockets. */
+    for( i = 0; i < CELLULAR_NUM_SOCKET_MAX; i++ )
+    {
+        if( pContext->pSocketData[ i ] != NULL )
+        {
+            #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
+                {
+                    Platform_Free( pContext->pSocketData[ i ] );
+                }
+            #endif
+            pContext->pSocketData[ i ] = NULL;
+        }
+    }
+
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
+    CellularLogDebug( "CELLULARLib closed" );
 }
 
 /*-----------------------------------------------------------*/
@@ -404,19 +396,17 @@ static uint8_t _getSignalBars( int16_t compareValue,
         pSignalBarsTable = gsmSignalBarsTable;
         tableSize = ARRY_SIZE( gsmSignalBarsTable );
     }
-    else if( ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_LTE ) )
+
+    if( ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_LTE ) )
     {
         pSignalBarsTable = lteCATMSignalBarsTable;
         tableSize = ARRY_SIZE( lteCATMSignalBarsTable );
     }
-    else if( rat == CELLULAR_RAT_NBIOT )
+
+    if( rat == CELLULAR_RAT_NBIOT )
     {
         pSignalBarsTable = lteNBIotSignalBarsTable;
         tableSize = ARRY_SIZE( lteNBIotSignalBarsTable );
-    }
-    else
-    {
-        CellularLogDebug( "_getSignalBars : Invalid RAT " );
     }
 
     if( pSignalBarsTable != NULL )
@@ -467,6 +457,17 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
+                                           _pPktioShutdownCallback_t shutdownCb )
+{
+    if( pContext != NULL )
+    {
+        pContext->pPktioShutdownCB = shutdownCb;
+    }
 }
 
 /*-----------------------------------------------------------*/
@@ -656,13 +657,19 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                 break;
             }
         }
-    }
 
-    #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
+        if( socketId == CELLULAR_NUM_SOCKET_MAX )
         {
-            Platform_Free( socketHandle );
+            cellularStatus = CELLULAR_BAD_PARAMETER;
         }
-    #endif
+
+        #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
+            else
+            {
+                Platform_Free( socketHandle );
+            }
+        #endif
+    }
 
     taskEXIT_CRITICAL();
 
@@ -1124,6 +1131,30 @@ CellularError_t _Cellular_LibCleanup( CellularHandle_t cellularHandle )
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+/* This function is provided as common code to cellular module porting.
+ * Vendor may choose to use this function or use their implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation]. */
+CellularPktStatus_t _Cellular_AtcmdRequestWithCallback( CellularContext_t * pContext,
+                                                        CellularAtReq_t atReq )
+{
+    /* Parameters are checked in this function. */
+    return _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReq, PACKET_REQ_TIMEOUT_MS );
+}
+
+/*-----------------------------------------------------------*/
+
+/* This function is provided as common code to cellular module porting.
+ * Vendor may choose to use this function or use their implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation]. */
+CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t * pContext,
+                                                               CellularAtReq_t atReq,
+                                                               uint32_t timeoutMS )
+{
+    return _Cellular_PktHandler_AtcmdRequestWithCallback( pContext, atReq, timeoutMS );
 }
 
 /*-----------------------------------------------------------*/

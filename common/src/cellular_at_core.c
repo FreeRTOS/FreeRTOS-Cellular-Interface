@@ -31,6 +31,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "cellular_config.h"
+#include "cellular_config_defaults.h"
+
 #include "cellular_at_core.h"
 #include "cellular_internal.h"
 

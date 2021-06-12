@@ -54,32 +54,35 @@
 
 typedef void * PVOID;
 
-#define PlatformEventGroupHandle_t          uint16_t
-#define PlatformEventGroup_Delete           MockPlatformEventGroup_Delete
-#define PlatformEventGroup_ClearBits        MockPlatformEventGroup_ClearBits
-#define PlatformEventGroup_Create           MockPlatformEventGroup_Create
-#define PlatformEventGroup_GetBits          MockPlatformEventGroup_GetBits
-#define PlatformEventGroup_SetBits           
-#define PlatformEventGroup_SetBitsFromISR   MockPlatformEventGroup_SetBitsFromISR
-#define PlatformEventGroup_WaitBits         MockPlatformEventGroup_WaitBits
-#define PlatformEventGroup_EventBits        uint32_t
+#define PlatformEventGroupHandle_t           uint16_t
+#define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete
+#define PlatformEventGroup_ClearBits         MockPlatformEventGroup_ClearBits
+#define PlatformEventGroup_Create            MockPlatformEventGroup_Create
+#define PlatformEventGroup_GetBits           MockPlatformEventGroup_GetBits
+#define PlatformEventGroup_SetBits
+#define PlatformEventGroup_SetBitsFromISR    MockPlatformEventGroup_SetBitsFromISR
+#define PlatformEventGroup_WaitBits          MockPlatformEventGroup_WaitBits
+#define PlatformEventGroup_EventBits         uint32_t
 
-#define vQueueDelete                        MockvQueueDelete
-#define xQueueSend                          MockxQueueSend
-#define xQueueReceive                       MockxQueueReceive
-#define xQueueCreate                        MockxQueueCreate
+#define vQueueDelete                         MockvQueueDelete
+#define xQueueSend                           MockxQueueSend
+#define xQueueReceive                        MockxQueueReceive
+#define xQueueCreate                         MockxQueueCreate
 
-#define PlatformMutex_Create                MockPlatformMutex_Create
-#define PlatformMutex_Destroy               MockPlatformMutex_Destroy
-#define PlatformMutex_Lock                  MockPlatformMutex_Lock
-#define PlatformMutex_TryLock               MockPlatformMutex_TryLock
-#define PlatformMutex_Unlock                MockPlatformMutex_Unlock
+#define PlatformMutex_Create                 MockPlatformMutex_Create
+#define PlatformMutex_Destroy                MockPlatformMutex_Destroy
+#define PlatformMutex_Lock                   MockPlatformMutex_Lock
+#define PlatformMutex_TryLock                MockPlatformMutex_TryLock
+#define PlatformMutex_Unlock                 MockPlatformMutex_Unlock
 
-#define pdFALSE ( 0x0UL )
-#define pdTRUE  ( 0x1UL )
-#define pdPASS  ( 0x1UL )
+#define taskENTER_CRITICAL()    PVOID
+#define taskEXIT_CRITICAL()     PVOID
 
-#define PlatformTickType                    uint32_t
+#define pdFALSE             ( 0x0 )
+#define pdTRUE              ( 0x1 )
+#define pdPASS              ( 0x1 )
+
+#define PlatformTickType    uint32_t
 
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
@@ -113,10 +116,10 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
  * Items are queued by copy, not reference.  See the following link for the
  * rationale: https://www.FreeRTOS.org/Embedded-RTOS-Queues.html
  */
-struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+struct QueueDefinition  /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
-    int8_t * pcHead;           /*< Points to the beginning of the queue storage area. */
-    int8_t * pcWriteTo;        /*< Points to the free next place in the storage area. */
+    int8_t * pcHead;    /*< Points to the beginning of the queue storage area. */
+    int8_t * pcWriteTo; /*< Points to the free next place in the storage area. */
 };
 
 /**
@@ -125,7 +128,7 @@ struct QueueDefinition /* The old naming convention is used to prevent breaking 
  * xQueueSend(), xQueueReceive(), etc.
  */
 struct QueueDefinition; /* Using old naming convention so as not to break kernel aware debuggers. */
-typedef struct QueueDefinition   * QueueHandle_t;
+typedef struct QueueDefinition * QueueHandle_t;
 
 /*
  * In line with software engineering best practice, especially when supplying a
@@ -171,7 +174,7 @@ void PlatformMutex_Destroy( PlatformMutex_t * pMutex );
 void PlatformMutex_Lock( PlatformMutex_t * pMutex );
 bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
 void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
-
+void * mock_malloc( size_t size );
 
 /*-----------------------------------------------------------*/
 
@@ -184,15 +187,15 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
  *
  */
 
-#define Platform_Malloc    malloc
+#define Platform_Malloc    mock_malloc
 #define Platform_Free      free
 
-#if( configUSE_16_BIT_TICKS == 1 )
-	typedef uint16_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffff
+#if ( configUSE_16_BIT_TICKS == 1 )
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
 #else
-	typedef uint32_t TickType_t;
-	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+    typedef uint32_t TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
 #endif
 
 #endif /* __CELLULAR_PLATFORM_H__ */

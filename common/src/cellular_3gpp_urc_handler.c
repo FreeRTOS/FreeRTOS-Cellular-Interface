@@ -97,12 +97,8 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
     CellularNetworkRegistrationStatus_t regStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
 
-    if( pToken == NULL )
-    {
-        packetStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
-    }
-    else if( ( regType != CELLULAR_REG_TYPE_CREG ) && ( regType != CELLULAR_REG_TYPE_CEREG ) &&
-             ( regType != CELLULAR_REG_TYPE_CGREG ) )
+    if( ( regType != CELLULAR_REG_TYPE_CREG ) && ( regType != CELLULAR_REG_TYPE_CEREG ) &&
+        ( regType != CELLULAR_REG_TYPE_CGREG ) )
     {
         packetStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
@@ -610,8 +606,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         }
 
         /* If Registration Status changed, generate the event. */
-        if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) &&
-            ( _Cellular_RegEventStatus( pLibAtData, regType, prevCsRegStatus, prevPsRegStatus ) == true ) )
+        if( ( _Cellular_RegEventStatus( pLibAtData, regType, prevCsRegStatus, prevPsRegStatus ) == true ) )
         {
             _regStatusGenerateEvent( pContext, regType, &serviceStatus, pLibAtData );
         }
@@ -627,8 +622,8 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-void Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
-                                    char * pInputLine )
+CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
+                                                   char * pInputLine )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
@@ -644,6 +639,8 @@ void Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 
         _Cellular_UnlockAtDataMutex( pContext );
     }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -651,8 +648,8 @@ void Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 /* This function is provided as common code to cellular module porting.
  * Vendor may choose to use this function or use their implementation. */
 /* coverity[misra_c_2012_rule_8_7_violation]. */
-void Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
-                                     char * pInputLine )
+CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
+                                                    char * pInputLine )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
@@ -668,12 +665,14 @@ void Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
 
         _Cellular_UnlockAtDataMutex( pContext );
     }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
 
-void Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
-                                     char * pInputLine )
+CellularPktStatus_t Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
+                                                    char * pInputLine )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
@@ -689,6 +688,8 @@ void Cellular_CommonUrcProcessCereg( CellularContext_t * pContext,
 
         _Cellular_UnlockAtDataMutex( pContext );
     }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
