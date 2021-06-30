@@ -55,14 +55,40 @@ CellularError_t Cellular_CommonSocketRegisterDataReadyCallback( CellularHandle_t
 void harness()
 {
     CellularHandle_t pHandle = NULL;
-    CellularSocketHandle_t socketHandle;
     CellularSocketDataReadyCallback_t dataReadyCallback;
     void * pCallbackContext;
+    uint8_t CellularSocketPdnContextId;
+    CellularSocketDomain_t cellularSocketDomain;
+    CellularSocketType_t cellularSocketType;
+    CellularSocketProtocol_t cellularSocketProtocol;
+    CellularSocketHandle_t pTcpSocket;
+    CellularError_t socketStatus = CELLULAR_INVALID_HANDLE;
+    CellularContext_t * pContext;
+    bool bLibOpened;
 
     /****************************************************************
     * Initialize the member of Cellular_CommonInit.
     ****************************************************************/
     Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface );
 
-    Cellular_CommonSocketRegisterDataReadyCallback( pHandle, socketHandle, dataReadyCallback, pCallbackContext );
+    if( ( pHandle != NULL ) && ensure_memory_is_valid( pHandle, sizeof( CellularContext_t ) ) )
+    {
+        /* Create a new TCP socket. */
+        socketStatus = Cellular_CommonCreateSocket( pHandle,
+                                                    CellularSocketPdnContextId,
+                                                    cellularSocketDomain,
+                                                    cellularSocketType,
+                                                    cellularSocketProtocol,
+                                                    &pTcpSocket );
+
+        if( ( pTcpSocket == NULL ) ||
+            ( ( socketStatus == CELLULAR_SUCCESS ) &&
+              ( pTcpSocket != NULL ) &&
+              ensure_memory_is_valid( pTcpSocket, sizeof( struct CellularSocketContext ) ) ) )
+        {
+            pContext = ( CellularContext_t * ) pHandle;
+            pContext->bLibOpened = bLibOpened;
+            Cellular_CommonSocketRegisterDataReadyCallback( pHandle, pTcpSocket, dataReadyCallback, pCallbackContext );
+        }
+    }
 }

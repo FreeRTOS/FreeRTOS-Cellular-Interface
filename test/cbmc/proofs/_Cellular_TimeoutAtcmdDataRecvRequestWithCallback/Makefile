@@ -29,6 +29,15 @@ INCLUDES +=
 
 REMOVE_FUNCTION_BODY += _Cellular_TranslatePktStatus
 
+# This value was experimentally chosen to provide 100% coverage
+# without tripping unwinding assertions and without exhausting memory.
+CBMC_MAX_BUFSIZE=128
+
+DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
+
+UNWINDSET += strlen.0:$(CBMC_MAX_BUFSIZE)
+UNWINDSET += __builtin___strncpy_chk.0:$(CBMC_MAX_BUFSIZE)
+
 PROJECT_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c

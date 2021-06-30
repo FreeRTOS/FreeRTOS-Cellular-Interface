@@ -39,7 +39,7 @@
 #include "cellular_common_internal.h"
 #include "cellular_common_api.h"
 
-#define ensure_memory_is_valid( px, length )    ( px != NULL ) && __CPROVER_w_ok( ( px ), length )
+#define ensure_memory_is_valid( px, length )    ( px != NULL ) && __CPROVER_w_ok( ( px ), length ) && __CPROVER_r_ok( ( px ), length )
 
 /* Extern the com interface in comm_if_windows.c */
 extern CellularCommInterface_t CellularCommInterface;
@@ -61,15 +61,61 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularC
 void harness()
 {
     CellularHandle_t pHandle = NULL;
-    CellularAtReq_t atReq;
-    CellularAtDataReq_t dataReq;
+    uint16_t atCmdLen;
+    uint16_t atRspCmdLen;
+    uint16_t atReqDataLen;
+    char * pAtRspPrefix;
+    char * pAtCmd;
+    CellularATCommandType_t atCmdType;
+    CellularATCommandResponseReceivedCallback_t respCallback;
+    void * pData;
+    uint32_t atDataReqDataLen;
+    uint8_t * pAtDataReqData = ( uint8_t * ) safeMalloc( atDataReqDataLen );
+    uint32_t * pSentDataLength = safeMalloc( sizeof( uint32_t ) );
+    uint32_t endPatternLen;
+    uint8_t * pEndPattern = ( uint8_t * ) safeMalloc( endPatternLen );
+
+    __CPROVER_assume( atCmdLen > 0 && atCmdLen < CBMC_MAX_BUFSIZE );
+    __CPROVER_assume( atRspCmdLen > 0 && atRspCmdLen < CBMC_MAX_BUFSIZE );
+
+    pAtCmd = ( char * ) safeMalloc( atCmdLen );
+
+    if( pAtCmd )
+    {
+        __CPROVER_assume( ensure_memory_is_valid( pAtCmd, atCmdLen ) );
+        pAtCmd[ atCmdLen - 1 ] = '\0';
+    }
+
+    pAtRspPrefix = ( char * ) safeMalloc( atRspCmdLen );
+
+    if( pAtRspPrefix )
+    {
+        __CPROVER_assume( ensure_memory_is_valid( pAtRspPrefix, atRspCmdLen ) );
+        pAtRspPrefix[ atRspCmdLen - 1 ] = '\0';
+    }
+
+    CellularAtReq_t atReq =
+    {
+        pAtCmd,
+        atCmdType,
+        pAtRspPrefix,
+        respCallback,
+        pData,
+        atReqDataLen,
+    };
+
+    CellularAtDataReq_t dataReq =
+    {
+        pAtDataReqData,
+        atDataReqDataLen,
+        pSentDataLength,
+        pEndPattern,
+        endPatternLen
+    };
     uint32_t atTimeoutMS;
     uint32_t dataTimeoutMS;
 
-    /****************************************************************
-    * Initialize the member of Cellular_CommonInit.
-    ****************************************************************/
-    Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface );
+    pHandle = ( CellularContext_t * ) safeMalloc( sizeof( CellularContext_t ) );
 
     if( ( pHandle == NULL ) ||
         ( ( pHandle != NULL ) && ensure_memory_is_valid( pHandle, sizeof( CellularContext_t ) ) ) )

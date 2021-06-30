@@ -35,7 +35,7 @@
 #include "cellular_common_internal.h"
 #include "cellular_common_api.h"
 
-#define ensure_memory_is_valid( px, length )    ( px != NULL ) && __CPROVER_w_ok( ( px ), length )
+#define ensure_memory_is_valid( px, length )    ( px != NULL ) && __CPROVER_w_ok( ( px ), length ) && __CPROVER_r_ok( ( px ), length )
 
 /* Extern the com interface in comm_if_windows.c */
 extern CellularCommInterface_t CellularCommInterface;
@@ -55,14 +55,40 @@ CellularError_t Cellular_CommonSocketRegisterSocketOpenCallback( CellularHandle_
 void harness()
 {
     CellularHandle_t pHandle = NULL;
-    CellularSocketHandle_t socketHandle;
     CellularSocketOpenCallback_t socketOpenCallback;
     void * pCallbackContext;
+    uint8_t CellularSocketPdnContextId;
+    CellularSocketDomain_t cellularSocketDomain;
+    CellularSocketType_t cellularSocketType;
+    CellularSocketProtocol_t cellularSocketProtocol;
+    CellularSocketHandle_t pTcpSocket;
+    CellularError_t socketStatus = CELLULAR_INVALID_HANDLE;
+    CellularContext_t * pContext;
+    bool bLibOpened;
 
     /****************************************************************
     * Initialize the member of Cellular_CommonInit.
     ****************************************************************/
     Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface );
 
-    Cellular_CommonSocketRegisterSocketOpenCallback( pHandle, socketHandle, socketOpenCallback, pCallbackContext );
+    if( ( pHandle != NULL ) && ensure_memory_is_valid( pHandle, sizeof( CellularContext_t ) ) )
+    {
+        /* Create a new TCP socket. */
+        socketStatus = Cellular_CommonCreateSocket( pHandle,
+                                                    CellularSocketPdnContextId,
+                                                    cellularSocketDomain,
+                                                    cellularSocketType,
+                                                    cellularSocketProtocol,
+                                                    &pTcpSocket );
+
+        if( ( pTcpSocket == NULL ) ||
+            ( ( socketStatus == CELLULAR_SUCCESS ) &&
+              ( pTcpSocket != NULL ) &&
+              ensure_memory_is_valid( pTcpSocket, sizeof( struct CellularSocketContext ) ) ) )
+        {
+            pContext = ( CellularContext_t * ) pHandle;
+            pContext->bLibOpened = bLibOpened;
+            Cellular_CommonSocketRegisterSocketOpenCallback( pHandle, pTcpSocket, socketOpenCallback, pCallbackContext );
+        }
+    }
 }

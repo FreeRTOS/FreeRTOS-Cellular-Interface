@@ -54,6 +54,8 @@ void harness()
 {
     CellularHandle_t pHandle = NULL;
     uint32_t inputLength;
+
+    __CPROVER_assume( inputLength < CBMC_MAX_BUFSIZE );
     char * pInputLine = ( char * ) safeMalloc( sizeof( inputLength ) );
 
     /****************************************************************
