@@ -27,6 +27,8 @@
 #ifndef __CELLULAR_PKTIO_INTERNAL_H__
 #define __CELLULAR_PKTIO_INTERNAL_H__
 
+#include "cellular_config.h"
+#include "cellular_config_defaults.h"
 #include "cellular_types.h"
 
 /*-----------------------------------------------------------*/
@@ -85,18 +87,6 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  */
 void _Cellular_PktioShutdown( CellularContext_t * pContext );
-
-/**
- * @brief Packet IO shutdown callback set function.
- *
- * This function set the shutdown callback set function.
- * Once the packet IO thread is shutdown, the packet IO thread will call this function.
- *
- * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] shutdownCb The shutdown callback function.
- */
-void _Cellular_PktioSetShutdownCallback( CellularContext_t * pContext,
-                                         _pPktioShutdownCallback_t shutdownCb );
 
 /**
  * @brief Send AT command function.

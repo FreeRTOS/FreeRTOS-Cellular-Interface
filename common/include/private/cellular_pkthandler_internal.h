@@ -26,7 +26,8 @@
 #ifndef __CELLULAR_PKTHANDLER_INTERNAL_H__
 #define __CELLULAR_PKTHANDLER_INTERNAL_H__
 
-
+#include "cellular_config.h"
+#include "cellular_config_defaults.h"
 #include "cellular_types.h"
 #include "cellular_common.h"
 #include "cellular_pktio_internal.h"
@@ -103,10 +104,13 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext );
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] atRespType The AT response type from packet IO.
  * @param[in] pBuf The input data buffer from packet IO.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-void _Cellular_HandlePacket( CellularContext_t * pContext,
-                             _atRespType_t atRespType,
-                             const void * pBuf );
+CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
+                                            _atRespType_t atRespType,
+                                            const void * pBuf );
 
 /**
  * @brief The URC handler init function.
@@ -114,7 +118,25 @@ void _Cellular_HandlePacket( CellularContext_t * pContext,
  * This function setup the URC handler table query function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-void _Cellular_AtParseInit( const CellularContext_t * pContext );
+CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext );
+
+
+/**
+ * @brief Wrapper for sending the AT command to cellular modem.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] atReq The AT command data structure with send command response callback.
+ * @param[in] timeoutMS The timeout value to wait for the response from cellular modem.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularContext_t * pContext,
+                                                                   CellularAtReq_t atReq,
+                                                                   uint32_t timeoutMS );
 
 #endif /* __CELLULAR_PKTHANDLER_INTERNAL_H__ */
