@@ -36,6 +36,14 @@ DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
 
 UNWINDSET += __builtin___strcpy_chk.0:$(CBMC_MAX_BUFSIZE)
 
+# This value was experimentally chosen to provide 100% coverage
+# without tripping unwinding assertions and without exhausting memory.
+CBMC_MAX_BUFSIZE=128
+
+DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
+
+UNWINDSET += __builtin___strcpy_chk.0:$(CBMC_MAX_BUFSIZE)
+
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
