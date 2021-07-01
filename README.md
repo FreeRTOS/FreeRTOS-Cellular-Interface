@@ -14,7 +14,7 @@
 
 The FreeRTOS Cellular Library exposes the capability of a few popular cellular modems through a uniform API. Currently, this Labs project contains libraries for these three cellular modems.
 
-* [Quectel BG96](https://www.quectel.com/product/bg96.htm)
+* [Quectel BG96](https://www.quectel.com/product/lte-bg96-cat-m1-nb1-egprs/)
 * [Sierra Wireless HL7802](https://www.sierrawireless.com/products-and-solutions/embedded-solutions/products/hl7802/)
 * [U-Blox Sara-R4](https://www.u-blox.com/en/product/sara-r4-series)
 
