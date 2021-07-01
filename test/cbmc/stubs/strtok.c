@@ -21,8 +21,8 @@
  */
 
 /**
- * @file strncpy.c
- * @brief Creates a stub for strncpy. This stub checks if, for the input copy
+ * @file strtok.c
+ * @brief Creates a stub for strtok. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
@@ -33,23 +33,28 @@
     #define __has_builtin( x )    0
 #endif
 
-#if __has_builtin( __builtin___strncpy_chk )
-    void * __builtin___strncpy_chk( void * dest,
-                                    const void * src,
-                                    size_t n,
-                                    size_t os )
+#if __has_builtin( __builtin___strtok )
+    char * __builtin___strtok (char *s, const char *delim)
     {
-        __CPROVER_assert( __CPROVER_w_ok( dest, n ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( src, n ), "read" );
-        return dest;
+        if( (__CPROVER_w_ok( s, 1 ), "write") && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        {
+            while( *s != '\0')
+            {
+                if((int)*s == c )
+                    return s;
+                if( (__CPROVER_w_ok( s + 1, 1 ), "write") && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                {
+                    s++;
+                }
+            }
+            return NULL;
+        }
     }
 #else
-    void * strncpy( void * dest,
-                    const void * src,
-                    size_t n )
+    char * strtok (char *s, const char *delim)
     {
-        __CPROVER_assert( __CPROVER_w_ok( dest, n ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( src, n ), "read" );
-        return dest;
+        __CPROVER_assert( __CPROVER_w_ok( s, strlen(s) ), "write" );
+        __CPROVER_assert( __CPROVER_r_ok( s, strlen(s) ), "read" );
+        return s;
     }
-#endif /* if __has_builtin( __builtin___strncpy_chk ) */
+#endif /* if __has_builtin( __builtin___strchr ) */

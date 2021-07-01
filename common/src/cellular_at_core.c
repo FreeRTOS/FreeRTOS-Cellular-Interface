@@ -253,7 +253,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if( ppString == NULL )
+    if( ppString == NULL || *ppString == NULL)
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -292,6 +292,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     char * p = NULL;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
+    uint32_t stringLen = 0;
 
     if( pString == NULL )
     {
@@ -310,20 +311,25 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        p = &pString[ strlen( pString ) ];
-
-        do
+        stringLen = strlen( pString );
+        /* This API intend to remove the trailing space, and this should be functional 
+         * when the string length is greater than 2. */
+        if( stringLen > 2 )
         {
-            --p;
-            /* isspace is a standard library function and we cannot control it. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
-            /* coverity[misra_c_2012_rule_10_1_violation] */
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_18_4_violation] */
-            /* coverity[misra_c_2012_rule_21_13_violation] */
-        } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0 ) );
+            p = &pString[ stringLen ];
 
-        p[ 1 ] = '\0';
+            do
+            {
+                --p;
+                /* isspace is a standard library function and we cannot control it. */
+                /* coverity[misra_c_2012_directive_4_6_violation] */
+                /* coverity[misra_c_2012_rule_10_1_violation] */
+                /* coverity[misra_c_2012_rule_10_4_violation] */
+                /* coverity[misra_c_2012_rule_18_4_violation] */
+                /* coverity[misra_c_2012_rule_21_13_violation] */
+            } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0 ) );
+            p[ 1 ] = '\0';
+        }
     }
 
     return atStatus;
@@ -388,8 +394,9 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     char * p = NULL;
+    uint32_t stringLen = 0;
 
-    if( ppString == NULL )
+    if( ppString == NULL || *ppString == NULL )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -406,21 +413,26 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        if( **ppString == '\"' )
-        {
-            ( *ppString )++;
-        }
+        stringLen = strlen( *ppString );
 
-        p = *ppString;
-
-        while( *p != '\0' )
+        if( stringLen > 2 )
         {
-            p++;
-        }
+            if( **ppString == '\"' )
+            {
+                ( *ppString )++;
+            }
 
-        if( *--p == '\"' )
-        {
-            *p = '\0';
+            p = *ppString;
+
+            while( *p != '\0' )
+            {
+                p++;
+            }
+
+            if( *--p == '\"' )
+            {
+                *p = '\0';
+            }
         }
     }
 
@@ -505,7 +517,8 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
     uint16_t tokStrLen = 0, dataStrlen = 0;
     char * tok = NULL;
 
-    if( ( ppString == NULL ) || ( pDelimiter == NULL ) || ( ppTokOutput == NULL ) )
+    if( ( ppString == NULL ) || ( pDelimiter == NULL ) ||
+        ( ppTokOutput == NULL ) || ( * ppString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -624,9 +637,18 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
 
         for( i = 0; i < strHexLen; i++ )
         {
-            firstNibble = _charToNibble( *p ) << 4;
+            firstNibble = _charToNibble( *p );
             secondNibble = _charToNibble( p[ 1 ] );
-            ( pHexData )[ i ] = firstNibble | secondNibble;
+            if( firstNibble == 0xFFU)
+            {
+                ( pHexData )[ i ] = firstNibble;
+            }
+            else
+            {
+                firstNibble = firstNibble << 4;
+                ( pHexData )[ i ] = firstNibble | secondNibble;
+            }
+
             p = &p[ 2 ];
         }
     }
@@ -768,10 +790,10 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
 
 CellularATError_t Cellular_ATStrtoi( const char * pStr,
                                      int32_t base,
-                                     int32_t * pResult )
+                                     long * pResult )
 {
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
-    int32_t retStrtol = 0;
+    long retStrtol = 0;
     char * pEndStr = NULL;
 
     if( ( pStr == NULL ) || ( pResult == NULL ) )
@@ -810,7 +832,8 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
         /* coverity[misra_c_2012_rule_22_9_violation] */
         retStrtol = strtol( pStr, &pEndStr, base );
 
-        if( *pEndStr == '\0' )
+        /* Need to check if the pEndStr is NULL or not to prevent dereference error. */
+        if( pEndStr != NULL && *pEndStr == '\0' )
         {
             *pResult = retStrtol;
         }
