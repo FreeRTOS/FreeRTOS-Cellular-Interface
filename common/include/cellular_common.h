@@ -50,7 +50,7 @@ typedef struct CellularAtReq
     const char * pAtRspPrefix;
     CellularATCommandResponseReceivedCallback_t respCallback;
     void * pData;
-    uint32_t dataLen;
+    uint16_t dataLen;
 } CellularAtReq_t;
 
 /**
