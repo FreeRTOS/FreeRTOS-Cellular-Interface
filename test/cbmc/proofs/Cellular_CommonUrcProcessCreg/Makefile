@@ -26,6 +26,7 @@ PROOF_UID = Cellular_CommonUrcProcessCreg
 
 DEFINES +=
 INCLUDES +=
+REMOVE_FUNCTION_BODY += _Cellular_ParseRegStatus
 
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
