@@ -56,12 +56,18 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString );
 void harness()
 {
     uint32_t stringLength;
-    __CPROVER_assume( stringLength < CELLULAR_AT_MAX_STRING_SIZE + 1 );
-    char * pString = ( char * )safeMalloc( stringLength );
-    char **ppString = nondet_bool() ? NULL : &pString;
 
-    if( pString == NULL || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLength ) ) )
+    __CPROVER_assume( stringLength < CELLULAR_AT_MAX_STRING_SIZE + 1 );
+    char * pString = ( char * ) safeMalloc( stringLength );
+    char ** ppString = nondet_bool() ? NULL : &pString;
+
+    if( ( pString == NULL ) || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLength ) ) )
     {
+        if( pString != NULL )
+        {
+            pString[ stringLength - 1 ] = '\0';
+        }
+
         Cellular_ATRemovePrefix( ppString );
     }
 }

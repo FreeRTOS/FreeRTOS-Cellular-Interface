@@ -28,7 +28,7 @@ DEFINES +=
 INCLUDES +=
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
-CBMC_MAX_BUFSIZE=256
+CBMC_MAX_BUFSIZE=128
 
 DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
 

@@ -1754,7 +1754,7 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * )Platform_Malloc( sizeof( cellularOperatorInfo_t ) );
+    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) Platform_Malloc( sizeof( cellularOperatorInfo_t ) );
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );

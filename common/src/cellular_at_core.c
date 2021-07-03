@@ -209,7 +209,7 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if( ppString == NULL )
+    if( ( ppString == NULL ) || ( *ppString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -253,7 +253,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if( ppString == NULL || *ppString == NULL)
+    if( ( ppString == NULL ) || ( *ppString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -312,7 +312,8 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         stringLen = strlen( pString );
-        /* This API intend to remove the trailing space, and this should be functional 
+
+        /* This API intend to remove the trailing space, and this should be functional
          * when the string length is greater than 2. */
         if( stringLen > 2 )
         {
@@ -328,6 +329,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
                 /* coverity[misra_c_2012_rule_18_4_violation] */
                 /* coverity[misra_c_2012_rule_21_13_violation] */
             } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0 ) );
+
             p[ 1 ] = '\0';
         }
     }
@@ -396,7 +398,7 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
     char * p = NULL;
     uint32_t stringLen = 0;
 
-    if( ppString == NULL || *ppString == NULL )
+    if( ( ppString == NULL ) || ( *ppString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -518,7 +520,7 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
     char * tok = NULL;
 
     if( ( ppString == NULL ) || ( pDelimiter == NULL ) ||
-        ( ppTokOutput == NULL ) || ( * ppString == NULL ) )
+        ( ppTokOutput == NULL ) || ( *ppString == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
@@ -639,7 +641,8 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
         {
             firstNibble = _charToNibble( *p );
             secondNibble = _charToNibble( p[ 1 ] );
-            if( firstNibble == 0xFFU)
+
+            if( firstNibble == 0xFFU )
             {
                 ( pHexData )[ i ] = firstNibble;
             }
@@ -833,7 +836,7 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
         retStrtol = strtol( pStr, &pEndStr, base );
 
         /* Need to check if the pEndStr is NULL or not to prevent dereference error. */
-        if( pEndStr != NULL && *pEndStr == '\0' )
+        if( ( pEndStr != NULL ) && ( *pEndStr == '\0' ) )
         {
             *pResult = retStrtol;
         }
