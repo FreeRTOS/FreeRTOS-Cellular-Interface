@@ -24,7 +24,7 @@ HARNESS_ENTRY=harness
 HARNESS_FILE=Cellular_ATIsStrDigit_harness
 PROOF_UID = Cellular_ATIsStrDigit
 
-DEFINES +=
+DEFINES += -D__NO_CTYPE
 INCLUDES +=
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
