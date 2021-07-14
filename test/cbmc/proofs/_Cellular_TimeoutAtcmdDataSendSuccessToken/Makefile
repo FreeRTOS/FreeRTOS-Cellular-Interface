@@ -37,7 +37,5 @@ PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common_api.c
 PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_pkthandler.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_pktio.c
 
 include ../Makefile.common

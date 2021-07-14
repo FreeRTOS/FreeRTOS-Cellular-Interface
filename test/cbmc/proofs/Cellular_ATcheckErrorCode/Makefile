@@ -21,36 +21,28 @@
 
 
 HARNESS_ENTRY=harness
-HARNESS_FILE=Cellular_CommonUrcProcessCgreg_harness
-PROOF_UID = Cellular_CommonUrcProcessCgreg
+HARNESS_FILE=Cellular_ATcheckErrorCode_harness
+PROOF_UID = Cellular_ATcheckErrorCode
 
 DEFINES +=
 INCLUDES +=
-REMOVE_FUNCTION_BODY += _Cellular_ParseRegStatus
-
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
-CBMC_MAX_BUFSIZE=128
+CBMC_MAX_BUFSIZE=256
 
-DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
+KEY_LIST_SIZE=16
 
-UNWINDSET += __builtin___strcpy_chk.0:$(CBMC_MAX_BUFSIZE)
+DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE) -DKEY_LIST_SIZE=$(KEY_LIST_SIZE)
 
-# This value was experimentally chosen to provide 100% coverage
-# without tripping unwinding assertions and without exhausting memory.
-CBMC_MAX_BUFSIZE=128
+UNWINDSET += Cellular_ATcheckErrorCode.0:$(CBMC_MAX_BUFSIZE)
 
-DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
-
-UNWINDSET += __builtin___strcpy_chk.0:$(CBMC_MAX_BUFSIZE)
+# This API has its own CBMC test case.
+REMOVE_FUNCTION_BODY += Cellular_ATStrStartWith
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
-PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strncpy.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common_api.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_3gpp_urc_handler.c
-
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strchr.c
+PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_at_core.c
 
 include ../Makefile.common
