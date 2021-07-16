@@ -444,16 +444,17 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
         CellularLogError( "All the functions in the CellularCommInterface should be valid." );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
-    else
-    {
-        if( ( pTokenTable == NULL ) || ( pTokenTable->pCellularUrcHandlerTable == NULL ) ||
+    else if( ( pTokenTable == NULL ) || ( pTokenTable->pCellularUrcHandlerTable == NULL ) ||
             ( pTokenTable->pCellularSrcTokenErrorTable == NULL ) ||
             ( pTokenTable->pCellularSrcTokenSuccessTable == NULL ) ||
             ( pTokenTable->pCellularUrcTokenWoPrefixTable == NULL ) )
-        {
-            CellularLogError( "All the token tables in the CellularTokenTable should be valid." );
-            cellularStatus = CELLULAR_BAD_PARAMETER;
-        }
+    {
+        CellularLogError( "All the token tables in the CellularTokenTable should be valid." );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else
+    {
+        /* Empty Else MISRA 15.7 */
     }
 
     return cellularStatus;

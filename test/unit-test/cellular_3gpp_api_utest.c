@@ -86,6 +86,7 @@ static int simLockStateTestCase = 0;
 static int psmSettingsTimerIndex = 0;
 static int psmSettingsTimerError = 0;
 static int parseEidrxTokenOutOfRange = 0;
+static int mallocAllocFail = 0;
 
 /* ============================   UNITY FIXTURES ============================ */
 
@@ -103,6 +104,7 @@ void setUp()
     psmSettingsTimerIndex = 0;
     psmSettingsTimerError = 0;
     parseEidrxTokenOutOfRange = 0;
+    mallocAllocFail = 0;
 }
 
 /* Called after each test method. */
@@ -1282,6 +1284,16 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
     return atCoreStatus;
 }
 
+void * mock_malloc( size_t size )
+{
+    if( mallocAllocFail == 1 )
+    {
+        return NULL;
+    }
+
+    return malloc( size );
+}
+
 /* ========================================================================== */
 
 /**
@@ -1609,6 +1621,21 @@ void test_Cellular_CommonGetRegisteredNetwork_Bad_Parameter( void )
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that bad parameter case Cellular_CommonGetRegisteredNetwork to return CELLULAR_NO_MEMORY.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularHandle_t cellularHandle;
+    CellularPlmnInfo_t networkInfo;
+
+    mallocAllocFail = 1;
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
 }
 
 /**

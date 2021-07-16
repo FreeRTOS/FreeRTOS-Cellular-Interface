@@ -79,6 +79,11 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
+void * mock_malloc( size_t size )
+{
+    return malloc( size );
+}
+
 void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
 {
     pMutex->created = false;

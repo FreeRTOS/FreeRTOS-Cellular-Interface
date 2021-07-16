@@ -1754,7 +1754,7 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    cellularOperatorInfo_t operatorInfo = { 0 };
+    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) Platform_Malloc( sizeof( cellularOperatorInfo_t ) );
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -1768,18 +1768,23 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
         CellularLogError( "Cellular_CommonGetRegisteredNetwork : Bad parameter" );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
+    else if( pOperatorInfo == NULL )
+    {
+        CellularLogError( "Cellular_CommonGetRegisteredNetwork : Bad parameter" );
+        cellularStatus = CELLULAR_NO_MEMORY;
+    }
     else
     {
-        cellularStatus = atcmdUpdateMccMnc( pContext, &operatorInfo );
+        cellularStatus = atcmdUpdateMccMnc( pContext, pOperatorInfo );
     }
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        if( operatorInfo.rat != CELLULAR_RAT_INVALID )
+        if( pOperatorInfo->rat != CELLULAR_RAT_INVALID )
         {
-            ( void ) memcpy( pNetworkInfo->mcc, operatorInfo.plmnInfo.mcc, CELLULAR_MCC_MAX_SIZE );
+            ( void ) memcpy( pNetworkInfo->mcc, pOperatorInfo->plmnInfo.mcc, CELLULAR_MCC_MAX_SIZE );
             pNetworkInfo->mcc[ CELLULAR_MCC_MAX_SIZE ] = '\0';
-            ( void ) memcpy( pNetworkInfo->mnc, operatorInfo.plmnInfo.mnc, CELLULAR_MNC_MAX_SIZE );
+            ( void ) memcpy( pNetworkInfo->mnc, pOperatorInfo->plmnInfo.mnc, CELLULAR_MNC_MAX_SIZE );
             pNetworkInfo->mnc[ CELLULAR_MNC_MAX_SIZE ] = '\0';
         }
         else
@@ -1787,6 +1792,8 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
             cellularStatus = CELLULAR_UNKNOWN;
         }
     }
+
+    Platform_Free( pOperatorInfo );
 
     return cellularStatus;
 }
