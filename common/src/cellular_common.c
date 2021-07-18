@@ -605,7 +605,8 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                                             CellularSocketHandle_t socketHandle )
 {
@@ -774,7 +775,8 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
                                             void ** ppModuleContext )
 {
@@ -793,7 +795,8 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
                                              CellularSignalInfo_t * pSignalInfo )
 {
@@ -826,7 +829,8 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_GetCurrentRat( CellularContext_t * pContext,
                                          CellularRat_t * pRat )
 {
