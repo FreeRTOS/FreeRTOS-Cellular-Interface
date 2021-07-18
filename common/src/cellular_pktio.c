@@ -33,6 +33,7 @@
 /* Standard includes. */
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "cellular_platform.h"
 #include "cellular_types.h"
@@ -111,7 +112,7 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
 static uint32_t _convertCharPtrDistance( const char * pEndPtr,
                                          const char * pStartPtr )
 {
-    int32_t ptrDistance = ( pEndPtr - pStartPtr );
+    int32_t ptrDistance = ( int32_t ) ( pEndPtr - pStartPtr );
     uint32_t retValue = 0;
 
     if( ( ptrDistance >= 0 ) && ( ptrDistance < INT32_MAX ) )
@@ -175,7 +176,7 @@ static void _saveATData( char * pLine,
                          CellularATCommandResponse_t * pResp )
 {
     CellularLogDebug( "Save [%s] %d AT data to pResp", pLine, strlen( pLine ) );
-    _saveData( pLine, pResp, strlen( pLine ) + 1U );
+    _saveData( pLine, pResp, ( uint32_t ) ( strlen( pLine ) + 1U ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -186,7 +187,8 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
                                                          const char * pRespPrefix )
 {
     CellularPktStatus_t pkStatus = CELLULAR_PKT_STATUS_PENDING_DATA;
-    bool result = true;
+
+    ( void ) pRespPrefix;
 
     switch( atType )
     {
@@ -239,7 +241,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
         case CELLULAR_AT_MULTI_DATA_WO_PREFIX:
         default:
             _saveATData( pLine, pResp );
-            pkStatus = CELLULAR_PKT_STATUS_PENDING_DATA_BUFFER;
+            pkStatus = CELLULAR_PKT_STATUS_PENDING_BUFFER;
             break;
     }
 
@@ -451,15 +453,17 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
     ( void ) commInterfaceHandle; /* Comm if is not used in this function. */
 
     /* The context of this function is a ISR. */
-    if( ( pContext == NULL ) || ( pContext->pPktioCommEvent == NULL ) )
+    if( ( pContext == NULL ) || ( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL ) )
     {
         retComm = IOT_COMM_INTERFACE_BAD_PARAMETER;
     }
     else
     {
-        xResult = PlatformEventGroup_SetBitsFromISR( pContext->pPktioCommEvent,
-                                                     PKTIO_EVT_MASK_RX_DATA,
-                                                     &xHigherPriorityTaskWoken );
+        /* It's platform-dependent declaration. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        xResult = ( BaseType_t ) PlatformEventGroup_SetBitsFromISR( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                                    ( EventBits_t ) PKTIO_EVT_MASK_RX_DATA,
+                                                                    &xHigherPriorityTaskWoken );
 
         if( xResult == pdPASS )
         {
@@ -515,7 +519,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
     char * pRead = NULL;  /* pRead is the first empty ptr in the Buffer for comm intf to read. */
     uint32_t bytesRead = 0;
     uint32_t partialDataRead = pContext->partialDataRcvdLen;
-    int32_t bufferEmptyLength = PKTIO_READ_BUFFER_SIZE;
+    int32_t bufferEmptyLength = ( int32_t ) PKTIO_READ_BUFFER_SIZE;
 
     pAtBuf = pContext->pktioReadBuf;
     pRead = pContext->pktioReadBuf;
@@ -529,7 +533,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
         ( pContext->partialDataRcvdLen != 0U ) && ( pAtResp == NULL ) )
     {
         pRead = _handleLeftoverBuffer( pContext );
-        bufferEmptyLength = PKTIO_READ_BUFFER_SIZE - pContext->partialDataRcvdLen;
+        bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE - ( int32_t ) pContext->partialDataRcvdLen );
     }
     else
     {
@@ -538,15 +542,15 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
             /* There are still valid data before pPktioReadPtr. */
             pRead = &pContext->pPktioReadPtr[ pContext->partialDataRcvdLen ];
             pAtBuf = pContext->pPktioReadPtr;
-            bufferEmptyLength = PKTIO_READ_BUFFER_SIZE -
-                                pContext->partialDataRcvdLen - _convertCharPtrDistance( pContext->pPktioReadPtr, pContext->pktioReadBuf );
+            bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE -
+                                  ( int32_t ) pContext->partialDataRcvdLen - ( int32_t ) _convertCharPtrDistance( pContext->pPktioReadPtr, pContext->pktioReadBuf ) );
         }
         else
         {
             /* There are valid data need to be handled with length pContext->partialDataRcvdLen. */
             pRead = &pContext->pktioReadBuf[ pContext->partialDataRcvdLen ];
             pAtBuf = pContext->pktioReadBuf;
-            bufferEmptyLength = PKTIO_READ_BUFFER_SIZE - pContext->partialDataRcvdLen;
+            bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE - ( int32_t ) pContext->partialDataRcvdLen );
         }
     }
 
@@ -633,7 +637,7 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         /* The data received is partial. Store the start of data in read pointer. */
         pContext->pPktioReadPtr = pStartOfData;
         pContext->partialDataRcvdLen = bytesDataAndLeft;
-        pkStatus = CELLULAR_PKT_STATUS_PENDING_DATA_BUFFER;
+        pkStatus = CELLULAR_PKT_STATUS_PENDING_BUFFER;
     }
 
     return pkStatus;
@@ -651,7 +655,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
     {
         if( pContext->pPktioHandlepktCB != NULL )
         {
-            pContext->pPktioHandlepktCB( pContext, AT_UNSOLICITED, pLine );
+            ( void ) pContext->pPktioHandlepktCB( pContext, AT_UNSOLICITED, pLine );
         }
     }
     else if( pContext->recvdMsgType == AT_SOLICITED )
@@ -671,12 +675,12 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         {
             if( pContext->pPktioHandlepktCB != NULL )
             {
-                pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
+                ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
 
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
-        else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_DATA_BUFFER )
+        else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
         {
             /* Check data prefix first then store the data if this command has data response. */
         }
@@ -833,7 +837,7 @@ static bool _handleDataResult( CellularContext_t * pContext,
     /* The input line is a data recv command. Handle the data buffer. */
     pktStatus = _handleData( pStartOfData, pContext, *ppAtResp, ppLine, *pBytesRead, &bytesLeft );
 
-    /* pktStatus will never be CELLULAR_PKT_STATUS_PENDING_DATA_BUFFER from _handleData(). */
+    /* pktStatus will never be CELLULAR_PKT_STATUS_PENDING_BUFFER from _handleData(). */
     if( bytesLeft == 0U )
     {
         CellularLogDebug( "Complete Data received" );
@@ -859,7 +863,7 @@ static bool _getNextLine( CellularContext_t * pContext,
     bool keepProcess = true;
 
     /* Find other responses or urcs which need to be processed in this read buffer. */
-    stringLength = strnlen( *ppLine, *pBytesRead );
+    stringLength = ( uint32_t ) strnlen( *ppLine, *pBytesRead );
 
     /* Advanced 1 bytes to read next Line. */
     if( *pBytesRead >= ( stringLength + 1U ) )
@@ -916,7 +920,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             /* Handle the message according the received message type. */
             pktStatus = _handleMsgType( pContext, ppAtResp, pTempLine );
 
-            if( pktStatus == CELLULAR_PKT_STATUS_PENDING_DATA_BUFFER )
+            if( pktStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
             {
                 /* The input line is a data recv command. Handle the data buffer. */
                 if( ( pContext->dataLength != 0U ) && ( pStartOfData != NULL ) )
@@ -986,7 +990,7 @@ static void _pktioReadThread( void * pUserData )
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
     CellularATCommandResponse_t * pAtResp = NULL;
     PlatformEventGroup_EventBits uxBits = 0;
-    uint32_t bytesRead = 0;
+    uint32_t bytesRead = 0U;
 
     /* Open main communication port. */
     if( ( pContext != NULL ) && ( pContext->pCommIntf != NULL ) &&
@@ -994,17 +998,20 @@ static void _pktioReadThread( void * pUserData )
                                      &pContext->hPktioCommIntf ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
         /* Send thread started event. */
-        ( void ) PlatformEventGroup_SetBits( pContext->pPktioCommEvent,
-                                             PKTIO_EVT_MASK_STARTED );
+        /* It's platform-dependent declaration. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_STARTED );
 
         do
         {
             /* Wait events for abort thread or rx data available. */
-            uxBits = PlatformEventGroup_WaitBits( ( pContext->pPktioCommEvent ),
-                                                  ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ),
-                                                  pdTRUE,
-                                                  pdFALSE,
-                                                  portMAX_DELAY );
+            /* It's platform-dependent declaration. */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
+            uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                                                   ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ),
+                                                                                   pdTRUE,
+                                                                                   pdFALSE,
+                                                                                   portMAX_DELAY );
 
             if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT ) != 0U )
             {
@@ -1018,15 +1025,19 @@ static void _pktioReadThread( void * pUserData )
                 do
                 {
                     bytesRead = _handleRxDataEvent( pContext, &pAtResp );
-                } while( bytesRead != 0U && LOOP_FOREVER() );
+                    /* The variable NumLoops only used in unit test mode. */
+                    /* coverity[misra_c_2012_rule_10_1_violation] */
+                    /* coverity[misra_c_2012_rule_13_5_violation] */
+                    /* coverity[misra_c_2012_rule_14_4_violation] */
+                } while( ( bytesRead != 0U ) && LOOP_FOREVER() );
             }
             else
             {
                 /* Empty else to avoid MISRA violation */
-                while( 0 )
-                {
-                }
             }
+
+            /* The variable NumLoops only used in unit test mode. */
+            /* coverity[misra_c_2012_rule_14_4_violation] */
         } while( LOOP_FOREVER() );
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );
@@ -1040,9 +1051,9 @@ static void _pktioReadThread( void * pUserData )
 
     if( pContext != NULL )
     {
-        if( pContext->pPktioCommEvent != NULL )
+        if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
         {
-            ( void ) PlatformEventGroup_SetBits( pContext->pPktioCommEvent, PKTIO_EVT_MASK_ABORTED );
+            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
         }
 
         /* Call the shutdown callback if it is defined. */
@@ -1059,13 +1070,13 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext )
 {
     PlatformEventGroup_EventBits uxBits = 0;
 
-    uxBits = PlatformEventGroup_WaitBits( ( pContext->pPktioCommEvent ),
-                                          ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_STARTED | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ),
-                                          pdTRUE,
-                                          pdFALSE,
-                                          ( ( PlatformTickType ) ~( 0UL ) ) );
+    uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                                           ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_STARTED | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ),
+                                                                           pdTRUE,
+                                                                           pdFALSE,
+                                                                           ( ( PlatformTickType ) ~( 0UL ) ) );
 
-    if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ) != PKTIO_EVT_MASK_ABORTED )
+    if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED )
     {
         pContext->bPktioUp = true;
     }
@@ -1087,9 +1098,11 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
     {
         pContext->bPktioUp = false;
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
-        pContext->pPktioCommEvent = PlatformEventGroup_Create();
+        /* It's platform-dependent declaration. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) PlatformEventGroup_Create();
 
-        if( pContext->pPktioCommEvent == NULL )
+        if( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL )
         {
             CellularLogError( "Can't create event group" );
             pktStatus = CELLULAR_PKT_STATUS_CREATION_FAIL;
@@ -1099,7 +1112,9 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
         pContext->pPktioHandlepktCB = handlePacketCb;
-        ( void ) PlatformEventGroup_ClearBits( ( pContext->pPktioCommEvent ),
+        /* It's platform-dependent declaration. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        ( void ) PlatformEventGroup_ClearBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
                                                ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ALL_EVENTS ) );
 
         /* Create the Read thread. */
@@ -1136,10 +1151,12 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
         {
             pContext->pPktioHandlepktCB = NULL;
 
-            if( pContext->pPktioCommEvent != NULL )
+            if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
             {
-                PlatformEventGroup_Delete( pContext->pPktioCommEvent );
-                pContext->pPktioCommEvent = NULL;
+                /* It's platform-dependent declaration. */
+                /* coverity[misra_c_2012_directive_4_6_violation] */
+                ( void ) PlatformEventGroup_Delete( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
+                pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) ( uintptr_t ) ( uintptr_t * ) NULL;
             }
         }
     }
@@ -1176,7 +1193,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
     }
     else
     {
-        cmdLen = strlen( pAtCmd );
+        cmdLen = ( uint32_t ) strlen( pAtCmd );
 
         if( cmdLen > PKTIO_WRITE_BUFFER_SIZE )
         {
@@ -1205,7 +1222,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 /* Sends data to the modem. */
-uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
+uint32_t _Cellular_PktioSendData( const CellularContext_t * pContext,
                                   const uint8_t * pData,
                                   uint32_t dataLen )
 {
@@ -1241,19 +1258,21 @@ void _Cellular_PktioShutdown( CellularContext_t * pContext )
 
     if( ( pContext != NULL ) && ( pContext->bPktioUp ) )
     {
-        if( pContext->pPktioCommEvent != NULL )
+        if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
         {
-            ( void ) PlatformEventGroup_SetBits( pContext->pPktioCommEvent, PKTIO_EVT_MASK_ABORT );
-            uxBits = PlatformEventGroup_GetBits( pContext->pPktioCommEvent );
+            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORT );
+            /* It's platform-dependent declaration. */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
+            uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
 
-            while( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ) != ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ) )
+            while( ( PlatformEventGroup_EventBits ) ( uxBits & PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventGroup_EventBits ) ( PKTIO_EVT_MASK_ABORTED ) )
             {
                 Platform_Delay( PKTIO_SHUTDOWN_WAIT_INTERVAL_MS );
-                uxBits = PlatformEventGroup_GetBits( pContext->pPktioCommEvent );
+                uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
             }
 
-            PlatformEventGroup_Delete( pContext->pPktioCommEvent );
-            pContext->pPktioCommEvent = NULL;
+            ( void ) PlatformEventGroup_Delete( pContext->pPktioCommEvent );
+            pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) ( uintptr_t ) ( uintptr_t * ) NULL;
         }
 
         pContext->pPktioHandlepktCB = NULL;

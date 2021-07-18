@@ -354,10 +354,10 @@ void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
 }
 
-uint16_t MockvQueueDelete( int32_t * queue )
+uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     free( queue );
-    *queue = 0;
+    queue = 0;
     return 1;
 }
 

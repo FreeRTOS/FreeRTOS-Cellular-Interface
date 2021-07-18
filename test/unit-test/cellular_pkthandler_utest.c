@@ -204,8 +204,8 @@ void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
 }
 
-QueueHandle_t MockxQueueCreate( uxQueueLength,
-                                uxItemSize )
+QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
+                                uint32_t uxItemSize )
 {
     if( queueCreateFail == 0 )
     {
@@ -218,9 +218,9 @@ QueueHandle_t MockxQueueCreate( uxQueueLength,
     }
 }
 
-bool MockxQueueSend( int32_t * queue,
-                     void * data,
-                     int32_t time )
+BaseType_t MockxQueueSend( QueueHandle_t queue,
+                           void * data,
+                           uint32_t time )
 {
     queueData = *( ( uint16_t * ) data );
 
@@ -239,9 +239,9 @@ bool MockxQueueSend( int32_t * queue,
  * The first byte value of queueReturnFail means the return value when xQueueReceive called at first time, and
  * the second byte value of queueReturnFail means the return value when xQueueReceive called, and etc.
  */
-bool MockxQueueReceive( int32_t * queue,
-                        void * data,
-                        int32_t time )
+BaseType_t MockxQueueReceive( QueueHandle_t queue,
+                              void * data,
+                              uint32_t time )
 {
     if( ( queueReturnFail & 0xFF ) == 0 )
     {
@@ -271,10 +271,10 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
 }
 
 
-uint16_t MockvQueueDelete( int32_t * queue )
+uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     free( queue );
-    *queue = NULL;
+    queue = NULL;
     return 1;
 }
 

@@ -210,10 +210,10 @@ void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
 }
 
-uint16_t MockvQueueDelete( int32_t * queue )
+uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     free( queue );
-    *queue = 0;
+    queue = 0;
     return 1;
 }
 
@@ -594,14 +594,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
         {
             cellularOperatorInfo_t cellularOperatorInfo;
             memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
-            cellularOperatorInfo.operatorNameFormat = CELLULAR_OPERATOR_NAME_FORMAT_LONG;
+            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
             pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else if( parseNetworkNameFailureCase == 3 )
         {
             cellularOperatorInfo_t cellularOperatorInfo;
             memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
-            cellularOperatorInfo.operatorNameFormat = CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC;
+            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
             pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else
@@ -1010,19 +1010,19 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
         {
             *ppTokOutput = NULL;
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_SHORT. */
+        /* OPERATOR_NAME_FORMAT_SHORT. */
         else if( parseNetworkNameFailureCase == 2 )
         {
             *ppTokOutput = malloc( sizeof( pFitNum ) );
             memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC. */
+        /* OPERATOR_NAME_FORMAT_NUMERIC. */
         else if( parseNetworkNameFailureCase == 3 )
         {
             *ppTokOutput = malloc( sizeof( pNumericNum ) );
             memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC wrong length. */
+        /* OPERATOR_NAME_FORMAT_NUMERIC wrong length. */
         else if( parseNetworkNameFailureCase == 5 )
         {
             *ppTokOutput = malloc( sizeof( pBigNum ) );
@@ -2182,6 +2182,7 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
+
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
@@ -2212,7 +2213,6 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Hap
 
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-
 
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
@@ -2339,12 +2339,11 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data( void )
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    /* Null data pointer case condition. */
     cbCondition = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
-
     cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
@@ -2367,9 +2366,6 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_AtCmd_Fa
 
     /* Enter _parseTimeZoneInfo. */
     Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
-    /* _Cellular_TranslateAtCoreStatus_IgnoreAndReturn(CELLULAR_PKT_STATUS_OK); */
-    /* Cellular_ATGetSpecificNextTok_IgnoreAndReturn(CELLULAR_AT_SUCCESS); */
-    /* Cellular_ATStrtoi_IgnoreAndReturn(CELLULAR_AT_SUCCESS); */
     _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
 
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );

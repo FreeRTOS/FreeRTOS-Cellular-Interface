@@ -367,14 +367,14 @@ void test_Cellular_ParseRegStatus_Null_RegPayload( void )
 }
 
 /**
- * @brief Test that reject type/case for CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED to return CELLULAR_PKT_STATUS_OK.
+ * @brief Test that reject type/case for REGISTRATION_STATUS_REGISTRATION_DENIED to return CELLULAR_PKT_STATUS_OK.
  */
 void test_Cellular_ParseRegStatus_CELLULAR_REG_POS_REJ_TYPE_Cause_Registration_Denied( void )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
 
-    context.libAtData.csRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED;
+    context.libAtData.csRegStatus = REGISTRATION_STATUS_REGISTRATION_DENIED;
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Callback );

@@ -101,7 +101,7 @@ static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
 
 static CellularContext_t * cellularContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 
-#if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 1 )
+#if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
     static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
 #endif
 
@@ -255,31 +255,28 @@ static CellularError_t libOpen( CellularContext_t * pContext )
 
     PlatformMutex_Lock( &pContext->libStatusMutex );
 
-    if( cellularStatus == CELLULAR_SUCCESS )
+    ( CellularPktStatus_t ) _Cellular_AtParseInit( pContext );
+    _Cellular_LockAtDataMutex( pContext );
+    _Cellular_InitAtData( pContext, 0 );
+    _Cellular_UnlockAtDataMutex( pContext );
+    _Cellular_SetShutdownCallback( pContext, _shutdownCallback );
+    pktStatus = _Cellular_PktHandlerInit( pContext );
+
+    if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        _Cellular_AtParseInit( pContext );
-        _Cellular_LockAtDataMutex( pContext );
-        _Cellular_InitAtData( pContext, 0 );
-        _Cellular_UnlockAtDataMutex( pContext );
-        _Cellular_SetShutdownCallback( pContext, _shutdownCallback );
-        pktStatus = _Cellular_PktHandlerInit( pContext );
-
-        if( pktStatus == CELLULAR_PKT_STATUS_OK )
-        {
-            pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
-
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                CellularLogError( "pktio failed to initialize" );
-                _Cellular_PktioShutdown( pContext );
-                _Cellular_PktHandlerCleanup( pContext );
-            }
-        }
+        pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            CellularLogError( "pktio failed to initialize" );
+            _Cellular_PktioShutdown( pContext );
+            _Cellular_PktHandlerCleanup( pContext );
         }
+    }
+
+    if( pktStatus != CELLULAR_PKT_STATUS_OK )
+    {
+        cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
     if( cellularStatus == CELLULAR_SUCCESS )
@@ -327,7 +324,7 @@ static void libClose( CellularContext_t * pContext )
     {
         if( pContext->pSocketData[ i ] != NULL )
         {
-            #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
+            #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
                 {
                     Platform_Free( pContext->pSocketData[ i ] );
                 }
@@ -394,19 +391,19 @@ static uint8_t _getSignalBars( int16_t compareValue,
     if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
     {
         pSignalBarsTable = gsmSignalBarsTable;
-        tableSize = ARRY_SIZE( gsmSignalBarsTable );
+        tableSize = ( uint8_t ) ARRY_SIZE( gsmSignalBarsTable );
     }
 
     if( ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_LTE ) )
     {
         pSignalBarsTable = lteCATMSignalBarsTable;
-        tableSize = ARRY_SIZE( lteCATMSignalBarsTable );
+        tableSize = ( uint8_t ) ARRY_SIZE( lteCATMSignalBarsTable );
     }
 
     if( rat == CELLULAR_RAT_NBIOT )
     {
         pSignalBarsTable = lteNBIotSignalBarsTable;
-        tableSize = ARRY_SIZE( lteNBIotSignalBarsTable );
+        tableSize = ( uint8_t ) ARRY_SIZE( lteNBIotSignalBarsTable );
     }
 
     if( pSignalBarsTable != NULL )
@@ -445,9 +442,9 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( ( pTokenTable == NULL ) || ( pTokenTable->pCellularUrcHandlerTable == NULL ) ||
-            ( pTokenTable->pCellularSrcTokenErrorTable == NULL ) ||
-            ( pTokenTable->pCellularSrcTokenSuccessTable == NULL ) ||
-            ( pTokenTable->pCellularUrcTokenWoPrefixTable == NULL ) )
+             ( pTokenTable->pCellularSrcTokenErrorTable == NULL ) ||
+             ( pTokenTable->pCellularSrcTokenSuccessTable == NULL ) ||
+             ( pTokenTable->pCellularUrcTokenWoPrefixTable == NULL ) )
     {
         CellularLogError( "All the token tables in the CellularTokenTable should be valid." );
         cellularStatus = CELLULAR_BAD_PARAMETER;
@@ -588,7 +585,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     {
         if( pContext->pSocketData[ socketId ] == NULL )
         {
-            #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 1 )
+            #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
                 {
                     pSocketData = &cellularStaticSocketDataTable[ socketId ];
                 }
@@ -634,7 +631,8 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                                             CellularSocketHandle_t socketHandle )
 {
@@ -664,7 +662,7 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
 
-        #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_SOCKET_CONTEXT == 0 )
+        #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
             else
             {
                 Platform_Free( socketHandle );
@@ -799,7 +797,8 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
                                             void ** ppModuleContext )
 {
@@ -818,7 +817,8 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
                                              CellularSignalInfo_t * pSignalInfo )
 {
@@ -851,7 +851,8 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
 }
 
 /*-----------------------------------------------------------*/
-
+/* Cellular common API prototype. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_GetCurrentRat( CellularContext_t * pContext,
                                          CellularRat_t * pRat )
 {
@@ -1143,7 +1144,7 @@ CellularPktStatus_t _Cellular_AtcmdRequestWithCallback( CellularContext_t * pCon
                                                         CellularAtReq_t atReq )
 {
     /* Parameters are checked in this function. */
-    return _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReq, PACKET_REQ_TIMEOUT_MS );
+    return _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReq, ( uint32_t ) PACKET_REQ_TIMEOUT_MS );
 }
 
 /*-----------------------------------------------------------*/

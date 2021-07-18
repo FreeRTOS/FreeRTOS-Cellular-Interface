@@ -60,7 +60,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
                                           char * pInputLine );
 static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf );
-static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( CellularContext_t * pContext,
+static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( CellularContext_t * pContext,
                                                                          CellularAtReq_t atReq,
                                                                          uint32_t timeoutMS );
 static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContext_t * pContext,
@@ -76,7 +76,7 @@ static int _sortCompareFunc( const void * pElem1Ptr,
 static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
                                          const char * pInputLine );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
-                                               char * pTokenPtr,
+                                               const char * pTokenPtr,
                                                char * pSavePtr );
 
 /*-----------------------------------------------------------*/
@@ -107,6 +107,8 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
         }
 
         /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
@@ -199,8 +201,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
-static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( CellularContext_t * pContext,
+static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( CellularContext_t * pContext,
                                                                          CellularAtReq_t atReq,
                                                                          uint32_t timeoutMS )
 {
@@ -230,6 +231,8 @@ static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( Cellula
         else
         {
             /* Wait for a response. */
+            /* This is platform dependent api. */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
             qRet = xQueueReceive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMS ) );
 
             if( qRet == pdTRUE )
@@ -373,8 +376,8 @@ static int _searchCompareFunc( const void * pInputToken,
     int compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
-    uint32_t tokenLen = strlen( pInputToken );
-    uint32_t strLen = strlen( pBasePtr->pStrValue );
+    uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
+    uint32_t strLen = ( uint32_t ) strlen( pBasePtr->pStrValue );
 
     compareValue = strncmp( pToken,
                             pBasePtr->pStrValue,
@@ -415,8 +418,8 @@ static int _sortCompareFunc( const void * pElem1Ptr,
     int compareValue = 0;
     const CellularAtParseTokenMap_t * pElement1Ptr = ( const CellularAtParseTokenMap_t * ) pElem1Ptr;
     const CellularAtParseTokenMap_t * pElement2Ptr = ( const CellularAtParseTokenMap_t * ) pElem2Ptr;
-    uint32_t element1PtrLen = strlen( pElement1Ptr->pStrValue );
-    uint32_t element2PtrLen = strlen( pElement2Ptr->pStrValue );
+    uint32_t element1PtrLen = ( uint32_t ) strlen( pElement1Ptr->pStrValue );
+    uint32_t element2PtrLen = ( uint32_t ) strlen( pElement2Ptr->pStrValue );
 
     compareValue = strncmp( pElement1Ptr->pStrValue,
                             pElement2Ptr->pStrValue,
@@ -450,7 +453,7 @@ static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
-                                               char * pTokenPtr,
+                                               const char * pTokenPtr,
                                                char * pSavePtr )
 {
     /* Now get the handler function based on the token. */
@@ -502,7 +505,9 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
     {
         /* Wait for response to finish. */
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
-        vQueueDelete( pContext->pktRespQueue );
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        ( void ) vQueueDelete( pContext->pktRespQueue );
         pContext->pktRespQueue = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
@@ -561,7 +566,7 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, timeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, timeoutMS );
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
 
@@ -591,7 +596,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->pktDataPrefixCB = pktDataPrefixCallback;
         pContext->pDataPrefixCBContext = pCallbackContext;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, timeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, timeoutMS );
         pContext->pktDataPrefixCB = NULL;
         pContext->pDataPrefixCBContext = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
@@ -626,7 +631,7 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->pktDataSendPrefixCB = pktDataSendPrefixCallback;
         pContext->pDataSendPrefixCBContext = pCallbackContext;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, atTimeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
         pContext->pDataSendPrefixCBContext = NULL;
         pContext->pktDataSendPrefixCB = NULL;
 
@@ -680,7 +685,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, atTimeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
 
@@ -704,7 +709,10 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Create the response queue which is used to post reponses to the sender. */
-        pContext->pktRespQueue = xQueueCreate( 1, sizeof( CellularPktStatus_t ) );
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        /* coverity[misra_c_2012_rule_11_4_violation] */
+        pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
 
         if( pContext->pktRespQueue == NULL )
         {
