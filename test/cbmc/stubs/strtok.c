@@ -34,27 +34,33 @@
 #endif
 
 #if __has_builtin( __builtin___strtok )
-    char * __builtin___strtok (char *s, const char *delim)
+    char * __builtin___strtok( char * s,
+                               const char * delim )
     {
-        if( (__CPROVER_w_ok( s, 1 ), "write") && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        if( ( __CPROVER_w_ok( s, 1 ), "write" ) && ( __CPROVER_r_ok( s, 1 ), "read" ) )
         {
-            while( *s != '\0')
+            while( *s != '\0' )
             {
-                if((int)*s == c )
+                if( ( int ) *s == c )
+                {
                     return s;
-                if( (__CPROVER_w_ok( s + 1, 1 ), "write") && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                }
+
+                if( ( __CPROVER_w_ok( s + 1, 1 ), "write" ) && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
                 {
                     s++;
                 }
             }
+
             return NULL;
         }
     }
-#else
-    char * strtok (char *s, const char *delim)
+#else  /* if __has_builtin( __builtin___strtok ) */
+    char * strtok( char * s,
+                   const char * delim )
     {
-        __CPROVER_assert( __CPROVER_w_ok( s, strlen(s) ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( s, strlen(s) ), "read" );
+        __CPROVER_assert( __CPROVER_w_ok( s, strlen( s ) ), "write" );
+        __CPROVER_assert( __CPROVER_r_ok( s, strlen( s ) ), "read" );
         return s;
     }
 #endif /* if __has_builtin( __builtin___strchr ) */
