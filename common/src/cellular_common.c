@@ -27,7 +27,10 @@
  * @brief FreeRTOS Cellular Library common AT commnad library.
  */
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */

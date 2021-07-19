@@ -27,7 +27,10 @@
  * @brief FreeRTOS Cellular Library common packet I/O functions to assemble packet from comm interface.
  */
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */
@@ -57,6 +60,9 @@
 
 #define PKTIO_SHUTDOWN_WAIT_INTERVAL_MS    ( 10U )
 
+#ifdef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    #define LOOP_FOREVER()    true
+#endif
 /*-----------------------------------------------------------*/
 
 static void _saveData( char * pLine,

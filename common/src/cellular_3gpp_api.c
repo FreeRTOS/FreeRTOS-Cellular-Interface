@@ -34,7 +34,10 @@
 
 #include "cellular_platform.h"
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 #include "cellular_internal.h"
 #include "cellular_common_internal.h"
