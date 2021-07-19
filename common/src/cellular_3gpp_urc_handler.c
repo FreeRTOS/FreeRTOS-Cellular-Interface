@@ -78,7 +78,6 @@ static void _regStatusGenerateLog( char * pRegPayload,
                                    CellularNetworkRegType_t regType );
 static void _regStatusGenerateEvent( const CellularContext_t * pContext,
                                      CellularNetworkRegType_t regType,
-                                     CellularServiceStatus_t * pServiceStatus,
                                      const cellularAtData_t * pLibAtData );
 static bool _Cellular_RegEventStatus( const cellularAtData_t * pLibAtData,
                                       CellularNetworkRegType_t regType,
@@ -458,33 +457,35 @@ static void _regStatusGenerateLog( char * pRegPayload,
 
 static void _regStatusGenerateEvent( const CellularContext_t * pContext,
                                      CellularNetworkRegType_t regType,
-                                     CellularServiceStatus_t * pServiceStatus,
                                      const cellularAtData_t * pLibAtData )
 {
-    pServiceStatus->rat = pLibAtData->rat;
-    pServiceStatus->csRegistrationStatus = pLibAtData->csRegStatus;
-    pServiceStatus->psRegistrationStatus = pLibAtData->psRegStatus;
-    pServiceStatus->csRejectionCause = pLibAtData->csRejCause;
-    pServiceStatus->csRejectionType = pLibAtData->csRejectType;
-    pServiceStatus->psRejectionCause = pLibAtData->psRejCause;
-    pServiceStatus->psRejectionType = pLibAtData->psRejectType;
+    CellularServiceStatus_t serviceStatus;
+
+    ( void ) memset( &serviceStatus, 0, sizeof( CellularServiceStatus_t ) );
+    serviceStatus.rat = pLibAtData->rat;
+    serviceStatus.csRegistrationStatus = pLibAtData->csRegStatus;
+    serviceStatus.psRegistrationStatus = pLibAtData->psRegStatus;
+    serviceStatus.csRejectionCause = pLibAtData->csRejCause;
+    serviceStatus.csRejectionType = pLibAtData->csRejectType;
+    serviceStatus.psRejectionCause = pLibAtData->psRejCause;
+    serviceStatus.psRejectionType = pLibAtData->psRejectType;
 
     /* Data should be obtained from COPS commmand. User should obtain with APIs. */
-    ( void ) strcpy( pServiceStatus->plmnInfo.mcc, "FFF" );
-    ( void ) strcpy( pServiceStatus->plmnInfo.mnc, "FFF" );
-    ( void ) strcpy( pServiceStatus->operatorName, "FFF" );
-    pServiceStatus->operatorNameFormat = OPERATOR_NAME_FORMAT_NOT_PRESENT;
-    pServiceStatus->networkRegistrationMode = REGISTRATION_MODE_UNKNOWN;
+    ( void ) strcpy( serviceStatus.plmnInfo.mcc, "FFF" );
+    ( void ) strcpy( serviceStatus.plmnInfo.mnc, "FFF" );
+    ( void ) strcpy( serviceStatus.operatorName, "FFF" );
+    serviceStatus.operatorNameFormat = OPERATOR_NAME_FORMAT_NOT_PRESENT;
+    serviceStatus.networkRegistrationMode = REGISTRATION_MODE_UNKNOWN;
 
     if( pContext->cbEvents.networkRegistrationCallback != NULL )
     {
         if( regType == CELLULAR_REG_TYPE_CREG )
         {
-            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, pServiceStatus );
+            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, &serviceStatus );
         }
         else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
-            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, pServiceStatus );
+            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, &serviceStatus );
         }
         else
         {
@@ -542,7 +543,6 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     uint8_t i = 0;
     char * pRegStr = NULL, * pToken = NULL;
     cellularAtData_t * pLibAtData = NULL;
-    CellularServiceStatus_t serviceStatus;
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularNetworkRegistrationStatus_t prevCsRegStatus = REGISTRATION_STATUS_UNKNOWN;
@@ -608,7 +608,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         /* If Registration Status changed, generate the event. */
         if( ( _Cellular_RegEventStatus( pLibAtData, regType, prevCsRegStatus, prevPsRegStatus ) == true ) )
         {
-            _regStatusGenerateEvent( pContext, regType, &serviceStatus, pLibAtData );
+            _regStatusGenerateEvent( pContext, regType, pLibAtData );
         }
 
         if( atCoreStatus != CELLULAR_AT_SUCCESS )
