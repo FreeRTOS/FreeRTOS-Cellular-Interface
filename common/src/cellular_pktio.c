@@ -1039,9 +1039,6 @@ static void _pktioReadThread( void * pUserData )
             {
                 /* Empty else to avoid MISRA violation */
             }
-
-            /* The variable NumLoops only used in unit test mode. */
-            /* coverity[misra_c_2012_rule_14_4_violation] */
         } while( LOOP_FOREVER() );
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );
