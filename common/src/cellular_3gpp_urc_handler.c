@@ -648,9 +648,6 @@ CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
                                                     char * pInputLine )
 {

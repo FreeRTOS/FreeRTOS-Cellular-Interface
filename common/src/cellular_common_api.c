@@ -164,12 +164,8 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Library prototype. */
-/* coverity[misra_c_2012_rule_8_13_violation] */
 CellularError_t Cellular_CommonCleanup( CellularHandle_t cellularHandle )
 {
-    /* Functions called this function modify the pContext data. */
-    /* coverity[misra_c_2012_rule_8_13_violation] */
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
@@ -238,9 +234,6 @@ CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cel
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( CellularHandle_t cellularHandle,
                                                                          CellularUrcSignalStrengthChangedCallback_t signalStrengthChangedCallback,
                                                                          void * pCallbackContext )

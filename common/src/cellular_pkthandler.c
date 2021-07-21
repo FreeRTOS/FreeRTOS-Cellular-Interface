@@ -50,10 +50,8 @@
 
 /* Windows simulator implementation. */
 #if defined( _WIN32 ) || defined( _WIN64 )
-    #define strtok_r             strtok_s
+    #define strtok_r    strtok_s
 #endif
-
-#define SORT_MODULE_TOKEN_MAP    ( 0U )
 
 /*-----------------------------------------------------------*/
 
@@ -552,9 +550,6 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                                    CellularAtReq_t atReq,
                                                                    uint32_t timeoutMS )
@@ -578,9 +573,6 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularContext_t * pContext,
                                                                        CellularAtReq_t atReq,
                                                                        uint32_t timeoutMS,
@@ -610,9 +602,6 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
                                              CellularAtReq_t atReq,
                                              CellularAtDataReq_t dataReq,
@@ -651,9 +640,6 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularContext_t * pContext,
                                                                        CellularAtReq_t atReq,
                                                                        CellularAtDataReq_t dataReq,
@@ -665,9 +651,6 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularC
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_t * pContext,
                                                                 CellularAtReq_t atReq,
                                                                 CellularAtDataReq_t dataReq,
@@ -760,35 +743,12 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
             }
         }
 
-        /* The Prefix Map should be sorted. */
-        #if ( SORT_MODULE_TOKEN_MAP == 1U )
-            if( finit != true )
-            {
-                taskENTER_CRITICAL();
+        if( finit != true )
+        {
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+            CellularLogError( "AtParseFail URC token table is not sorted" );
+        }
 
-                /* Ensure that the prefix to parse map is sorted
-                 * to rule out any manual insertion errors while introducing new AT elements. */
-                /* coverity[misra_c_2012_rule_10_4_violation]. */
-                qsort( pTokenMap,
-                       tokenMapSize,
-                       sizeof( CellularAtParseTokenMap_t ), _sortCompareFunc );
-                finit = true;
-                taskEXIT_CRITICAL();
-            }
-        #else /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
-            if( finit != true )
-            {
-                pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-                CellularLogError( "AtParseFail URC token table is not sorted" );
-            }
-
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_10_5_violation] */
-            configASSERT( finit == true );
-        #endif /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
-
-        /* coverity[misra_c_2012_rule_10_4_violation] */
-        /* coverity[misra_c_2012_rule_10_5_violation] */
         configASSERT( finit == true );
 
         for( i = 0; i < tokenMapSize; i++ )

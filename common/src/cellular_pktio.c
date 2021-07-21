@@ -142,7 +142,6 @@ static void _saveData( char * pLine,
     CellularLogDebug( "_saveData : Save data %p with length %d", pLine, dataLen );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
-    /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( ( int32_t ) ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
@@ -261,7 +260,6 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
     CellularATCommandResponse_t * pNew = NULL;
 
     pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
-    /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( ( int32_t ) ( pNew != NULL ) );
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
@@ -447,8 +445,7 @@ static _atRespType_t _getMsgType( const CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-/* Cellular comm interface callback prototype. */
-/* coverity[misra_c_2012_rule_8_13_violation] */
+
 static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
                                                              CellularCommInterfaceHandle_t commInterfaceHandle )
 {
@@ -1031,19 +1028,12 @@ static void _pktioReadThread( void * pUserData )
                 do
                 {
                     bytesRead = _handleRxDataEvent( pContext, &pAtResp );
-                    /* The variable NumLoops only used in unit test mode. */
-                    /* coverity[misra_c_2012_rule_10_1_violation] */
-                    /* coverity[misra_c_2012_rule_13_5_violation] */
-                    /* coverity[misra_c_2012_rule_14_4_violation] */
                 } while( ( bytesRead != 0U ) && LOOP_FOREVER() );
             }
             else
             {
                 /* Empty else to avoid MISRA violation */
             }
-
-            /* The variable NumLoops only used in unit test mode. */
-            /* coverity[misra_c_2012_rule_14_4_violation] */
         } while( LOOP_FOREVER() );
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );

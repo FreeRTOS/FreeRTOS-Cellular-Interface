@@ -108,69 +108,6 @@ static CellularContext_t * cellularContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
     static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
 #endif
 
-/* Look up Table for Mapping Signal Bars with RSSI value in dBm of GSM Signal.
- * The upper RSSI threshold is maintained in decreasing order to return the signal Bars. */
-
-/* Look up table is maintained here as global scope within this file instead of
- * block scope to help developers to quickly change the RSRP Upper thresholds
- * for respective Bars. */
-/* coverity[misra_c_2012_rule_8_9_violation] */
-static const signalBarsTable_t gsmSignalBarsTable[] =
-{
-    { -104, 1 },
-    { -98,  2 },
-    { -89,  3 },
-    { -80,  4 },
-    { 0,    5 },
-};
-
-/* Look up Table for Mapping Signal Bars with RSRP value in dBm of LTE CAT M1 Signal.
- * The upper RSRP threshold is maintained in decreasing order to return the signal Bars. */
-
-/* Look up table is maintained here as global scope within this file instead of
- * block scope to help developers to quickly change the RSRP Upper thresholds
- * for respective Bars. */
-/* coverity[misra_c_2012_rule_8_9_violation] */
-static const signalBarsTable_t lteCATMSignalBarsTable[] =
-{
-    { -115, 1 },
-    { -105, 2 },
-    { -95,  3 },
-    { -85,  4 },
-    { 0,    5 },
-};
-
-/* Look up Table for Mapping Signal Bars with RSRP value in dBm of LTE CAT NB1 Signal.
- * The upper RSRP threshold is maintained in decreasing order to return the signal Bars. */
-
-/* Look up table is maintained here as global scope within this file instead of
- * block scope to help developers to quickly change the RSRP Upper thresholds
- * for respective Bars. */
-/* coverity[misra_c_2012_rule_8_9_violation] */
-static const signalBarsTable_t lteNBIotSignalBarsTable[] =
-{
-    { -115, 1 },
-    { -105, 2 },
-    { -95,  3 },
-    { -85,  4 },
-    { 0,    5 },
-};
-
-/* Look up table is maintained here as global scope within this file instead of
- * block scope to help developers to convert BER value. */
-/* coverity[misra_c_2012_rule_8_9_violation] */
-static const uint16_t rxqualValueToBerTable[] =
-{
-    14,  /* Assumed value 0.14%. */
-    28,  /* Assumed value 0.28%.*/
-    57,  /* Assumed value 0.57%. */
-    113, /* Assumed value 1.13%. */
-    226, /* Assumed value 2.26%. */
-    453, /* Assumed value 4.53%. */
-    905, /* Assumed value 9.05%. */
-    1810 /* Assumed value 18.10%. */
-};
-
 /*-----------------------------------------------------------*/
 
 static CellularContext_t * _Cellular_AllocContext( void )
@@ -390,6 +327,40 @@ static uint8_t _getSignalBars( int16_t compareValue,
 {
     uint8_t i = 0, tableSize = 0, barsValue = CELLULAR_INVALID_SIGNAL_BAR_VALUE;
     const signalBarsTable_t * pSignalBarsTable = NULL;
+
+
+    /* Look up Table for Mapping Signal Bars with RSSI value in dBm of GSM Signal.
+     * The upper RSSI threshold is maintained in decreasing order to return the signal Bars. */
+    static const signalBarsTable_t gsmSignalBarsTable[] =
+    {
+        { -104, 1 },
+        { -98,  2 },
+        { -89,  3 },
+        { -80,  4 },
+        { 0,    5 },
+    };
+
+    /* Look up Table for Mapping Signal Bars with RSRP value in dBm of LTE CAT M1 Signal.
+     * The upper RSRP threshold is maintained in decreasing order to return the signal Bars. */
+    static const signalBarsTable_t lteCATMSignalBarsTable[] =
+    {
+        { -115, 1 },
+        { -105, 2 },
+        { -95,  3 },
+        { -85,  4 },
+        { 0,    5 },
+    };
+
+    /* Look up Table for Mapping Signal Bars with RSRP value in dBm of LTE CAT NB1 Signal.
+     * The upper RSRP threshold is maintained in decreasing order to return the signal Bars. */
+    static const signalBarsTable_t lteNBIotSignalBarsTable[] =
+    {
+        { -115, 1 },
+        { -105, 2 },
+        { -95,  3 },
+        { -85,  4 },
+        { 0,    5 },
+    };
 
     if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
     {
@@ -634,8 +605,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
+
 CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                                             CellularSocketHandle_t socketHandle )
 {
@@ -680,8 +650,6 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t _Cellular_IsValidSocket( const CellularContext_t * pContext,
                                          uint32_t sockIndex )
 {
@@ -721,9 +689,6 @@ CellularError_t _Cellular_IsValidPdn( uint8_t contextId )
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularError_t _Cellular_ConvertCsqSignalRssi( int16_t csqRssi,
                                                 int16_t * pRssiValue )
 {
@@ -761,14 +726,23 @@ CellularError_t _Cellular_ConvertCsqSignalRssi( int16_t csqRssi,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
                                                int16_t * pBerValue )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     int16_t berValue = 0;
+
+    static const uint16_t rxqualValueToBerTable[] =
+    {
+        14,  /* Assumed value 0.14%. */
+        28,  /* Assumed value 0.28%.*/
+        57,  /* Assumed value 0.57%. */
+        113, /* Assumed value 1.13%. */
+        226, /* Assumed value 2.26%. */
+        453, /* Assumed value 4.53%. */
+        905, /* Assumed value 9.05%. */
+        1810 /* Assumed value 18.10%. */
+    };
 
     if( pBerValue == NULL )
     {
@@ -800,8 +774,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
 }
 
 /*-----------------------------------------------------------*/
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
+
 CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
                                             void ** ppModuleContext )
 {
@@ -820,8 +793,7 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
+
 CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
                                              CellularSignalInfo_t * pSignalInfo )
 {
@@ -854,8 +826,7 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
 }
 
 /*-----------------------------------------------------------*/
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
+
 CellularError_t _Cellular_GetCurrentRat( CellularContext_t * pContext,
                                          CellularRat_t * pRat )
 {
@@ -883,8 +854,6 @@ CellularError_t _Cellular_GetCurrentRat( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 void _Cellular_NetworkRegistrationCallback( const CellularContext_t * pContext,
                                             CellularUrcEvent_t urcEvent,
                                             const CellularServiceStatus_t * pServiceStatus )
@@ -898,8 +867,6 @@ void _Cellular_NetworkRegistrationCallback( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 void _Cellular_PdnEventCallback( const CellularContext_t * pContext,
                                  CellularUrcEvent_t urcEvent,
                                  uint8_t contextId )
@@ -912,8 +879,6 @@ void _Cellular_PdnEventCallback( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 void _Cellular_SignalStrengthChangedCallback( const CellularContext_t * pContext,
                                               CellularUrcEvent_t urcEvent,
                                               const CellularSignalInfo_t * pSignalInfo )
@@ -927,8 +892,6 @@ void _Cellular_SignalStrengthChangedCallback( const CellularContext_t * pContext
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 void _Cellular_GenericCallback( const CellularContext_t * pContext,
                                 const char * pRawData )
 {
@@ -940,8 +903,6 @@ void _Cellular_GenericCallback( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 void _Cellular_ModemEventCallback( const CellularContext_t * pContext,
                                    CellularModemEvent_t modemEvent )
 {
@@ -953,8 +914,6 @@ void _Cellular_ModemEventCallback( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* Cellular common API prototype. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularSocketContext_t * _Cellular_GetSocketData( const CellularContext_t * pContext,
                                                    uint32_t sockIndex )
 {
@@ -1115,8 +1074,6 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
 
 CellularError_t _Cellular_LibCleanup( CellularHandle_t cellularHandle )
 {
-    /* Functions called this function modify the pContext data. */
-    /* coverity[misra_c_2012_rule_8_13_violation] */
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
@@ -1140,9 +1097,6 @@ CellularError_t _Cellular_LibCleanup( CellularHandle_t cellularHandle )
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                         CellularAtReq_t atReq )
 {
@@ -1152,9 +1106,6 @@ CellularPktStatus_t _Cellular_AtcmdRequestWithCallback( CellularContext_t * pCon
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t * pContext,
                                                                CellularAtReq_t atReq,
                                                                uint32_t timeoutMS )
