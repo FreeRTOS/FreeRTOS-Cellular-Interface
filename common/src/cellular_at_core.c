@@ -603,8 +603,6 @@ static uint8_t _charToNibble( char c )
 
 /*-----------------------------------------------------------*/
 
-/* AT core helper API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularATError_t Cellular_ATHexStrToHex( const char * pString,
                                           uint8_t * pHexData,
                                           uint16_t hexDataLen )
@@ -668,8 +666,6 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
 
 /*-----------------------------------------------------------*/
 
-/* AT core helper API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularATError_t Cellular_ATIsStrDigit( const char * pString,
                                          bool * pResult )
 {
