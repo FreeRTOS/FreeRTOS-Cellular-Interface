@@ -343,6 +343,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
         {
             pResp->status = false;
             pkStatus = CELLULAR_PKT_STATUS_OK;
+            if (pRespPrefix == NULL) pRespPrefix = "NULL";
             CellularLogError( "Modem return ERROR: %s %s respPrefix: %s status: %d",
                               pContext->pCurrentCmd, pLine, pRespPrefix, pkStatus );
         }
