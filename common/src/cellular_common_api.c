@@ -120,26 +120,14 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
 /*-----------------------------------------------------------*/
 
 CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
-                                     const CellularCommInterface_t * pCommInterface )
+                                     const CellularCommInterface_t * pCommInterface,
+                                     const CellularTokenTable_t * pTokenTable )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t * pContext = NULL;
-    CellularTokenTable_t tokenTable =
-    {
-        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
-        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
-        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
-        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
-        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
-        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
-        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
-        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
-        .pCellularSrcExtraTokenSuccessTable    = NULL,
-        .cellularSrcExtraTokenSuccessTableSize = 0
-    };
 
     /* Init the common library. */
-    cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, &tokenTable );
+    cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, pTokenTable );
 
     /* Init the module. */
     if( cellularStatus == CELLULAR_SUCCESS )

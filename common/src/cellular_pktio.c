@@ -833,12 +833,11 @@ static bool _handleDataResult( CellularContext_t * pContext,
                                char ** ppLine,
                                uint32_t * pBytesRead )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     uint32_t bytesLeft = 0;
     bool keepProcess = true;
 
     /* The input line is a data recv command. Handle the data buffer. */
-    pktStatus = _handleData( pStartOfData, pContext, *ppAtResp, ppLine, *pBytesRead, &bytesLeft );
+    ( void ) _handleData( pStartOfData, pContext, *ppAtResp, ppLine, *pBytesRead, &bytesLeft );
 
     /* pktStatus will never be CELLULAR_PKT_STATUS_PENDING_BUFFER from _handleData(). */
     if( bytesLeft == 0U )

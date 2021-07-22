@@ -81,22 +81,4 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
  */
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext );
 
-/*-----------------------------------------------------------*/
-/* This is module dependent declaration. */
-/* coverity[misra_c_2012_rule_8_11_violation] */
-extern const char * CellularSrcTokenErrorTable[];           /**< Solicited error token table. */
-extern uint32_t CellularSrcTokenErrorTableSize;             /**< Solicited error token table size. */
-/* This is module dependent declaration. */
-/* coverity[misra_c_2012_rule_8_11_violation] */
-extern const char * CellularSrcTokenSuccessTable[];         /**< Solicited success token table. */
-extern uint32_t CellularSrcTokenSuccessTableSize;           /**< Solicited success token table size. */
-/* This is module dependent declaration. */
-/* coverity[misra_c_2012_rule_8_11_violation] */
-extern const char * CellularUrcTokenWoPrefixTable[];        /**< URC token without prefix table. */
-extern uint32_t CellularUrcTokenWoPrefixTableSize;          /**< URC token without prefix table size. */
-/* This is module dependent declaration. */
-/* coverity[misra_c_2012_rule_8_11_violation] */
-extern CellularAtParseTokenMap_t CellularUrcHandlerTable[]; /**< URC handler table. */
-extern uint32_t CellularUrcHandlerTableSize;                /**< URC handler table size. */
-
 #endif /* End of __CELLULAR_COMMON_PORTABLE_H__. */
