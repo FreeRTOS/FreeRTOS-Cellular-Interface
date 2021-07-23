@@ -71,15 +71,15 @@
 
 #define MAX_QIRD_STRING_PREFIX_STRING                        ( 14U )           /* The max data prefix string is "+QIRD: 1460\r\n" */
 
-static uint16_t pktioEvtMask = 0x0000UL;
-static uint16_t evtGroupCreate = 0x0001UL;
+static uint16_t pktioEvtMask = 0x0000U;
+static uint16_t evtGroupCreate = 0x0001U;
 
 int NumLoops;
 
 static int recvCount = 0;
 
 static int eventDesiredCount = 0;
-static uint16_t desiredPktioEvtMask = 0x0000UL;
+static uint16_t desiredPktioEvtMask = 0x0000U;
 
 static bool threadReturn = true;
 
@@ -271,7 +271,10 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument )
 
     if( threadReturn )
     {
-        pContext->PktioAtCmdType = atCmdType;
+        if( pContext )
+        {
+            pContext->PktioAtCmdType = atCmdType;
+        }
         threadRoutine( pArgument );
     }
 
@@ -582,7 +585,6 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
 void test__Cellular_PktioInit_Invalid_Param( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t * pContext;
 
     /* Check that CELLULAR_PKT_STATUS_INVALID_HANDLE is returned. */
     pktStatus = _Cellular_PktioInit( NULL, PktioHandlePacketCallback_t );
@@ -727,7 +729,7 @@ void test__Cellular_PktioInit_String_Wo_Terminator( void )
 
     /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 1;
+    NumLoops = 2;
     recvCount = 1;
     atCmdType = CELLULAR_AT_WO_PREFIX;
     tokenTableType = 4;
@@ -912,8 +914,8 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__handleLeftov
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
 
     /* handle _handleLeftoverBuffer function case. */
-    NumLoops = 22;
-    recvCount = 22;
+    NumLoops = 23;
+    recvCount = 23;
     recvCommFail = 1;
     pktDataPrefixCBReturn = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
@@ -939,7 +941,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WITH_PREFIX
 
     /* Test the rx_data event with CELLULAR_AT_MULTI_WITH_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
+    NumLoops = 10;
     recvCount = 2;
     atCmdType = CELLULAR_AT_MULTI_WITH_PREFIX;
     /* copy the token table. */
@@ -1385,7 +1387,7 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
 }
 
 /**
- * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd.
+ * @brief Test that any NULL  interface for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
 {
@@ -1406,6 +1408,13 @@ void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.pCommIntf = NULL;
+    context.hPktioCommIntf = NULL;
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = NULL;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
                                           atReqSetRatPriority.atCmdType,
@@ -1519,11 +1528,17 @@ void test__Cellular_PktioSendData_Invalid_Param( void )
     TEST_ASSERT_EQUAL( 0, sentLen );
 
     context.pCommIntf = pCommIntf;
+    sentLen = _Cellular_PktioSendData( &context,
+                                       NULL,
+                                       NULL );
+    TEST_ASSERT_EQUAL( 0, sentLen );
+
     context.hPktioCommIntf = commInterfaceHandle;
     sentLen = _Cellular_PktioSendData( &context,
                                        NULL,
                                        NULL );
     TEST_ASSERT_EQUAL( 0, sentLen );
+
     free( commInterfaceHandle );
 }
 
@@ -1550,7 +1565,41 @@ void test__Cellular_PktioSendData_Happy_Path( void )
 }
 
 /**
- * @brief Test that any NULL parameter for _Cellular_PktioShutdown.
+ * @brief Test that any null parameter for _Cellular_PktioShutdown.
+ */
+void test__Cellular_PktioShutdown_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Mock null context */
+    _Cellular_PktioShutdown( NULL );
+
+    /* Mock context exist but member bPktioUp is fasle.*/
+    _Cellular_PktioShutdown( &context );
+}
+
+/**
+ * @brief Test that null pPktioCommEvent  for _Cellular_PktioShutdown.
+ */
+void test__Cellular_PktioShutdown_Null_PktioCommEvent( void )
+{
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    eventDesiredCount = 2;
+    desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
+    context.bPktioUp = true;
+
+    context.pPktioCommEvent = NULL;
+    _Cellular_PktioShutdown( &context );
+
+    TEST_ASSERT_EQUAL( false, context.bPktioUp );
+}
+
+/**
+ * @brief Test that happy path for _Cellular_PktioShutdown.
  */
 void test__Cellular_PktioShutdown_Happy_Path( void )
 {
@@ -1560,9 +1609,9 @@ void test__Cellular_PktioShutdown_Happy_Path( void )
     eventDesiredCount = 2;
     evtGroupCreate = 1U;
     desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
-    context.pPktioCommEvent = PlatformEventGroup_Create();
     context.bPktioUp = true;
 
+    context.pPktioCommEvent = PlatformEventGroup_Create();
     _Cellular_PktioShutdown( &context );
 
     TEST_ASSERT_EQUAL( false, context.bPktioUp );

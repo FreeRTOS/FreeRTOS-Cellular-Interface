@@ -61,7 +61,7 @@
 #ifndef LOOP_FOREVER
     #ifdef UNIT_TEST
         extern int32_t NumLoops;
-        #define LOOP_FOREVER()    NumLoops--
+        #define LOOP_FOREVER()    ( { NumLoops--; NumLoops > 0; } )
     #else
         #define LOOP_FOREVER()    true
     #endif
