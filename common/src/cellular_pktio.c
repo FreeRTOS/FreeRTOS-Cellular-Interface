@@ -527,6 +527,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
     uint32_t partialDataRead = pContext->partialDataRcvdLen;
     int32_t bufferEmptyLength = ( int32_t ) PKTIO_READ_BUFFER_SIZE;
 
+    ( void )pAtResp;
     pAtBuf = pContext->pktioReadBuf;
     pRead = pContext->pktioReadBuf;
 
@@ -536,7 +537,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
      * pAtResp equals NULL indicate that no data is buffered in AT command response and
      * data before pPktioReadPtr is invalid data can be recycled. */
     if( ( pContext->pPktioReadPtr != NULL ) && ( pContext->pPktioReadPtr != pContext->pktioReadBuf ) &&
-        ( pContext->partialDataRcvdLen != 0U ) && ( pAtResp == NULL ) )
+        ( pContext->partialDataRcvdLen != 0U ) )
     {
         pRead = _handleLeftoverBuffer( pContext );
         bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE - ( int32_t ) pContext->partialDataRcvdLen );
@@ -911,7 +912,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
     while( keepProcess == true )
     {
         /* Pktio is reading command. Skip over the change line. */
-        while( ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) ) && ( bytesRead > 0U ) )
+        while( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) )
         {
             pTempLine++;
             bytesRead = bytesRead - 1U;
@@ -967,7 +968,7 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
     /* Start from pLine there are bytesRead bytes. */
     pLine = _Cellular_ReadLine( pContext, &bytesRead, *ppAtResp );
 
-    if( ( bytesRead > 0U ) && ( pLine != NULL ) )
+    if( bytesRead > 0U )
     {
         if( pContext->dataLength != 0U )
         {
@@ -992,7 +993,6 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
 static void _pktioReadThread( void * pUserData )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
@@ -1001,7 +1001,7 @@ static void _pktioReadThread( void * pUserData )
     uint32_t bytesRead = 0U;
 
     /* Open main communication port. */
-    if( ( pContext != NULL ) && ( pContext->pCommIntf != NULL ) &&
+    if( ( pContext->pCommIntf != NULL ) &&
         ( pContext->pCommIntf->open( _Cellular_PktRxCallBack, ( void * ) pContext,
                                      &pContext->hPktioCommIntf ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
@@ -1050,18 +1050,12 @@ static void _pktioReadThread( void * pUserData )
         CellularLogError( "Comm port open failed" );
     }
 
-    if( pContext != NULL )
-    {
-        if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
-        {
-            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
-        }
+    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
 
-        /* Call the shutdown callback if it is defined. */
-        if( pContext->pPktioShutdownCB != NULL )
-        {
-            pContext->pPktioShutdownCB( pContext );
-        }
+    /* Call the shutdown callback if it is defined. */
+    if( pContext->pPktioShutdownCB != NULL )
+    {
+        pContext->pPktioShutdownCB( pContext );
     }
 }
 
