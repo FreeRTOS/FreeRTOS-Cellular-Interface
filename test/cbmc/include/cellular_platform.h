@@ -91,6 +91,12 @@ typedef void * PVOID;
     #define pdMS_TO_TICKS( xTimeInMs )    ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) 1000 ) / ( TickType_t ) 1000U ) )
 #endif
 
+#define CELLULAR_URC_HANDLER_TABLE_SIZE                ( sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t ) )
+#define CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE            ( sizeof( CellularSrcTokenErrorTable ) / sizeof( char * ) )
+#define CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE          ( sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * ) )
+#define CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE        ( sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * ) )
+#define CELLULAR_SRC_EXTRA_TOKEN_SUCCESS_TABLE_SIZE    ( sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * ) )
+
 /**
  * @brief Cellular library platform thread API and configuration.
  *

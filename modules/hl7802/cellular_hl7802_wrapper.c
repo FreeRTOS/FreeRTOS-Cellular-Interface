@@ -42,9 +42,10 @@
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
-                               const CellularCommInterface_t * pCommInterface )
+                               const CellularCommInterface_t * pCommInterfac,
+                               const CellularTokenTable_t * pTokenTable )
 {
-    return Cellular_CommonInit( pCellularHandle, pCommInterface );
+    return Cellular_CommonInit( pCellularHandle, pCommInterface, pTokenTable );
 }
 
 /*-----------------------------------------------------------*/

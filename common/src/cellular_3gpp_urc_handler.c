@@ -28,7 +28,10 @@
  */
 
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */
@@ -78,7 +81,6 @@ static void _regStatusGenerateLog( char * pRegPayload,
                                    CellularNetworkRegType_t regType );
 static void _regStatusGenerateEvent( const CellularContext_t * pContext,
                                      CellularNetworkRegType_t regType,
-                                     CellularServiceStatus_t * pServiceStatus,
                                      const cellularAtData_t * pLibAtData );
 static bool _Cellular_RegEventStatus( const cellularAtData_t * pLibAtData,
                                       CellularNetworkRegType_t regType,
@@ -95,7 +97,7 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
     int32_t tempValue = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
-    CellularNetworkRegistrationStatus_t regStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
+    CellularNetworkRegistrationStatus_t regStatus = REGISTRATION_STATUS_UNKNOWN;
 
     if( ( regType != CELLULAR_REG_TYPE_CREG ) && ( regType != CELLULAR_REG_TYPE_CEREG ) &&
         ( regType != CELLULAR_REG_TYPE_CGREG ) )
@@ -108,7 +110,7 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            if( ( tempValue >= 0 ) && ( tempValue < ( int32_t ) CELLULAR_NETWORK_REGISTRATION_STATUS_MAX ) )
+            if( ( tempValue >= 0 ) && ( tempValue < ( int32_t ) REGISTRATION_STATUS_MAX ) )
             {
                 /* tempValue range is checked before casting. */
                 /* coverity[misra_c_2012_rule_10_5_violation] */
@@ -134,15 +136,15 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
             pLibAtData->psRegStatus = regStatus;
         }
 
-        if( regStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_HOME )
+        if( regStatus == REGISTRATION_STATUS_REGISTERED_HOME )
         {
             CellularLogDebug( "Netowrk registration : HOME" );
         }
-        else if( regStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTERED_ROAMING )
+        else if( regStatus == REGISTRATION_STATUS_ROAMING_REGISTERED )
         {
             CellularLogDebug( "Netowrk registration : ROAMING" );
         }
-        else if( regStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED )
+        else if( regStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
         {
             /* clear the atlib data if the registration failed. */
             CellularLogDebug( "Netowrk registration : DEINED" );
@@ -306,14 +308,14 @@ static CellularPktStatus_t _parseRejectTypeInRegStatus( CellularNetworkRegType_t
         if( regType == CELLULAR_REG_TYPE_CREG )
         {
             /* Reject Type is only stored if the registration status is denied. */
-            if( pLibAtData->csRegStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED )
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->csRejectType = rejType;
             }
         }
         else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
-            if( pLibAtData->psRegStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED )
+            if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejectType = rejType;
             }
@@ -357,14 +359,14 @@ static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_
     {
         if( regType == CELLULAR_REG_TYPE_CREG )
         {
-            if( pLibAtData->csRegStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED )
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->csRejCause = rejCause;
             }
         }
         else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
-            if( pLibAtData->psRegStatus == CELLULAR_NETWORK_REGISTRATION_STATUS_REGISTRATION_DENIED )
+            if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejCause = rejCause;
             }
@@ -458,33 +460,35 @@ static void _regStatusGenerateLog( char * pRegPayload,
 
 static void _regStatusGenerateEvent( const CellularContext_t * pContext,
                                      CellularNetworkRegType_t regType,
-                                     CellularServiceStatus_t * pServiceStatus,
                                      const cellularAtData_t * pLibAtData )
 {
-    pServiceStatus->rat = pLibAtData->rat;
-    pServiceStatus->csRegistrationStatus = pLibAtData->csRegStatus;
-    pServiceStatus->psRegistrationStatus = pLibAtData->psRegStatus;
-    pServiceStatus->csRejectionCause = pLibAtData->csRejCause;
-    pServiceStatus->csRejectionType = pLibAtData->csRejectType;
-    pServiceStatus->psRejectionCause = pLibAtData->psRejCause;
-    pServiceStatus->psRejectionType = pLibAtData->psRejectType;
+    CellularServiceStatus_t serviceStatus;
+
+    ( void ) memset( &serviceStatus, 0, sizeof( CellularServiceStatus_t ) );
+    serviceStatus.rat = pLibAtData->rat;
+    serviceStatus.csRegistrationStatus = pLibAtData->csRegStatus;
+    serviceStatus.psRegistrationStatus = pLibAtData->psRegStatus;
+    serviceStatus.csRejectionCause = pLibAtData->csRejCause;
+    serviceStatus.csRejectionType = pLibAtData->csRejectType;
+    serviceStatus.psRejectionCause = pLibAtData->psRejCause;
+    serviceStatus.psRejectionType = pLibAtData->psRejectType;
 
     /* Data should be obtained from COPS commmand. User should obtain with APIs. */
-    ( void ) strcpy( pServiceStatus->plmnInfo.mcc, "FFF" );
-    ( void ) strcpy( pServiceStatus->plmnInfo.mnc, "FFF" );
-    ( void ) strcpy( pServiceStatus->operatorName, "FFF" );
-    pServiceStatus->operatorNameFormat = CELLULAR_OPERATOR_NAME_FORMAT_NOT_PRESENT;
-    pServiceStatus->networkRegistrationMode = CELLULAR_NETWORK_REGISTRATION_MODE_UNKNOWN;
+    ( void ) strcpy( serviceStatus.plmnInfo.mcc, "FFF" );
+    ( void ) strcpy( serviceStatus.plmnInfo.mnc, "FFF" );
+    ( void ) strcpy( serviceStatus.operatorName, "FFF" );
+    serviceStatus.operatorNameFormat = OPERATOR_NAME_FORMAT_NOT_PRESENT;
+    serviceStatus.networkRegistrationMode = REGISTRATION_MODE_UNKNOWN;
 
     if( pContext->cbEvents.networkRegistrationCallback != NULL )
     {
         if( regType == CELLULAR_REG_TYPE_CREG )
         {
-            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, pServiceStatus );
+            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, &serviceStatus );
         }
         else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
-            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, pServiceStatus );
+            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, &serviceStatus );
         }
         else
         {
@@ -542,11 +546,10 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     uint8_t i = 0;
     char * pRegStr = NULL, * pToken = NULL;
     cellularAtData_t * pLibAtData = NULL;
-    CellularServiceStatus_t serviceStatus = { 0 };
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
-    CellularNetworkRegistrationStatus_t prevCsRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
-    CellularNetworkRegistrationStatus_t prevPsRegStatus = CELLULAR_NETWORK_REGISTRATION_STATUS_UNKNOWN;
+    CellularNetworkRegistrationStatus_t prevCsRegStatus = REGISTRATION_STATUS_UNKNOWN;
+    CellularNetworkRegistrationStatus_t prevPsRegStatus = REGISTRATION_STATUS_UNKNOWN;
 
     if( pContext == NULL )
     {
@@ -608,7 +611,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         /* If Registration Status changed, generate the event. */
         if( ( _Cellular_RegEventStatus( pLibAtData, regType, prevCsRegStatus, prevPsRegStatus ) == true ) )
         {
-            _regStatusGenerateEvent( pContext, regType, &serviceStatus, pLibAtData );
+            _regStatusGenerateEvent( pContext, regType, pLibAtData );
         }
 
         if( atCoreStatus != CELLULAR_AT_SUCCESS )
@@ -645,9 +648,6 @@ CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext,
                                                     char * pInputLine )
 {

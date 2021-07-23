@@ -34,36 +34,46 @@
 #endif
 
 #if __has_builtin( __builtin___strchr )
-    char * __builtin___strchr_chk(const char *s, int c)
+    char * __builtin___strchr_chk( const char * s,
+                                   int c )
     {
-        if( (__CPROVER_w_ok( s, 1 ), "write") && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        if( ( __CPROVER_w_ok( s, 1 ), "write" ) && ( __CPROVER_r_ok( s, 1 ), "read" ) )
         {
-            while( *s != '\0')
+            while( *s != '\0' )
             {
-                if((int)*s == c )
+                if( ( int ) *s == c )
+                {
                     return s;
-                if( (__CPROVER_w_ok( s + 1, 1 ), "write") && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                }
+
+                if( ( __CPROVER_w_ok( s + 1, 1 ), "write" ) && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
                 {
                     s++;
                 }
             }
+
             return NULL;
         }
     }
-#else
-    char * strchr(const char *s, int c)
+#else  /* if __has_builtin( __builtin___strchr ) */
+    char * strchr( const char * s,
+                   int c )
     {
-        if( (__CPROVER_w_ok( s, 1 ), "write") && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        if( ( __CPROVER_w_ok( s, 1 ), "write" ) && ( __CPROVER_r_ok( s, 1 ), "read" ) )
         {
-            while( *s != '\0')
+            while( *s != '\0' )
             {
-                if((int)*s == c )
+                if( ( int ) *s == c )
+                {
                     return s;
-                if( (__CPROVER_w_ok( s + 1, 1 ), "write") && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                }
+
+                if( ( __CPROVER_w_ok( s + 1, 1 ), "write" ) && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
                 {
                     s++;
                 }
             }
+
             return NULL;
         }
     }

@@ -27,7 +27,10 @@
  * @brief FreeRTOS Cellular Library common packet handler functions to dispatch packet.
  */
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */
@@ -47,10 +50,8 @@
 
 /* Windows simulator implementation. */
 #if defined( _WIN32 ) || defined( _WIN64 )
-    #define strtok_r             strtok_s
+    #define strtok_r    strtok_s
 #endif
-
-#define SORT_MODULE_TOKEN_MAP    ( 0U )
 
 /*-----------------------------------------------------------*/
 
@@ -60,7 +61,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
                                           char * pInputLine );
 static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf );
-static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( CellularContext_t * pContext,
+static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( CellularContext_t * pContext,
                                                                          CellularAtReq_t atReq,
                                                                          uint32_t timeoutMS );
 static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContext_t * pContext,
@@ -76,7 +77,7 @@ static int _sortCompareFunc( const void * pElem1Ptr,
 static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
                                          const char * pInputLine );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
-                                               char * pTokenPtr,
+                                               const char * pTokenPtr,
                                                char * pSavePtr );
 
 /*-----------------------------------------------------------*/
@@ -107,6 +108,8 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
         }
 
         /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
@@ -199,8 +202,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
-static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( CellularContext_t * pContext,
+static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( CellularContext_t * pContext,
                                                                          CellularAtReq_t atReq,
                                                                          uint32_t timeoutMS )
 {
@@ -230,6 +232,8 @@ static CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallbackRaw( Cellula
         else
         {
             /* Wait for a response. */
+            /* This is platform dependent api. */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
             qRet = xQueueReceive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMS ) );
 
             if( qRet == pdTRUE )
@@ -373,8 +377,8 @@ static int _searchCompareFunc( const void * pInputToken,
     int compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
-    uint32_t tokenLen = strlen( pInputToken );
-    uint32_t strLen = strlen( pBasePtr->pStrValue );
+    uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
+    uint32_t strLen = ( uint32_t ) strlen( pBasePtr->pStrValue );
 
     compareValue = strncmp( pToken,
                             pBasePtr->pStrValue,
@@ -415,8 +419,8 @@ static int _sortCompareFunc( const void * pElem1Ptr,
     int compareValue = 0;
     const CellularAtParseTokenMap_t * pElement1Ptr = ( const CellularAtParseTokenMap_t * ) pElem1Ptr;
     const CellularAtParseTokenMap_t * pElement2Ptr = ( const CellularAtParseTokenMap_t * ) pElem2Ptr;
-    uint32_t element1PtrLen = strlen( pElement1Ptr->pStrValue );
-    uint32_t element2PtrLen = strlen( pElement2Ptr->pStrValue );
+    uint32_t element1PtrLen = ( uint32_t ) strlen( pElement1Ptr->pStrValue );
+    uint32_t element2PtrLen = ( uint32_t ) strlen( pElement2Ptr->pStrValue );
 
     compareValue = strncmp( pElement1Ptr->pStrValue,
                             pElement2Ptr->pStrValue,
@@ -450,7 +454,7 @@ static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
-                                               char * pTokenPtr,
+                                               const char * pTokenPtr,
                                                char * pSavePtr )
 {
     /* Now get the handler function based on the token. */
@@ -502,7 +506,9 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
     {
         /* Wait for response to finish. */
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
-        vQueueDelete( pContext->pktRespQueue );
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        ( void ) vQueueDelete( pContext->pktRespQueue );
         pContext->pktRespQueue = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
@@ -544,9 +550,6 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                                    CellularAtReq_t atReq,
                                                                    uint32_t timeoutMS )
@@ -561,7 +564,7 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, timeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, timeoutMS );
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
 
@@ -570,9 +573,6 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularContext_t * pContext,
                                                                        CellularAtReq_t atReq,
                                                                        uint32_t timeoutMS,
@@ -591,7 +591,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->pktDataPrefixCB = pktDataPrefixCallback;
         pContext->pDataPrefixCBContext = pCallbackContext;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, timeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, timeoutMS );
         pContext->pktDataPrefixCB = NULL;
         pContext->pDataPrefixCBContext = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
@@ -602,9 +602,6 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
                                              CellularAtReq_t atReq,
                                              CellularAtDataReq_t dataReq,
@@ -626,7 +623,7 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->pktDataSendPrefixCB = pktDataSendPrefixCallback;
         pContext->pDataSendPrefixCBContext = pCallbackContext;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, atTimeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
         pContext->pDataSendPrefixCBContext = NULL;
         pContext->pktDataSendPrefixCB = NULL;
 
@@ -643,9 +640,6 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularContext_t * pContext,
                                                                        CellularAtReq_t atReq,
                                                                        CellularAtDataReq_t dataReq,
@@ -657,9 +651,6 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularC
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_t * pContext,
                                                                 CellularAtReq_t atReq,
                                                                 CellularAtDataReq_t dataReq,
@@ -680,7 +671,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallbackRaw( pContext, atReq, atTimeoutMS );
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
 
@@ -704,7 +695,10 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Create the response queue which is used to post reponses to the sender. */
-        pContext->pktRespQueue = xQueueCreate( 1, sizeof( CellularPktStatus_t ) );
+        /* This is platform dependent api. */
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        /* coverity[misra_c_2012_rule_11_4_violation] */
+        pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
 
         if( pContext->pktRespQueue == NULL )
         {
@@ -749,35 +743,12 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
             }
         }
 
-        /* The Prefix Map should be sorted. */
-        #if ( SORT_MODULE_TOKEN_MAP == 1U )
-            if( finit != true )
-            {
-                taskENTER_CRITICAL();
+        if( finit != true )
+        {
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+            CellularLogError( "AtParseFail URC token table is not sorted" );
+        }
 
-                /* Ensure that the prefix to parse map is sorted
-                 * to rule out any manual insertion errors while introducing new AT elements. */
-                /* coverity[misra_c_2012_rule_10_4_violation]. */
-                qsort( pTokenMap,
-                       tokenMapSize,
-                       sizeof( CellularAtParseTokenMap_t ), _sortCompareFunc );
-                finit = true;
-                taskEXIT_CRITICAL();
-            }
-        #else /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
-            if( finit != true )
-            {
-                pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-                CellularLogError( "AtParseFail URC token table is not sorted" );
-            }
-
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_10_5_violation] */
-            configASSERT( finit == true );
-        #endif /* if ( SORT_MODULE_TOKEN_MAP == 1U ) */
-
-        /* coverity[misra_c_2012_rule_10_4_violation] */
-        /* coverity[misra_c_2012_rule_10_5_violation] */
         configASSERT( finit == true );
 
         for( i = 0; i < tokenMapSize; i++ )

@@ -31,6 +31,8 @@
 #ifndef CELLULAR_CONFIG_H_
 #define CELLULAR_CONFIG_H_
 
+#include <stdint.h>
+
 /* This is a project specific file and is used to override config values defined
  * in cellular_config_defaults.h. */
 
@@ -58,7 +60,7 @@
 #define UNIT_TEST
 #ifndef LOOP_FOREVER
     #ifdef UNIT_TEST
-        extern int NumLoops;
+        extern int32_t NumLoops;
         #define LOOP_FOREVER()    NumLoops--
     #else
         #define LOOP_FOREVER()    true

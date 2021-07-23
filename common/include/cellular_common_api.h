@@ -36,7 +36,8 @@
  * Reference Cellular_Init in cellular_api.h for definition.
  */
 CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
-                                     const CellularCommInterface_t * pCommInterface );
+                                     const CellularCommInterface_t * pCommInterface,
+                                     const CellularTokenTable_t * pTokenTable );
 
 /**
  * @brief This function is the common implementation of FreeRTOS Cellular Library API.

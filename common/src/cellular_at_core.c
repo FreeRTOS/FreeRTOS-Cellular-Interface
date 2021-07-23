@@ -31,7 +31,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
+
 #include "cellular_config_defaults.h"
 
 #include "cellular_at_core.h"
@@ -39,9 +43,9 @@
 
 /*-----------------------------------------------------------*/
 
-#define CHECK_IS_PREFIX_CHAR( inputChar )                  \
-    ( ( ( isalpha( ( ( int ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( isdigit( ( ( int ) ( inputChar ) ) ) ) == 0 ) && \
+#define CHECK_IS_PREFIX_CHAR( inputChar )                                 \
+    ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
+      ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
 
 /*-----------------------------------------------------------*/
@@ -134,7 +138,10 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
             /* There should be only '+', '_', characters or digit before seperator. */
             for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
-                if( CHECK_IS_PREFIX_CHAR( *ptrChar ) )
+                /* It's caused by stanard api isalpha and isdigit. */
+                /* coverity[misra_c_2012_directive_4_6_violation] */
+                /* coverity[misra_c_2012_rule_10_8_violation] */
+                if( CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;
@@ -311,11 +318,11 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        stringLen = strlen( pString );
+        stringLen = ( uint32_t ) strlen( pString );
 
         /* This API intend to remove the trailing space, and this should be functional
          * when the string length is greater than 2. */
-        if( stringLen > 2 )
+        if( stringLen > 2U )
         {
             p = &pString[ stringLen ];
 
@@ -415,9 +422,9 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        stringLen = strlen( *ppString );
+        stringLen = ( uint32_t ) strlen( *ppString );
 
-        if( stringLen > 2 )
+        if( stringLen > 2U )
         {
             if( **ppString == '\"' )
             {
@@ -596,8 +603,6 @@ static uint8_t _charToNibble( char c )
 
 /*-----------------------------------------------------------*/
 
-/* AT core helper API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularATError_t Cellular_ATHexStrToHex( const char * pString,
                                           uint8_t * pHexData,
                                           uint16_t hexDataLen )
@@ -661,8 +666,6 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
 
 /*-----------------------------------------------------------*/
 
-/* AT core helper API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularATError_t Cellular_ATIsStrDigit( const char * pString,
                                          bool * pResult )
 {
@@ -689,7 +692,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
     {
         *pResult = true;
 
-        while( ( pTempString != NULL ) && ( *pTempString != '\0' ) )
+        while( ( *pTempString != '\0' ) )
         {
             /* isdigit is a standard library function and we cannot control it. */
             /* coverity[misra_c_2012_directive_4_6_violation] */
@@ -793,10 +796,10 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
 
 CellularATError_t Cellular_ATStrtoi( const char * pStr,
                                      int32_t base,
-                                     long * pResult )
+                                     int32_t * pResult )
 {
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
-    long retStrtol = 0;
+    int32_t retStrtol = 0;
     char * pEndStr = NULL;
 
     if( ( pStr == NULL ) || ( pResult == NULL ) )
@@ -833,7 +836,7 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
         /* coverity[misra_c_2012_directive_4_7_violation] */
         /* coverity[misra_c_2012_rule_22_8_violation] */
         /* coverity[misra_c_2012_rule_22_9_violation] */
-        retStrtol = strtol( pStr, &pEndStr, base );
+        retStrtol = ( int32_t ) strtol( pStr, &pEndStr, base );
 
         /* Need to check if the pEndStr is NULL or not to prevent dereference error. */
         if( ( pEndStr != NULL ) && ( *pEndStr == '\0' ) )

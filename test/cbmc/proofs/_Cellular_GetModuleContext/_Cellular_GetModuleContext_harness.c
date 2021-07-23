@@ -45,6 +45,46 @@ typedef struct cellularModuleContext
     char * pTestUsrData;      /* test user data to store the result. */
 } cellularModuleContext_t;
 
+CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
+{
+    { "CEREG",             NULL },
+    { "CGREG",             NULL },
+    { "CREG",              NULL },
+    { "NORMAL POWER DOWN", NULL },
+    { "PSM POWER DOWN",    NULL },
+    { "QIND",              NULL },
+    { "QIOPEN",            NULL },
+    { "QIURC",             NULL },
+    { "QSIMSTAT",          NULL },
+    { "RDY",               NULL }
+};
+
+const char * CellularSrcTokenErrorTable[] =
+{ "ERROR", "BUSY", "NO CARRIER", "NO ANSWER", "NO DIALTONE", "ABORTED", "+CMS ERROR", "+CME ERROR", "SEND FAIL" };
+
+const char * CellularSrcTokenSuccessTable[] =
+{ "OK", "CONNECT", "SEND OK", ">" };
+
+const char * CellularUrcTokenWoPrefixTable[] =
+{ "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
+
+const char * CellularSrcExtraTokenSuccessTable[] =
+{ "EXTRA_TOKEN_1", "EXTRA_TOKEN_2", "EXTRA_TOKEN_3" };
+
+static CellularTokenTable_t tokenTable =
+{
+    .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+    .cellularPrefixToParserMapSize         = CELLULAR_URC_HANDLER_TABLE_SIZE,
+    .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+    .cellularSrcTokenErrorTableSize        = CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE,
+    .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+    .cellularSrcTokenSuccessTableSize      = CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE,
+    .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+    .cellularUrcTokenWoPrefixTableSize     = CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE,
+    .pCellularSrcExtraTokenSuccessTable    = CellularSrcExtraTokenSuccessTable,
+    .cellularSrcExtraTokenSuccessTableSize = CELLULAR_SRC_EXTRA_TOKEN_SUCCESS_TABLE_SIZE
+};
+
 /* Extern the com interface in comm_if_windows.c */
 extern CellularCommInterface_t CellularCommInterface;
 
@@ -66,7 +106,7 @@ void harness()
     /****************************************************************
     * Initialize the member of Cellular_CommonInit.
     ****************************************************************/
-    Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface );
+    Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface, &tokenTable );
 
     _Cellular_GetModuleContext( pHandle, &pModuleContext );
 }

@@ -28,6 +28,7 @@
 
 /* IoT Cellular data types. */
 #include "cellular_types.h"
+#include "cellular_common.h"
 
 /* Hardware interface. */
 #include "cellular_comm_interface.h"
@@ -40,12 +41,14 @@
  *
  * @param[in,out] pCellularHandle the handle pointer to store the cellular handle.
  * @param[in] pCommInterface Comm interface for communicating with the module.
+ * @param[in] pTokenTable Token tables for pkthandler and pktio.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
  */
 CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
-                               const CellularCommInterface_t * pCommInterface );
+                               const CellularCommInterface_t * pCommInterfac,
+                               const CellularTokenTable_t * pTokenTable );
 
 /**
  * @brief One time deinitialization function.

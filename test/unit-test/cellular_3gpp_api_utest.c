@@ -187,33 +187,28 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
     return commIntRet;
 }
 
-static CellularCommInterface_t CellularCommInterface =
-{
-    .open  = _prvCommIntfOpen,
-    .send  = _prvCommIntfSend,
-    .recv  = _prvCommIntfReceive,
-    .close = _prvCommIntfClose
-};
-
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
+    ( void )pNewMutex;
     pNewMutex->created = true;
     return true;
 }
 
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
+    ( void )pMutex;
 }
 
 void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
+    ( void )pMutex;
 }
 
-uint16_t MockvQueueDelete( int32_t * queue )
+uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     free( queue );
-    *queue = 0;
+    queue = 0;
     return 1;
 }
 
@@ -228,6 +223,8 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback( CellularContext_t * pContext,
 {
     cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
 
+    ( void )pContext;
+    ( void)cmock_num_calls;
     pOperatorInfo->rat = CELLULAR_RAT_INVALID;
 
     return CELLULAR_PKT_STATUS_OK;
@@ -302,7 +299,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTi
                                                                                     CellularAtReq_t atReq,
                                                                                     int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularATCommandResponse_t atResp;
     char pData[ 20 ];
@@ -343,6 +339,8 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
                                           int32_t * pResult,
                                           int cmock_num_calls )
 {
+    ( void )base;
+
     if( cbCondition < PARSE_TIME_FIRST_CALL_FAILURE_CONDITION )
     {
         *pResult = atoi( pStr );
@@ -424,7 +422,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                                   CellularAtReq_t atReq,
                                                                                                   int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
@@ -451,7 +448,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                        CellularAtReq_t atReq,
                                                                                        int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
@@ -481,7 +477,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId( 
                                                                                 CellularAtReq_t atReq,
                                                                                 int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
@@ -511,7 +506,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactu
                                                                                       CellularAtReq_t atReq,
                                                                                       int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
@@ -541,7 +535,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
                                                                                    CellularAtReq_t atReq,
                                                                                    int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
@@ -571,12 +564,12 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
                                                                                   CellularAtReq_t atReq,
                                                                                   int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ sizeof( cellularOperatorInfo_t ) ];
 
+    ( void )cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
     if( cbCondition < 3 )
@@ -589,19 +582,18 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
 
-        /*_parseCopsNetworkNameToken pOperatorInfo->operatorNameFormat */
         if( parseNetworkNameFailureCase == 2 )
         {
             cellularOperatorInfo_t cellularOperatorInfo;
             memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
-            cellularOperatorInfo.operatorNameFormat = CELLULAR_OPERATOR_NAME_FORMAT_LONG;
+            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
             pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else if( parseNetworkNameFailureCase == 3 )
         {
             cellularOperatorInfo_t cellularOperatorInfo;
             memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
-            cellularOperatorInfo.operatorNameFormat = CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC;
+            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
             pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else
@@ -622,6 +614,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
     CellularATCommandResponse_t atResp;
     char pData[ 2 ];
 
+    ( void )cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
     if( cbCondition < 3 )
@@ -656,6 +649,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettin
     CellularATCommandResponse_t atResp;
     CellularPsmSettings_t cellularPsmSettings;
 
+    ( void )cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
     if( cbCondition < 3 )
@@ -942,6 +936,8 @@ CellularATError_t Mock_simLockStateTestCase_ATGetNextTok_Calback( char ** ppStri
     char pFitNum[] = "1";
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
+    ( void )ppString;
+
     if( *ppTokOutput )
     {
         free( *ppTokOutput );
@@ -971,6 +967,8 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
     char pNumericNum[] = "123456";
     char pBigNum[] = "32";
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
+
+    ( void )ppString;
 
     if( *ppTokOutput )
     {
@@ -1010,19 +1008,19 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
         {
             *ppTokOutput = NULL;
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_SHORT. */
+        /* OPERATOR_NAME_FORMAT_SHORT. */
         else if( parseNetworkNameFailureCase == 2 )
         {
             *ppTokOutput = malloc( sizeof( pFitNum ) );
             memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC. */
+        /* OPERATOR_NAME_FORMAT_NUMERIC. */
         else if( parseNetworkNameFailureCase == 3 )
         {
             *ppTokOutput = malloc( sizeof( pNumericNum ) );
             memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
         }
-        /* CELLULAR_OPERATOR_NAME_FORMAT_NUMERIC wrong length. */
+        /* OPERATOR_NAME_FORMAT_NUMERIC wrong length. */
         else if( parseNetworkNameFailureCase == 5 )
         {
             *ppTokOutput = malloc( sizeof( pBigNum ) );
@@ -1065,6 +1063,8 @@ CellularATError_t Mock_recvFuncGetHplmnCase_ATGetNextTok_Calback( char ** ppStri
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char pFitNum[] = "1";
+
+    ( void )ppString;
 
     if( *ppTokOutput )
     {
@@ -1164,6 +1164,8 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
     char pBigNum[] = "32";
     char pNumericNum[] = "123456";
     int len = 10;
+
+    ( void )ppString;
 
     if( *ppTokOutput )
     {
@@ -1520,12 +1522,12 @@ void test_Cellular_CommonSetEidrxSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularEidrxSettingsList_t eidrxSettingsList;
+    CellularEidrxSettings_t eidrxSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_TIMED_OUT );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_TIMED_OUT, CELLULAR_TIMEOUT );
-    cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
     TEST_ASSERT_EQUAL( CELLULAR_TIMEOUT, cellularStatus );
 }
 
@@ -1536,11 +1538,11 @@ void test_Cellular_CommonSetEidrxSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularEidrxSettingsList_t eidrxSettingsList;
+    CellularEidrxSettings_t eidrxSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
-    cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
@@ -2182,6 +2184,7 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
+
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
@@ -2212,7 +2215,6 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Hap
 
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-
 
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
@@ -2339,12 +2341,11 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data( void )
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    /* Null data pointer case condition. */
     cbCondition = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
-
     cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
@@ -2367,9 +2368,6 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_AtCmd_Fa
 
     /* Enter _parseTimeZoneInfo. */
     Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
-    /* _Cellular_TranslateAtCoreStatus_IgnoreAndReturn(CELLULAR_PKT_STATUS_OK); */
-    /* Cellular_ATGetSpecificNextTok_IgnoreAndReturn(CELLULAR_AT_SUCCESS); */
-    /* Cellular_ATStrtoi_IgnoreAndReturn(CELLULAR_AT_SUCCESS); */
     _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
 
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
@@ -3254,7 +3252,6 @@ void test_Cellular_CommonGetIPAddress_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3276,7 +3273,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Context
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3297,7 +3293,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_F
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3318,7 +3313,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Data_Po
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3339,7 +3333,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path( 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3363,7 +3356,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path_C
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3387,7 +3379,6 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Input_H
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3410,7 +3401,6 @@ void test_Cellular_CommonGetIPAddress_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularHandle_t cellularHandle;
-    CellularModemInfo_t modemInfo;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
