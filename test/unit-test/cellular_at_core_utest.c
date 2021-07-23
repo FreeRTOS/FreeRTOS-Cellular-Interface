@@ -596,6 +596,22 @@ void test_Cellular_ATHexStrToHex_Happy_Path_Lowercase_Hex_String( void )
 }
 
 /**
+ * @brief Test the notation string case for Cellular_ATHexStrToHex to return CELLULAR_AT_SUCCESS and got expected results.
+ */
+void test_Cellular_ATHexStrToHex_Happy_Path_Notation_String( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char pNotationCaseString[] = "@@";
+    uint8_t hexData[ 3 ];
+    uint16_t hexDataLen = 3;
+
+    cellularStatus = Cellular_ATHexStrToHex( pNotationCaseString, hexData, hexDataLen );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+
+    TEST_ASSERT_EQUAL( hexData[ 0 ], 0xFF );
+}
+
+/**
  * @brief Test the error path for Cellular_ATHexStrToHex to return CELLULAR_AT_BAD_PARAMETER.
  */
 void test_Cellular_ATHexStrToHex_Error_Path( void )

@@ -29,7 +29,10 @@
 
 /* The config header is always included first. */
 
-#include "cellular_config.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */
@@ -117,26 +120,14 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
 /*-----------------------------------------------------------*/
 
 CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
-                                     const CellularCommInterface_t * pCommInterface )
+                                     const CellularCommInterface_t * pCommInterface,
+                                     const CellularTokenTable_t * pTokenTable )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t * pContext = NULL;
-    CellularTokenTable_t tokenTable =
-    {
-        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
-        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
-        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
-        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
-        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
-        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
-        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
-        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
-        .pCellularSrcExtraTokenSuccessTable    = NULL,
-        .cellularSrcExtraTokenSuccessTableSize = 0
-    };
 
     /* Init the common library. */
-    cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, &tokenTable );
+    cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, pTokenTable );
 
     /* Init the module. */
     if( cellularStatus == CELLULAR_SUCCESS )
@@ -161,12 +152,8 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Library prototype. */
-/* coverity[misra_c_2012_rule_8_13_violation] */
 CellularError_t Cellular_CommonCleanup( CellularHandle_t cellularHandle )
 {
-    /* Functions called this function modify the pContext data. */
-    /* coverity[misra_c_2012_rule_8_13_violation] */
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
@@ -235,9 +222,6 @@ CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cel
 
 /*-----------------------------------------------------------*/
 
-/* This function is provided as common code to cellular module porting.
- * Vendor may choose to use this function or use their implementation. */
-/* coverity[misra_c_2012_rule_8_7_violation]. */
 CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( CellularHandle_t cellularHandle,
                                                                          CellularUrcSignalStrengthChangedCallback_t signalStrengthChangedCallback,
                                                                          void * pCallbackContext )

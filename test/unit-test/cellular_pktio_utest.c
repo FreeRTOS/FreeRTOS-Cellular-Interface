@@ -187,36 +187,40 @@ void * mock_malloc( size_t size )
     return ( void * ) malloc( size );
 }
 
-uint16_t MockPlatformEventGroup_Delete()
+uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent )
+{
+    return 0U;
+}
+
+uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup,
+                                           TickType_t uxBitsToClear )
 {
     return 0;
 }
 
-uint16_t MockPlatformEventGroup_ClearBits()
-{
-    return 0;
-}
-
-uint16_t MockPlatformEventGroup_Create()
+uint16_t MockPlatformEventGroup_Create( void )
 {
     return evtGroupCreate;
 }
 
-uint16_t MockPlatformEventGroup_WaitBits()
+uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
+                                          EventBits_t uxBitsToWaitFor,
+                                          BaseType_t xClearOnExit,
+                                          BaseType_t xWaitForAllBits,
+                                          TickType_t xTicksToWait )
 {
     return pktioEvtMask;
 }
 
-uint16_t MockPlatformEventGroup_SetBits( int32_t groupEvent,
-                                         int32_t event )
+uint16_t MockPlatformEventGroup_SetBits( PlatformEventGroupHandle_t groupEvent,
+                                         EventBits_t event )
 {
-    pktioEvtMask = event;
-    return 0;
+    return pktioEvtMask;
 }
 
-int32_t MockPlatformEventGroup_SetBitsFromISR( int32_t groupEvent,
-                                               int32_t event,
-                                               int32_t * pHigherPriorityTaskWoken )
+int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupEvent,
+                                               EventBits_t event,
+                                               BaseType_t * pHigherPriorityTaskWoken )
 {
     int32_t ret = pdFALSE;
 
@@ -241,7 +245,7 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( int32_t groupEvent,
     return ret;
 }
 
-uint16_t MockPlatformEventGroup_GetBits( int32_t groupEvent )
+uint16_t MockPlatformEventGroup_GetBits( PlatformEventGroupHandle_t groupEvent )
 {
     if( eventDesiredCount > 0 )
     {
@@ -255,9 +259,9 @@ uint16_t MockPlatformEventGroup_GetBits( int32_t groupEvent )
     return pktioEvtMask;
 }
 
-bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
+bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument ),
                                     void * pArgument,
-                                    int32_t priority,
+                                    size_t priority,
                                     size_t stackSize )
 {
     ( void ) pArgument;
@@ -1277,7 +1281,7 @@ void test__Cellular_PktioInit_Event_Aborted( void )
 
     /* Test the aborted event. */
     pktioEvtMask = PKTIO_EVT_MASK_ABORTED;
-    evtGroupCreate = 1;
+    evtGroupCreate = 1U;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
@@ -1296,7 +1300,7 @@ void test__Cellular_PktioInit_Event_Group_Create_Null( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the pPktioCommEvent NULL case. */
-    evtGroupCreate = 0;
+    evtGroupCreate = 0U;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_CREATION_FAIL, pktStatus );
@@ -1316,7 +1320,7 @@ void test__Cellular_PktioInit_Create_Thread_Fail( void )
 
     /* Test the Platform_CreateDetachedThread fail case. */
     threadReturn = false;
-    evtGroupCreate = 1;
+    evtGroupCreate = 1U;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_CREATION_FAIL, pktStatus );
@@ -1554,7 +1558,7 @@ void test__Cellular_PktioShutdown_Happy_Path( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     eventDesiredCount = 2;
-    evtGroupCreate = 1;
+    evtGroupCreate = 1U;
     desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
     context.pPktioCommEvent = PlatformEventGroup_Create();
     context.bPktioUp = true;

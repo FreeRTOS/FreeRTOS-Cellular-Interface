@@ -43,11 +43,14 @@
 #include "mock_cellular_common_portable.h"
 
 
+#define CELLULAR_URC_HANDLER_TABLE_SIZE                ( sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t ) )
+#define CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE            ( sizeof( CellularSrcTokenErrorTable ) / sizeof( char * ) )
+#define CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE          ( sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * ) )
+#define CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE        ( sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * ) )
+#define CELLULAR_SRC_EXTRA_TOKEN_SUCCESS_TABLE_SIZE    ( sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * ) )
+
 static int32_t queueCreateFail = 0;
 
-/* Try to Keep this map in Alphabetical order. */
-/* FreeRTOS Cellular Common Library porting interface. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
     { "CEREG",             NULL },
@@ -61,25 +64,32 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "QSIMSTAT",          NULL },
     { "RDY",               NULL }
 };
-uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
 
 const char * CellularSrcTokenErrorTable[] =
 { "ERROR", "BUSY", "NO CARRIER", "NO ANSWER", "NO DIALTONE", "ABORTED", "+CMS ERROR", "+CME ERROR", "SEND FAIL" };
-uint32_t CellularSrcTokenErrorTableSize = sizeof( CellularSrcTokenErrorTable ) / sizeof( char * );
 
 const char * CellularSrcTokenSuccessTable[] =
 { "OK", "CONNECT", "SEND OK", ">" };
-uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * );
 
 const char * CellularUrcTokenWoPrefixTable[] =
 { "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
 
-uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
-
 const char * CellularSrcExtraTokenSuccessTable[] =
 { "EXTRA_TOKEN_1", "EXTRA_TOKEN_2", "EXTRA_TOKEN_3" };
 
-uint32_t CellularSrcExtraTokenSuccessTableSize = sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * );
+static CellularTokenTable_t tokenTable =
+{
+    .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+    .cellularPrefixToParserMapSize         = CELLULAR_URC_HANDLER_TABLE_SIZE,
+    .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+    .cellularSrcTokenErrorTableSize        = CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE,
+    .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+    .cellularSrcTokenSuccessTableSize      = CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE,
+    .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+    .cellularUrcTokenWoPrefixTableSize     = CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE,
+    .pCellularSrcExtraTokenSuccessTable    = CellularSrcExtraTokenSuccessTable,
+    .cellularSrcExtraTokenSuccessTableSize = CELLULAR_SRC_EXTRA_TOKEN_SUCCESS_TABLE_SIZE
+};
 
 void cellularSocketDataReadyCallback( CellularSocketHandle_t socketHandle,
                                       void * pCallbackContext )
@@ -140,10 +150,10 @@ void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
 }
 
-uint16_t MockvQueueDelete( int32_t * queue )
+uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     free( queue );
-    *queue = 0;
+    queue = 0;
     return 1;
 }
 
@@ -152,8 +162,8 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
     pMutex->created = false;
 }
 
-QueueHandle_t MockxQueueCreate( uxQueueLength,
-                                uxItemSize )
+QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
+                                uint32_t uxItemSize )
 {
     if( queueCreateFail == 0 )
     {
@@ -269,7 +279,7 @@ void test_Cellular_CommonInit_Null_Handler( void )
 
     _Cellular_LibInit_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
 
-    cellularStatus = Cellular_CommonInit( NULL, &cellularCommInterface );
+    cellularStatus = Cellular_CommonInit( NULL, &cellularCommInterface, &tokenTable );
 
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
@@ -290,7 +300,7 @@ void test_Cellular_CommonInit_Happy_Path( void )
 
     Cellular_ModuleEnableUrc_IgnoreAndReturn( CELLULAR_SUCCESS );
 
-    cellularStatus = Cellular_CommonInit( ( CellularHandle_t * ) &handler, &cellularCommInterface );
+    cellularStatus = Cellular_CommonInit( ( CellularHandle_t * ) &handler, &cellularCommInterface, &tokenTable );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }

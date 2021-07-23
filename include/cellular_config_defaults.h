@@ -142,4 +142,8 @@
     #define CELLULAR_CONFIG_DEFAULT_RAT    ( 8 )   /* Set default RAT to CELLULAR_RAT_CATM1 @ref CellularRat_t. */
 #endif
 
+#ifndef CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
+    #define CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION    ( 0 )
+#endif
+
 #endif /* __CELLULAR_CONFIG_DEFAULTS_H__ */

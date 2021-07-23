@@ -38,5 +38,6 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_at_core.c
+PROJECT_SOURCES += $(SRCDIR)/test/cbmc/stubs/strtol.c
 
 include ../Makefile.common

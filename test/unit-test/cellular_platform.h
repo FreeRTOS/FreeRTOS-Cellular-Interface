@@ -29,40 +29,45 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <assert.h>
 
 /*-----------------------------------------------------------*/
 
 
-/**
- * @brief Cellular library platform event group APIs.
- *
- * Cellular library use platform event group for process synchronization.
- *
- * The EventGroup functions in the following link can be referenced as function prototype.
- * https://www.freertos.org/event-groups-API.html
- *
+/* Users should define their platform dependent method if they need.
+ * Otherwise use our predefine method which has no effect but pass
+ * the coverity check.
  */
+#ifdef DEBUG_METHOD
+    #define CellularLogError
+    #define CellularLogDebug
+    #define CellularLogWarn
+    #define CellularLogInfo
+    #define configASSERT
+    #define Platform_Delay
+    #define taskENTER_CRITICAL()
+    #define taskEXIT_CRITICAL()
+#else
+    #define CellularLogError( ... )    ( { 1U; } )
+    #define CellularLogDebug( ... )    ( { 1U; } )
+    #define CellularLogWarn( ... )     ( { 1U; } )
+    #define CellularLogInfo( ... )     ( { 1U; } )
+    #define configASSERT( X )          ( { 1U; } )
+    #define Platform_Delay( X )        ( { ( void ) X; 1U; } )
+    #define taskENTER_CRITICAL()       ( { 1U; } )
+    #define taskEXIT_CRITICAL()        ( { 1U; } )
+#endif /* ifdef DEBUG_METHOD */
 
-#define CellularLogError
-#define CellularLogDebug
-#define CellularLogWarn
-#define CellularLogInfo
-
-#define configASSERT
-
-#define Platform_Delay
-
-typedef void * PVOID;
 
 #define PlatformEventGroupHandle_t           uint16_t
 #define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete
 #define PlatformEventGroup_ClearBits         MockPlatformEventGroup_ClearBits
 #define PlatformEventGroup_Create            MockPlatformEventGroup_Create
 #define PlatformEventGroup_GetBits           MockPlatformEventGroup_GetBits
-#define PlatformEventGroup_SetBits
+#define PlatformEventGroup_SetBits           MockPlatformEventGroup_SetBits
 #define PlatformEventGroup_SetBitsFromISR    MockPlatformEventGroup_SetBitsFromISR
 #define PlatformEventGroup_WaitBits          MockPlatformEventGroup_WaitBits
-#define PlatformEventGroup_EventBits         uint32_t
+#define PlatformEventGroup_EventBits         uint16_t
 
 #define vQueueDelete                         MockvQueueDelete
 #define xQueueSend                           MockxQueueSend
@@ -75,14 +80,23 @@ typedef void * PVOID;
 #define PlatformMutex_TryLock                MockPlatformMutex_TryLock
 #define PlatformMutex_Unlock                 MockPlatformMutex_Unlock
 
-#define taskENTER_CRITICAL()    PVOID
-#define taskEXIT_CRITICAL()     PVOID
+#define pdFALSE                              ( 0x0 )
+#define pdTRUE                               ( 0x1 )
+#define pdPASS                               ( 0x1 )
 
-#define pdFALSE             ( 0x0 )
-#define pdTRUE              ( 0x1 )
-#define pdPASS              ( 0x1 )
+#define PlatformTickType                     uint32_t
 
-#define PlatformTickType    uint32_t
+/**
+ * @brief Cellular library platform memory allocation APIs.
+ *
+ * Cellular library use platform memory allocation APIs to allocate memory dynamically.
+ * The FreeRTOS memory management document can be referenced for these APIs.
+ * https://www.freertos.org/a00111.html
+ *
+ */
+
+#define Platform_Malloc    mock_malloc
+#define Platform_Free      free
 
 /* Converts a time in milliseconds to a time in ticks.  This macro can be
  * overridden by a macro of the same name defined in FreeRTOSConfig.h in case the
@@ -91,20 +105,14 @@ typedef void * PVOID;
     #define pdMS_TO_TICKS( xTimeInMs )    ( ( TickType_t ) ( ( ( TickType_t ) ( xTimeInMs ) * ( TickType_t ) 1000 ) / ( TickType_t ) 1000U ) )
 #endif
 
-/**
- * @brief Cellular library platform thread API and configuration.
- *
- * Cellular library create a detached thread by this API.
- * The threadRoutine should be called with pArgument in the created thread.
- *
- * PLATFORM_THREAD_DEFAULT_STACK_SIZE and PLATFORM_THREAD_DEFAULT_PRIORITY defines
- * the platform related stack size and priority.
- */
+#if defined( configUSE_16_BIT_TICKS ) && ( configUSE_16_BIT_TICKS == 1 )
+    typedef uint16_t   TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
+#else
+    typedef uint32_t   TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
+#endif
 
-bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
-                                    void * pArgument,
-                                    int32_t priority,
-                                    size_t stackSize );
 
 #define PLATFORM_THREAD_DEFAULT_STACK_SIZE    ( 2048U )
 #define PLATFORM_THREAD_DEFAULT_PRIORITY      ( 5U )
@@ -160,7 +168,7 @@ typedef StaticQueue_t StaticSemaphore_t;
  * https://docs.aws.amazon.com/freertos/latest/lib-ref/c-sdk/platform/platform_threads_functions.html
  *
  */
-typedef long BaseType_t;
+typedef int32_t BaseType_t;
 typedef struct PlatformMutex
 {
     StaticSemaphore_t xMutex; /**< FreeRTOS mutex. */
@@ -168,6 +176,42 @@ typedef struct PlatformMutex
     bool created;
 } PlatformMutex_t;
 
+/*
+ * The type that holds event bits always matches TickType_t - therefore the
+ * number of bits it holds is set by configUSE_16_BIT_TICKS (16 bits if set to 1,
+ * 32 bits if set to 0.
+ *
+ * \defgroup EventBits_t EventBits_t
+ * \ingroup EventGroup
+ */
+typedef TickType_t EventBits_t;
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Cellular library platform thread API and configuration.
+ *
+ * Cellular library create a detached thread by this API.
+ * The threadRoutine should be called with pArgument in the created thread.
+ *
+ * PLATFORM_THREAD_DEFAULT_STACK_SIZE and PLATFORM_THREAD_DEFAULT_PRIORITY defines
+ * the platform related stack size and priority.
+ */
+
+bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument ),
+                                    void * pArgument,
+                                    size_t priority,
+                                    size_t stackSize );
+
+/**
+ * @brief Cellular library platform event group APIs.
+ *
+ * Cellular library use platform event group for process synchronization.
+ *
+ * The EventGroup functions in the following link can be referenced as function prototype.
+ * https://www.freertos.org/event-groups-API.html
+ *
+ */
 bool PlatformMutex_Create( PlatformMutex_t * pNewMutex,
                            bool recursive );
 void PlatformMutex_Destroy( PlatformMutex_t * pMutex );
@@ -176,26 +220,39 @@ bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
 void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 void * mock_malloc( size_t size );
 
-/*-----------------------------------------------------------*/
+BaseType_t MockxQueueReceive( QueueHandle_t queue,
+                              void * data,
+                              uint32_t time );
 
-/**
- * @brief Cellular library platform memory allocation APIs.
- *
- * Cellular library use platform memory allocation APIs to allocate memory dynamically.
- * The FreeRTOS memory management document can be referenced for these APIs.
- * https://www.freertos.org/a00111.html
- *
- */
+QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
+                                uint32_t uxItemSize );
 
-#define Platform_Malloc    mock_malloc
-#define Platform_Free      free
+uint16_t MockvQueueDelete( QueueHandle_t queue );
 
-#if ( configUSE_16_BIT_TICKS == 1 )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffff
-#else
-    typedef uint32_t TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
-#endif
+BaseType_t MockxQueueSend( QueueHandle_t queue,
+                           void * data,
+                           uint32_t time );
+
+uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
+                                          EventBits_t uxBitsToWaitFor,
+                                          BaseType_t xClearOnExit,
+                                          BaseType_t xWaitForAllBits,
+                                          TickType_t xTicksToWait );
+
+uint16_t MockPlatformEventGroup_Create( void );
+
+uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent );
+
+uint16_t MockPlatformEventGroup_GetBits( PlatformEventGroupHandle_t groupEvent );
+
+uint16_t MockPlatformEventGroup_SetBits( PlatformEventGroupHandle_t groupEvent,
+                                         EventBits_t event );
+
+uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t groupEvent,
+                                           TickType_t uxBitsToClear );
+
+int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupEvent,
+                                               EventBits_t event,
+                                               BaseType_t * pHigherPriorityTaskWoken );
 
 #endif /* __CELLULAR_PLATFORM_H__ */

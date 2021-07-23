@@ -30,12 +30,9 @@
 
 /* Cellular includes. */
 #include "cellular_platform.h"
-#include "cellular_comm_interface.h"
-#include "cellular_types.h"
 #include "cellular_pkthandler_internal.h"
 #include "cellular_at_core.h"
 #include "cellular_pktio_internal.h"
-#include "cellular_common.h"
 
 /*-----------------------------------------------------------*/
 
@@ -94,7 +91,7 @@ typedef struct cellularAtData
 /**
  * @brief Parameters involved in maintaining the context for the modem.
  */
-typedef struct CellularContext
+struct CellularContext
 {
     /* Communication interface for target specific. */
     const CellularCommInterface_t * pCommIntf;
@@ -146,10 +143,7 @@ typedef struct CellularContext
 
     /* Module Context. */
     void * pModueContext;
-
-    /* The context is already defined in types to hide internal data strcture from user. */
-    /* coverity[misra_c_2012_rule_1_1_violation] */
-} CellularContext_t;
+} ;
 
 /*-----------------------------------------------------------*/
 
