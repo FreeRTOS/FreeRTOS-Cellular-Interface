@@ -349,8 +349,11 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
         {
             pResp->status = false;
             pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogError( "Modem return ERROR: %s %s respPrefix: %s status: %d",
-                              pContext->pCurrentCmd, pLine, pRespPrefix, pkStatus );
+            CellularLogError( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
+                              ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                              pLine,
+                              ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
+                              pkStatus );
         }
         else
         {
@@ -694,13 +697,16 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
                 ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
                 pContext->pPktioReadPtr = NULL;
                 FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
+                /* pContext->pCurrentCmd is not NULL since it is a solicited response. */
                 CellularLogError( "processLine ERROR, cleaning up! Current command %s", pContext->pCurrentCmd );
             }
         }
     }
     else
     {
-        CellularLogError( "recvdMsgType is AT_UNDEFINED for Message: %s %s", pLine, pContext->pCurrentCmd );
+        CellularLogError( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
+                          pLine,
+                          ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) );
         ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
         pContext->pPktioReadPtr = NULL;
         pContext->partialDataRcvdLen = 0;
