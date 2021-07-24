@@ -1776,8 +1776,8 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Bit Error Rate (BER):
-             *  ・0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
-             *  ・99: not known or not detectable
+             *  0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
+             *  99: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 7 ) )
             {
@@ -1821,10 +1821,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Quality (RSRQ):
-             *  ・0: less than -19.5 dB
-             *  ・1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
-             *  ・34: -3 dB or greater
-             *  ・255: not known or not detectable
+             *  0: less than -19.5 dB
+             *  1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
+             *  34: -3 dB or greater
+             *  255: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 34 ) )
             {
@@ -1856,10 +1856,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Power(RSRP) :
-             *  ・0 : less than - 140 dBm
-             *  ・1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
-             *  ・97 : -44 dBm or greater
-             *  ・255 : not known or not detectable
+             *  0 : less than - 140 dBm
+             *  1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
+             *  97 : -44 dBm or greater
+             *  255 : not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 97 ) )
             {
