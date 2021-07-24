@@ -32,6 +32,10 @@
 /* Standard includes. */
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Return codes from various APIs.
  */
@@ -152,5 +156,9 @@ typedef struct CellularCommInterface
     CellularCommInterfaceRecv_t recv;
     CellularCommInterfaceClose_t close;
 } CellularCommInterface_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_COMM_INTERFACE_H__ */

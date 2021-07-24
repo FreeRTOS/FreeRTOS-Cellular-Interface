@@ -40,6 +40,10 @@
  */
 #define CELLULAR_INVALID_SIGNAL_BAR_VALUE    ( 0xFFU )
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct CellularContext;
 typedef struct CellularContext         CellularContext_t;
 
@@ -799,5 +803,9 @@ typedef void ( * CellularSocketDataReadyCallback_t )( CellularSocketHandle_t soc
  */
 typedef void ( * CellularSocketClosedCallback_t )( CellularSocketHandle_t socketHandle,
                                                    void * pCallbackContext );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_TYPES_H__ */

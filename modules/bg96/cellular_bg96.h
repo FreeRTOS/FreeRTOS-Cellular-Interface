@@ -18,6 +18,10 @@
 #define DATA_SEND_TIMEOUT_MS                       ( 50000UL )
 #define DATA_READ_TIMEOUT_MS                       ( 50000UL )
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief DNS query result.
  */
@@ -53,5 +57,9 @@ typedef struct cellularModuleContext
 
 CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
                                             CellularSimCardState_t * pSimState );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef __CELLULAR_BG96_H__ */

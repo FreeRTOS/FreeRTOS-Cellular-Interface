@@ -31,6 +31,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Cellular module init function.
  *
@@ -80,5 +84,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
  * code indicating the cause of the error.
  */
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* End of __CELLULAR_COMMON_PORTABLE_H__. */

@@ -33,6 +33,10 @@
 /* Hardware interface. */
 #include "cellular_comm_interface.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief One time initialization function.
  *
@@ -629,5 +633,9 @@ CellularError_t Cellular_SocketRegisterClosedCallback( CellularHandle_t cellular
                                                        CellularSocketHandle_t socketHandle,
                                                        CellularSocketClosedCallback_t closedCallback,
                                                        void * pCallbackContext );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_API_H__ */

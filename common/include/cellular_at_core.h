@@ -50,6 +50,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Represents error codes returned from AT Core APIs.
  */
@@ -389,5 +393,9 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
 CellularATError_t Cellular_ATStrtoi( const char * pStr,
                                      int32_t base,
                                      int32_t * pResult );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_AT_CORE_H__ */

@@ -42,6 +42,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @ingroup cellular_common_datatypes_paramstructs
  * @brief The AT command request structure.
@@ -554,5 +558,9 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
                                                                 uint32_t dataTimeoutMS,
                                                                 const char ** pCellularSrcTokenSuccessTable,
                                                                 uint32_t cellularSrcTokenSuccessTableSize );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_COMMON_H__ */

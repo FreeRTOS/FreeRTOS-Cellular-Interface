@@ -36,6 +36,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct cellularModuleContext
 {
     uint32_t pSessionMap[ TCP_SESSION_TABLE_LEGNTH ];
@@ -131,5 +135,8 @@ typedef struct CellularPdnContextActInfo
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef __CELLULAR_R4_H__ */

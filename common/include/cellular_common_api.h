@@ -31,6 +31,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief This function is the common implementation of FreeRTOS Cellular Library API.
  * Reference Cellular_Init in cellular_api.h for definition.
@@ -291,5 +295,9 @@ CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext
  */
 CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
                                                    char * pInputLine );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CELLULAR_COMMON_API_H__ */

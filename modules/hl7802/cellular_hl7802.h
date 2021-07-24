@@ -37,6 +37,10 @@
 
 /*-----------------------------------------------------------*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct cellularModuleContext
 {
     uint32_t placeholder;
@@ -81,5 +85,9 @@ uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
                                 uint8_t sessionId );
 
 /*-----------------------------------------------------------*/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef __CELLULAR_HL7802_H__ */
