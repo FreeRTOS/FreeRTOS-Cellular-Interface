@@ -1050,7 +1050,7 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
             }
 
             /* Deactivate context if active */
-            if( pdpContextsActInfo.contextActState[ contextId - 1 ] == TRUE )
+            if( pdpContextsActInfo.contextActState[ contextId - 1 ] == true )
             {
                 /* Don't deactivate LTE default bearer context */
                 /* Otherwise sending AT command "+CGACT=0,1" for deactivation will result in ERROR */
@@ -1257,7 +1257,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPdpContextActState( CellularCont
                                         ( tempValue <= ( int32_t ) MAX_PDP_CONTEXTS ) )
                                     {
                                         contextId = ( uint8_t ) tempValue;
-                                        pPDPContextsActInfo->contextsPresent[ contextId - 1 ] = TRUE;
+                                        pPDPContextsActInfo->contextsPresent[ contextId - 1 ] = true;
                                         CellularLogDebug( "_Cellular_RecvFuncGetPdpContextActState: Context Id: %d", contextId );
                                     }
                                     else
@@ -1416,7 +1416,7 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         }
 
         /* Activate context if not already active */
-        if( pdpContextsActInfo.contextActState[ contextId - 1 ] == FALSE )
+        if( pdpContextsActInfo.contextActState[ contextId - 1 ] == false )
         {
             if( pktStatus == CELLULAR_PKT_STATUS_OK )
             {
@@ -1776,8 +1776,8 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Bit Error Rate (BER):
-             *  • 0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
-             *  • 99: not known or not detectable
+             *  0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
+             *  99: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 7 ) )
             {
@@ -1821,10 +1821,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Quality (RSRQ):
-             *  • 0: less than -19.5 dB
-             *  • 1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
-             *  • 34: -3 dB or greater
-             *  • 255: not known or not detectable
+             *  0: less than -19.5 dB
+             *  1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
+             *  34: -3 dB or greater
+             *  255: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 34 ) )
             {
@@ -1856,10 +1856,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Power(RSRP) :
-             *  • 0 : less than - 140 dBm
-             *  • 1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
-             *  • 97 : -44 dBm or greater
-             *  • 255 : not known or not detectable
+             *  0 : less than - 140 dBm
+             *  1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
+             *  97 : -44 dBm or greater
+             *  255 : not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 97 ) )
             {
@@ -2432,7 +2432,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPdpContextSettings( CellularCont
                                         ( tempValue <= ( int32_t ) MAX_PDP_CONTEXTS ) )
                                     {
                                         contextId = ( uint8_t ) tempValue;
-                                        pPDPContextsInfo->contextsPresent[ contextId - 1 ] = TRUE;
+                                        pPDPContextsInfo->contextsPresent[ contextId - 1 ] = true;
                                         CellularLogDebug( "_Cellular_RecvFuncGetPdpContextSettings: Context Id: %d", contextId );
                                     }
                                     else
