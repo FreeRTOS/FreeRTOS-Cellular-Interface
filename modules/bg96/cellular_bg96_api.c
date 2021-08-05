@@ -237,8 +237,8 @@ static bool _parseSignalQuality( char * pQcsqPayload,
     if( ( parseStatus == true ) && ( Cellular_ATGetNextTok( &pTmpQcsqPayload, &pToken ) == CELLULAR_AT_SUCCESS ) )
     {
         if( ( strcmp( pToken, "GSM" ) != 0 ) &&
-            ( strcmp( pToken, "CAT-M1" ) != 0 ) &&
-            ( strcmp( pToken, "CAT-NB1" ) != 0 ) )
+            ( strcmp( pToken, "eMTC" ) != 0 ) &&
+            ( strcmp( pToken, "NBIoT" ) != 0 ) )
         {
             parseStatus = false;
         }
