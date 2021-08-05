@@ -408,15 +408,8 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
     {
         if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_IP )
         {
-            if( option == CELLULAR_SOCKET_OPTION_MAX_IP_PACKET_SIZE )
-            {
-                /*TBD */
-            }
-            else
-            {
-                CellularLogError( "Cellular_SocketSetSockOpt: Option not supported" );
-                cellularStatus = CELLULAR_UNSUPPORTED;
-            }
+            CellularLogError( "Cellular_SocketSetSockOpt: Option not supported" );
+            cellularStatus = CELLULAR_UNSUPPORTED;
         }
         else /* optionLevel CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT. */
         {

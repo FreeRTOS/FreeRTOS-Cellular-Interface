@@ -43,13 +43,13 @@
 #include "mock_cellular_pkthandler_internal.h"
 #include "mock_cellular_pktio_internal.h"
 
-#define SIGNAL_QUALITY_CSQ_UNKNOWN      ( 99 )
-#define SIGNAL_QUALITY_CSQ_RSSI_MIN     ( 0 )
-#define SIGNAL_QUALITY_CSQ_RSSI_MAX     ( 31 )
-#define SIGNAL_QUALITY_CSQ_BER_MIN      ( 0 )
-#define SIGNAL_QUALITY_CSQ_BER_MAX      ( 7 )
-#define SIGNAL_QUALITY_CSQ_RSSI_BASE    ( -113 )
-#define SIGNAL_QUALITY_CSQ_RSSI_STEP    ( 2 )
+#define SIGNAL_QUALITY_CSQ_UNKNOWN                     ( 99 )
+#define SIGNAL_QUALITY_CSQ_RSSI_MIN                    ( 0 )
+#define SIGNAL_QUALITY_CSQ_RSSI_MAX                    ( 31 )
+#define SIGNAL_QUALITY_CSQ_BER_MIN                     ( 0 )
+#define SIGNAL_QUALITY_CSQ_BER_MAX                     ( 7 )
+#define SIGNAL_QUALITY_CSQ_RSSI_BASE                   ( -113 )
+#define SIGNAL_QUALITY_CSQ_RSSI_STEP                   ( 2 )
 
 #define CELLULAR_URC_HANDLER_TABLE_SIZE                ( sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t ) )
 #define CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE            ( sizeof( CellularSrcTokenErrorTable ) / sizeof( char * ) )
@@ -179,7 +179,25 @@ static const signalBarsTable_t lteNBIotSignalBarsTable[] =
     { 0,    5 },
 };
 
+static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
+                                                      void * pUserData,
+                                                      CellularCommInterfaceHandle_t * pCommInterfaceHandle );
 
+static CellularCommInterfaceError_t _prvCommIntfSend( CellularCommInterfaceHandle_t commInterfaceHandle,
+                                                      const uint8_t * pData,
+                                                      uint32_t dataLength,
+                                                      uint32_t timeoutMilliseconds,
+                                                      uint32_t * pDataSentLength );
+
+static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHandle_t commInterfaceHandle,
+                                                         uint8_t * pBuffer,
+                                                         uint32_t bufferLength,
+                                                         uint32_t timeoutMilliseconds,
+                                                         uint32_t * pDataReceivedLength );
+
+static CellularCommInterfaceError_t _prvCommIntfClose( CellularCommInterfaceHandle_t commInterfaceHandle );
+
+static CellularCommInterface_t CellularCommInterface;
 /* ============================   UNITY FIXTURES ============================ */
 
 /* Called before each test method. */
@@ -188,6 +206,10 @@ void setUp()
     mallocAllocFail = 0;
     eventData = 0;
     mockPlatformMutexCreateFlag = 0;
+    CellularCommInterface.open = _prvCommIntfOpen;
+    CellularCommInterface.send = _prvCommIntfSend;
+    CellularCommInterface.recv = _prvCommIntfReceive;
+    CellularCommInterface.close = _prvCommIntfClose;
 }
 
 /* Called after each test method. */
@@ -268,20 +290,12 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
     return commIntRet;
 }
 
-static CellularCommInterface_t CellularCommInterface =
-{
-    .open  = _prvCommIntfOpen,
-    .send  = _prvCommIntfSend,
-    .recv  = _prvCommIntfReceive,
-    .close = _prvCommIntfClose
-};
-
 void cellularUrcNetworkRegistrationCallback( CellularUrcEvent_t urcEvent,
                                              const CellularServiceStatus_t * pServiceStatus,
                                              void * pCallbackContext )
 {
-    ( void )pServiceStatus;
-    ( void )pCallbackContext;
+    ( void ) pServiceStatus;
+    ( void ) pCallbackContext;
     eventData = urcEvent;
 }
 
@@ -289,8 +303,8 @@ void cellularUrcPdnEventCallback( CellularUrcEvent_t urcEvent,
                                   uint8_t contextId,
                                   void * pCallbackContext )
 {
-    ( void )contextId;
-    ( void )pCallbackContext;
+    ( void ) contextId;
+    ( void ) pCallbackContext;
     eventData = urcEvent;
 }
 
@@ -298,8 +312,8 @@ void cellularUrcSignalStrengthChangedCallback( CellularUrcEvent_t urcEvent,
                                                const CellularSignalInfo_t * pSignalInfo,
                                                void * pCallbackContext )
 {
-    ( void )pSignalInfo;
-    ( void )pCallbackContext;
+    ( void ) pSignalInfo;
+    ( void ) pCallbackContext;
     eventData = urcEvent;
 }
 
@@ -308,7 +322,7 @@ void cellularUrcGenericCallback( const char * pRawData,
 {
     int len;
 
-    ( void )pCallbackContext;
+    ( void ) pCallbackContext;
 
     if( strlen( pRawData ) > 0 )
     {
@@ -321,7 +335,7 @@ void cellularUrcGenericCallback( const char * pRawData,
 void cellularModemEventCallback( CellularModemEvent_t modemEvent,
                                  void * pCallbackContext )
 {
-    ( void )pCallbackContext;
+    ( void ) pCallbackContext;
     eventData = modemEvent;
 }
 
@@ -340,7 +354,8 @@ bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
 {
     bool ret = false;
 
-    ( void )recursive;
+    ( void ) recursive;
+
     if( ( mockPlatformMutexCreateFlag & 0xFF ) > 0 )
     {
         ret = true;
@@ -353,12 +368,12 @@ bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
 
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
-    ( void )pMutex;
+    ( void ) pMutex;
 }
 
 void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
-    ( void )pMutex;
+    ( void ) pMutex;
 }
 
 uint16_t MockvQueueDelete( QueueHandle_t queue )
@@ -542,13 +557,29 @@ void test__Cellular_CreateSocketData_Happy_Path( void )
 }
 
 /**
+ * @brief Test that null context case for _Cellular_RemoveSocketData.
+ */
+void test__Cellular_RemoveSocketData_Null_Context( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularSocketContext_t socketContext;
+    CellularSocketHandle_t socketHandle = &socketContext;
+
+    cellularStatus = _Cellular_RemoveSocketData( NULL,
+                                                 socketHandle );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+}
+
+/**
  * @brief Test that no match socketHandle case for _Cellular_RemoveSocketData.
  */
-void test__Cellular_CheckLibraryStatus_No_Match_SocketHandle( void )
+void test__Cellular_RemoveSocketData_No_Match_SocketHandle( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
-    CellularSocketHandle_t socketHandle;
+    CellularSocketContext_t socketContext;
+    CellularSocketHandle_t socketHandle = &socketContext;
     uint32_t i = 0;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
@@ -702,6 +733,9 @@ void test__Cellular_ConvertCsqSignalRssi_Bad_CsqRssi_Parameter( void )
 
     cellularStatus = _Cellular_ConvertCsqSignalRssi( SIGNAL_QUALITY_CSQ_RSSI_MAX + 1, &rssiValue );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_ConvertCsqSignalRssi( SIGNAL_QUALITY_CSQ_RSSI_MIN - 1, &rssiValue );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
 /**
@@ -751,6 +785,9 @@ void test__Cellular_ConvertCsqSignalBer_Bad_CsqRssi_Parameter( void )
     int16_t berValue;
 
     cellularStatus = _Cellular_ConvertCsqSignalBer( SIGNAL_QUALITY_CSQ_BER_MAX + 1, &berValue );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_ConvertCsqSignalBer( SIGNAL_QUALITY_CSQ_BER_MIN - 1, &berValue );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
@@ -805,7 +842,7 @@ void test__Cellular_GetModuleContext_Happy_Path( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     context.pModueContext = &moduleContext;
-    cellularStatus = _Cellular_GetModuleContext( &context, ( void ** )&pModuleContext );
+    cellularStatus = _Cellular_GetModuleContext( &context, ( void ** ) &pModuleContext );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( pModuleContext, context.pModueContext );
@@ -838,6 +875,22 @@ void test__Cellular_ComputeSignalBars_Unknow_Rat( void )
 }
 
 /**
+ * @brief Test that greater rat (Radio Access Technologies case for _Cellular_ComputeSignalBars.
+ */
+void test__Cellular_ComputeSignalBars_Greater_Than_Bar( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularSignalInfo_t signalInfo;
+    signalBarsTable_t bigSignalBars = { 1, 0 };
+
+    signalInfo.rssi = bigSignalBars.upperThreshold;
+    cellularStatus = _Cellular_ComputeSignalBars( CELLULAR_RAT_GSM, &signalInfo );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_SIGNAL_BAR_VALUE, signalInfo.bars );
+}
+
+/**
  * @brief Test that GSM happy path case for _Cellular_ComputeSignalBars.
  */
 void test__Cellular_ComputeSignalBars_GSM_Happy_Path( void )
@@ -850,6 +903,36 @@ void test__Cellular_ComputeSignalBars_GSM_Happy_Path( void )
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( gsmSignalBarsTable[ 0 ].bars, signalInfo.bars );
+}
+
+/**
+ * @brief Test that EDGE happy path case for _Cellular_ComputeSignalBars.
+ */
+void test__Cellular_ComputeSignalBars_EDGE_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularSignalInfo_t signalInfo;
+
+    signalInfo.rssi = gsmSignalBarsTable[ 0 ].upperThreshold;
+    cellularStatus = _Cellular_ComputeSignalBars( CELLULAR_RAT_EDGE, &signalInfo );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( gsmSignalBarsTable[ 0 ].bars, signalInfo.bars );
+}
+
+/**
+ * @brief Test that LTE happy path case for _Cellular_ComputeSignalBars.
+ */
+void test__Cellular_ComputeSignalBars_LTE_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularSignalInfo_t signalInfo;
+
+    signalInfo.rsrp = lteCATMSignalBarsTable[ 0 ].upperThreshold;
+    cellularStatus = _Cellular_ComputeSignalBars( CELLULAR_RAT_LTE, &signalInfo );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( lteCATMSignalBarsTable[ 0 ].bars, signalInfo.bars );
 }
 
 /**
@@ -930,6 +1013,20 @@ void test__Cellular_GetCurrentRat_Happy_Path( void )
 }
 
 /**
+ * @brief Test that null parameter case for _Cellular_NetworkRegistrationCallback.
+ */
+void test__Cellular_NetworkRegistrationCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_NetworkRegistrationCallback( NULL, CELLULAR_URC_SOCKET_OPENED, NULL );
+
+    memset( &context, 0, sizeof( struct CellularContext ) );
+    context.cbEvents.networkRegistrationCallback = NULL;
+    _Cellular_NetworkRegistrationCallback( &context, CELLULAR_URC_SOCKET_OPENED, NULL );
+}
+
+/**
  * @brief Test that happy path case for _Cellular_NetworkRegistrationCallback.
  */
 void test__Cellular_NetworkRegistrationCallback_Happy_Path( void )
@@ -941,6 +1038,20 @@ void test__Cellular_NetworkRegistrationCallback_Happy_Path( void )
     _Cellular_NetworkRegistrationCallback( &context, CELLULAR_URC_SOCKET_OPENED, NULL );
 
     TEST_ASSERT_EQUAL( CELLULAR_URC_SOCKET_OPENED, eventData );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_PdnEventCallback.
+ */
+void test__Cellular_PdnEventCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_PdnEventCallback( NULL, CELLULAR_URC_SOCKET_OPENED, 0U );
+
+    memset( &context, 0, sizeof( struct CellularContext ) );
+    context.cbEvents.pdnEventCallback = NULL;
+    _Cellular_PdnEventCallback( &context, CELLULAR_URC_SOCKET_OPENED, 0U );
 }
 
 /**
@@ -958,6 +1069,20 @@ void test__Cellular_PdnEventCallback_Happy_Path( void )
 }
 
 /**
+ * @brief Test that null parameter case for _Cellular_SignalStrengthChangedCallback.
+ */
+void test__Cellular_SignalStrengthChangedCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_SignalStrengthChangedCallback( NULL, CELLULAR_URC_SOCKET_OPENED, NULL );
+
+    memset( &context, 0, sizeof( struct CellularContext ) );
+    context.cbEvents.signalStrengthChangedCallback = NULL;
+    _Cellular_SignalStrengthChangedCallback( &context, CELLULAR_URC_SOCKET_OPENED, NULL );
+}
+
+/**
  * @brief Test that happy path case for _Cellular_SignalStrengthChangedCallback.
  */
 void test__Cellular_SignalStrengthChangedCallback_Happy_Path( void )
@@ -969,6 +1094,21 @@ void test__Cellular_SignalStrengthChangedCallback_Happy_Path( void )
     _Cellular_SignalStrengthChangedCallback( &context, CELLULAR_URC_SOCKET_OPENED, NULL );
 
     TEST_ASSERT_EQUAL( CELLULAR_URC_SOCKET_OPENED, eventData );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_GenericCallback.
+ */
+void test__Cellular_GenericCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+    const char pRawData[] = "cellularUrcGenericCallback test.";
+
+    _Cellular_GenericCallback( NULL, pRawData );
+
+    memset( &context, 0, sizeof( struct CellularContext ) );
+    context.cbEvents.genericCallback = NULL;
+    _Cellular_GenericCallback( &context, pRawData );
 }
 
 /**
@@ -985,6 +1125,21 @@ void test__Cellular_GenericCallback_Happy_Path( void )
 
     TEST_ASSERT_EQUAL( strcmp( pRawData, pData ), 0 );
     free( pData );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_ModemEventCallback.
+ */
+
+void test__Cellular_ModemEventCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_ModemEventCallback( NULL, CELLULAR_MODEM_EVENT_POWERED_DOWN );
+
+    memset( &context, 0, sizeof( struct CellularContext ) );
+    context.cbEvents.modemEventCallback = NULL;
+    _Cellular_ModemEventCallback( &context, CELLULAR_MODEM_EVENT_POWERED_DOWN );
 }
 
 /**
@@ -1070,30 +1225,89 @@ void test__Cellular_LibInit_Null_Context( void )
 }
 
 /**
- * @brief Test that null comm interface case for _Cellular_LibInit.
- */
-void test__Cellular_LibInit_Null_CommInterface( void )
-{
-    CellularHandle_t CellularHandle = NULL;
-
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-
-    cellularStatus = _Cellular_LibInit( &CellularHandle, NULL, NULL );
-
-    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
-}
-
-/**
  * @brief Test that null comm interface member case for _Cellular_LibInit.
  */
 void test__Cellular_LibInit_Null_CommInterface_Member( void )
 {
     CellularHandle_t CellularHandle = NULL;
-
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
-    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    cellularStatus = _Cellular_LibInit( &CellularHandle, NULL, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 
+    CellularCommInterface.recv = NULL;
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    CellularCommInterface.send = NULL;
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    CellularCommInterface.close = NULL;
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    CellularCommInterface.open = NULL;
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that null token table case for _Cellular_LibInit.
+ */
+void test__Cellular_LibInit_Null_Tabletoken_Member( void )
+{
+    CellularHandle_t CellularHandle = NULL;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularTokenTable_t tokenTableNoUrcTable =
+    {
+        .pCellularUrcHandlerTable      = NULL,
+        .cellularPrefixToParserMapSize = CELLULAR_URC_HANDLER_TABLE_SIZE,
+    };
+
+    CellularTokenTable_t tokenTableNoErrorTable =
+    {
+        .pCellularUrcHandlerTable       = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize  = CELLULAR_URC_HANDLER_TABLE_SIZE,
+        .pCellularSrcTokenErrorTable    = NULL,
+        .cellularSrcTokenErrorTableSize = CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE
+    };
+
+    CellularTokenTable_t tokenTableNoSuccessTable =
+    {
+        .pCellularUrcHandlerTable         = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize    = CELLULAR_URC_HANDLER_TABLE_SIZE,
+        .pCellularSrcTokenErrorTable      = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize   = CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE,
+        .pCellularSrcTokenSuccessTable    = NULL,
+        .cellularSrcTokenSuccessTableSize = CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE
+    };
+
+    CellularTokenTable_t tokenTableNoWoPrefixTable =
+    {
+        .pCellularUrcHandlerTable          = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize     = CELLULAR_URC_HANDLER_TABLE_SIZE,
+        .pCellularSrcTokenErrorTable       = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize    = CELLULAR_SRC_TOKEN_ERROR_TABLE_SIZE,
+        .pCellularSrcTokenSuccessTable     = CellularSrcTokenSuccessTable,
+        .cellularSrcTokenSuccessTableSize  = CELLULAR_SRC_TOKEN_SUCCESS_TABLE_SIZE,
+        .pCellularUrcTokenWoPrefixTable    = NULL,
+        .cellularUrcTokenWoPrefixTableSize = CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE
+    };
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTableNoUrcTable );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTableNoErrorTable );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTableNoSuccessTable );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTableNoWoPrefixTable );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
@@ -1258,6 +1472,50 @@ void test__Cellular_LibCleanup_Happy_Path( void )
 }
 
 /**
+ * @brief Test that PktHandlerInit failure case for _Cellular_LibInit.
+ */
+void test__Cellular_LibInit_PktHandlerInit_Fail( void )
+{
+    CellularHandle_t CellularHandle = NULL;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* Mock CreateLibStatusMutex, _Cellular_CreateAtDataMutex and _Cellular_CreatePktRequestMutex work. */
+    mockPlatformMutexCreateFlag = 0x0101;
+    _Cellular_CreatePktRequestMutex_IgnoreAndReturn( true );
+    _Cellular_CreatePktResponseMutex_IgnoreAndReturn( true );
+    _Cellular_AtParseInit_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_PktHandlerInit_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_DestroyPktResponseMutex_Ignore();
+    _Cellular_DestroyPktRequestMutex_Ignore();
+
+    cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that no pktio shutdown case for _Cellular_LibCleanup.
+ */
+void test__Cellular_LibCleanup_No_Pktio_Shutdown( void )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) malloc( sizeof( struct CellularContext ) );
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    int i = rand() % CELLULAR_NUM_SOCKET_MAX;
+    CellularSocketContext_t * pSocketData = ( CellularSocketContext_t * ) malloc( sizeof( CellularSocketContext_t ) );
+
+    pContext->pSocketData[ i ] = pSocketData;
+    pContext->bLibOpened = false;
+
+    _Cellular_PktioShutdown_Ignore();
+    _Cellular_PktHandlerCleanup_Ignore();
+    _Cellular_DestroyPktRequestMutex_Ignore();
+    _Cellular_DestroyPktResponseMutex_Ignore();
+
+    cellularStatus = _Cellular_LibCleanup( pContext );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
  * @brief Test that happy path case for _shutdownCallback.
  */
 void test__shutdownCallback_Happy_Path( void )
@@ -1292,4 +1550,23 @@ void test__Cellular_AtcmdRequestWithCallback_Happy_Path( void )
     pktStatus = _Cellular_AtcmdRequestWithCallback( &context, atReqGetResult );
 
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that double allocate context case for _Cellular_LibInit.
+ */
+void test__Cellular_LibInit_PktHandlerInit_Double_Allocate_Context( void )
+{
+    CellularHandle_t CellularHandle = NULL;
+
+    /* Mock CreateLibStatusMutex, _Cellular_CreateAtDataMutex and _Cellular_CreatePktRequestMutex work. */
+    mockPlatformMutexCreateFlag = 0x0101;
+    _Cellular_CreatePktRequestMutex_IgnoreAndReturn( true );
+    _Cellular_CreatePktResponseMutex_IgnoreAndReturn( true );
+    _Cellular_AtParseInit_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_PktHandlerInit_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
+    CellularHandle = NULL;
+    _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
 }

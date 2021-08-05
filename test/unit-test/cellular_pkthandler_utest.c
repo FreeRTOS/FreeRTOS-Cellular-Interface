@@ -45,6 +45,7 @@
 
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_URC_TOKEN_STRING_INPUT                 "RDY"
+#define CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS      "+RDY"
 #define CELLULAR_URC_TOKEN_STRING_GREATER_INPUT         "RDYY"
 #define CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT         "RD"
 #define CELLULAR_PLUS_TOKEN_ONLY_STRING                 "+"
@@ -59,7 +60,7 @@ static int32_t pktRespCBReturn = 0;
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );
 
-const CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
+CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
     { "CEREG",             cellularAtParseTokenHandler },
     { "CGREG",             cellularAtParseTokenHandler },
@@ -69,12 +70,12 @@ const CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "QIND",              cellularAtParseTokenHandler },
     { "QIOPEN",            cellularAtParseTokenHandler },
     { "QIURC",             cellularAtParseTokenHandler },
-    { "QSIMSTAT",          cellularAtParseTokenHandler },
+    { "RDY",               cellularAtParseTokenHandler },
     { "RDY",               cellularAtParseTokenHandler }
 };
 const uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
 
-const CellularAtParseTokenMap_t CellularUrcHandlerTableWoParseFunc[] =
+CellularAtParseTokenMap_t CellularUrcHandlerTableWoParseFunc[] =
 {
     { "CEREG",             NULL },
     { "CGREG",             NULL },
@@ -89,7 +90,7 @@ const CellularAtParseTokenMap_t CellularUrcHandlerTableWoParseFunc[] =
 };
 const uint32_t CellularUrcHandlerTableWoParseFuncSize = sizeof( CellularUrcHandlerTableWoParseFunc ) / sizeof( CellularAtParseTokenMap_t );
 
-const CellularAtParseTokenMap_t CellularUrcHandlerTableSortFailCase[] =
+CellularAtParseTokenMap_t CellularUrcHandlerTableSortFailCase[] =
 {
     { "NORMAL POWER DOWN", NULL },
     { "CEREG",             NULL },
@@ -109,13 +110,13 @@ CellularTokenTable_t tokenTable =
     .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
     .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
     .pCellularSrcTokenErrorTable           = NULL,
-    .cellularSrcTokenErrorTableSize        = NULL,
+    .cellularSrcTokenErrorTableSize        = 0,
     .pCellularSrcTokenSuccessTable         = NULL,
-    .cellularSrcTokenSuccessTableSize      = NULL,
+    .cellularSrcTokenSuccessTableSize      = 0,
     .pCellularUrcTokenWoPrefixTable        = NULL,
-    .cellularUrcTokenWoPrefixTableSize     = NULL,
+    .cellularUrcTokenWoPrefixTableSize     = 0,
     .pCellularSrcExtraTokenSuccessTable    = NULL,
-    .cellularSrcExtraTokenSuccessTableSize = NULL
+    .cellularSrcExtraTokenSuccessTableSize = 0
 };
 
 CellularTokenTable_t tokenTableWoParseFunc =
@@ -123,13 +124,13 @@ CellularTokenTable_t tokenTableWoParseFunc =
     .pCellularUrcHandlerTable              = CellularUrcHandlerTableWoParseFunc,
     .cellularPrefixToParserMapSize         = CellularUrcHandlerTableWoParseFuncSize,
     .pCellularSrcTokenErrorTable           = NULL,
-    .cellularSrcTokenErrorTableSize        = NULL,
+    .cellularSrcTokenErrorTableSize        = 0,
     .pCellularSrcTokenSuccessTable         = NULL,
-    .cellularSrcTokenSuccessTableSize      = NULL,
+    .cellularSrcTokenSuccessTableSize      = 0,
     .pCellularUrcTokenWoPrefixTable        = NULL,
-    .cellularUrcTokenWoPrefixTableSize     = NULL,
+    .cellularUrcTokenWoPrefixTableSize     = 0,
     .pCellularSrcExtraTokenSuccessTable    = NULL,
-    .cellularSrcExtraTokenSuccessTableSize = NULL
+    .cellularSrcExtraTokenSuccessTableSize = 0
 };
 
 CellularTokenTable_t tokenTableSortFailCase =
@@ -137,13 +138,27 @@ CellularTokenTable_t tokenTableSortFailCase =
     .pCellularUrcHandlerTable              = CellularUrcHandlerTableSortFailCase,
     .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSortFailCaseSize,
     .pCellularSrcTokenErrorTable           = NULL,
-    .cellularSrcTokenErrorTableSize        = NULL,
+    .cellularSrcTokenErrorTableSize        = 0,
     .pCellularSrcTokenSuccessTable         = NULL,
-    .cellularSrcTokenSuccessTableSize      = NULL,
+    .cellularSrcTokenSuccessTableSize      = 0,
     .pCellularUrcTokenWoPrefixTable        = NULL,
-    .cellularUrcTokenWoPrefixTableSize     = NULL,
+    .cellularUrcTokenWoPrefixTableSize     = 0,
     .pCellularSrcExtraTokenSuccessTable    = NULL,
-    .cellularSrcExtraTokenSuccessTableSize = NULL
+    .cellularSrcExtraTokenSuccessTableSize = 0
+};
+
+CellularTokenTable_t tokenTableWoMapSize =
+{
+    .pCellularUrcHandlerTable              = CellularUrcHandlerTableSortFailCase,
+    .cellularPrefixToParserMapSize         = 0,
+    .pCellularSrcTokenErrorTable           = NULL,
+    .cellularSrcTokenErrorTableSize        = 0,
+    .pCellularSrcTokenSuccessTable         = NULL,
+    .cellularSrcTokenSuccessTableSize      = 0,
+    .pCellularUrcTokenWoPrefixTable        = NULL,
+    .cellularUrcTokenWoPrefixTableSize     = 0,
+    .pCellularSrcExtraTokenSuccessTable    = NULL,
+    .cellularSrcExtraTokenSuccessTableSize = 0
 };
 
 /* ============================   UNITY FIXTURES ============================ */
@@ -186,27 +201,39 @@ static CellularPktStatus_t pktRespCB( CellularContext_t * pContext,
 {
     CellularPktStatus_t pktStatus = pktRespCBReturn;
 
+    ( void ) pContext;
+    ( void ) pAtResp;
+    ( void ) pData;
+    ( void ) dataLen;
+
     return pktStatus;
 }
 
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
+    ( void ) recursive;
+
     pNewMutex->created = true;
     return true;
 }
 
 void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
+    ( void ) pMutex;
 }
 
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
+    ( void ) pMutex;
 }
 
 QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
                                 uint32_t uxItemSize )
 {
+    ( void ) uxQueueLength;
+    ( void ) uxItemSize;
+
     if( queueCreateFail == 0 )
     {
         QueueHandle_t test = malloc( sizeof( struct QueueDefinition ) );
@@ -222,6 +249,9 @@ BaseType_t MockxQueueSend( QueueHandle_t queue,
                            void * data,
                            uint32_t time )
 {
+    ( void ) queue;
+    ( void ) time;
+
     queueData = *( ( uint16_t * ) data );
 
     if( queueReturnFail == 0 )
@@ -243,6 +273,9 @@ BaseType_t MockxQueueReceive( QueueHandle_t queue,
                               void * data,
                               uint32_t time )
 {
+    ( void ) queue;
+    ( void ) time;
+
     if( ( queueReturnFail & 0xFF ) == 0 )
     {
         *( int32_t * ) data = ( queueData & 0xFF );
@@ -286,6 +319,8 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     const char * pTempSrc = pSrc;
 
+    ( void ) cmock_num_calls;
+
     if( ( ppDst == NULL ) || ( pTempSrc == NULL ) || ( strnlen( pTempSrc, CELLULAR_AT_MAX_STRING_SIZE ) >= CELLULAR_AT_MAX_STRING_SIZE ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
@@ -317,9 +352,25 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr )
 {
+    ( void ) pContext;
+    ( void ) pInputStr;
 }
 
 /* ========================================================================== */
+
+/**
+ * @brief Test that invalid parameter for _Cellular_PktHandlerCleanup.
+ */
+void test__Cellular_PktHandlerCleanup_Invalid_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_PktHandlerCleanup( NULL );
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pktRespQueue = NULL;
+    _Cellular_PktHandlerCleanup( &context );
+}
 
 /**
  * @brief Test that happy path for _Cellular_PktHandlerCleanup.
@@ -376,6 +427,10 @@ void test__Cellular_HandlePacket_AT_SOLICITED_False_AtResp_Failure( void )
     atResp.pItm = &testATCmdLine;
     atResp.status = false;
 
+    pktStatus = _Cellular_HandlePacket( &context, AT_SOLICITED, ( void * ) &atResp );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
+
+    context.pktRespCB = pktRespCB;
     pktStatus = _Cellular_HandlePacket( &context, AT_SOLICITED, ( void * ) &atResp );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
 }
@@ -445,7 +500,6 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Start_Plus_No_Token_String( void
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
@@ -461,7 +515,6 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Too_Large_String( void )
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
@@ -478,7 +531,6 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Null_Parse_Function( void )
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     /* copy the token table. */
@@ -496,14 +548,13 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
     _Cellular_GenericCallback_Ignore();
-    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT );
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
@@ -514,7 +565,6 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Greater_Than_Urc_To
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
@@ -533,7 +583,6 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Less_Than_Urc_Token
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATCommandLine_t testATCmdLine;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     /* copy the token table. */
@@ -726,11 +775,11 @@ void test__Cellular_TimeoutAtcmdDataRecvRequestWithCallback_NULL_atReq( void )
 void test__Cellular_AtcmdDataSend_NULL_Context( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    const char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
         NULL,
@@ -746,6 +795,32 @@ void test__Cellular_AtcmdDataSend_NULL_Context( void )
 }
 
 /**
+ * @brief Test that null req case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_Null_Req( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtDataReq_t atDataReq;
+    CellularAtReq_t atReq =
+    {
+        NULL,
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+}
+
+/**
  * @brief Test that happy path case for _Cellular_AtcmdDataSend.
  */
 void test__Cellular_AtcmdDataSend_Happy_Path( void )
@@ -756,10 +831,10 @@ void test__Cellular_AtcmdDataSend_Happy_Path( void )
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -788,17 +863,37 @@ void test__Cellular_AtcmdDataSend_Happy_Path( void )
 /**
  * @brief Test that Test dataReq.pData or dataReq.pSentDataLength null case for _Cellular_AtcmdDataSend.
  */
-void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_DataReq_Null_Failure( void )
+void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_DataReq_Null_Parameter_Failure( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char pEndPattern[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReqNullParam =
     {
         NULL,
+        0,
         NULL,
         NULL,
+        0
+    };
+
+    CellularAtDataReq_t atDataReqNullSendLength =
+    {
+        ( const uint8_t * )dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         NULL,
-        NULL
+        ( const uint8_t * )pEndPattern,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtDataReq_t atDataReqNullEndPattern =
+    {
+        ( const uint8_t * )dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        NULL,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
     CellularAtReq_t atReq =
@@ -819,6 +914,18 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Dat
     /* Test dataReq.pData or dataReq.pSentDataLength case. */
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReqNullParam, NULL, NULL, 0, 0, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+
+    pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReqNullSendLength, NULL, NULL, 0, 0, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
+    queueData = CELLULAR_PKT_STATUS_OK;
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    queueData = CELLULAR_PKT_STATUS_OK;
+    pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReqNullEndPattern, NULL, NULL, 0, 0, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
 /**
@@ -832,10 +939,10 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Une
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -872,10 +979,10 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Une
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -913,10 +1020,10 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_Fai
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -955,10 +1062,10 @@ void test__Cellular_AtcmdDataSend_call__Cellular_DataSendWithTimeoutDelayRaw_xQu
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -999,6 +1106,32 @@ void test__Cellular_TimeoutAtcmdDataSendSuccessToken_Null_Context( void )
 }
 
 /**
+ * @brief Test that null req case for _Cellular_TimeoutAtcmdDataSendSuccessToken.
+ */
+void test__Cellular_TimeoutAtcmdDataSendSuccessToken_Null_Req( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtDataReq_t atDataReq;
+    CellularAtReq_t atReq =
+    {
+        NULL,
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    pktStatus = _Cellular_TimeoutAtcmdDataSendSuccessToken( &context, atReq, atDataReq, 0, 0, NULL, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+}
+
+/**
  * @brief Test that happy path case for _Cellular_TimeoutAtcmdDataSendSuccessToken.
  */
 void test__Cellular_TimeoutAtcmdDataSendSuccessToken_Happy_Path( void )
@@ -1009,10 +1142,10 @@ void test__Cellular_TimeoutAtcmdDataSendSuccessToken_Happy_Path( void )
     uint32_t sentDataLength = 0;
     CellularAtDataReq_t atDataReq =
     {
-        dataBuf,
+        ( const uint8_t * )dataBuf,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
         &sentDataLength,
-        pEndPattern,
+        ( const uint8_t * )pEndPattern,
         CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
     };
 
@@ -1063,6 +1196,20 @@ void test__Cellular_PktHandlerInit_Null_Context( void )
 }
 
 /**
+ * @brief Test that happy path case for _Cellular_PktHandlerInit.
+ */
+void test__Cellular_PktHandlerInit_Happy_Path( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    pktStatus = _Cellular_PktHandlerInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
  * @brief Test that null pktRespQueue case for _Cellular_PktHandlerInit.
  */
 void test__Cellular_PktHandlerInit_Null_pktRespQueue( void )
@@ -1081,15 +1228,36 @@ void test__Cellular_PktHandlerInit_Null_pktRespQueue( void )
 /**
  * @brief Test that happy path case for _Cellular_CreatePktRequestMutex.
  */
+void test__Cellular_CreatePktRequestMutex_Null_Parameter( void )
+{
+    bool ret = true;
+
+    ret = _Cellular_CreatePktRequestMutex( NULL );
+    TEST_ASSERT_EQUAL( false, ret );
+}
+
+/**
+ * @brief Test that happy path case for _Cellular_CreatePktRequestMutex.
+ */
 void test__Cellular_CreatePktRequestMutex_Happy_Path( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    bool ret = false;
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
+    ret = _Cellular_CreatePktRequestMutex( &context );
+    TEST_ASSERT_EQUAL( true, ret );
+}
 
-    pktStatus = _Cellular_CreatePktRequestMutex( &context );
-    TEST_ASSERT_EQUAL( true, pktStatus );
+/**
+ * @brief Test that null parameter case for _Cellular_CreatePktResponseMutex.
+ */
+void test__Cellular_CreatePktResponseMutex_Null_Parameter( void )
+{
+    bool ret = true;
+
+    ret = _Cellular_CreatePktResponseMutex( NULL );
+    TEST_ASSERT_EQUAL( false, ret );
 }
 
 /**
@@ -1097,13 +1265,25 @@ void test__Cellular_CreatePktRequestMutex_Happy_Path( void )
  */
 void test__Cellular_CreatePktResponseMutex_Happy_Path( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    bool ret = false;
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
-    pktStatus = _Cellular_CreatePktResponseMutex( &context );
-    TEST_ASSERT_EQUAL( true, pktStatus );
+    ret = _Cellular_CreatePktResponseMutex( &context );
+    TEST_ASSERT_EQUAL( true, ret );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_DestroyPktRequestMutex.
+ */
+void test__Cellular_DestroyPktRequestMutex_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_CreatePktResponseMutex( &context );
+    _Cellular_DestroyPktRequestMutex( NULL );
+    TEST_ASSERT_EQUAL( false, context.pktRequestMutex.created );
 }
 
 /**
@@ -1111,14 +1291,25 @@ void test__Cellular_CreatePktResponseMutex_Happy_Path( void )
  */
 void test__Cellular_DestroyPktRequestMutex_Happy_Path( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
-    pktStatus = _Cellular_CreatePktRequestMutex( &context );
+    _Cellular_CreatePktRequestMutex( &context );
     _Cellular_DestroyPktRequestMutex( &context );
     TEST_ASSERT_EQUAL( false, context.pktRequestMutex.created );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_DestroyPktResponseMutex.
+ */
+void test__Cellular_DestroyPktResponseMutex_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    _Cellular_CreatePktResponseMutex( &context );
+    _Cellular_DestroyPktResponseMutex( NULL );
+    TEST_ASSERT_EQUAL( true, context.PktRespMutex.created );
 }
 
 /**
@@ -1126,12 +1317,11 @@ void test__Cellular_DestroyPktRequestMutex_Happy_Path( void )
  */
 void test__Cellular_DestroyPktResponseMutex_Happy_Path( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
-    pktStatus = _Cellular_CreatePktResponseMutex( &context );
+    _Cellular_CreatePktResponseMutex( &context );
     _Cellular_DestroyPktResponseMutex( &context );
     TEST_ASSERT_EQUAL( false, context.PktRespMutex.created );
 }
@@ -1173,6 +1363,30 @@ void test__Cellular_AtParseInit_Check_Sort_Fail( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTableSortFailCase, sizeof( CellularTokenTable_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief Test that token table fail case case for _Cellular_AtParseInit.
+ */
+void test__Cellular_AtParseInit_Check_TokenTable_Fail( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableWoMapSize, sizeof( CellularTokenTable_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     pktStatus = _Cellular_AtParseInit( &context );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
