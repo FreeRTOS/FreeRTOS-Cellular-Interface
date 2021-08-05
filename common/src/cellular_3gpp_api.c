@@ -238,7 +238,7 @@ static CellularPktStatus_t _parseTimeZoneInCCLKResponse( char ** ppToken,
                                                          CellularTime_t * pTimeInfo )
 {
     int32_t tempValue = 0;
-    CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
+    CellularATError_t atCoreStatus = CELLULAR_AT_ERROR;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
     /* Get Time Zone info. */
@@ -465,7 +465,7 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
         atCoreStatus = Cellular_ATGetSpecificNextTok( &pTempTimeZoneResp, "/", &pToken );
     }
 
-    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
     {
         pktStatus = _parseYearMonthDayInCCLKResponse( &pToken,
                                                       &pTempTimeZoneResp, pTimeInfo );
@@ -477,14 +477,10 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
         atCoreStatus = Cellular_ATGetSpecificNextTok( &pTempTimeZoneResp, ":", &pToken );
     }
 
-    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
     {
         pktStatus = _parseTimeInCCLKResponse( &pToken, timeZoneSignNegative,
                                               &pTempTimeZoneResp, pTimeInfo );
-    }
-    else
-    {
-        pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
     }
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
@@ -821,7 +817,7 @@ static bool _parseCopsRegModeToken( char * pToken,
     int32_t var = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
-    if( ( pOperatorInfo == NULL ) || ( pToken == NULL ) )
+    if( pToken == NULL )
     {
         CellularLogError( "_parseCopsRegMode: Input Parameter NULL" );
         parseStatus = false;
@@ -860,7 +856,7 @@ static bool _parseCopsNetworkNameFormatToken( const char * pToken,
     int32_t var = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
-    if( ( pOperatorInfo == NULL ) || ( pToken == NULL ) )
+    if( pToken == NULL )
     {
         CellularLogError( "_parseCopsNetworkNameFormat: Input Parameter NULL" );
         parseStatus = false;
@@ -869,19 +865,22 @@ static bool _parseCopsNetworkNameFormatToken( const char * pToken,
     {
         atCoreStatus = Cellular_ATStrtoi( pToken, 10, &var );
 
-        if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && ( var >= 0 ) &&
-            ( var < ( int32_t ) OPERATOR_NAME_FORMAT_MAX ) )
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            /* Variable "var" is ensured that it is valid and within
-             * a valid range. Hence, assigning the value of the variable to
-             * operatorNameFormat with a enum cast. */
-            /* coverity[misra_c_2012_rule_10_5_violation] */
-            pOperatorInfo->operatorNameFormat = ( CellularOperatorNameFormat_t ) var;
-        }
-        else
-        {
-            CellularLogError( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %s", pToken );
-            parseStatus = false;
+            if( ( var >= 0 ) &&
+                ( var < ( int32_t ) OPERATOR_NAME_FORMAT_MAX ) )
+            {
+                /* Variable "var" is ensured that it is valid and within
+                 * a valid range. Hence, assigning the value of the variable to
+                 * operatorNameFormat with a enum cast. */
+                /* coverity[misra_c_2012_rule_10_5_violation] */
+                pOperatorInfo->operatorNameFormat = ( CellularOperatorNameFormat_t ) var;
+            }
+            else
+            {
+                CellularLogError( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %s", pToken );
+                parseStatus = false;
+            }
         }
     }
 
@@ -896,7 +895,7 @@ static bool _parseCopsNetworkNameToken( const char * pToken,
     bool parseStatus = true;
     uint32_t mccMncLen = 0U;
 
-    if( ( pOperatorInfo == NULL ) || ( pToken == NULL ) )
+    if( pToken == NULL )
     {
         CellularLogError( "_parseCopsNetworkName: Input Parameter NULL" );
         parseStatus = false;
@@ -946,7 +945,7 @@ static bool _parseCopsRatToken( const char * pToken,
     int32_t var = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
-    if( ( pOperatorInfo == NULL ) || ( pToken == NULL ) )
+    if( pToken == NULL )
     {
         CellularLogError( "_parseCopsNetworkName: Input Parameter NULL" );
         parseStatus = false;
@@ -955,19 +954,21 @@ static bool _parseCopsRatToken( const char * pToken,
     {
         atCoreStatus = Cellular_ATStrtoi( pToken, 10, &var );
 
-        if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) &&
-            ( var < ( int32_t ) CELLULAR_RAT_MAX ) && ( var >= 0 ) )
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            /* Variable "var" is ensured that it is valid and within
-             * a valid range. Hence, assigning the value of the variable to
-             * rat with a enum cast. */
-            /* coverity[misra_c_2012_rule_10_5_violation] */
-            pOperatorInfo->rat = ( CellularRat_t ) var;
-        }
-        else
-        {
-            CellularLogError( "_parseCopsNetworkName: Error in processing RAT. Token %s", pToken );
-            parseStatus = false;
+            if( ( var < ( int32_t ) CELLULAR_RAT_MAX ) && ( var >= 0 ) )
+            {
+                /* Variable "var" is ensured that it is valid and within
+                 * a valid range. Hence, assigning the value of the variable to
+                 * rat with a enum cast. */
+                /* coverity[misra_c_2012_rule_10_5_violation] */
+                pOperatorInfo->rat = ( CellularRat_t ) var;
+            }
+            else
+            {
+                CellularLogError( "_parseCopsNetworkName: Error in processing RAT. Token %s", pToken );
+                parseStatus = false;
+            }
         }
     }
 
@@ -1409,7 +1410,7 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     }
 
     /* Get the service status from lib AT data. */
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pServiceStatus != NULL ) )
+    if( cellularStatus == CELLULAR_SUCCESS )
     {
         pLibAtData = &pContext->libAtData;
         _Cellular_LockAtDataMutex( pContext );
@@ -2008,10 +2009,9 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
 
 void _Cellular_DestroyAtDataMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Destroy( &pContext->libAtDataMutex );
-    }
+    configASSERT( pContext != NULL );
+
+    PlatformMutex_Destroy( &pContext->libAtDataMutex );
 }
 
 /*-----------------------------------------------------------*/
@@ -2020,10 +2020,9 @@ bool _Cellular_CreateAtDataMutex( CellularContext_t * pContext )
 {
     bool status = false;
 
-    if( pContext != NULL )
-    {
-        status = PlatformMutex_Create( &pContext->libAtDataMutex, false );
-    }
+    configASSERT( pContext != NULL );
+
+    status = PlatformMutex_Create( &pContext->libAtDataMutex, false );
 
     return status;
 }
@@ -2032,20 +2031,18 @@ bool _Cellular_CreateAtDataMutex( CellularContext_t * pContext )
 
 void _Cellular_LockAtDataMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Lock( &pContext->libAtDataMutex );
-    }
+    configASSERT( pContext != NULL );
+
+    PlatformMutex_Lock( &pContext->libAtDataMutex );
 }
 
 /*-----------------------------------------------------------*/
 
 void _Cellular_UnlockAtDataMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Unlock( &pContext->libAtDataMutex );
-    }
+    configASSERT( pContext != NULL );
+
+    PlatformMutex_Unlock( &pContext->libAtDataMutex );
 }
 
 /*-----------------------------------------------------------*/
@@ -2057,22 +2054,21 @@ void _Cellular_InitAtData( CellularContext_t * pContext,
 {
     cellularAtData_t * pLibAtData = NULL;
 
-    if( pContext != NULL )
+    configASSERT( pContext != NULL );
+
+    pLibAtData = &pContext->libAtData;
+
+    if( mode == 0u )
     {
-        pLibAtData = &pContext->libAtData;
-
-        if( mode == 0u )
-        {
-            ( void ) memset( pLibAtData, 0, sizeof( cellularAtData_t ) );
-            pLibAtData->csRegStatus = REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING;
-            pLibAtData->psRegStatus = REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING;
-        }
-
-        pLibAtData->lac = 0xFFFFU;
-        pLibAtData->cellId = 0xFFFFFFFFU;
-        pLibAtData->rat = CELLULAR_RAT_INVALID;
-        pLibAtData->rac = 0xFF;
+        ( void ) memset( pLibAtData, 0, sizeof( cellularAtData_t ) );
+        pLibAtData->csRegStatus = REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING;
+        pLibAtData->psRegStatus = REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING;
     }
+
+    pLibAtData->lac = 0xFFFFU;
+    pLibAtData->cellId = 0xFFFFFFFFU;
+    pLibAtData->rat = CELLULAR_RAT_INVALID;
+    pLibAtData->rac = 0xFF;
 }
 
 /*-----------------------------------------------------------*/
@@ -2729,26 +2725,23 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
 {
     uint32_t retLen = 0;
 
-    if( cmdBuf != NULL )
+    if( value != 0U )
     {
-        if( value != 0U )
-        {
-            /* The return value of snprintf is not used.
-             * The max length of the string is fixed and checked offline. */
-            /* coverity[misra_c_2012_rule_21_6_violation]. */
-            ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%c",
-                               ( uint32_t ) PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
-        }
-        else
-        {
-            /* The return value of snprintf is not used.
-             * The max length of the string is fixed and checked offline. */
-            /* coverity[misra_c_2012_rule_21_6_violation]. */
-            ( void ) snprintf( cmdBuf, cmdLen, "%c", endOfString ? '\0' : ',' );
-        }
-
-        retLen = ( uint32_t ) strlen( cmdBuf );
+        /* The return value of snprintf is not used.
+         * The max length of the string is fixed and checked offline. */
+        /* coverity[misra_c_2012_rule_21_6_violation]. */
+        ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%c",
+                           ( uint32_t ) PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
     }
+    else
+    {
+        /* The return value of snprintf is not used.
+         * The max length of the string is fixed and checked offline. */
+        /* coverity[misra_c_2012_rule_21_6_violation]. */
+        ( void ) snprintf( cmdBuf, cmdLen, "%c", endOfString ? '\0' : ',' );
+    }
+
+    retLen = ( uint32_t ) strlen( cmdBuf );
 
     return retLen;
 }

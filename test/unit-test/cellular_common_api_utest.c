@@ -94,17 +94,24 @@ static CellularTokenTable_t tokenTable =
 void cellularSocketDataReadyCallback( CellularSocketHandle_t socketHandle,
                                       void * pCallbackContext )
 {
+    ( void ) socketHandle;
+    ( void ) pCallbackContext;
 }
 
 void cellularSocketOpenCallback( CellularUrcEvent_t urcEvent,
                                  CellularSocketHandle_t socketHandle,
                                  void * pCallbackContext )
 {
+    ( void ) urcEvent;
+    ( void ) pCallbackContext;
+    ( void ) socketHandle;
 }
 
 void cellularSocketClosedCallback( CellularSocketHandle_t socketHandle,
                                    void * pCallbackContext )
 {
+    ( void ) socketHandle;
+    ( void ) pCallbackContext;
 }
 
 void testCallback( void )
@@ -115,6 +122,9 @@ void cellularUrcNetworkRegistrationCallback( CellularUrcEvent_t urcEvent,
                                              const CellularServiceStatus_t * pServiceStatus,
                                              void * pCallbackContext )
 {
+    ( void ) urcEvent;
+    ( void ) pCallbackContext;
+    ( void ) pServiceStatus;
 }
 
 /* ============================   UNITY FIXTURES ============================ */
@@ -144,10 +154,12 @@ int suiteTearDown( int numFailures )
 
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
+    ( void ) pMutex;
 }
 
 void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
+    ( void ) pMutex;
 }
 
 uint16_t MockvQueueDelete( QueueHandle_t queue )
@@ -165,6 +177,9 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
 QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
                                 uint32_t uxItemSize )
 {
+    ( void ) uxQueueLength;
+    ( void ) uxItemSize;
+
     if( queueCreateFail == 0 )
     {
         QueueHandle_t test = malloc( sizeof( struct QueueDefinition ) );
@@ -179,6 +194,7 @@ QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
+    ( void ) recursive;
     pNewMutex->created = true;
     return true;
 }
@@ -194,21 +210,6 @@ static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceRecei
     ( void ) pCommInterfaceHandle;
 
     commIntRet = receiveCallback( pContext, NULL );
-
-    return commIntRet;
-}
-
-static CellularCommInterfaceError_t _prvCommIntfOpenCallrecvCallbackNullContext( CellularCommInterfaceReceiveCallback_t receiveCallback,
-                                                                                 void * pUserData,
-                                                                                 CellularCommInterfaceHandle_t * pCommInterfaceHandle )
-{
-    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
-
-    ( void ) receiveCallback;
-    ( void ) pUserData;
-    ( void ) pCommInterfaceHandle;
-
-    commIntRet = receiveCallback( NULL, NULL );
 
     return commIntRet;
 }
@@ -254,7 +255,6 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
     ( void ) bufferLength;
     ( void ) timeoutMilliseconds;
     ( void ) pDataReceivedLength;
-    char * pString;
 
     return commIntRet;
 }
@@ -325,7 +325,8 @@ void test_Cellular_CommonCleanup_Null_Handler( void )
 void test_Cellular_CommonCleanup_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t handler;
+    CellularContext_t context;
+    CellularHandle_t handler = &context;
 
     Cellular_ModuleCleanUp_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_LibCleanup_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -623,18 +624,26 @@ void test_Cellular_CommonSocketSetSockOpt_Null_SocketHandler( void )
 }
 
 /**
- * @brief Test that null option case for Cellular_CommonSocketSetSockOpt.
+ * @brief Test that null parameter case for Cellular_CommonSocketSetSockOpt.
  */
-void test_Cellular_CommonSocketSetSockOpt_NULL_Option( void )
+void test_Cellular_CommonSocketSetSockOpt_NULL_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
     struct CellularSocketContext socketHandle;
+    uint32_t optionValue = 0;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
+    cellularStatus = Cellular_CommonSocketSetSockOpt( NULL, &socketHandle, 0, 0, NULL, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-
     cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle, 0, 0, NULL, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle, 0, 0,
+                                                      ( const uint8_t * ) &optionValue, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
