@@ -300,7 +300,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
                                                   const char * pRespPrefix )
 {
     CellularPktStatus_t pkStatus = CELLULAR_PKT_STATUS_FAILURE;
-    bool result = true;
+    bool result = false;
     const char * const * pTokenSuccessTable = NULL;
     const char * const * pTokenErrorTable = NULL;
     const char * const * pTokenExtraTable = NULL;
@@ -799,7 +799,15 @@ static bool _preprocessLine( CellularContext_t * pContext,
                                                    pTempLine, *pBytesRead,
                                                    ppStartOfData, &pContext->dataLength );
 
-            if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
+            if( pktStatus == CELLULAR_PKT_STATUS_OK )
+            {
+                /* These members filled by user callback function and need to be demonstrated. */
+                if( pContext->dataLength > 0 )
+                {
+                    configASSERT( ppStartOfData != NULL );
+                }
+            }
+            else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
             {
                 /* The modem driver is waiting for more data to decide. */
                 CellularLogDebug( "%p is not a complete line", pTempLine );
@@ -809,11 +817,8 @@ static bool _preprocessLine( CellularContext_t * pContext,
             }
             else
             {
-                if( pktStatus != CELLULAR_PKT_STATUS_OK )
-                {
-                    CellularLogError( "pktDataPrefixCB returns error %d", pktStatus );
-                    keepProcess = false;
-                }
+                CellularLogError( "pktDataPrefixCB returns error %d", pktStatus );
+                keepProcess = false;
             }
         }
         else
@@ -907,7 +912,10 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
     while( keepProcess == true )
     {
-        /* Pktio is reading command. Skip over the change line. */
+        /* Pktio is reading command. Skip over the change line. And the reason
+         * we don't consider the variable bytesInBuffer is because that the
+         * input variable bytesInBuffer is bounded by the caller already.
+         */
         while( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) )
         {
             pTempLine++;
