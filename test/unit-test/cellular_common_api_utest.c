@@ -326,6 +326,8 @@ void test_Cellular_CommonCleanup_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t handler = &context;
 
     Cellular_ModuleCleanUp_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -357,6 +359,8 @@ void test_Cellular_CommonRegisterUrcNetworkRegistrationEventCallback_Happy_Path(
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( ( CellularHandle_t ) &context, cellularUrcNetworkRegistrationCallback, testCallback );
 
@@ -387,6 +391,8 @@ void test_Cellular_CommonRegisterUrcPdnEventCallback_Happy_Path( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonRegisterUrcPdnEventCallback( ( CellularHandle_t ) &context, NULL, NULL );
 
@@ -414,6 +420,8 @@ void test_Cellular_CommonRegisterUrcSignalStrengthChangedCallback_Happy_Path( vo
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonRegisterUrcSignalStrengthChangedCallback( ( CellularHandle_t ) &context, NULL, NULL );
@@ -443,6 +451,8 @@ void test_Cellular_CommonRegisterUrcGenericCallback_Happy_Path( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonRegisterUrcGenericCallback( ( CellularHandle_t ) &context, NULL, NULL );
 
@@ -470,6 +480,8 @@ void test_Cellular_CommonRegisterModemEventCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonRegisterModemEventCallback( ( CellularHandle_t ) &context, NULL, NULL );
@@ -499,6 +511,8 @@ void test_Cellular_CommonATCommandRaw_Null_AtCmdPayload( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonATCommandRaw( &context, NULL, NULL, 0, NULL, NULL, 0 );
@@ -513,6 +527,8 @@ void test_Cellular_CommonATCommandRaw_AtCmd_Bad_Request( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     char pPrefix[] = "AtTSest";
     char pData[] = "Test Data";
 
@@ -532,6 +548,8 @@ void test_Cellular_CommonATCommandRaw_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     char pPrefix[] = "AtTSest";
     char pData[] = "Test Data";
 
@@ -566,6 +584,8 @@ void test_Cellular_CommonCreateSocket_Null_SocketHandler( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonCreateSocket( &context, 0, 0, 0, 0, NULL );
@@ -580,6 +600,8 @@ void test_Cellular_CommonCreateSocket_Invalid_ContextId( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -597,6 +619,8 @@ void test_Cellular_CommonCreateSocket_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -616,6 +640,8 @@ void test_Cellular_CommonSocketSetSockOpt_Null_SocketHandler( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketSetSockOpt( &context, NULL, 0, 0, 0, 0 );
@@ -630,6 +656,8 @@ void test_Cellular_CommonSocketSetSockOpt_NULL_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -654,6 +682,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SendTimeout_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -674,6 +704,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SendTimeout_Failure_Path( void 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -694,6 +726,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_RecvTimeout_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -714,6 +748,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_RecvTimeout_Failure_Path( void 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -734,6 +770,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -756,6 +794,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_Failure_Path( void
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -778,6 +818,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_Unsupported_Failure_Path( void 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -800,6 +842,8 @@ void test_Cellular_CommonSocketSetSockOpt_Option_UnsupportedOption_Failure_Path(
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
     uint32_t optionValue = 0;
 
@@ -836,6 +880,8 @@ void test_Cellular_CommonSocketRegisterDataReadyCallback_Null_socketHandle( void
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterDataReadyCallback( &context, NULL,
@@ -851,6 +897,8 @@ void test_Cellular_CommonSocketRegisterDataReadyCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -887,6 +935,8 @@ void test_Cellular_CommonSocketRegisterSocketOpenCallback_Null_socketHandle( voi
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterSocketOpenCallback( &context, NULL,
@@ -902,6 +952,8 @@ void test_Cellular_CommonSocketRegisterSocketOpenCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -938,6 +990,8 @@ void test_Cellular_CommonSocketRegisterClosedCallback_Null_socketHandle( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterClosedCallback( &context, NULL,
@@ -953,6 +1007,8 @@ void test_Cellular_CommonSocketRegisterClosedCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );

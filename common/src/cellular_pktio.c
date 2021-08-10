@@ -682,6 +682,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             {
                 ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
+
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
@@ -859,6 +860,7 @@ static bool _handleDataResult( CellularContext_t * pContext,
         *pBytesRead = bytesLeft;
         CellularLogDebug( "_handleData okay, keep processing %u bytes %p", bytesLeft, *ppLine );
     }
+
     return keepProcess;
 }
 
@@ -909,7 +911,6 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
     while( keepProcess == true )
     {
-        printf("%s():bytesRead %d\r\n", __func__, bytesRead);
         /* Pktio is reading command. Skip over the change line. And the reason
          * we don't consider the variable bytesInBuffer is because that the
          * input variable bytesInBuffer is bounded by the caller already.

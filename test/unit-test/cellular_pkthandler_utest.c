@@ -422,6 +422,7 @@ void test__Cellular_HandlePacket_AT_SOLICITED_False_AtResp_Failure( void )
     CellularATCommandResponse_t atResp;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     testATCmdLine.pLine = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
     testATCmdLine.pNext = NULL;
     atResp.pItm = &testATCmdLine;
@@ -445,6 +446,7 @@ void test__Cellular_HandlePacket_AT_SOLICITED_xQueueSend_Failure( void )
     CellularATCommandResponse_t atResp;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     testATCmdLine.pLine = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
     testATCmdLine.pNext = NULL;
     atResp.pItm = &testATCmdLine;

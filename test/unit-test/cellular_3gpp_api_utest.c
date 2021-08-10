@@ -456,7 +456,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                                   int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_FW_VERSION_MAX_SIZE + 1 ];
 
@@ -473,7 +472,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
     }
 
     return pktStatus;
@@ -484,7 +483,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                        int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_IMEI_MAX_SIZE + 1 ];
 
@@ -501,7 +499,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -513,7 +511,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId( 
                                                                                 int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_MODEL_ID_MAX_SIZE + 1 ];
 
@@ -530,7 +527,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId( 
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -542,7 +539,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactu
                                                                                       int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_MANUFACTURE_ID_MAX_SIZE + 1 ];
 
@@ -559,7 +555,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactu
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -571,7 +567,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
                                                                                    int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ sizeof( CellularNetworkRegType_t ) ];
 
@@ -588,7 +583,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -600,7 +595,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
                                                                                   int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     cellularOperatorInfo_t cellularOperatorInfo;
 
@@ -621,16 +615,16 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
         if( parseNetworkNameFailureCase == 2 )
         {
             cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else if( parseNetworkNameFailureCase == 3 )
         {
             cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else
         {
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
     }
 
@@ -642,7 +636,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
                                                                                                int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularEidrxSettingsList_t cellularEidrxSettingsList;
 
@@ -660,7 +653,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
         _saveData( pLine2, &atResp, sizeof( pLine2 ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 4 )
     {
@@ -668,7 +661,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
         char pLine2[] = "+CEDRXS: 0";
         _saveData( pLine, &atResp, sizeof( pLine ) );
         _saveData( pLine2, &atResp, sizeof( pLine2 ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
 
     return pktStatus;
@@ -679,7 +672,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettin
                                                                                     int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularPsmSettings_t cellularPsmSettings;
 
@@ -695,14 +687,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettin
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
     }
 
     return pktStatus;
@@ -713,7 +705,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid( Ce
                                                                               int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ strlen( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) + 1 ];
 
@@ -730,14 +721,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid( Ce
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
         }
         else if( cbCondition == 4 )
         {
             char pLine[] = "This is testing string for greater than 20.";
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
         }
     }
 
@@ -749,7 +740,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi( Cel
                                                                              int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ strlen( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) + 1 ];
 
@@ -766,14 +756,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi( Cel
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
         }
         else if( cbCondition == 4 )
         {
             char pLine[] = "This is the testing long string.";
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
         }
     }
 
@@ -785,7 +775,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn( Ce
                                                                               int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularPlmnInfo_t cellularPlmnInfo;
 
@@ -802,7 +791,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn( Ce
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularPlmnInfo, sizeof( CellularPlmnInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularPlmnInfo, sizeof( CellularPlmnInfo_t ) );
         }
     }
 
@@ -814,7 +803,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress( C
                                                                                int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularEidrxSettingsList_t cellularEidrxSettingsList;
 
@@ -831,21 +819,21 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress( C
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 5 )
     {
         char pLine = '\0';
 
         _saveData( &pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
 
     return pktStatus;
@@ -856,7 +844,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockSt
                                                                                       int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularSimCardLockState_t cellularSimCardLockState;
 
@@ -873,14 +860,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockSt
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
     }
 
     return pktStatus;
@@ -1423,6 +1410,8 @@ void test_Cellular_CommonGetEidrxSettings_Null_EidrxSettings( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1437,6 +1426,8 @@ void test_Cellular_CommonGetEidrxSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1455,6 +1446,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_N
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1476,6 +1469,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_N
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1498,6 +1493,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_W
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1521,6 +1518,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_N
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1543,6 +1542,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb__Cellular_RecvFuncGetEidrxSettings_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1565,6 +1566,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_N
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1586,6 +1589,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_E
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1609,6 +1614,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_I
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1635,6 +1642,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_C
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1662,6 +1671,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_O
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1689,6 +1700,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_A
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1714,6 +1727,8 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_H
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1738,6 +1753,8 @@ void test_Cellular_CommonGetEidrxSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
@@ -1766,6 +1783,8 @@ void test_Cellular_CommonSetEidrxSettings_Null_EidrxSettings( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1780,6 +1799,8 @@ void test_Cellular_CommonSetEidrxSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettings_t eidrxSettings;
 
@@ -1797,6 +1818,8 @@ void test_Cellular_CommonSetEidrxSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettings_t eidrxSettings;
 
@@ -1832,6 +1855,8 @@ void test_Cellular_CommonRfOn_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1860,6 +1885,8 @@ void test_Cellular_CommonRfOff_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1888,6 +1915,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1902,6 +1931,8 @@ void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -1918,6 +1949,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Invalid_Rat( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -1937,6 +1970,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -1958,6 +1993,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -1980,6 +2017,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2002,6 +2041,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2024,6 +2065,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2046,6 +2089,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2069,6 +2114,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2096,6 +2143,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2125,6 +2174,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2157,6 +2208,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2192,6 +2245,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2233,6 +2288,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2262,6 +2319,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2291,6 +2350,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2321,6 +2382,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2351,6 +2414,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2382,6 +2447,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2412,6 +2479,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2442,6 +2511,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2472,6 +2543,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2503,6 +2576,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2534,6 +2609,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2564,6 +2641,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2594,6 +2673,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2624,6 +2705,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2654,6 +2737,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2677,6 +2762,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2706,6 +2793,8 @@ void test_Cellular_CommonGetRegisteredNetwork_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
@@ -2735,6 +2824,8 @@ void test_Cellular_CommonGetServiceStatus_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2750,6 +2841,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
@@ -2777,6 +2870,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     context.libAtData.psRegStatus = 5;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2803,6 +2898,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Wro
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.libAtData.psRegStatus = 5;
 
@@ -2832,6 +2929,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     context.libAtData.psRegStatus = 1;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2859,6 +2958,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.libAtData.psRegStatus = 1;
 
@@ -2888,6 +2989,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
     context.libAtData.psRegStatus = 1;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2914,6 +3017,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_AtC
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
@@ -2942,6 +3047,8 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Hap
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
@@ -2974,6 +3081,8 @@ void test_Cellular_CommonGetServiceStatus_Wrong_psRegStatus( void )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularServiceStatus_t serviceStatus;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.libAtData.psRegStatus = 1;
 
@@ -3013,6 +3122,8 @@ void test_Cellular_CommonGetServiceStatus_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
@@ -3061,6 +3172,8 @@ void test_Cellular_CommonGetNetworkTime_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3075,6 +3188,8 @@ void test_Cellular_CommonGetNetworkTime_Retrieve_Network_Time_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3093,6 +3208,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3113,6 +3230,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_AtCmd( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3134,6 +3253,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Item( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3155,6 +3276,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Item_Line( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3176,6 +3299,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3196,6 +3321,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data_Length( void 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3217,6 +3344,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_AtCmd_Fa
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3244,6 +3373,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3290,6 +3421,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3338,6 +3471,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3388,6 +3523,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3441,6 +3578,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3472,6 +3611,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3502,6 +3643,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZoneInfo_AtCm
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3529,6 +3672,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3563,6 +3708,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3598,6 +3745,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3633,6 +3782,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3667,6 +3818,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3702,6 +3855,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3738,6 +3893,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3773,6 +3930,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3809,6 +3968,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3846,6 +4007,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Ho
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3881,6 +4044,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Ho
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3917,6 +4082,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Mi
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3952,6 +4119,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Mi
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -3988,6 +4157,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Mi
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4033,6 +4204,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Se
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4080,6 +4253,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Se
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4115,6 +4290,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Se
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4151,6 +4328,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4174,6 +4353,8 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4227,6 +4408,8 @@ void test_Cellular_CommonGetNetworkTime_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
@@ -4255,6 +4438,8 @@ void test_Cellular_CommonGetModemInfo_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4269,6 +4454,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4299,6 +4486,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4323,6 +4512,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4348,6 +4539,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4373,6 +4566,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4397,6 +4592,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4421,6 +4618,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4446,6 +4645,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4469,6 +4670,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4493,6 +4696,8 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4517,6 +4722,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4539,6 +4746,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4562,6 +4771,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4585,6 +4796,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4607,6 +4820,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4627,6 +4842,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4649,6 +4866,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4672,6 +4891,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4694,6 +4915,8 @@ void test_Cellular_CommonGetModemInfo_Get_IMEI_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4724,6 +4947,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4746,6 +4971,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4769,6 +4996,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4792,6 +5021,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4814,6 +5045,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4834,6 +5067,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4856,6 +5091,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4879,6 +5116,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4901,6 +5140,8 @@ void test_Cellular_CommonGetModemInfo_Get_ModelId_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4931,6 +5172,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4953,6 +5196,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4976,6 +5221,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -4999,6 +5246,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5021,6 +5270,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5041,6 +5292,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5063,6 +5316,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5086,6 +5341,8 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5108,6 +5365,8 @@ void test_Cellular_CommonGetModemInfo_Get_ManufactureId_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5137,6 +5396,8 @@ void test_Cellular_CommonGetModemInfo_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
@@ -5177,6 +5438,8 @@ void test_Cellular_CommonGetIPAddress_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5196,6 +5459,8 @@ void test_Cellular_CommonGetIPAddress_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5218,6 +5483,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Context
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5239,6 +5506,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_F
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5261,6 +5530,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_I
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5283,6 +5554,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_I
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5305,6 +5578,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Data_Po
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5327,6 +5602,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Wrong_Data_L
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5349,6 +5626,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_AtCmd_Failur
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5372,6 +5651,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path( 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5396,6 +5677,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path_C
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5420,6 +5703,8 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Input_H
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5443,6 +5728,8 @@ void test_Cellular_CommonGetIPAddress_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
@@ -5473,6 +5760,8 @@ void test_Cellular_CommonSetPdnConfig_Bad_Pdn_Context_Type( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
@@ -5491,6 +5780,8 @@ void test_Cellular_CommonSetPdnConfig_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
@@ -5511,6 +5802,8 @@ void test_Cellular_CommonSetPdnConfig_IPV6_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
@@ -5531,6 +5824,8 @@ void test_Cellular_CommonSetPdnConfig_IPV4V6_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
@@ -5563,6 +5858,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -5578,6 +5875,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5599,6 +5898,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5620,6 +5921,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5641,6 +5944,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5664,6 +5969,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5686,6 +5993,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5708,6 +6017,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5731,6 +6042,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5757,6 +6070,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5783,6 +6098,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5809,6 +6126,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5835,6 +6154,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5861,6 +6182,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5887,6 +6210,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5913,6 +6238,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5939,6 +6266,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5965,6 +6294,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -5991,6 +6322,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6017,6 +6350,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6043,6 +6378,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6069,6 +6406,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6095,6 +6434,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6119,6 +6460,8 @@ void test_Cellular_CommonGetSimCardLockStatus_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
@@ -6148,6 +6491,8 @@ void test_Cellular_CommonGetSimCardInfo_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -6162,6 +6507,8 @@ void test_Cellular_CommonGetSimCardInfo_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6189,6 +6536,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Contex
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6211,6 +6560,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_AtCmd_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6233,6 +6584,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Data_P
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6254,6 +6607,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Happy_Path(
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6278,6 +6633,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_AtCmd_Failu
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6301,6 +6658,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Too_Long_St
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6325,6 +6684,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Item( 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6349,6 +6710,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Item_L
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6373,6 +6736,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Wrong_Data_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6398,6 +6763,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Context
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6420,6 +6787,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_AtCmd_F
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6442,6 +6811,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Data_Po
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6464,6 +6835,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Wrong_Length
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6488,6 +6861,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Item( v
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6511,6 +6886,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Item_Li
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6534,6 +6911,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_String_Too_L
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6559,6 +6938,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_AtCmd_Failur
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6583,6 +6964,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Happy_Path( 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6608,6 +6991,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Contex
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6630,6 +7015,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_AtCmd_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6652,6 +7039,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Data_P
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6674,6 +7063,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Wrong_Data_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6698,6 +7089,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Item( 
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6721,6 +7114,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Item_L
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6744,6 +7139,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_AtCmd_Failu
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6769,6 +7166,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6797,6 +7196,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmRe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6826,6 +7227,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6856,6 +7259,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6886,6 +7291,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6915,6 +7322,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6944,6 +7353,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -6973,6 +7384,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_CrsmMemoryS
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -7002,6 +7415,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmMe
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -7031,6 +7446,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path(
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -7060,6 +7477,8 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -7089,6 +7508,8 @@ void test_Cellular_CommonGetSimCardInfo_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
@@ -7126,6 +7547,8 @@ void test_Cellular_CommonSetPsmSettings_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -7140,11 +7563,15 @@ void test_Cellular_CommonSetPsmSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
-    psmSettings.periodicRauValue = 0;
-    psmSettings.activeTimeValue = 1;
+    psmSettings.periodicRauValue = 0x0;
+    psmSettings.gprsReadyTimer = 0x9B;
+    psmSettings.periodicTauValue = 0xfc;
+    psmSettings.activeTimeValue = 0x1;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
@@ -7162,11 +7589,15 @@ void test_Cellular_CommonSetPsmSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
-    psmSettings.activeTimeValue = 0;
-    psmSettings.periodicTauValue = 4;
+    psmSettings.periodicRauValue = 0x0;
+    psmSettings.gprsReadyTimer = 0x99;
+    psmSettings.periodicTauValue = 0x4;
+    psmSettings.activeTimeValue = 0x0;
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
@@ -7193,6 +7624,8 @@ void test_Cellular_CommonGetPsmSettings_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -7207,6 +7640,8 @@ void test_Cellular_CommonGetPsmSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7229,6 +7664,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7251,6 +7688,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7273,6 +7712,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7295,6 +7736,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Wrong
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7318,6 +7761,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7340,6 +7785,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7362,6 +7809,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_AtCmd
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7392,6 +7841,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7421,6 +7872,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7450,6 +7903,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7479,6 +7934,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7508,6 +7965,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7536,6 +7995,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7564,6 +8025,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7592,6 +8055,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7620,6 +8085,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7648,6 +8115,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7676,6 +8145,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7704,6 +8175,8 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Timer
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
@@ -7732,6 +8205,8 @@ void test_Cellular_CommonGetPsmSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
     CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 

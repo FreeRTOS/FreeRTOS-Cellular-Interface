@@ -1623,7 +1623,7 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
 }
 
 /**
- * @brief Test that any NULL  interface for _Cellular_PktioSendAtCmd.
+ * @brief Test that any NULL Comm interface for _Cellular_PktioSendAtCmd.
  */
 void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
 {
@@ -1705,6 +1705,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
         0,
     };
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
@@ -1732,6 +1733,7 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
         0,
     };
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
@@ -1816,7 +1818,7 @@ void test__Cellular_PktioShutdown_Null_Parameter( void )
 }
 
 /**
- * @brief Test that null pPktioCommEvent  for _Cellular_PktioShutdown.
+ * @brief Test that null pPktioCommEvent for _Cellular_PktioShutdown.
  */
 void test__Cellular_PktioShutdown_Null_PktioCommEvent( void )
 {
