@@ -526,7 +526,6 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
     uint32_t partialDataRead = pContext->partialDataRcvdLen;
     int32_t bufferEmptyLength = ( int32_t ) PKTIO_READ_BUFFER_SIZE;
 
-    ( void ) pAtResp;
     pAtBuf = pContext->pktioReadBuf;
     pRead = pContext->pktioReadBuf;
 
@@ -536,7 +535,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
      * pAtResp equals NULL indicate that no data is buffered in AT command response and
      * data before pPktioReadPtr is invalid data can be recycled. */
     if( ( pContext->pPktioReadPtr != NULL ) && ( pContext->pPktioReadPtr != pContext->pktioReadBuf ) &&
-        ( pContext->partialDataRcvdLen != 0U ) )
+        ( pContext->partialDataRcvdLen != 0U ) && ( pAtResp == NULL ) )
     {
         pRead = _handleLeftoverBuffer( pContext );
         bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE - ( int32_t ) pContext->partialDataRcvdLen );
@@ -683,7 +682,6 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             {
                 ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
-
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
@@ -861,7 +859,6 @@ static bool _handleDataResult( CellularContext_t * pContext,
         *pBytesRead = bytesLeft;
         CellularLogDebug( "_handleData okay, keep processing %u bytes %p", bytesLeft, *ppLine );
     }
-
     return keepProcess;
 }
 
@@ -912,11 +909,12 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
     while( keepProcess == true )
     {
+        printf("%s():bytesRead %d\r\n", __func__, bytesRead);
         /* Pktio is reading command. Skip over the change line. And the reason
          * we don't consider the variable bytesInBuffer is because that the
          * input variable bytesInBuffer is bounded by the caller already.
          */
-        while( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) )
+        while( ( bytesRead > 0U ) && ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) ) )
         {
             pTempLine++;
             bytesRead = bytesRead - 1U;
