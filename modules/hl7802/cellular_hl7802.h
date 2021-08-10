@@ -82,4 +82,16 @@ uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
+extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
+extern uint32_t CellularUrcHandlerTableSize;
+
+extern const char * CellularSrcTokenErrorTable[];
+extern uint32_t CellularSrcTokenErrorTableSize;
+
+extern const char * CellularSrcTokenSuccessTable[];
+extern uint32_t CellularSrcTokenSuccessTableSize;
+
+extern const char * CellularUrcTokenWoPrefixTable[];
+extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
 #endif /* ifndef __CELLULAR_HL7802_H__ */

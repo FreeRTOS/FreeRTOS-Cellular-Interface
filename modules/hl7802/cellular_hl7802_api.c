@@ -40,7 +40,7 @@
 #include "cellular_common.h"
 #include "cellular_at_core.h"
 
-/* Cellular module incliudes. */
+/* Cellular module includes. */
 #include "cellular_hl7802.h"
 
 /*-----------------------------------------------------------*/
@@ -2617,6 +2617,27 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
+                               const CellularCommInterface_t * pCommInterface )
+{
+    CellularTokenTable_t cellularTokenTable =
+    {
+        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
+        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
+        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+        .pCellularSrcExtraTokenSuccessTable    = NULL,
+        .cellularSrcExtraTokenSuccessTableSize = 0
+    };
+    return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
 }
 
 /*-----------------------------------------------------------*/
