@@ -131,5 +131,18 @@ typedef struct CellularPdnContextActInfo
 
 /*-----------------------------------------------------------*/
 
+extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
+extern uint32_t CellularUrcHandlerTableSize;
+
+extern const char * CellularSrcTokenErrorTable[];
+extern uint32_t CellularSrcTokenErrorTableSize;
+
+extern const char * CellularSrcTokenSuccessTable[];
+extern uint32_t CellularSrcTokenSuccessTableSize;
+
+extern const char * CellularUrcTokenWoPrefixTable[];
+extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
+/*-----------------------------------------------------------*/
 
 #endif /* ifndef __CELLULAR_R4_H__ */

@@ -2780,3 +2780,24 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
 }
 
 /*-----------------------------------------------------------*/
+
+CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
+                               const CellularCommInterface_t * pCommInterface )
+{
+    CellularTokenTable_t cellularTokenTable =
+    {
+        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
+        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
+        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+        .pCellularSrcExtraTokenSuccessTable    = NULL,
+        .cellularSrcExtraTokenSuccessTableSize = 0
+    };
+    return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
+}
+
+/*-----------------------------------------------------------*/
