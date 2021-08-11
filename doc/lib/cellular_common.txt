@@ -2,7 +2,7 @@
  * @mainpage
  * @brief FreeRTOS Cellular Common Library<br>
  *
- * 
+ *
  * FreeRTOS Cellular Common Library provides the following functions to help cellular module implementing FreeRTOS Cellular Library APIs.<br>
  *  - FreeRTOS Cellular Library APIs implementation with 3GPP TS v27.007 AT commands.
  *  - AT command functions to help implementing FreeRTOS Cellular Library APIs with vendor specific AT commands.
@@ -142,7 +142,7 @@
  *     ( E.X "APP READY", "POWER ON" )
  *   - @ref CellularUrcTokenWoPrefixTableSize
  */
- 
+
 /**
  * @page cellular_module_api cellular_module_api
  * @brief Implement FreeRTOS Cellular Library API with cellular module specific AT commands. <br>
@@ -162,7 +162,7 @@
  * @image html cellular_API_implementation.png width=80%
  *
  */
- 
+
 /**
  * @page cellular_module_urc_handler cellular_module_urc_handler
  * @brief Implement URC handler to handle URC event and call the corresponding callback function. <br>
@@ -191,7 +191,7 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * @functionpointers_group{cellular_common}
  * @functionpointers_brief{cellular_common library}
  */
- 
+
 /**
  * @enums_group{cellular_common}
  * @enums_brief{cellular_common library}
@@ -258,7 +258,7 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * @function_brief{Cellular_CommonGetSimCardLockStatus}
  *
  * The following APIs can be used when implementating FreeRTOS Cellular Library APIs with module specific AT command.<br>
- * <b>AT command parsing functions</b><br> 
+ * <b>AT command parsing functions</b><br>
  * - @function_name{Cellular_ATRemovePrefix}
  * @function_brief{Cellular_ATRemovePrefix}
  * - @function_name{Cellular_ATRemoveLeadingWhiteSpaces}
@@ -290,7 +290,7 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * - @function_name{Cellular_ATStrtoi}
  * @function_brief{Cellular_ATStrtoi}
  *
- * <b>Cellular common library helper functions</b><br> 
+ * <b>Cellular common library helper functions</b><br>
  * - @function_name{_Cellular_LibInit}
  * @function_brief{_Cellular_LibInit}
  * - @function_name{_Cellular_LibCleanup}
@@ -333,6 +333,6 @@ uint32_t CellularUrcHandlerTableSize = 4;
  * @function_brief{_Cellular_AtcmdDataSend}
  * - @function_name{_Cellular_TimeoutAtcmdDataSendSuccessToken}
  * @function_brief{_Cellular_TimeoutAtcmdDataSendSuccessToken}
- * 
+ *
  */
- 
+
