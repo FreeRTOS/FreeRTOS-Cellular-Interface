@@ -55,7 +55,7 @@
             return NULL;
         }
     }
-#else  /* if __has_builtin( __builtin___strtok ) */
+#else /* if __has_builtin( __builtin___strtok ) */
     char * strtok( char * s,
                    const char * delim )
     {

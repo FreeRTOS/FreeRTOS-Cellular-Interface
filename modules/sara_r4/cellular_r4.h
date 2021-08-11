@@ -75,7 +75,7 @@ typedef enum MNOProfileType
 
 /* Select network MNO profile. Default value is MNO_PROFILE_NOT_SET */
 #ifndef CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE
-    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE                ( MNO_PROFILE_NOT_SET )
+    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE    ( MNO_PROFILE_NOT_SET )
 #endif
 
 /*

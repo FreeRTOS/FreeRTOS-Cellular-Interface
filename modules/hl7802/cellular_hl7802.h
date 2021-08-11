@@ -26,14 +26,14 @@
 #ifndef __CELLULAR_HL7802_H__
 #define __CELLULAR_HL7802_H__
 
-#define MIN_TCP_SESSION_ID          ( 1U )
-#define MAX_TCP_SESSION_ID          ( 6U )
-#define TCP_SESSION_TABLE_LEGNTH    ( MAX_TCP_SESSION_ID + 1 )
+#define MIN_TCP_SESSION_ID                ( 1U )
+#define MAX_TCP_SESSION_ID                ( 6U )
+#define TCP_SESSION_TABLE_LEGNTH          ( MAX_TCP_SESSION_ID + 1 )
 
-#define INVALID_SOCKET_INDEX        ( UINT32_MAX )
+#define INVALID_SOCKET_INDEX              ( UINT32_MAX )
 
 /* Delay after AT+CFUN=1,1 commands. */
-#define CELLULAR_HL7802_RESET_DELAY_MS  ( 3000U )
+#define CELLULAR_HL7802_RESET_DELAY_MS    ( 3000U )
 
 /*-----------------------------------------------------------*/
 

@@ -59,24 +59,27 @@ void harness()
 {
     uint16_t stringLen;
     uint16_t prefixLen;
+
     __CPROVER_assume( stringLen < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( stringLen > 0 );
     __CPROVER_assume( prefixLen < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( prefixLen > 0 );
-    char * pString = ( char * )safeMalloc( stringLen );
-    char * pPrefix = ( char * )safeMalloc( prefixLen );
-    bool * pResult =  ( uint8_t * )safeMalloc( sizeof( bool * ) );
-    if( pString == NULL || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLen ) ) )
+    char * pString = ( char * ) safeMalloc( stringLen );
+    char * pPrefix = ( char * ) safeMalloc( prefixLen );
+    bool * pResult = ( uint8_t * ) safeMalloc( sizeof( bool * ) );
+
+    if( ( pString == NULL ) || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLen ) ) )
     {
         if( pString != NULL )
         {
-            pString[stringLen-1] = '\0';
+            pString[ stringLen - 1 ] = '\0';
         }
 
         if( pPrefix != NULL )
         {
-            pPrefix[prefixLen-1] = '\0';
+            pPrefix[ prefixLen - 1 ] = '\0';
         }
+
         Cellular_ATStrStartWith( pString,
                                  pPrefix,
                                  pResult );

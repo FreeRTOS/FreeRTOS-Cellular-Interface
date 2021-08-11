@@ -60,17 +60,19 @@ void harness()
 {
     uint16_t stringLen;
     uint16_t keyListLen;
+
     __CPROVER_assume( stringLen < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( stringLen > 0 );
     __CPROVER_assume( keyListLen < KEY_LIST_SIZE );
-    char * pInputBuf = ( char * )safeMalloc( stringLen );
-    bool * pResult =  ( uint8_t * )safeMalloc( sizeof( bool * ) );
-    char ** ppKeyList = (char **)safeMalloc( sizeof( char**)*keyListLen);
-    if( pInputBuf == NULL || ( ( pInputBuf != NULL ) && ensure_memory_is_valid( pInputBuf, stringLen ) ) )
+    char * pInputBuf = ( char * ) safeMalloc( stringLen );
+    bool * pResult = ( uint8_t * ) safeMalloc( sizeof( bool * ) );
+    char ** ppKeyList = ( char ** ) safeMalloc( sizeof( char ** ) * keyListLen );
+
+    if( ( pInputBuf == NULL ) || ( ( pInputBuf != NULL ) && ensure_memory_is_valid( pInputBuf, stringLen ) ) )
     {
         if( pInputBuf != NULL )
         {
-            pInputBuf[stringLen-1] = '\0';
+            pInputBuf[ stringLen - 1 ] = '\0';
         }
 
         Cellular_ATcheckErrorCode( pInputBuf,

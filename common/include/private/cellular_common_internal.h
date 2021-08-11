@@ -143,7 +143,7 @@ struct CellularContext
 
     /* Module Context. */
     void * pModueContext;
-} ;
+};
 
 /*-----------------------------------------------------------*/
 
