@@ -302,10 +302,8 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
     CellularPktStatus_t pkStatus = CELLULAR_PKT_STATUS_FAILURE;
     bool result = false;
     const char * const * pTokenSuccessTable = NULL;
-    const char * const * pTokenErrorTable = NULL;
     const char * const * pTokenExtraTable = NULL;
     uint32_t tokenSuccessTableSize = 0;
-    uint32_t tokenErrorTableSize = 0;
     uint32_t tokenExtraTableSize = 0;
 
     if( ( pContext->tokenTable.pCellularSrcTokenErrorTable != NULL ) &&
@@ -313,8 +311,6 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
     {
         pTokenSuccessTable = pContext->tokenTable.pCellularSrcTokenSuccessTable;
         tokenSuccessTableSize = pContext->tokenTable.cellularSrcTokenSuccessTableSize;
-        pTokenErrorTable = pContext->tokenTable.pCellularSrcTokenErrorTable;
-        tokenErrorTableSize = pContext->tokenTable.cellularSrcTokenErrorTableSize;
         pTokenExtraTable = pContext->tokenTable.pCellularSrcExtraTokenSuccessTable;
         tokenExtraTableSize = pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize;
 
