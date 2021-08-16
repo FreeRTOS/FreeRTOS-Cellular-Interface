@@ -797,7 +797,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
             if( pktStatus == CELLULAR_PKT_STATUS_OK )
             {
                 /* These members filled by user callback function and need to be demonstrated. */
-                if( pContext->dataLength > 0 )
+                if( pContext->dataLength > 0U )
                 {
                     configASSERT( ppStartOfData != NULL );
                 }
