@@ -41,14 +41,12 @@
  *
  * @param[in,out] pCellularHandle the handle pointer to store the cellular handle.
  * @param[in] pCommInterface Comm interface for communicating with the module.
- * @param[in] pTokenTable Token tables for pkthandler and pktio.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
  */
 CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
-                               const CellularCommInterface_t * pCommInterfac,
-                               const CellularTokenTable_t * pTokenTable );
+                               const CellularCommInterface_t * pCommInterface );
 
 /**
  * @brief One time deinitialization function.

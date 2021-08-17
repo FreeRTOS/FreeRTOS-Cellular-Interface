@@ -486,13 +486,9 @@ static void _regStatusGenerateEvent( const CellularContext_t * pContext,
         {
             _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, &serviceStatus );
         }
-        else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
-        {
-            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, &serviceStatus );
-        }
         else
         {
-            /* Empty else MISRA 15.7 */
+            _Cellular_NetworkRegistrationCallback( pContext, CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, &serviceStatus );
         }
     }
 }
@@ -642,6 +638,10 @@ CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 
         _Cellular_UnlockAtDataMutex( pContext );
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
 
     return pktStatus;
 }
@@ -665,6 +665,10 @@ CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext
 
         _Cellular_UnlockAtDataMutex( pContext );
     }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
 
     return pktStatus;
 }
@@ -687,6 +691,10 @@ CellularPktStatus_t Cellular_CommonUrcProcessCereg( CellularContext_t * pContext
         }
 
         _Cellular_UnlockAtDataMutex( pContext );
+    }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
 
     return pktStatus;

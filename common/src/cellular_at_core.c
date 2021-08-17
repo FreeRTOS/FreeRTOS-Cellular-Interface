@@ -787,6 +787,10 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
 
             *p = '\0';
         }
+        else
+        {
+            atStatus = CELLULAR_AT_NO_MEMORY;
+        }
     }
 
     return atStatus;
@@ -838,14 +842,17 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
         /* coverity[misra_c_2012_rule_22_9_violation] */
         retStrtol = ( int32_t ) strtol( pStr, &pEndStr, base );
 
-        /* Need to check if the pEndStr is NULL or not to prevent dereference error. */
-        if( ( pEndStr != NULL ) && ( *pEndStr == '\0' ) )
+        /* The return value zero may stand for the failure of strtol. So if the return value
+         * is zero, need to check the address of pEndStr, if it's greater than the pStr, that
+         * means there is an real parsed zero before pEndStr.
+         */
+        if( pEndStr == pStr )
         {
-            *pResult = retStrtol;
+            atStatus = CELLULAR_AT_ERROR;
         }
         else
         {
-            atStatus = CELLULAR_AT_ERROR;
+            *pResult = retStrtol;
         }
     }
 

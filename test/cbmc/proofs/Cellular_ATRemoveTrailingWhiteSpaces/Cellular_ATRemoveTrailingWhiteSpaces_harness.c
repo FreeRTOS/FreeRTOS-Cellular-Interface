@@ -56,16 +56,18 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString );
 void harness()
 {
     uint16_t stringLength;
+
     __CPROVER_assume( stringLength < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( stringLength > 0 );
-    char * pString = ( char * )safeMalloc( stringLength );
+    char * pString = ( char * ) safeMalloc( stringLength );
 
-    if( pString == NULL || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLength ) ) )
+    if( ( pString == NULL ) || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLength ) ) )
     {
         if( pString != NULL )
         {
-            pString[stringLength-1] = '\0';
+            pString[ stringLength - 1 ] = '\0';
         }
+
         Cellular_ATRemoveTrailingWhiteSpaces( pString );
     }
 }

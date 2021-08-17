@@ -40,7 +40,7 @@
 /**
  * @brief Cellular sample prefix string input.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN:READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN_000:READY"
 
 /**
  * @brief Cellular sample prefix string wrong input.
@@ -103,6 +103,11 @@
 #define CELLULAR_SAMPLE_STRING_DELIMITER_FIRST                     ",TEST_TOKENTOKEN1TOKEN2"
 
 /**
+ * @brief Cellular sample string delimiter last.
+ */
+#define CELLULAR_SAMPLE_STRING_DELIMITER_LAST                      "testaaa,"
+
+/**
  * @brief Cellular sample string wrong delimiter first.
  */
 #define CELLULAR_SAMPLE_WRONG_STRING_DELIMITER_FIRST               "TEST_TOKENTOKEN1TOKEN2"
@@ -157,11 +162,14 @@
  */
 #define CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT             "*CPIN:READY"
 
+static int mallocAllocFail = 0;
+
 /* ============================   UNITY FIXTURES ============================ */
 
 /* Called before each test method. */
 void setUp()
 {
+    mallocAllocFail = 0;
 }
 
 /* Called after each test method. */
@@ -184,6 +192,11 @@ int suiteTearDown( int numFailures )
 
 void * mock_malloc( size_t size )
 {
+    if( mallocAllocFail == 1 )
+    {
+        return NULL;
+    }
+
     return malloc( size );
 }
 
@@ -195,8 +208,12 @@ void * mock_malloc( size_t size )
 void test_Cellular_ATRemovePrefix_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char * pString = NULL;
 
     cellularStatus = Cellular_ATRemovePrefix( NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = Cellular_ATRemovePrefix( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -256,8 +273,12 @@ void test_Cellular_ATRemovePrefix_Too_Large_String( void )
 void test_Cellular_ATRemoveLeadingWhiteSpaces_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char * pString = NULL;
 
     cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -268,11 +289,15 @@ void test_Cellular_ATRemoveLeadingWhiteSpaces_Happy_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = CELLULAR_SAMPLE_STRING_LEADING_WHITE_SPACE;
+    char * pEmptyString = "        ";
 
     cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
     TEST_ASSERT_EQUAL_STRING( CELLULAR_SAMPLE_STRING_NO_WHITE_SPACE, pString );
+
+    cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pEmptyString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 }
 
 /**
@@ -305,10 +330,13 @@ void test_Cellular_ATRemoveTrailingWhiteSpaces_Happy_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char pString[] = CELLULAR_SAMPLE_STRING_TRAILING_WHITE_SPACE;
+    char pEmptyString[] = " ";
+
+    cellularStatus = Cellular_ATRemoveTrailingWhiteSpaces( pEmptyString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
     cellularStatus = Cellular_ATRemoveTrailingWhiteSpaces( pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
-
     TEST_ASSERT_EQUAL_STRING( CELLULAR_SAMPLE_STRING_NO_WHITE_SPACE, pString );
 }
 
@@ -322,6 +350,18 @@ void test_Cellular_ATRemoveTrailingWhiteSpaces_Error_Path( void )
 
     cellularStatus = Cellular_ATRemoveTrailingWhiteSpaces( pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test the no trailing white space.
+ */
+void test_Cellular_ATRemoveTrailingWhiteSpaces_No_Trailing_White_Space( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char pString[] = "       ";
+
+    cellularStatus = Cellular_ATRemoveTrailingWhiteSpaces( pString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 }
 
 /**
@@ -367,8 +407,12 @@ void test_Cellular_ATRemoveAllWhiteSpaces_Error_Path( void )
 void test_Cellular_ATRemoveOutermostDoubleQuote_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char * pString = NULL;
 
     cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -400,6 +444,22 @@ void test_Cellular_ATRemoveOutermostDoubleQuote_Error_Path( void )
 
     cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test the not process string case and still return CELLULAR_AT_SUCCESS.
+ */
+void test_Cellular_ATRemoveOutermostDoubleQuote_Not_Process_String_Case( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char * pEmptyString = " ";
+    char * pNotStartingQuoteString = "test\"test";
+
+    cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pEmptyString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+
+    cellularStatus = Cellular_ATRemoveOutermostDoubleQuote( &pNotStartingQuoteString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 }
 
 /**
@@ -488,8 +548,8 @@ void test_Cellular_ATGetNextTok_Happy_Path( void )
 void test_Cellular_ATGetSpecificNextTok_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    const char * pDelimiter;
+    char * pString = NULL;
+    const char * pDelimiter = ",";
     char * pTokOutput;
 
     cellularStatus = Cellular_ATGetSpecificNextTok( NULL, pDelimiter, &pTokOutput );
@@ -500,6 +560,26 @@ void test_Cellular_ATGetSpecificNextTok_Invalid_Param( void )
 
     cellularStatus = Cellular_ATGetSpecificNextTok( &pString, pDelimiter, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = Cellular_ATGetSpecificNextTok( &pString, pDelimiter, &pTokOutput );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test happy path with delimiter at last character for Cellular_ATGetSpecificNextTok to return CELLULAR_AT_SUCCESS and got expected results.
+ */
+void test_Cellular_ATGetSpecificNextTok_Happy_Path_With_Delimiter_Last( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    const char * pDelimiter = ",";
+    char * pTokOutput;
+    char * pString = malloc( sizeof( char ) * ( strlen( CELLULAR_SAMPLE_STRING_DELIMITER_LAST ) + 1 ) );
+    char * pStringSource = pString;
+
+    strcpy( pString, CELLULAR_SAMPLE_STRING_DELIMITER_LAST );
+    cellularStatus = Cellular_ATGetSpecificNextTok( &pString, pDelimiter, &pTokOutput );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+    free( pStringSource );
 }
 
 /**
@@ -556,9 +636,9 @@ void test_Cellular_ATGetSpecificNextTok_Error_Path( void )
 void test_Cellular_ATHexStrToHex_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    uint8_t * ppHexData;
-    uint16_t hexDataLen;
+    char pString[ 10 ];
+    uint8_t ppHexData[ 10 ];
+    uint16_t hexDataLen = 0;
 
     cellularStatus = Cellular_ATHexStrToHex( NULL, ppHexData, hexDataLen );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
@@ -601,9 +681,9 @@ void test_Cellular_ATHexStrToHex_Happy_Path_Lowercase_Hex_String( void )
 void test_Cellular_ATHexStrToHex_Happy_Path_Notation_String( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char pNotationCaseString[] = "@@";
-    uint8_t hexData[ 3 ];
-    uint16_t hexDataLen = 3;
+    char pNotationCaseString[] = "!@gG";
+    uint8_t hexData[ 6 ];
+    uint16_t hexDataLen = 6;
 
     cellularStatus = Cellular_ATHexStrToHex( pNotationCaseString, hexData, hexDataLen );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
@@ -618,7 +698,7 @@ void test_Cellular_ATHexStrToHex_Error_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = "";
-    uint8_t * ppHexData;
+    uint8_t ppHexData[ 10 ];
     uint16_t hexDataLen = 0;
 
     cellularStatus = Cellular_ATHexStrToHex( pString, ppHexData, hexDataLen );
@@ -636,10 +716,10 @@ void test_Cellular_ATHexStrToHex_Error_Path( void )
 void test_Cellular_ATIsStrDigit_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    bool * pResult;
+    char pString[] = CELLULAR_SAMPLE_DIGIT_STRING;
+    bool result = false;
 
-    cellularStatus = Cellular_ATIsStrDigit( NULL, pResult );
+    cellularStatus = Cellular_ATIsStrDigit( NULL, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
     cellularStatus = Cellular_ATIsStrDigit( pString, NULL );
@@ -692,14 +772,18 @@ void test_Cellular_ATIsStrDigit_Error_Path( void )
 void test_Cellular_ATcheckErrorCode_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    bool * pResult;
+    char pString[] = CELLULAR_SAMPLE_SUCCESS_CODE_STRING;
+    bool Result;
+    char * ppKeyList[] = { "TEST1:SUCCESS", "TEST2:ERROR" };
     size_t keyListLen = 2;
 
     cellularStatus = Cellular_ATcheckErrorCode( NULL, NULL, keyListLen, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
-    cellularStatus = Cellular_ATcheckErrorCode( pString, NULL, keyListLen, pResult );
+    cellularStatus = Cellular_ATcheckErrorCode( pString, NULL, keyListLen, &Result );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    cellularStatus = Cellular_ATcheckErrorCode( pString, ppKeyList, keyListLen, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -722,6 +806,11 @@ void test_Cellular_ATcheckErrorCode_Happy_Path( void )
     cellularStatus = Cellular_ATcheckErrorCode( pStringError, ppKeyList, keyListLen, &Result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( true, Result );
+
+    ppKeyList[ 0 ] = CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT;
+    cellularStatus = Cellular_ATcheckErrorCode( pString, ppKeyList, keyListLen, &Result );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( false, Result );
 }
 
 /**
@@ -745,17 +834,17 @@ void test_Cellular_ATcheckErrorCode_Error_Path( void )
 void test_Cellular_ATStrStartWith_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    bool * pResult;
-    char * pPrefix;
+    char pString[] = CELLULAR_SAMPLE_DIGIT_STRING;
+    bool result;
+    char pPrefix[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
     cellularStatus = Cellular_ATStrStartWith( NULL, NULL, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
-    cellularStatus = Cellular_ATStrStartWith( NULL, pPrefix, pResult );
+    cellularStatus = Cellular_ATStrStartWith( NULL, pPrefix, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
-    cellularStatus = Cellular_ATStrStartWith( pString, NULL, pResult );
+    cellularStatus = Cellular_ATStrStartWith( pString, NULL, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
     cellularStatus = Cellular_ATStrStartWith( pString, pPrefix, NULL );
@@ -768,11 +857,11 @@ void test_Cellular_ATStrStartWith_Invalid_Param( void )
 void test_Cellular_ATStrStartWith_Empty_String( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString = "";
-    bool * pResult;
-    char * pPrefix = "";
+    char pString[] = "";
+    bool result;
+    char pPrefix[] = "";
 
-    cellularStatus = Cellular_ATStrStartWith( pString, pPrefix, pResult );
+    cellularStatus = Cellular_ATStrStartWith( pString, pPrefix, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -782,11 +871,11 @@ void test_Cellular_ATStrStartWith_Empty_String( void )
 void test_Cellular_ATStrStartWith_Empty_Prefix( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    bool * pResult;
+    bool result;
     char * pPrefix = "";
     char pStringSuccess[] = CELLULAR_SAMPLE_SUCCESS_CODE_STRING;
 
-    cellularStatus = Cellular_ATStrStartWith( pStringSuccess, pPrefix, pResult );
+    cellularStatus = Cellular_ATStrStartWith( pStringSuccess, pPrefix, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 }
 
@@ -796,11 +885,11 @@ void test_Cellular_ATStrStartWith_Empty_Prefix( void )
 void test_Cellular_ATStrtoi_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    const char * pStr;
-    int32_t base;
-    int32_t * pResult;
+    const char pStr[] = CELLULAR_SAMPLE_SUCCESS_CODE_STRING;
+    int32_t base = 10;
+    int32_t result;
 
-    cellularStatus = Cellular_ATStrtoi( NULL, base, pResult );
+    cellularStatus = Cellular_ATStrtoi( NULL, base, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
     cellularStatus = Cellular_ATStrtoi( pStr, base, NULL );
@@ -826,17 +915,17 @@ void test_Cellular_ATStrtoi_Happy_Path( void )
 }
 
 /**
- * @brief Test the error path for Cellular_ATStrtoi to return CELLULAR_AT_BAD_PARAMETER.
+ * @brief Test the error path for Cellular_ATStrtoi to return CELLULAR_AT_ERROR.
  */
 void test_Cellular_ATStrtoi_Error_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pStr = malloc( sizeof( char ) * ( strlen( CELLULAR_SAMPLE_STRTOL_ERROR_CASE_STRING ) + 1 ) );
-
-    strcpy( pStr, CELLULAR_SAMPLE_STRTOL_ERROR_CASE_STRING );
     int32_t base = 10;
     int32_t Result;
 
+    char * pStr = malloc( sizeof( char ) * ( strlen( CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT ) + 1 ) );
+
+    strcpy( pStr, CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT );
     cellularStatus = Cellular_ATStrtoi( pStr, base, &Result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_ERROR, cellularStatus );
     free( pStr );
@@ -851,11 +940,31 @@ void test_Cellular_ATStrDup_Invalid_Param( void )
     char * pDst;
     char * pSrc;
 
-    cellularStatus = Cellular_ATStrDup( NULL, pSrc );
+    cellularStatus = Cellular_ATStrDup( NULL, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
     cellularStatus = Cellular_ATStrDup( &pDst, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+
+    pSrc = malloc( strlen( CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT ) + 1 );
+    strcpy( pSrc, CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT );
+    cellularStatus = Cellular_ATStrDup( &pDst, pSrc );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+    free( pSrc );
+}
+
+/**
+ * @brief Test memory allocation failure path for Cellular_ATStrDup to return CELLULAR_AT_SUCCESS and got expected results.
+ */
+void test_Cellular_ATStrDup_Memory_Allocation_Failure( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char * pDst;
+    char pSrc[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+
+    mallocAllocFail = 1;
+    cellularStatus = Cellular_ATStrDup( &pDst, pSrc );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_NO_MEMORY, cellularStatus );
 }
 
 /**
@@ -879,10 +988,10 @@ void test_Cellular_ATStrDup_Happy_Path( void )
 void test_Cellular_ATIsPrefixPresent_Invalid_Param( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
-    char * pString;
-    bool * pResult;
+    char pString[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+    bool result;
 
-    cellularStatus = Cellular_ATIsPrefixPresent( NULL, pResult );
+    cellularStatus = Cellular_ATIsPrefixPresent( NULL, &result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
 
     cellularStatus = Cellular_ATIsPrefixPresent( pString, NULL );

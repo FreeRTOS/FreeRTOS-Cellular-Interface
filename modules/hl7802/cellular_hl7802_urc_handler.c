@@ -119,7 +119,7 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
                 CellularLogError( "_cellular_UrcProcessKtcpInd : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else if( pSocketData->openCallback == NULL )
             {
@@ -256,7 +256,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
                 CellularLogError( "_cellular_UrcProcessKtcpNotif : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -319,7 +319,7 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
                 CellularLogError( "_cellular_UrcProcessKtcpData : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else if( pSocketData->dataReadyCallback == NULL )
             {

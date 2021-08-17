@@ -59,18 +59,21 @@ void harness()
 {
     uint16_t hexDataLen;
     uint16_t stringLen;
+
     __CPROVER_assume( stringLen < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( stringLen > 0 );
-    char * pString = ( char * )safeMalloc( stringLen );
-    uint8_t * pHexData =  ( uint8_t * )safeMalloc( hexDataLen );
-    if( pString == NULL || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLen ) ) )
+    char * pString = ( char * ) safeMalloc( stringLen );
+    uint8_t * pHexData = ( uint8_t * ) safeMalloc( hexDataLen );
+
+    if( ( pString == NULL ) || ( ( pString != NULL ) && ensure_memory_is_valid( pString, stringLen ) ) )
     {
         if( pString != NULL )
         {
-            pString[stringLen-1] = '\0';
+            pString[ stringLen - 1 ] = '\0';
         }
+
         Cellular_ATHexStrToHex( pString,
                                 pHexData,
-                                hexDataLen);
+                                hexDataLen );
     }
 }

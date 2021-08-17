@@ -173,7 +173,7 @@ create_mock_list(${cellular_common_mock_name}
                 "${MODULE_ROOT_DIR}/tools/cmock/project.yml"
                 "${mock_include_list}"
                 "${mock_define_list}"
-        )   
+        )
 
 create_real_library(${cellular_common_real_name}
                     "${cellular_common_real_source_files}"

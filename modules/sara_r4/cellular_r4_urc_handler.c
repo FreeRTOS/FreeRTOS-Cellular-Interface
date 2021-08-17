@@ -438,7 +438,7 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
                 CellularLogError( "_cellular_UrcProcessUusoco : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -517,7 +517,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
                 CellularLogError( "_cellular_UrcProcessUusord : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -584,7 +584,7 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
                 CellularLogError( "_cellular_UrcProcessUusocl : session not match %d socket index %d",
-                             ( uint32_t ) pSocketData->pModemData, socketIndex );
+                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {

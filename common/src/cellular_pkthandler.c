@@ -343,20 +343,14 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Lock( &pContext->pktRequestMutex );
-    }
+    PlatformMutex_Lock( &pContext->pktRequestMutex );
 }
 
 /*-----------------------------------------------------------*/
 
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Unlock( &pContext->pktRequestMutex );
-    }
+    PlatformMutex_Unlock( &pContext->pktRequestMutex );
 }
 
 /*-----------------------------------------------------------*/

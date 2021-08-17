@@ -59,15 +59,17 @@ void harness()
 {
     uint16_t stringLen;
     int32_t base;
+
     __CPROVER_assume( stringLen < CBMC_MAX_BUFSIZE );
     __CPROVER_assume( stringLen > 0 );
-    char * pInputBuf = ( char * )safeMalloc( stringLen );
-    long * pResult =  ( long * )safeMalloc( sizeof( long * ) );
-    if( pInputBuf == NULL || ( ( pInputBuf != NULL ) && ensure_memory_is_valid( pInputBuf, stringLen ) ) )
+    char * pInputBuf = ( char * ) safeMalloc( stringLen );
+    long * pResult = ( long * ) safeMalloc( sizeof( long * ) );
+
+    if( ( pInputBuf == NULL ) || ( ( pInputBuf != NULL ) && ensure_memory_is_valid( pInputBuf, stringLen ) ) )
     {
         if( pInputBuf != NULL )
         {
-            pInputBuf[stringLen-1] = '\0';
+            pInputBuf[ stringLen - 1 ] = '\0';
         }
 
         Cellular_ATStrtoi( pInputBuf,

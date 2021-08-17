@@ -312,20 +312,20 @@ typedef enum CellularSocketOption
  */
 typedef enum CellularPktStatus
 {
-    CELLULAR_PKT_STATUS_OK = 0,             /* The operation was successful. */
-    CELLULAR_PKT_STATUS_TIMED_OUT,          /* The operation timed out. */
-    CELLULAR_PKT_STATUS_FAILURE,            /* There was some internal failure. */
-    CELLULAR_PKT_STATUS_BAD_REQUEST,        /* Request was not valid. */
-    CELLULAR_PKT_STATUS_BAD_RESPONSE,       /* The response received was not valid. */
-    CELLULAR_PKT_STATUS_SIZE_MISMATCH,      /* There is a size mismatch between the params. */
-    CELLULAR_PKT_STATUS_BAD_PARAM,          /* One or more params is not valid. */
-    CELLULAR_PKT_STATUS_SEND_ERROR,         /* Modem returned a send error. */
-    CELLULAR_PKT_STATUS_INVALID_HANDLE,     /* Invalid context. */
-    CELLULAR_PKT_STATUS_CREATION_FAIL,      /* Resource creation fail. */
-    CELLULAR_PKT_STATUS_PREFIX_MISMATCH,    /* Invalid prefix from Modem resp. */
-    CELLULAR_PKT_STATUS_INVALID_DATA,       /* Invalid data from Modem resp. */
-    CELLULAR_PKT_STATUS_PENDING_DATA,       /* Pending data from Modem resp. */
-    CELLULAR_PKT_STATUS_PENDING_BUFFER /* Pending data from Modem resp. */
+    CELLULAR_PKT_STATUS_OK = 0,          /* The operation was successful. */
+    CELLULAR_PKT_STATUS_TIMED_OUT,       /* The operation timed out. */
+    CELLULAR_PKT_STATUS_FAILURE,         /* There was some internal failure. */
+    CELLULAR_PKT_STATUS_BAD_REQUEST,     /* Request was not valid. */
+    CELLULAR_PKT_STATUS_BAD_RESPONSE,    /* The response received was not valid. */
+    CELLULAR_PKT_STATUS_SIZE_MISMATCH,   /* There is a size mismatch between the params. */
+    CELLULAR_PKT_STATUS_BAD_PARAM,       /* One or more params is not valid. */
+    CELLULAR_PKT_STATUS_SEND_ERROR,      /* Modem returned a send error. */
+    CELLULAR_PKT_STATUS_INVALID_HANDLE,  /* Invalid context. */
+    CELLULAR_PKT_STATUS_CREATION_FAIL,   /* Resource creation fail. */
+    CELLULAR_PKT_STATUS_PREFIX_MISMATCH, /* Invalid prefix from Modem resp. */
+    CELLULAR_PKT_STATUS_INVALID_DATA,    /* Invalid data from Modem resp. */
+    CELLULAR_PKT_STATUS_PENDING_DATA,    /* Pending data from Modem resp. */
+    CELLULAR_PKT_STATUS_PENDING_BUFFER   /* Pending data from Modem resp. */
 } CellularPktStatus_t;
 
 /**

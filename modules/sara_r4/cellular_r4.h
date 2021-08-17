@@ -75,7 +75,7 @@ typedef enum MNOProfileType
 
 /* Select network MNO profile. Default value is MNO_PROFILE_NOT_SET */
 #ifndef CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE
-    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE                ( MNO_PROFILE_NOT_SET )
+    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE    ( MNO_PROFILE_NOT_SET )
 #endif
 
 /*
@@ -131,5 +131,18 @@ typedef struct CellularPdnContextActInfo
 
 /*-----------------------------------------------------------*/
 
+extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
+extern uint32_t CellularUrcHandlerTableSize;
+
+extern const char * CellularSrcTokenErrorTable[];
+extern uint32_t CellularSrcTokenErrorTableSize;
+
+extern const char * CellularSrcTokenSuccessTable[];
+extern uint32_t CellularSrcTokenSuccessTableSize;
+
+extern const char * CellularUrcTokenWoPrefixTable[];
+extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
+/*-----------------------------------------------------------*/
 
 #endif /* ifndef __CELLULAR_R4_H__ */
