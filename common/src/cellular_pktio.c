@@ -302,15 +302,20 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
     CellularPktStatus_t pkStatus = CELLULAR_PKT_STATUS_FAILURE;
     bool result = false;
     const char * const * pTokenSuccessTable = NULL;
+    const char * const * pTokenErrorTable = NULL;
     const char * const * pTokenExtraTable = NULL;
     uint32_t tokenSuccessTableSize = 0;
+    uint32_t tokenErrorTableSize = 0;
     uint32_t tokenExtraTableSize = 0;
+    int32_t flagkExtraTokenTableCheck = 0;
 
     if( ( pContext->tokenTable.pCellularSrcTokenErrorTable != NULL ) &&
         ( pContext->tokenTable.pCellularSrcTokenSuccessTable != NULL ) )
     {
         pTokenSuccessTable = pContext->tokenTable.pCellularSrcTokenSuccessTable;
         tokenSuccessTableSize = pContext->tokenTable.cellularSrcTokenSuccessTableSize;
+        pTokenErrorTable = pContext->tokenTable.pCellularSrcTokenErrorTable;
+        tokenErrorTableSize = pContext->tokenTable.cellularSrcTokenErrorTableSize;
         pTokenExtraTable = pContext->tokenTable.pCellularSrcExtraTokenSuccessTable;
         tokenExtraTableSize = pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize;
 
@@ -322,38 +327,40 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
 
         if( result == true )
         {
-            pResp->status = true;
-            pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogDebug( "Final AT response is SUCCESS [%s] in extra table", pLine );
+            flagkExtraTokenTableCheck = 1;
         }
-
-        if( result != true )
+        else
         {
             ( void ) Cellular_ATcheckErrorCode( pLine, pTokenSuccessTable,
                                                 tokenSuccessTableSize, &result );
+        }
+
+        if( result == true )
+        {
+            pResp->status = true;
+            pkStatus = CELLULAR_PKT_STATUS_OK;
+            CellularLogDebug( "Final AT response is SUCCESS [%s] in %s table", pLine, flagkExtraTokenTableCheck == 1 ? "extra" : "success" );
+        }
+
+        if( result != true )
+        {
+            ( void ) Cellular_ATcheckErrorCode( pLine, pTokenErrorTable,
+                                                tokenErrorTableSize, &result );
 
             if( result == true )
             {
-                pResp->status = true;
+                pResp->status = false;
                 pkStatus = CELLULAR_PKT_STATUS_OK;
-                CellularLogDebug( "Final AT response is SUCCESS [%s]", pLine );
+                CellularLogError( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
+                                  ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                                  pLine,
+                                  ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
+                                  pkStatus );
             }
-        }
-
-        if( result != true )
-        {
-            pResp->status = false;
-            pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogError( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
-                              ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
-                              pLine,
-                              ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
-                              pkStatus );
-        }
-
-        if( result != true )
-        {
-            pkStatus = _processIntermediateResponse( pLine, pResp, atType, pRespPrefix );
+            else
+            {
+                pkStatus = _processIntermediateResponse( pLine, pResp, atType, pRespPrefix );
+            }
         }
     }
 
