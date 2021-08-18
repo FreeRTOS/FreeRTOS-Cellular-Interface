@@ -307,7 +307,6 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
     uint32_t tokenSuccessTableSize = 0;
     uint32_t tokenErrorTableSize = 0;
     uint32_t tokenExtraTableSize = 0;
-    int32_t flagkExtraTokenTableCheck = 0;
 
     if( ( pContext->tokenTable.pCellularSrcTokenErrorTable != NULL ) &&
         ( pContext->tokenTable.pCellularSrcTokenSuccessTable != NULL ) )
@@ -327,19 +326,21 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
 
         if( result == true )
         {
-            flagkExtraTokenTableCheck = 1;
+            pResp->status = true;
+            pkStatus = CELLULAR_PKT_STATUS_OK;
+            CellularLogDebug( "Final AT response is SUCCESS [%s] in extra table", pLine );
         }
         else
         {
             ( void ) Cellular_ATcheckErrorCode( pLine, pTokenSuccessTable,
                                                 tokenSuccessTableSize, &result );
-        }
 
-        if( result == true )
-        {
-            pResp->status = true;
-            pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogDebug( "Final AT response is SUCCESS [%s] in %s table", pLine, flagkExtraTokenTableCheck == 1 ? "extra" : "success" );
+            if( result == true )
+            {
+                pResp->status = true;
+                pkStatus = CELLULAR_PKT_STATUS_OK;
+                CellularLogDebug( "Final AT response is SUCCESS [%s]", pLine );
+            }
         }
 
         if( result != true )
