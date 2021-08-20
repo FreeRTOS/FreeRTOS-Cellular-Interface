@@ -247,14 +247,16 @@ uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
     ( void ) xClearOnExit;
     ( void ) xWaitForAllBits;
     ( void ) xTicksToWait;
+
     if( testInfiniteLoop > 0 )
     {
-        testInfiniteLoop --;
+        testInfiniteLoop--;
     }
     else if( recvCount == 0 )
     {
         return PKTIO_EVT_MASK_ABORT;
     }
+
     return pktioEvtMask;
 }
 
