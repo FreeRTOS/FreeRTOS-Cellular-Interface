@@ -1040,13 +1040,13 @@ static void _pktioReadThread( void * pUserData )
                 do
                 {
                     bytesRead = _handleRxDataEvent( pContext, &pAtResp );
-                } while( ( bytesRead != 0U ) && LOOP_FOREVER() );
+                } while( ( bytesRead != 0U ) );
             }
             else
             {
                 /* Empty else to avoid MISRA violation */
             }
-        } while( LOOP_FOREVER() );
+        } while( true );
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );
         pContext->hPktioCommIntf = NULL;

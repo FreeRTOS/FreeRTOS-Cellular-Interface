@@ -55,14 +55,4 @@
  */
 #define CELLULAR_IP_ADDRESS_MAX_SIZE    ( 64U )
 
-#define UNIT_TEST
-#ifndef LOOP_FOREVER
-    #ifdef UNIT_TEST
-        extern int NumLoops;
-        #define LOOP_FOREVER()    NumLoops--
-    #else
-        #define LOOP_FOREVER()    true
-    #endif
-#endif
-
 #endif /* __CELLULAR_CONFIG_H__ */
