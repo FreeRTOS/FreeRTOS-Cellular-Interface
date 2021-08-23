@@ -30,34 +30,30 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "cellular_config_defaults.h"
 
 /*-----------------------------------------------------------*/
 
+#define CellularLogError    LogError
+#define CellularLogDebug    LogDebug
+#define CellularLogWarn     LogWarn
+#define CellularLogInfo     LogInfo
 
 /* Users should define their platform dependent method if they need.
  * Otherwise use our predefine method which has no effect but pass
  * the coverity check.
  */
 #ifdef DEBUG_METHOD
-    #define CellularLogError
-    #define CellularLogDebug
-    #define CellularLogWarn
-    #define CellularLogInfo
     #define configASSERT
     #define Platform_Delay
     #define taskENTER_CRITICAL()
     #define taskEXIT_CRITICAL()
 #else
-    #define CellularLogError( ... )    ( { 1U; } )
-    #define CellularLogDebug( ... )    ( { 1U; } )
-    #define CellularLogWarn( ... )     ( { 1U; } )
-    #define CellularLogInfo( ... )     ( { 1U; } )
-    #define configASSERT( X )          ( { 1U; } )
-    #define Platform_Delay( X )        ( { ( void ) X; 1U; } )
-    #define taskENTER_CRITICAL()       ( { 1U; } )
-    #define taskEXIT_CRITICAL()        ( { 1U; } )
+    #define configASSERT( X )       ( { 1U; } )
+    #define Platform_Delay( X )     ( { ( void ) X; 1U; } )
+    #define taskENTER_CRITICAL()    ( { 1U; } )
+    #define taskEXIT_CRITICAL()     ( { 1U; } )
 #endif /* ifdef DEBUG_METHOD */
-
 
 #define PlatformEventGroupHandle_t           uint16_t
 #define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete

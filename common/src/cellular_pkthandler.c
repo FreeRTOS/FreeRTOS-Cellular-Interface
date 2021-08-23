@@ -95,7 +95,7 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
 
         if( pAtResp->status == false )
         {
-            CellularLogError( "_convertAndQueueRespPacket: AT response contains error" );
+            CellularLogError( ( "_convertAndQueueRespPacket: AT response contains error" ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
 
@@ -113,7 +113,7 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            CellularLogError( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" );
+            CellularLogError( ( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" ) );
         }
 
         PlatformMutex_Unlock( &pContext->PktRespMutex );
@@ -138,7 +138,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
     char * pSavePtr = pInputLine, * pTokenPtr = pInputLine;
 
 
-    CellularLogDebug( "Next URC token to parse [%s]", pInputLine );
+    CellularLogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
 
     /* First check for + at the beginning and advance to point to the next
      * byte. Use that string to pass to strtok and retrieve the token. Once the
@@ -151,7 +151,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
 
         if( pTokenPtr == NULL )
         {
-            CellularLogError( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine );
+            CellularLogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine ) );
             pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
         }
     }
@@ -190,7 +190,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            CellularLogWarn( "Couldn't Allocate memory of %d for urc", strlen( pBuf ) );
+            CellularLogWarn( ( "Couldn't Allocate memory of %d for urc", strlen( pBuf ) ) );
         }
     }
     else
@@ -212,14 +212,14 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
     if( atReq.pAtCmd == NULL )
     {
-        CellularLogError( "PKT_STATUS_BAD_REQUEST, null AT param" );
+        CellularLogError( ( "PKT_STATUS_BAD_REQUEST, null AT param" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
     }
     else
     {
         /* Fill in request info structure. */
         pContext->pktRespCB = atReq.respCallback;
-        CellularLogDebug( ">>>>>Start sending [%s]<<<<<", atReq.pAtCmd );
+        CellularLogDebug( ( ">>>>>Start sending [%s]<<<<<", atReq.pAtCmd ) );
         pContext->pPktUsrData = atReq.pData;
         pContext->PktUsrDataLen = ( uint16_t ) atReq.dataLen;
         pContext->pCurrentCmd = atReq.pAtCmd;
@@ -227,7 +227,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Can't send req packet" );
+            CellularLogError( ( "Can't send req packet" ) );
         }
         else
         {
@@ -242,13 +242,13 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
                 if( pktStatus != CELLULAR_PKT_STATUS_OK )
                 {
-                    CellularLogError( "pkt_recv status=%d, error in AT cmd %s resp", pktStatus, atReq.pAtCmd );
+                    CellularLogError( ( "pkt_recv status=%d, error in AT cmd %s resp", pktStatus, atReq.pAtCmd ) );
                 } /* Ignore errors from callbacks as they will be handled elsewhere. */
             }
             else
             {
                 pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-                CellularLogError( "pkt_recv status=%d, AT cmd %s timed out", pktStatus, atReq.pAtCmd );
+                CellularLogError( ( "pkt_recv status=%d, AT cmd %s timed out", pktStatus, atReq.pAtCmd ) );
             }
         }
 
@@ -256,7 +256,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
         pContext->pktRespCB = NULL;
         pContext->pCurrentCmd = NULL;
-        CellularLogDebug( "<<<<<Exit sending [%s] status[%d]<<<<<", atReq.pAtCmd, pktStatus );
+        CellularLogDebug( ( "<<<<<Exit sending [%s] status[%d]<<<<<", atReq.pAtCmd, pktStatus ) );
     }
 
     return pktStatus;
@@ -276,19 +276,19 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 
     if( ( dataReq.pData == NULL ) || ( dataReq.pSentDataLength == NULL ) )
     {
-        CellularLogError( "_Cellular_DataSendWithTimeoutDelayRaw, null input" );
+        CellularLogError( ( "_Cellular_DataSendWithTimeoutDelayRaw, null input" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
     }
     else
     {
-        CellularLogDebug( ">>>>>Start sending Data <<<<<" );
+        CellularLogDebug( ( ">>>>>Start sending Data <<<<<" ) );
         pContext->PktioAtCmdType = CELLULAR_AT_NO_RESULT;
         /* Send the packet. */
         *dataReq.pSentDataLength = _Cellular_PktioSendData( pContext, dataReq.pData, dataReq.dataLen );
 
         if( *dataReq.pSentDataLength != dataReq.dataLen )
         {
-            CellularLogError( "_Cellular_DataSendWithTimeoutDelayRaw, incomplete data transfer" );
+            CellularLogError( ( "_Cellular_DataSendWithTimeoutDelayRaw, incomplete data transfer" ) );
             pktStatus = CELLULAR_PKT_STATUS_SEND_ERROR;
         }
     }
@@ -303,7 +303,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 
         if( sendEndPatternLen != dataReq.endPatternLen )
         {
-            CellularLogError( "_Cellular_DataSendWithTimeoutDelayRaw, incomplete endpattern transfer" );
+            CellularLogError( ( "_Cellular_DataSendWithTimeoutDelayRaw, incomplete endpattern transfer" ) );
             pktStatus = CELLULAR_PKT_STATUS_SEND_ERROR;
         }
     }
@@ -319,21 +319,21 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 
             if( pktStatus == CELLULAR_PKT_STATUS_OK )
             {
-                CellularLogDebug( "Data Sent successfully!" );
+                CellularLogDebug( ( "Data Sent successfully!" ) );
             }
             else
             {
-                CellularLogError( "pkt_recv status=%d, error in sending data", pktStatus );
+                CellularLogError( ( "pkt_recv status=%d, error in sending data", pktStatus ) );
             }
         }
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-            CellularLogError( "pkt_recv status=%d, data sending timed out", pktStatus );
+            CellularLogError( ( "pkt_recv status=%d, data sending timed out", pktStatus ) );
         }
 
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
-        CellularLogDebug( "<<<<<Exit sending data ret[%d]>>>>>", pktStatus );
+        CellularLogDebug( ( "<<<<<Exit sending data ret[%d]>>>>>", pktStatus ) );
     }
 
     return pktStatus;
@@ -478,14 +478,14 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
         }
         else
         {
-            CellularLogWarn( "No URC Callback func avail %s", pTokenPtr );
+            CellularLogWarn( ( "No URC Callback func avail %s", pTokenPtr ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
     }
     else
     {
         /* No URC callback function available, check for generic call back. */
-        CellularLogDebug( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr );
+        CellularLogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
         _Cellular_ProcessGenericUrc( pContext, pSavePtr );
     }
 
@@ -530,7 +530,7 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
             default:
                 pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-                CellularLogError( "_Cellular_HandlePacket Callback type (%d) error", atRespType );
+                CellularLogError( ( "_Cellular_HandlePacket Callback type (%d) error", atRespType ) );
                 break;
         }
     }
@@ -552,7 +552,7 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_TimeoutAtcmdRequestWithCallback : Invalid cellular context" );
+        CellularLogError( ( "_Cellular_TimeoutAtcmdRequestWithCallback : Invalid cellular context" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else
@@ -577,7 +577,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_TimeoutAtcmdDataRecvRequestWithCallback : Invalid cellular context" );
+        CellularLogError( ( "_Cellular_TimeoutAtcmdDataRecvRequestWithCallback : Invalid cellular context" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else
@@ -609,7 +609,7 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_TimeoutAtcmdDataSendRequestWithCallback : Invalid cellular context" );
+        CellularLogError( ( "_Cellular_TimeoutAtcmdDataSendRequestWithCallback : Invalid cellular context" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else
@@ -657,7 +657,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_TimeoutAtcmdDataSendSuccessToken : Invalid cellular context" );
+        CellularLogError( ( "_Cellular_TimeoutAtcmdDataSendSuccessToken : Invalid cellular context" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else
@@ -731,8 +731,8 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                CellularLogError( "AtParseFail for %u: %d %s %s", i, result,
-                                  pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue );
+                CellularLogError( ( "AtParseFail for %u: %d %s %s", i, result,
+                                    pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }
         }
@@ -740,14 +740,14 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
         if( finit != true )
         {
             pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-            CellularLogError( "AtParseFail URC token table is not sorted" );
+            CellularLogError( ( "AtParseFail URC token table is not sorted" ) );
         }
 
         configASSERT( finit == true );
 
         for( i = 0; i < tokenMapSize; i++ )
         {
-            CellularLogDebug( "Callbacks setup for %u : %s", i, pTokenMap[ i ].pStrValue );
+            CellularLogDebug( ( "Callbacks setup for %u : %s", i, pTokenMap[ i ].pStrValue ) );
         }
     }
     else

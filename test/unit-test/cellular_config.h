@@ -33,6 +33,30 @@
 
 #include <stdint.h>
 
+/**************************************************/
+/******* DO NOT CHANGE the following order ********/
+/**************************************************/
+
+/* Include logging header files and define logging macros in the following order:
+ * 1. Include the header file "logging_levels.h".
+ * 2. Define the LIBRARY_LOG_NAME and LIBRARY_LOG_LEVEL macros depending on
+ * the logging configuration for Cellular.
+ * 3. Include the header file "logging_stack.h", if logging is enabled for Cellular.
+ */
+
+#include "logging_levels.h"
+
+/* Logging configuration for the Cellular library. */
+#ifndef LIBRARY_LOG_NAME
+    #define LIBRARY_LOG_NAME    "Cellular"
+#endif
+
+#ifndef LIBRARY_LOG_LEVEL
+    #define LIBRARY_LOG_LEVEL    LOG_NONE
+#endif
+
+#include "logging_stack.h"
+
 /* This is a project specific file and is used to override config values defined
  * in cellular_config_defaults.h. */
 

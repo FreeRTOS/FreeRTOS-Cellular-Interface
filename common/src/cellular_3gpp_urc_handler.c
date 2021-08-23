@@ -138,22 +138,22 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
 
         if( regStatus == REGISTRATION_STATUS_REGISTERED_HOME )
         {
-            CellularLogDebug( "Netowrk registration : HOME" );
+            CellularLogDebug( ( "Netowrk registration : HOME" ) );
         }
         else if( regStatus == REGISTRATION_STATUS_ROAMING_REGISTERED )
         {
-            CellularLogDebug( "Netowrk registration : ROAMING" );
+            CellularLogDebug( ( "Netowrk registration : ROAMING" ) );
         }
         else if( regStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
         {
             /* clear the atlib data if the registration failed. */
-            CellularLogDebug( "Netowrk registration : DEINED" );
+            CellularLogDebug( ( "Netowrk registration : DEINED" ) );
             _Cellular_InitAtData( pContext, 1 );
         }
         else
         {
             /* clear the atlib data if the registration failed. */
-            CellularLogDebug( "Netowrk registration : OTHERS" );
+            CellularLogDebug( ( "Netowrk registration : OTHERS" ) );
             _Cellular_InitAtData( pContext, 1 );
         }
     }
@@ -227,7 +227,7 @@ static CellularPktStatus_t _parseCellIdInRegStatus( const char * pToken,
         }
         else
         {
-            CellularLogError( "Error in processing Cell Id. Token %s", pToken );
+            CellularLogError( ( "Error in processing Cell Id. Token %s", pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -252,7 +252,7 @@ static CellularPktStatus_t _parseRatInfoInRegStatus( const char * pToken,
         if( var >= ( int32_t ) CELLULAR_RAT_MAX )
         {
             atCoreStatus = CELLULAR_AT_ERROR;
-            CellularLogError( "Error in processing RAT. Token %s", pToken );
+            CellularLogError( ( "Error in processing RAT. Token %s", pToken ) );
         }
         else if( ( var == ( int32_t ) CELLULAR_RAT_GSM ) || ( var == ( int32_t ) CELLULAR_RAT_EDGE ) ||
                  ( var == ( int32_t ) CELLULAR_RAT_CATM1 ) || ( var == ( int32_t ) CELLULAR_RAT_NBIOT ) )
@@ -424,7 +424,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pCon
             break;
 
         default:
-            CellularLogDebug( "Unknown Parameter Position in Registration URC" );
+            CellularLogDebug( ( "Unknown Parameter Position in Registration URC" ) );
             break;
     }
 
@@ -440,19 +440,19 @@ static void _regStatusGenerateLog( char * pRegPayload,
 
     if( regType == CELLULAR_REG_TYPE_CREG )
     {
-        CellularLogDebug( "URC: CREG: %s", pRegPayload );
+        CellularLogDebug( ( "URC: CREG: %s", pRegPayload ) );
     }
     else if( regType == CELLULAR_REG_TYPE_CGREG )
     {
-        CellularLogDebug( "URC: CGREG: %s", pRegPayload );
+        CellularLogDebug( ( "URC: CGREG: %s", pRegPayload ) );
     }
     else if( regType == CELLULAR_REG_TYPE_CEREG )
     {
-        CellularLogDebug( "URC: CEREG: %s", pRegPayload );
+        CellularLogDebug( ( "URC: CEREG: %s", pRegPayload ) );
     }
     else
     {
-        CellularLogDebug( " URC: Unknown " );
+        CellularLogDebug( ( " URC: Unknown " ) );
     }
 }
 
@@ -525,7 +525,7 @@ static bool _Cellular_RegEventStatus( const cellularAtData_t * pLibAtData,
             break;
 
         default:
-            CellularLogInfo( "_Cellular_RegEventStatus : unknown reg type " );
+            CellularLogInfo( ( "_Cellular_RegEventStatus : unknown reg type " ) );
             break;
     }
 
@@ -633,7 +633,7 @@ CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogDebug( "Creg Parse failure" );
+            CellularLogDebug( ( "Creg Parse failure" ) );
         }
 
         _Cellular_UnlockAtDataMutex( pContext );
@@ -660,7 +660,7 @@ CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogDebug( "Cgreg Parse failure" );
+            CellularLogDebug( ( "Cgreg Parse failure" ) );
         }
 
         _Cellular_UnlockAtDataMutex( pContext );
@@ -687,7 +687,7 @@ CellularPktStatus_t Cellular_CommonUrcProcessCereg( CellularContext_t * pContext
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogDebug( "Cereg Parse failure" );
+            CellularLogDebug( ( "Cereg Parse failure" ) );
         }
 
         _Cellular_UnlockAtDataMutex( pContext );
