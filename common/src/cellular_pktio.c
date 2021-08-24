@@ -352,17 +352,21 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
             {
                 pResp->status = false;
                 pkStatus = CELLULAR_PKT_STATUS_OK;
-                CellularLogError( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
-                                    ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
-                                    pLine,
-                                    ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
-                                    pkStatus ) );
             }
             else
             {
                 pkStatus = _processIntermediateResponse( pLine, pResp, atType, pRespPrefix );
             }
         }
+    }
+
+    if( ( result == true ) && ( pResp->status == false ) )
+    {
+        CellularLogError( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
+                            ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                            pLine,
+                            ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
+                            pkStatus ) );
     }
 
     return pkStatus;

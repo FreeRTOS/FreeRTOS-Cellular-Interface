@@ -2939,12 +2939,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
             }
         }
 
-        CellularLogDebug( ( "PSM setting: mode: %d, RAU: %d, RDY_Timer: %d, TAU: %d, Active_time: %d",
-                            pPsmSettings->mode,
-                            pPsmSettings->periodicRauValue,
-                            pPsmSettings->gprsReadyTimer,
-                            pPsmSettings->periodicTauValue,
-                            pPsmSettings->activeTimeValue ) );
         pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
     }
 

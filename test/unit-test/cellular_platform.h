@@ -30,14 +30,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
 #include "cellular_config_defaults.h"
 
 /*-----------------------------------------------------------*/
-
-#define CellularLogError    LogError
-#define CellularLogDebug    LogDebug
-#define CellularLogWarn     LogWarn
-#define CellularLogInfo     LogInfo
 
 /* Users should define their platform dependent method if they need.
  * Otherwise use our predefine method which has no effect but pass

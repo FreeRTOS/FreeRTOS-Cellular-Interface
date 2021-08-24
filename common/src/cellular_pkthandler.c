@@ -190,7 +190,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            CellularLogWarn( ( "Couldn't Allocate memory of %d for urc", strlen( pBuf ) ) );
+            CellularLogWarn( ( "Couldn't allocate memory of %d for urc", strlen( pBuf ) ) );
         }
     }
     else
@@ -319,7 +319,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 
             if( pktStatus == CELLULAR_PKT_STATUS_OK )
             {
-                CellularLogDebug( ( "Data Sent successfully!" ) );
+                CellularLogDebug( ( "Data sent successfully!" ) );
             }
             else
             {
