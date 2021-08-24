@@ -232,7 +232,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     if( *pDataRecv->pDataLen > outBufSize )
     {
         CellularLogError( "Data is turncated, received data length %d, out buffer size %d",
-                     *pDataRecv->pDataLen, outBufSize );
+                          *pDataRecv->pDataLen, outBufSize );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
     }
@@ -254,7 +254,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
         else
         {
             CellularLogError( "Receive Data: paramerter error, data pointer %p, data to copy %d",
-                         pInputLine, dataLenToCopy );
+                              pInputLine, dataLenToCopy );
             atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
@@ -373,7 +373,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
     else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
     {
         CellularLogError( "buildSocketConfig: socket protocol unsupported %d",
-                     socketHandle->socketProtocol );
+                          socketHandle->socketProtocol );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -416,13 +416,13 @@ static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
     else if( socketHandle->socketState != SOCKETSTATE_ALLOCATED )
     {
         CellularLogError( "storeAccessModeAndAddress, bad socket state %d",
-                     socketHandle->socketState );
+                          socketHandle->socketState );
         cellularStatus = CELLULAR_INTERNAL_FAILURE;
     }
     else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
     {
         CellularLogError( "storeAccessModeAndAddress, Access mode not supported %d",
-                     dataAccessMode );
+                          dataAccessMode );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -983,7 +983,7 @@ CellularError_t Cellular_GetSimCardStatus( CellularHandle_t cellularHandle,
             }
 
             CellularLogInfo( "Cellular_GetSimCardStatus, Sim Insert State[%d], Lock State[%d]",
-                        pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
+                             pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
         }
     }
 
@@ -1045,12 +1045,12 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
                 if( pdpContextsActInfo.contextsPresent[ i ] )
                 {
                     CellularLogDebug( "Context [%d], Act State [%d], Operator <Act> [%d]\r\n", i + 1,
-                                 pdpContextsActInfo.contextActState[ i ], serviceStatus.rat );
+                                      pdpContextsActInfo.contextActState[ i ], serviceStatus.rat );
                 }
             }
 
             /* Deactivate context if active */
-            if( pdpContextsActInfo.contextActState[ contextId - 1 ] == TRUE )
+            if( pdpContextsActInfo.contextActState[ contextId - 1 ] == true )
             {
                 /* Don't deactivate LTE default bearer context */
                 /* Otherwise sending AT command "+CGACT=0,1" for deactivation will result in ERROR */
@@ -1257,7 +1257,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPdpContextActState( CellularCont
                                         ( tempValue <= ( int32_t ) MAX_PDP_CONTEXTS ) )
                                     {
                                         contextId = ( uint8_t ) tempValue;
-                                        pPDPContextsActInfo->contextsPresent[ contextId - 1 ] = TRUE;
+                                        pPDPContextsActInfo->contextsPresent[ contextId - 1 ] = true;
                                         CellularLogDebug( "_Cellular_RecvFuncGetPdpContextActState: Context Id: %d", contextId );
                                     }
                                     else
@@ -1410,13 +1410,13 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
                 if( pdpContextsActInfo.contextsPresent[ i ] )
                 {
                     CellularLogDebug( "Cellular_ActivatePdn: Context [%d], Act State [%d]\r\n", i + 1,
-                                 pdpContextsActInfo.contextActState[ i ] );
+                                      pdpContextsActInfo.contextActState[ i ] );
                 }
             }
         }
 
         /* Activate context if not already active */
-        if( pdpContextsActInfo.contextActState[ contextId - 1 ] == FALSE )
+        if( pdpContextsActInfo.contextActState[ contextId - 1 ] == false )
         {
             if( pktStatus == CELLULAR_PKT_STATUS_OK )
             {
@@ -1776,8 +1776,8 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Bit Error Rate (BER):
-             *  • 0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
-             *  • 99: not known or not detectable
+             *  0..7: as RXQUAL values in the table in 3GPP TS 45.008 [124], subclause 8.2.4
+             *  99: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 7 ) )
             {
@@ -1821,10 +1821,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Quality (RSRQ):
-             *  • 0: less than -19.5 dB
-             *  • 1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
-             *  • 34: -3 dB or greater
-             *  • 255: not known or not detectable
+             *  0: less than -19.5 dB
+             *  1..33: from -19.5 dB to -3.5 dB with 0.5 dB steps
+             *  34: -3 dB or greater
+             *  255: not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 34 ) )
             {
@@ -1856,10 +1856,10 @@ static bool _parseExtendedSignalQuality( char * pQcsqPayload,
         {
             /*
              * Reference Signal Received Power(RSRP) :
-             *  • 0 : less than - 140 dBm
-             *  • 1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
-             *  • 97 : -44 dBm or greater
-             *  • 255 : not known or not detectable
+             *  0 : less than - 140 dBm
+             *  1..96 : from - 140 dBm to - 45 dBm with 1 dBm steps
+             *  97 : -44 dBm or greater
+             *  255 : not known or not detectable
              */
             if( ( tempValue >= 0 ) && ( tempValue <= 97 ) )
             {
@@ -2432,7 +2432,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPdpContextSettings( CellularCont
                                         ( tempValue <= ( int32_t ) MAX_PDP_CONTEXTS ) )
                                     {
                                         contextId = ( uint8_t ) tempValue;
-                                        pPDPContextsInfo->contextsPresent[ contextId - 1 ] = TRUE;
+                                        pPDPContextsInfo->contextsPresent[ contextId - 1 ] = true;
                                         CellularLogDebug( "_Cellular_RecvFuncGetPdpContextSettings: Context Id: %d", contextId );
                                     }
                                     else
@@ -2544,7 +2544,7 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
 
             default:
                 CellularLogDebug( "Cellular_SetPdnConfig: Invalid pdn context type %d",
-                             CELLULAR_PDN_CONTEXT_IPV4V6 );
+                                  CELLULAR_PDN_CONTEXT_IPV4V6 );
                 cellularStatus = CELLULAR_BAD_PARAMETER;
                 break;
         }
@@ -2589,7 +2589,7 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
                 if( pdpContextsInfo.contextsPresent[ i ] )
                 {
                     CellularLogDebug( "Context [%d], IP Type [%s], APN Name [%s], IP Address [%s]\r\n", i + 1,
-                                 pdpContextsInfo.ipType[ i ], pdpContextsInfo.apnName, pdpContextsInfo.ipAddress );
+                                      pdpContextsInfo.ipType[ i ], pdpContextsInfo.apnName, pdpContextsInfo.ipAddress );
                 }
             }
         }
@@ -2777,6 +2777,28 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
+                               const CellularCommInterface_t * pCommInterface )
+{
+    CellularTokenTable_t cellularTokenTable =
+    {
+        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
+        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
+        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+        .pCellularSrcExtraTokenSuccessTable    = NULL,
+        .cellularSrcExtraTokenSuccessTableSize = 0
+    };
+
+    return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
 }
 
 /*-----------------------------------------------------------*/

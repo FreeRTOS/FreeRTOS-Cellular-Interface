@@ -59,7 +59,7 @@ void harness()
     const char ** ppString;
     const char ** ppTokOutput;
 
-    ppString = ( char * )safeMalloc( sizeof( * ppString ) );
-    ppTokOutput = ( char * )safeMalloc( sizeof( * ppTokOutput ) );
+    ppString = ( char * ) safeMalloc( sizeof( *ppString ) );
+    ppTokOutput = ( char * ) safeMalloc( sizeof( *ppTokOutput ) );
     Cellular_ATGetNextTok( ppString, ppTokOutput );
 }

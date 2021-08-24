@@ -1052,7 +1052,7 @@ static CellularATError_t getPdnStatusParseToken( char * pToken,
 
         default:
             CellularLogError( "Unknown token in getPdnStatusParseToken %s %d",
-                         pToken, tokenIndex );
+                              pToken, tokenIndex );
             atCoreStatus = CELLULAR_AT_ERROR;
             break;
     }
@@ -1230,7 +1230,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     if( *pDataRecv->pDataLen > outBufSize )
     {
         CellularLogError( "Data is turncated, received data length %d, out buffer size %d",
-                     *pDataRecv->pDataLen, outBufSize );
+                          *pDataRecv->pDataLen, outBufSize );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
     }
@@ -1671,11 +1671,11 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
         }
 
         CellularLogDebug( "PSM setting: mode: %d, RAU: %d, RDY_Timer: %d, TAU: %d, Active_time: %d",
-                     pPsmSettings->mode,
-                     pPsmSettings->periodicRauValue,
-                     pPsmSettings->gprsReadyTimer,
-                     pPsmSettings->periodicTauValue,
-                     pPsmSettings->activeTimeValue );
+                          pPsmSettings->mode,
+                          pPsmSettings->periodicRauValue,
+                          pPsmSettings->gprsReadyTimer,
+                          pPsmSettings->periodicTauValue,
+                          pPsmSettings->activeTimeValue );
         pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
     }
 
@@ -1699,7 +1699,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
     char pLocalLine[ MAX_QIRD_STRING_PREFIX_STRING + 1 ] = "\0";
     uint32_t localLineLength = MAX_QIRD_STRING_PREFIX_STRING > lineLength ? lineLength : MAX_QIRD_STRING_PREFIX_STRING;
 
-    (void)pCallbackContext;
+    ( void ) pCallbackContext;
 
     if( ( pLine == NULL ) || ( ppDataStart == NULL ) || ( pDataLength == NULL ) )
     {
@@ -1795,13 +1795,13 @@ static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
     else if( socketHandle->socketState != SOCKETSTATE_ALLOCATED )
     {
         CellularLogError( "storeAccessModeAndAddress, bad socket state %d",
-                     socketHandle->socketState );
+                          socketHandle->socketState );
         cellularStatus = CELLULAR_INTERNAL_FAILURE;
     }
     else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
     {
         CellularLogError( "storeAccessModeAndAddress, Access mode not supported %d",
-                     dataAccessMode );
+                          dataAccessMode );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -2922,7 +2922,7 @@ CellularError_t Cellular_GetSimCardStatus( CellularHandle_t cellularHandle,
 
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         CellularLogDebug( "_Cellular_GetSimStatus, Sim Insert State[%d], Lock State[%d]",
-                     pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
+                          pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
     }
 
     return cellularStatus;
@@ -3000,8 +3000,8 @@ CellularError_t Cellular_GetSimCardInfo( CellularHandle_t cellularHandle,
         else
         {
             CellularLogDebug( "SimInfo updated: IMSI:%s, Hplmn:%s%s, ICCID:%s",
-                         pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
-                         pSimCardInfo->iccid );
+                              pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
+                              pSimCardInfo->iccid );
         }
     }
 
@@ -3132,6 +3132,28 @@ CellularError_t Cellular_GetHostByName( CellularHandle_t cellularHandle,
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
+                               const CellularCommInterface_t * pCommInterface )
+{
+    CellularTokenTable_t cellularTokenTable =
+    {
+        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
+        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
+        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+        .pCellularSrcExtraTokenSuccessTable    = NULL,
+        .cellularSrcExtraTokenSuccessTableSize = 0
+    };
+
+    return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
 }
 
 /*-----------------------------------------------------------*/

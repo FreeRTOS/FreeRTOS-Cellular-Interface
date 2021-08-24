@@ -376,7 +376,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Setup mobile network operator profiles. */
-			/* Setting +UMNOPROF profile will automatically select suitable values for +URAT and +UBANDMASK. */
+            /* Setting +UMNOPROF profile will automatically select suitable values for +URAT and +UBANDMASK. */
 
             /* Check current MNO profile first to avoid unneccessary modem reboot. */
             MNOProfileType_t currentMNOProfile = MNO_PROFILE_NOT_SET;

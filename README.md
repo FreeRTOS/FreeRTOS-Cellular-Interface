@@ -79,7 +79,7 @@ The FreeRTOS Cellular Library runs on MCUs.  It use an abstracted interface - th
 
 The FreeRTOS Cellular Library uses kernel APIs for task synchronization and memory management.  Please refer to "cellular/cellular_platform.html" after unzipping the doc to see the needed API.
 
-The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project has implemented such kernel APIs by using FreeRTOS primitives.  If the target platform is FreeRTOS, [this implementation](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_platform.c) provides a pre-integrated interface.  If your platform is not FreeRTOS, you need to re-implement the APIs contained in [this file](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_platform.c). 
+The [Lab-Project-FreeRTOS-Cellular-Demo](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) project has implemented such kernel APIs by using FreeRTOS primitives.  If the target platform is FreeRTOS, [this implementation](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_platform.c) provides a pre-integrated interface.  If your platform is not FreeRTOS, you need to re-implement the APIs contained in [this file](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo/blob/master/source/cellular/cellular_platform.c).
 
 ## Adding support for new cellular modems
 
@@ -94,7 +94,7 @@ In order to port the [common component](https://www.freertos.org/Documentation/a
 The [Cellular common APIs document](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html) provides detail information required in each steps.
 It is recommended that you start by cloning the implementation of one of the existing modems, then make modifications where your modem’s vendor-specific (non-3GPP) AT commands are different.
 
- Current Example Implementations: 
+ Current Example Implementations:
 
 * [Quectel BG96](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/master/modules/bg96)
 * [Sierra Wireless HL7802](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Library/tree/main/modules/hl7802)

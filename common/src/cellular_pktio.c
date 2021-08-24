@@ -119,14 +119,8 @@ static uint32_t _convertCharPtrDistance( const char * pEndPtr,
                                          const char * pStartPtr )
 {
     int32_t ptrDistance = ( int32_t ) ( pEndPtr - pStartPtr );
-    uint32_t retValue = 0;
 
-    if( ( ptrDistance >= 0 ) && ( ptrDistance < INT32_MAX ) )
-    {
-        retValue = ( uint32_t ) ptrDistance;
-    }
-
-    return retValue;
+    return ( uint32_t ) ptrDistance;
 }
 
 /*-----------------------------------------------------------*/
@@ -306,7 +300,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
                                                   const char * pRespPrefix )
 {
     CellularPktStatus_t pkStatus = CELLULAR_PKT_STATUS_FAILURE;
-    bool result = true;
+    bool result = false;
     const char * const * pTokenSuccessTable = NULL;
     const char * const * pTokenErrorTable = NULL;
     const char * const * pTokenExtraTable = NULL;
@@ -327,34 +321,47 @@ static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pCon
         /* pResp has been checked while allocating memory, so we don't
          * need to demonstrate it here.
          */
-        if( ( Cellular_ATcheckErrorCode( pLine, pTokenExtraTable,
-                                         tokenExtraTableSize, &result ) == CELLULAR_AT_SUCCESS ) &&
-            ( result == true ) )
+        ( void ) Cellular_ATcheckErrorCode( pLine, pTokenExtraTable,
+                                            tokenExtraTableSize, &result );
+
+        if( result == true )
         {
             pResp->status = true;
             pkStatus = CELLULAR_PKT_STATUS_OK;
             CellularLogDebug( "Final AT response is SUCCESS [%s] in extra table", pLine );
         }
-        else if( ( Cellular_ATcheckErrorCode( pLine, pTokenSuccessTable,
-                                              tokenSuccessTableSize, &result ) == CELLULAR_AT_SUCCESS ) &&
-                 ( result == true ) )
-        {
-            pResp->status = true;
-            pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogDebug( "Final AT response is SUCCESS [%s]", pLine );
-        }
-        else if( ( Cellular_ATcheckErrorCode( pLine, pTokenErrorTable,
-                                              tokenErrorTableSize, &result ) == CELLULAR_AT_SUCCESS ) &&
-                 ( result == true ) )
-        {
-            pResp->status = false;
-            pkStatus = CELLULAR_PKT_STATUS_OK;
-            CellularLogError( "Modem return ERROR: %s %s respPrefix: %s status: %d",
-                              pContext->pCurrentCmd, pLine, pRespPrefix, pkStatus );
-        }
         else
         {
-            pkStatus = _processIntermediateResponse( pLine, pResp, atType, pRespPrefix );
+            ( void ) Cellular_ATcheckErrorCode( pLine, pTokenSuccessTable,
+                                                tokenSuccessTableSize, &result );
+
+            if( result == true )
+            {
+                pResp->status = true;
+                pkStatus = CELLULAR_PKT_STATUS_OK;
+                CellularLogDebug( "Final AT response is SUCCESS [%s]", pLine );
+            }
+        }
+
+        if( result != true )
+        {
+            ( void ) Cellular_ATcheckErrorCode( pLine, pTokenErrorTable,
+                                                tokenErrorTableSize, &result );
+
+            if( result == true )
+            {
+                pResp->status = false;
+                pkStatus = CELLULAR_PKT_STATUS_OK;
+                CellularLogError( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
+                                  ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                                  pLine,
+                                  ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
+                                  pkStatus );
+            }
+            else
+            {
+                pkStatus = _processIntermediateResponse( pLine, pResp, atType, pRespPrefix );
+            }
         }
     }
 
@@ -394,7 +401,7 @@ static _atRespType_t _getMsgType( const CellularContext_t * pContext,
     bool inputWithPrefix = false;
     bool inputWithSrcPrefix = false;
 
-    if( ( pContext == NULL ) || ( pLine == NULL ) || ( pContext->tokenTable.pCellularUrcTokenWoPrefixTable == NULL ) )
+    if( pContext->tokenTable.pCellularUrcTokenWoPrefixTable == NULL )
     {
         atStatus = CELLULAR_AT_ERROR;
         atRespType = AT_UNDEFINED;
@@ -406,9 +413,9 @@ static _atRespType_t _getMsgType( const CellularContext_t * pContext,
     else
     {
         /* Check if prefix exist in pLine. */
-        atStatus = Cellular_ATIsPrefixPresent( pLine, &inputWithPrefix );
+        ( void ) Cellular_ATIsPrefixPresent( pLine, &inputWithPrefix );
 
-        if( ( atStatus == CELLULAR_AT_SUCCESS ) && ( inputWithPrefix == true ) && ( pRespPrefix != NULL ) )
+        if( inputWithPrefix == true )
         {
             /* Check if SRC prefix exist in pLine. */
             atStatus = Cellular_ATStrStartWith( pLine, pRespPrefix, &inputWithSrcPrefix );
@@ -431,7 +438,6 @@ static _atRespType_t _getMsgType( const CellularContext_t * pContext,
         else
         {
             if( ( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( pRespPrefix == NULL ) ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WO_PREFIX ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_DATA_WO_PREFIX ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) )
@@ -456,7 +462,7 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
     ( void ) commInterfaceHandle; /* Comm if is not used in this function. */
 
     /* The context of this function is a ISR. */
-    if( ( pContext == NULL ) || ( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL ) )
+    if( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL )
     {
         retComm = IOT_COMM_INTERFACE_BAD_PARAMETER;
     }
@@ -694,13 +700,16 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
                 ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
                 pContext->pPktioReadPtr = NULL;
                 FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
+                /* pContext->pCurrentCmd is not NULL since it is a solicited response. */
                 CellularLogError( "processLine ERROR, cleaning up! Current command %s", pContext->pCurrentCmd );
             }
         }
     }
     else
     {
-        CellularLogError( "recvdMsgType is AT_UNDEFINED for Message: %s %s", pLine, pContext->pCurrentCmd );
+        CellularLogError( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
+                          pLine,
+                          ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) );
         ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
         pContext->pPktioReadPtr = NULL;
         pContext->partialDataRcvdLen = 0;
@@ -793,7 +802,15 @@ static bool _preprocessLine( CellularContext_t * pContext,
                                                    pTempLine, *pBytesRead,
                                                    ppStartOfData, &pContext->dataLength );
 
-            if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
+            if( pktStatus == CELLULAR_PKT_STATUS_OK )
+            {
+                /* These members filled by user callback function and need to be demonstrated. */
+                if( pContext->dataLength > 0U )
+                {
+                    configASSERT( ppStartOfData != NULL );
+                }
+            }
+            else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
             {
                 /* The modem driver is waiting for more data to decide. */
                 CellularLogDebug( "%p is not a complete line", pTempLine );
@@ -803,11 +820,8 @@ static bool _preprocessLine( CellularContext_t * pContext,
             }
             else
             {
-                if( pktStatus != CELLULAR_PKT_STATUS_OK )
-                {
-                    CellularLogError( "pktDataPrefixCB returns error %d", pktStatus );
-                    keepProcess = false;
-                }
+                CellularLogError( "pktDataPrefixCB returns error %d", pktStatus );
+                keepProcess = false;
             }
         }
         else
@@ -868,22 +882,19 @@ static bool _getNextLine( CellularContext_t * pContext,
     stringLength = ( uint32_t ) strnlen( *ppLine, *pBytesRead );
 
     /* Advanced 1 bytes to read next Line. */
-    if( *pBytesRead >= ( stringLength + 1U ) )
-    {
-        *ppLine = &( ( *ppLine )[ ( stringLength + 1U ) ] );
-        *pBytesRead = *pBytesRead - ( stringLength + 1U );
-        pContext->pPktioReadPtr = *ppLine;
-        pContext->partialDataRcvdLen = *pBytesRead;
+    *ppLine = &( ( *ppLine )[ ( stringLength + 1U ) ] );
+    *pBytesRead = *pBytesRead - ( stringLength + 1U );
+    pContext->pPktioReadPtr = *ppLine;
+    pContext->partialDataRcvdLen = *pBytesRead;
 
-        if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) && ( pContext->recvdMsgType == AT_SOLICITED ) )
-        {
-            /* Garbage collection. */
-            CellularLogDebug( "Garbage collection" );
-            ( void ) memmove( pContext->pktioReadBuf, *ppLine, *pBytesRead );
-            *ppLine = pContext->pktioReadBuf;
-            pContext->pPktioReadPtr = pContext->pktioReadBuf;
-            pContext->partialDataRcvdLen = *pBytesRead;
-        }
+    if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) && ( pContext->recvdMsgType == AT_SOLICITED ) )
+    {
+        /* Garbage collection. */
+        CellularLogDebug( "Garbage collection" );
+        ( void ) memmove( pContext->pktioReadBuf, *ppLine, *pBytesRead );
+        *ppLine = pContext->pktioReadBuf;
+        pContext->pPktioReadPtr = pContext->pktioReadBuf;
+        pContext->partialDataRcvdLen = *pBytesRead;
     }
 
     return keepProcess;
@@ -904,8 +915,11 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
     while( keepProcess == true )
     {
-        /* Pktio is reading command. Skip over the change line. */
-        while( ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) ) && ( bytesRead > 0U ) )
+        /* Pktio is reading command. Skip over the change line. And the reason
+         * we don't consider the variable bytesInBuffer is because that the
+         * input variable bytesInBuffer is bounded by the caller already.
+         */
+        while( ( bytesRead > 0U ) && ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) ) )
         {
             pTempLine++;
             bytesRead = bytesRead - 1U;
@@ -925,7 +939,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             if( pktStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
             {
                 /* The input line is a data recv command. Handle the data buffer. */
-                if( ( pContext->dataLength != 0U ) && ( pStartOfData != NULL ) )
+                if( pContext->dataLength != 0U )
                 {
                     keepProcess = _handleDataResult( pContext, ppAtResp, pStartOfData, &pTempLine, &bytesRead );
                 }
@@ -961,7 +975,7 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
     /* Start from pLine there are bytesRead bytes. */
     pLine = _Cellular_ReadLine( pContext, &bytesRead, *ppAtResp );
 
-    if( ( bytesRead > 0U ) && ( pLine != NULL ) )
+    if( bytesRead > 0U )
     {
         if( pContext->dataLength != 0U )
         {
@@ -986,7 +1000,6 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 }
 
 /*-----------------------------------------------------------*/
-
 static void _pktioReadThread( void * pUserData )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
@@ -995,7 +1008,7 @@ static void _pktioReadThread( void * pUserData )
     uint32_t bytesRead = 0U;
 
     /* Open main communication port. */
-    if( ( pContext != NULL ) && ( pContext->pCommIntf != NULL ) &&
+    if( ( pContext->pCommIntf != NULL ) &&
         ( pContext->pCommIntf->open( _Cellular_PktRxCallBack, ( void * ) pContext,
                                      &pContext->hPktioCommIntf ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
@@ -1027,13 +1040,13 @@ static void _pktioReadThread( void * pUserData )
                 do
                 {
                     bytesRead = _handleRxDataEvent( pContext, &pAtResp );
-                } while( ( bytesRead != 0U ) && LOOP_FOREVER() );
+                } while( ( bytesRead != 0U ) );
             }
             else
             {
                 /* Empty else to avoid MISRA violation */
             }
-        } while( LOOP_FOREVER() );
+        } while( true );
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );
         pContext->hPktioCommIntf = NULL;
@@ -1044,18 +1057,12 @@ static void _pktioReadThread( void * pUserData )
         CellularLogError( "Comm port open failed" );
     }
 
-    if( pContext != NULL )
-    {
-        if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
-        {
-            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
-        }
+    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
 
-        /* Call the shutdown callback if it is defined. */
-        if( pContext->pPktioShutdownCB != NULL )
-        {
-            pContext->pPktioShutdownCB( pContext );
-        }
+    /* Call the shutdown callback if it is defined. */
+    if( pContext->pPktioShutdownCB != NULL )
+    {
+        pContext->pPktioShutdownCB( pContext );
     }
 }
 

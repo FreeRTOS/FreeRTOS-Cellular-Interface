@@ -154,20 +154,17 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
 
     taskENTER_CRITICAL();
 
-    if( pContext != NULL )
+    for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
     {
-        for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
+        if( cellularContextTable[ i ] == pContext )
         {
-            if( cellularContextTable[ i ] == pContext )
-            {
-                cellularContextTable[ i ] = NULL;
-                #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
-                    {
-                        Platform_Free( pContext );
-                    }
-                #endif
-                break;
-            }
+            cellularContextTable[ i ] = NULL;
+            #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
+                {
+                    Platform_Free( pContext );
+                }
+            #endif
+            break;
         }
     }
 
@@ -178,10 +175,7 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
 
 static void _shutdownCallback( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        pContext->bLibShutdown = true;
-    }
+    pContext->bLibShutdown = true;
 }
 
 /*-----------------------------------------------------------*/
@@ -283,10 +277,7 @@ static bool _Cellular_CreateLibStatusMutex( CellularContext_t * pContext )
 {
     bool status = false;
 
-    if( pContext != NULL )
-    {
-        status = PlatformMutex_Create( &pContext->libStatusMutex, false );
-    }
+    status = PlatformMutex_Create( &pContext->libStatusMutex, false );
 
     return status;
 }
@@ -295,10 +286,7 @@ static bool _Cellular_CreateLibStatusMutex( CellularContext_t * pContext )
 
 static void _Cellular_DestroyLibStatusMutex( CellularContext_t * pContext )
 {
-    if( pContext != NULL )
-    {
-        PlatformMutex_Destroy( &pContext->libStatusMutex );
-    }
+    PlatformMutex_Destroy( &pContext->libStatusMutex );
 }
 
 /*-----------------------------------------------------------*/
@@ -380,15 +368,12 @@ static uint8_t _getSignalBars( int16_t compareValue,
         tableSize = ( uint8_t ) ARRY_SIZE( lteNBIotSignalBarsTable );
     }
 
-    if( pSignalBarsTable != NULL )
+    for( i = 0; i < tableSize; i++ )
     {
-        for( i = 0; i < tableSize; i++ )
+        if( compareValue <= pSignalBarsTable[ i ].upperThreshold )
         {
-            if( compareValue <= pSignalBarsTable[ i ].upperThreshold )
-            {
-                barsValue = pSignalBarsTable[ i ].bars;
-                break;
-            }
+            barsValue = pSignalBarsTable[ i ].bars;
+            break;
         }
     }
 
@@ -436,10 +421,7 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
 static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
                                            _pPktioShutdownCallback_t shutdownCb )
 {
-    if( pContext != NULL )
-    {
-        pContext->pPktioShutdownCB = shutdownCb;
-    }
+    pContext->pPktioShutdownCB = shutdownCb;
 }
 
 /*-----------------------------------------------------------*/
@@ -641,6 +623,10 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                 Platform_Free( socketHandle );
             }
         #endif
+    }
+    else
+    {
+        cellularStatus = CELLULAR_INVALID_HANDLE;
     }
 
     taskEXIT_CRITICAL();

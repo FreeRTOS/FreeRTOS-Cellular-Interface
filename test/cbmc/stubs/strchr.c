@@ -55,7 +55,7 @@
             return NULL;
         }
     }
-#else  /* if __has_builtin( __builtin___strchr ) */
+#else /* if __has_builtin( __builtin___strchr ) */
     char * strchr( const char * s,
                    int c )
     {

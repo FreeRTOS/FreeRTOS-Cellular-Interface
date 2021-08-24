@@ -24,6 +24,6 @@ Cellular_modem -> Cellular_common : OK
 
 Cellular_common ->Cellular_modules_porting : Call the callback function with corresponding data field \n_Cellular_RecvFuncGetSimCardStatus( pData, dataLen )
 
-Cellular_modules_porting ->Application : Return parsing status and data 
+Cellular_modules_porting ->Application : Return parsing status and data
 
 

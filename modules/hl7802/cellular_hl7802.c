@@ -214,18 +214,22 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         {
             switch( CELLULAR_CONFIG_DEFAULT_RAT )
             {
-            case CELLULAR_RAT_CATM1:
-                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,1";
-                break;
-            case CELLULAR_RAT_NBIOT:
-                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,2";
-                break;
-            case CELLULAR_RAT_GSM:
-                atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,3";
-                break;
-            default:
-                break;
+                case CELLULAR_RAT_CATM1:
+                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,1";
+                    break;
+
+                case CELLULAR_RAT_NBIOT:
+                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,2";
+                    break;
+
+                case CELLULAR_RAT_GSM:
+                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,3";
+                    break;
+
+                default:
+                    break;
             }
+
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
@@ -250,6 +254,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             atReqGetNoResult.pAtCmd = "AT+CFUN=1,1";
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
+
         Platform_Delay( CELLULAR_HL7802_RESET_DELAY_MS );
 
         /* Disable echo after reboot device. */

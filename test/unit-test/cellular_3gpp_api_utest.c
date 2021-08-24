@@ -87,6 +87,11 @@ static int psmSettingsTimerIndex = 0;
 static int psmSettingsTimerError = 0;
 static int parseEidrxTokenOutOfRange = 0;
 static int mallocAllocFail = 0;
+static int nullTokenFirst = 0;
+static int checkCrsmReadStatusCase = 0;
+static int negativeNumberCase = 0;
+static int commonCase = 0;
+static int wrongDataLength = 0;
 
 /* ============================   UNITY FIXTURES ============================ */
 
@@ -105,6 +110,11 @@ void setUp()
     psmSettingsTimerError = 0;
     parseEidrxTokenOutOfRange = 0;
     mallocAllocFail = 0;
+    nullTokenFirst = 0;
+    checkCrsmReadStatusCase = 0;
+    negativeNumberCase = 0;
+    commonCase = 0;
+    wrongDataLength = 0;
 }
 
 /* Called after each test method. */
@@ -125,84 +135,23 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
-/* static function declaration */
-
-static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
-                                                      void * pUserData,
-                                                      CellularCommInterfaceHandle_t * pCommInterfaceHandle )
-{
-    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
-
-    ( void ) receiveCallback;
-    ( void ) pCommInterfaceHandle;
-    CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
-
-    commIntRet = receiveCallback( pContext, NULL );
-
-    return commIntRet;
-}
-
-static CellularCommInterfaceError_t _prvCommIntfClose( CellularCommInterfaceHandle_t commInterfaceHandle )
-{
-    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
-
-    ( void ) commInterfaceHandle;
-
-    return commIntRet;
-}
-
-static CellularCommInterfaceError_t _prvCommIntfSend( CellularCommInterfaceHandle_t commInterfaceHandle,
-                                                      const uint8_t * pData,
-                                                      uint32_t dataLength,
-                                                      uint32_t timeoutMilliseconds,
-                                                      uint32_t * pDataSentLength )
-{
-    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
-
-    ( void ) commInterfaceHandle;
-    ( void ) pData;
-    ( void ) dataLength;
-    ( void ) timeoutMilliseconds;
-    ( void ) pDataSentLength;
-
-    *pDataSentLength = dataLength;
-
-    return commIntRet;
-}
-
-static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHandle_t commInterfaceHandle,
-                                                         uint8_t * pBuffer,
-                                                         uint32_t bufferLength,
-                                                         uint32_t timeoutMilliseconds,
-                                                         uint32_t * pDataReceivedLength )
-{
-    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
-
-    ( void ) commInterfaceHandle;
-    ( void ) pBuffer;
-    ( void ) bufferLength;
-    ( void ) timeoutMilliseconds;
-    ( void ) pDataReceivedLength;
-
-    return commIntRet;
-}
-
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
-    ( void )pNewMutex;
+    ( void ) pNewMutex;
+    ( void ) recursive;
     pNewMutex->created = true;
     return true;
 }
 
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
-    ( void )pMutex;
+    ( void ) pMutex;
 }
 
 void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
 {
-    ( void )pMutex;
+    ( void ) pMutex;
 }
 
 uint16_t MockvQueueDelete( QueueHandle_t queue )
@@ -223,8 +172,8 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback( CellularContext_t * pContext,
 {
     cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
 
-    ( void )pContext;
-    ( void)cmock_num_calls;
+    ( void ) pContext;
+    ( void ) cmock_num_calls;
     pOperatorInfo->rat = CELLULAR_RAT_INVALID;
 
     return CELLULAR_PKT_STATUS_OK;
@@ -278,18 +227,48 @@ CellularPktStatus_t handleCommonCallback( CellularContext_t * pContext,
     {
         pktStatus = atReq.respCallback( NULL, NULL, NULL, 0 );
     }
-    /* bad parameter */
+    /* AtResp */
     else if( cbCondition == 1 )
     {
-        pktStatus = atReq.respCallback( pContext, NULL, NULL, 0 );
+        /* null AtResp */
+        if( commonCase == 0 )
+        {
+            pktStatus = atReq.respCallback( pContext, NULL, NULL, 0 );
+        }
+        /* null AtResp item */
+        else if( commonCase == 1 )
+        {
+            pktStatus = atReq.respCallback( pContext, &atResp, NULL, 0 );
+        }
+        /* null AtResp item line */
+        else if( commonCase == 2 )
+        {
+            char * pLine = NULL;
+
+            _saveData( pLine, &atResp, sizeof( pLine ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, NULL, 0 );
+        }
     }
     /* null data pointer */
     else if( cbCondition == 2 )
     {
-        char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+        /* null data pointer */
+        if( commonCase == 0 )
+        {
+            char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
-        _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( pContext, &atResp, NULL, 0 );
+            _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, NULL, 0 );
+        }
+        /* wrong data length */
+        else if( commonCase == 1 )
+        {
+            char pData[ 2 ];
+            char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+
+            _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, wrongDataLength );
+        }
     }
 
     return pktStatus;
@@ -302,6 +281,8 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTi
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularATCommandResponse_t atResp;
     char pData[ 20 ];
+
+    ( void ) cmock_num_calls;
 
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -318,10 +299,20 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTi
     }
     else if( cbCondition == 5 )
     {
-        char pLine[] = "-0519−00402";
+        if( commonCase == 0 )
+        {
+            char pLine[] = "-0519−00402";
 
-        _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
+            _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
+        }
+        else if( commonCase == 1 )
+        {
+            char pLine[] = "255";
+
+            _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
+        }
     }
     else if( cbCondition >= 6 )
     {
@@ -339,7 +330,7 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
                                           int32_t * pResult,
                                           int cmock_num_calls )
 {
-    ( void )base;
+    ( void ) base;
 
     if( cbCondition < PARSE_TIME_FIRST_CALL_FAILURE_CONDITION )
     {
@@ -351,7 +342,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 1 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -362,7 +360,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 2 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -373,7 +378,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 3 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -384,7 +396,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 4 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -395,7 +414,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 5 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -406,7 +432,14 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
         {
             if( cmock_num_calls == 6 )
             {
-                *pResult = atoi( "+655350" );
+                if( negativeNumberCase == 1 )
+                {
+                    *pResult = atoi( "-255" );
+                }
+                else
+                {
+                    *pResult = atoi( "+655350" );
+                }
             }
             else
             {
@@ -423,9 +456,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                                   int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_FW_VERSION_MAX_SIZE + 1 ];
+
+    ( void ) cmock_num_calls;
 
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -438,7 +472,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
     }
 
     return pktStatus;
@@ -449,7 +483,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
                                                                                        int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_IMEI_MAX_SIZE + 1 ];
 
@@ -466,7 +499,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGe
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -478,7 +511,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId( 
                                                                                 int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_MODEL_ID_MAX_SIZE + 1 ];
 
@@ -495,7 +527,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId( 
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -507,7 +539,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactu
                                                                                       int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ CELLULAR_MANUFACTURE_ID_MAX_SIZE + 1 ];
 
@@ -524,7 +555,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactu
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -536,7 +567,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
                                                                                    int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ sizeof( CellularNetworkRegType_t ) ];
 
@@ -553,7 +583,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
 
@@ -565,12 +595,12 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
                                                                                   int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
-    char pData[ sizeof( cellularOperatorInfo_t ) ];
+    cellularOperatorInfo_t cellularOperatorInfo;
 
-    ( void )cmock_num_calls;
+    ( void ) cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
+    memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
 
     if( cbCondition < 3 )
     {
@@ -584,21 +614,17 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
 
         if( parseNetworkNameFailureCase == 2 )
         {
-            cellularOperatorInfo_t cellularOperatorInfo;
-            memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
             cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else if( parseNetworkNameFailureCase == 3 )
         {
-            cellularOperatorInfo_t cellularOperatorInfo;
-            memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
             cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
         else
         {
-            pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
         }
     }
 
@@ -610,11 +636,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
                                                                                                int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
-    char pData[ 2 ];
+    CellularEidrxSettingsList_t cellularEidrxSettingsList;
 
-    ( void )cmock_num_calls;
+    ( void ) cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
     if( cbCondition < 3 )
@@ -624,17 +649,19 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
     else if( cbCondition == 3 )
     {
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+        char pLine2[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+        _saveData( pLine2, &atResp, sizeof( pLine2 ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 4 )
     {
-        char pLine[ 1 ];
-        pLine[ 0 ] = '\0';
-
-        _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, pData, sizeof( pData ) );
+        char pLine[] = "+CEDRXS:";
+        char pLine2[] = "+CEDRXS: 0";
+        _saveData( pLine, &atResp, sizeof( pLine ) );
+        _saveData( pLine2, &atResp, sizeof( pLine2 ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
 
     return pktStatus;
@@ -645,11 +672,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettin
                                                                                     int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularPsmSettings_t cellularPsmSettings;
 
-    ( void )cmock_num_calls;
+    ( void ) cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
     if( cbCondition < 3 )
@@ -661,14 +687,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettin
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularPsmSettings, sizeof( CellularPsmSettings_t ) );
     }
 
     return pktStatus;
@@ -679,7 +705,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid( Ce
                                                                               int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ strlen( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) + 1 ];
 
@@ -696,14 +721,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid( Ce
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
         }
         else if( cbCondition == 4 )
         {
             char pLine[] = "This is testing string for greater than 20.";
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_ICCID_MAX_SIZE + 1 );
         }
     }
 
@@ -715,7 +740,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi( Cel
                                                                              int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     char pData[ strlen( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) + 1 ];
 
@@ -732,14 +756,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi( Cel
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
         }
         else if( cbCondition == 4 )
         {
             char pLine[] = "This is the testing long string.";
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
+            pktStatus = atReq.respCallback( pContext, &atResp, pData, CELLULAR_IMSI_MAX_SIZE + 1 );
         }
     }
 
@@ -751,7 +775,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn( Ce
                                                                               int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularPlmnInfo_t cellularPlmnInfo;
 
@@ -768,7 +791,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn( Ce
             char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            pktStatus = atReq.respCallback( &context, &atResp, &cellularPlmnInfo, sizeof( CellularPlmnInfo_t ) );
+            pktStatus = atReq.respCallback( pContext, &atResp, &cellularPlmnInfo, sizeof( CellularPlmnInfo_t ) );
         }
     }
 
@@ -780,9 +803,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress( C
                                                                                int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularEidrxSettingsList_t cellularEidrxSettingsList;
+
+    ( void ) cmock_num_calls;
 
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -795,21 +819,21 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress( C
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
     else if( cbCondition == 5 )
     {
         char pLine = '\0';
 
         _saveData( &pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
 
     return pktStatus;
@@ -820,9 +844,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockSt
                                                                                       int cmock_num_calls )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t context;
     CellularATCommandResponse_t atResp;
     CellularSimCardLockState_t cellularSimCardLockState;
+
+    ( void ) cmock_num_calls;
 
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -835,14 +860,14 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockSt
         char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
         _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
     }
     else if( cbCondition == 4 )
     {
         char pLine[] = "+CEDRXS: 0";
 
         _saveData( pLine, &atResp, sizeof( pLine ) );
-        pktStatus = atReq.respCallback( &context, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularSimCardLockState, sizeof( CellularSimCardLockState_t ) );
     }
 
     return pktStatus;
@@ -851,8 +876,6 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockSt
 void handle_simLockStateTestCase( char ** ppTokOutput,
                                   int simLockStateTestCase )
 {
-    char * pStsToken = NULL;
-
     switch( simLockStateTestCase )
     {
         case 1:
@@ -936,7 +959,8 @@ CellularATError_t Mock_simLockStateTestCase_ATGetNextTok_Calback( char ** ppStri
     char pFitNum[] = "1";
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
-    ( void )ppString;
+    ( void ) ppString;
+    ( void ) cmock_num_calls;
 
     if( *ppTokOutput )
     {
@@ -968,7 +992,7 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
     char pBigNum[] = "32";
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
 
-    ( void )ppString;
+    ( void ) ppString;
 
     if( *ppTokOutput )
     {
@@ -1017,8 +1041,17 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
         /* OPERATOR_NAME_FORMAT_NUMERIC. */
         else if( parseNetworkNameFailureCase == 3 )
         {
-            *ppTokOutput = malloc( sizeof( pNumericNum ) );
-            memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
+            if( commonCase == 0 )
+            {
+                *ppTokOutput = malloc( sizeof( pNumericNum ) );
+                memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
+            }
+            else if( commonCase == 1 )
+            {
+                char pNumericNumCaseII[] = "12345";
+                *ppTokOutput = malloc( sizeof( pNumericNumCaseII ) );
+                memcpy( *ppTokOutput, pNumericNumCaseII, sizeof( pNumericNumCaseII ) );
+            }
         }
         /* OPERATOR_NAME_FORMAT_NUMERIC wrong length. */
         else if( parseNetworkNameFailureCase == 5 )
@@ -1036,13 +1069,18 @@ CellularATError_t Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback( char **
     {
         if( parseNetworkNameFailureCase == 7 )
         {
-            char pTmp[] = "123456789123";
-            *ppTokOutput = malloc( sizeof( pTmp ) );
-            memcpy( *ppTokOutput, pTmp, sizeof( pTmp ) );
+            *ppTokOutput = malloc( sizeof( pBigNum ) );
+            memcpy( *ppTokOutput, pBigNum, sizeof( pBigNum ) );
         }
         else if( parseNetworkNameFailureCase == 8 )
         {
             char pTmp[] = "8";
+            *ppTokOutput = malloc( sizeof( pTmp ) );
+            memcpy( *ppTokOutput, pTmp, sizeof( pTmp ) );
+        }
+        else if( parseNetworkNameFailureCase == 9 )
+        {
+            char pTmp[] = "-8";
             *ppTokOutput = malloc( sizeof( pTmp ) );
             memcpy( *ppTokOutput, pTmp, sizeof( pTmp ) );
         }
@@ -1064,7 +1102,7 @@ CellularATError_t Mock_recvFuncGetHplmnCase_ATGetNextTok_Calback( char ** ppStri
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char pFitNum[] = "1";
 
-    ( void )ppString;
+    ( void ) ppString;
 
     if( *ppTokOutput )
     {
@@ -1077,6 +1115,18 @@ CellularATError_t Mock_recvFuncGetHplmnCase_ATGetNextTok_Calback( char ** ppStri
         if( recvFuncGetHplmnCase == 1 )
         {
             char pSts[] = "11";
+            *ppTokOutput = malloc( sizeof( pSts ) );
+            memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
+        }
+        else if( checkCrsmReadStatusCase == 1 )
+        {
+            char pSts[] = "145";
+            *ppTokOutput = malloc( sizeof( pSts ) );
+            memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
+        }
+        else if( checkCrsmReadStatusCase == 2 )
+        {
+            char pSts[] = "146";
             *ppTokOutput = malloc( sizeof( pSts ) );
             memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
         }
@@ -1139,6 +1189,12 @@ CellularATError_t Mock_recvFuncGetHplmnCase_ATGetNextTok_Calback( char ** ppStri
             *ppTokOutput = malloc( sizeof( pSts ) );
             memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
         }
+        else if( recvFuncGetHplmnCase == 8 )
+        {
+            char pSts[] = "FFFFFFFFFFF";
+            *ppTokOutput = malloc( sizeof( pSts ) );
+            memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
+        }
         else
         {
             *ppTokOutput = malloc( sizeof( pFitNum ) );
@@ -1163,9 +1219,11 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
     char pFitNum[] = "1";
     char pBigNum[] = "32";
     char pNumericNum[] = "123456";
+    char pNegativeNum[] = "-3";
+    char pPositiveNum[] = "256";
     int len = 10;
 
-    ( void )ppString;
+    ( void ) ppString;
 
     if( *ppTokOutput )
     {
@@ -1177,36 +1235,46 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
     {
         if( parseEidrxTokenOutOfRange == 1 )
         {
-            char pSts[] = "300";
-            *ppTokOutput = malloc( sizeof( pSts ) );
-            memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
+            *ppTokOutput = malloc( sizeof( pPositiveNum ) );
+            memcpy( *ppTokOutput, pPositiveNum, sizeof( pPositiveNum ) );
+        }
+        else if( parseEidrxTokenOutOfRange == 2 )
+        {
+            *ppTokOutput = malloc( sizeof( pNegativeNum ) );
+            memcpy( *ppTokOutput, pNegativeNum, sizeof( pNegativeNum ) );
         }
         else if( parseRegFailureCase == 1 )
         {
             *ppTokOutput = malloc( sizeof( pBigNum ) );
             memcpy( *ppTokOutput, pBigNum, sizeof( pBigNum ) );
         }
+        else if( cpsms_pos_mode_error == 1 )
+        {
+            *ppTokOutput = malloc( sizeof( pNumericNum ) );
+            memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
+        }
+        else if( cpsms_pos_mode_error == 2 )
+        {
+            *ppTokOutput = malloc( sizeof( pNegativeNum ) );
+            memcpy( *ppTokOutput, pNegativeNum, sizeof( pNegativeNum ) );
+        }
         else
         {
-            if( cpsms_pos_mode_error == 1 )
-            {
-                *ppTokOutput = malloc( sizeof( pNumericNum ) );
-                memcpy( *ppTokOutput, pNumericNum, sizeof( pNumericNum ) );
-            }
-            else
-            {
-                *ppTokOutput = malloc( sizeof( pFitNum ) );
-                memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
-            }
+            *ppTokOutput = malloc( sizeof( pFitNum ) );
+            memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
         }
     }
     else if( cmock_num_calls == 1 )
     {
         if( parseEidrxTokenOutOfRange == 1 )
         {
-            char pSts[] = "300";
-            *ppTokOutput = malloc( sizeof( pSts ) );
-            memcpy( *ppTokOutput, pSts, sizeof( pSts ) );
+            *ppTokOutput = malloc( sizeof( pPositiveNum ) );
+            memcpy( *ppTokOutput, pPositiveNum, sizeof( pPositiveNum ) );
+        }
+        else if( parseEidrxTokenOutOfRange == 2 )
+        {
+            *ppTokOutput = malloc( sizeof( pNegativeNum ) );
+            memcpy( *ppTokOutput, pNegativeNum, sizeof( pNegativeNum ) );
         }
         /* null data pointer. */
         else if( parseNetworkTimeFailureCase == 1 )
@@ -1216,8 +1284,16 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
         /* big number case or _parseCopsNetworkNameToken parse error case. */
         else if( parseNetworkTimeFailureCase == 2 )
         {
-            *ppTokOutput = malloc( sizeof( pBigNum ) );
-            memcpy( *ppTokOutput, pBigNum, sizeof( pBigNum ) );
+            if( commonCase == 0 )
+            {
+                *ppTokOutput = malloc( sizeof( pBigNum ) );
+                memcpy( *ppTokOutput, pBigNum, sizeof( pBigNum ) );
+            }
+            else
+            {
+                *ppTokOutput = malloc( sizeof( pNegativeNum ) );
+                memcpy( *ppTokOutput, pNegativeNum, sizeof( pNegativeNum ) );
+            }
         }
         else
         {
@@ -1227,8 +1303,15 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
     }
     else if( cmock_num_calls == 2 )
     {
-        *ppTokOutput = malloc( sizeof( pFitNum ) );
-        memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
+        if( parseEidrxTokenOutOfRange == 1 )
+        {
+            nullTokenFirst = 1;
+        }
+        else
+        {
+            *ppTokOutput = malloc( sizeof( pFitNum ) );
+            memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
+        }
     }
     else if( cmock_num_calls < 7 )
     {
@@ -1245,6 +1328,11 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
 
                 *ppTokOutput = malloc( len );
                 snprintf( *ppTokOutput, len, "%d", t3412TimerInx );
+            }
+            else
+            {
+                *ppTokOutput = malloc( sizeof( pFitNum ) );
+                memcpy( *ppTokOutput, pFitNum, sizeof( pFitNum ) );
             }
         }
         else
@@ -1273,7 +1361,12 @@ CellularATError_t Mock_Cellular_ATGetNextTok_Calback( char ** ppString,
         atCoreStatus = CELLULAR_AT_ERROR;
     }
 
-    if( *ppTokOutput == NULL )
+    if( nullTokenFirst == 1 )
+    {
+        *ppTokOutput = NULL;
+        atCoreStatus = CELLULAR_AT_SUCCESS;
+    }
+    else if( *ppTokOutput == NULL )
     {
         atCoreStatus = CELLULAR_AT_ERROR;
     }
@@ -1316,7 +1409,10 @@ void test_Cellular_CommonGetEidrxSettings_Null_Handler( void )
 void test_Cellular_CommonGetEidrxSettings_Null_EidrxSettings( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, NULL );
@@ -1329,7 +1425,10 @@ void test_Cellular_CommonGetEidrxSettings_Null_EidrxSettings( void )
 void test_Cellular_CommonGetEidrxSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1346,7 +1445,10 @@ void test_Cellular_CommonGetEidrxSettings_AtCmd_Failure( void )
 void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1360,19 +1462,23 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_N
 }
 
 /**
- * @brief Test that null at command failure case in callback function _Cellular_RecvFuncIpAddress
+ * @brief Test that null item line case in callback function _Cellular_RecvFuncGetEidrxSettings
  * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_Failure( void )
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Null_Item_Line( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 1;
-    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
     cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
@@ -1380,19 +1486,24 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_AtC
 }
 
 /**
- * @brief Test that null data pointer case in callback function _Cellular_RecvFuncIpAddress
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetEidrxSettings
  * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_Data_Pointer( void )
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Wrong_Data_Length( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 2;
-    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    commonCase = 1;
+    wrongDataLength = CELLULAR_EDRX_LIST_MAX_SIZE + 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
     cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
@@ -1400,19 +1511,118 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_Dat
 }
 
 /**
- * @brief Test that happy path case in callback function _Cellular_RecvFuncIpAddress
- * for Cellular_CommonGetEidrxSettings to return CELLULAR_SUCCESS.
+ * @brief Test that null item case in callback function _Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_Line( void )
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Null_Item( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command failure case in callback function _Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb__Cellular_RecvFuncGetEidrxSettings_Null_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null data pointer case in callback function Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Null_Data_Pointer( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that error packet status in loop in callback function Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Error_PacketSTatus_InLoop( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that input line case in callback function Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Input_Line_Case( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 4;
-    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
 
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
@@ -1425,19 +1635,22 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Null_Lin
 }
 
 /**
- * @brief Test that CELLULAR_CEDRXS_POS_ACT case in callback function _Cellular_RecvFuncIpAddress
+ * @brief Test that CELLULAR_CEDRXS_POS_ACT case in callback function Cellular_RecvFuncGetEidrxSettings
  * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_CEDRXS_POS_ACT_OutOfRange( void )
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_CEDRXS_POS_ACT_OutOfRange( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 3;
-    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
 
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
@@ -1451,20 +1664,78 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_CEDRXS_P
 }
 
 /**
- * @brief Test that happy path case in callback function _Cellular_RecvFuncIpAddress
+ * @brief Test that out of lower bound range case in callback function Cellular_RecvFuncGetEidrxSettings
  * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Happy_Path( void )
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_OutOfLowerBound_Range( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 3;
-    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
 
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    parseEidrxTokenOutOfRange = 2;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that atoi failure case in parseEidrxToken called by callback function Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Atoi_Failed_In_parseEidrxToken( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that happy path case in callback function Cellular_RecvFuncGetEidrxSettings
+ * for Cellular_CommonGetEidrxSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
@@ -1481,7 +1752,10 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncIpAddress_Happy_Pa
 void test_Cellular_CommonGetEidrxSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettingsList_t eidrxSettingsList;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1508,7 +1782,10 @@ void test_Cellular_CommonSetEidrxSettings_Null_Handler( void )
 void test_Cellular_CommonSetEidrxSettings_Null_EidrxSettings( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, NULL );
@@ -1521,7 +1798,10 @@ void test_Cellular_CommonSetEidrxSettings_Null_EidrxSettings( void )
 void test_Cellular_CommonSetEidrxSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettings_t eidrxSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1537,9 +1817,19 @@ void test_Cellular_CommonSetEidrxSettings_AtCmd_Failure( void )
 void test_Cellular_CommonSetEidrxSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularEidrxSettings_t eidrxSettings;
 
+    eidrxSettings.requestedEdrxVaue = 0xF;
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+
+    eidrxSettings.requestedEdrxVaue = 0x0;
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
@@ -1564,7 +1854,10 @@ void test_Cellular_CommonRfOn_Null_Handler( void )
 void test_Cellular_CommonRfOn_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
@@ -1591,7 +1884,10 @@ void test_Cellular_CommonRfOff_Null_Handler( void )
 void test_Cellular_CommonRfOff_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
@@ -1618,7 +1914,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Null_Handler( void )
 void test_Cellular_CommonGetRegisteredNetwork_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, NULL );
@@ -1631,7 +1930,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Bad_Parameter( void )
 void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     mallocAllocFail = 1;
@@ -1646,7 +1948,10 @@ void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
 void test_Cellular_CommonGetRegisteredNetwork_Invalid_Rat( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1664,7 +1969,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Invalid_Rat( void )
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1684,12 +1992,64 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Null_AtCmd_Resp( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command response item case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Null_AtCmd_Resp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command response item line case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Null_AtCmd_Resp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
 
@@ -1704,12 +2064,16 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cbCondition = 2;
+    commonCase = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
 
@@ -1718,13 +2082,172 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 }
 
 /**
- * @brief Test that happy path case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncUpdateMccMnc
  * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = sizeof( cellularOperatorInfo_t ) + 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that at command failure case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    Cellular_ATGetNextTok_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_ExpectAndReturn( CELLULAR_AT_ERROR, CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that atoi failure case in _parseCopsRegModeToken called by callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc__parseCopsRegModeToken_Atoi_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that atoi failure case in _parseCopsNetworkNameFormatToken called by callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc__parseCopsNetworkNameFormatToken_Atoi_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseCopsNetworkNameFormatToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that atoi failure case in _parseCopsRatToken called by callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc__parseCopsRatToken_Atoi_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseCopsNetworkNameFormatToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseCopsRatToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that happy path case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1744,16 +2267,17 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
     Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
 
     Cellular_ATGetNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCopsNetworkNameToken */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
 
     Cellular_ATGetNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-
     /* _parseCopsRatToken */
     Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
 
-    _Cellular_TranslateAtCoreStatus_ExpectAndReturn( CELLULAR_AT_ERROR, CELLULAR_PKT_STATUS_FAILURE );
-    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
-    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
 /**
@@ -1763,7 +2287,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRegModeToken_Big_Num_Error( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1785,13 +2312,47 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 }
 
 /**
+ * @brief Test that _parseCopsRegModeToken negative number case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRegModeToken_Negative_Number( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    parseEidrxTokenOutOfRange = 2;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_ExpectAndReturn( CELLULAR_AT_ERROR, CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that _parseCopsNetworkNameFormatToken null pointer case in callback function _Cellular_RecvFuncUpdateMccMnc
  * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameFormatToken_Null_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1820,7 +2381,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameFormatToken_Big_Number( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1843,13 +2407,49 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 }
 
 /**
+ * @brief Test that _parseCopsNetworkNameFormatToken out of lower bound case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameFormatToken_OutOfLowerBound( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    parseNetworkTimeFailureCase = 2;
+    commonCase = 1;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that _parseCopsNetworkNameToken null pointer case in callback function _Cellular_RecvFuncUpdateMccMnc
  * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Null_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1878,7 +2478,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Name_Format_Long( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1907,7 +2510,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Name_Format_Numeric( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1930,13 +2536,49 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 }
 
 /**
+ * @brief Test that _parseCopsNetworkNameToken name format numeric case II in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Name_Format_Numeric_CaseII( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    parseNetworkNameFailureCase = 3;
+    commonCase = 1;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that _parseCopsNetworkNameToken name format numeric wrong length case in callback function _Cellular_RecvFuncUpdateMccMnc
  * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Name_Format_Numeric_Wrong_Length( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1966,7 +2608,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsNetworkNameToken_Parse_Error( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -1995,7 +2640,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRatToken_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2024,7 +2672,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRatToken_Token_OutOfRange( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2047,13 +2698,73 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 }
 
 /**
+ * @brief Test that _parseCopsRatToken token out of lower bound case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRatToken_Token_OutOfLowerBound( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    /* _parseCops */
+    parseNetworkNameFailureCase = 9;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_parseNetworkNameFailureCase_ATGetNextTok_Calback );
+    /* _parseCopsRegModeToken */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that at command failure case in callback function _Cellular_RecvFuncUpdateMccMnc
+ * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRatToken_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that _parseCopsRatToken happy path case in callback function _Cellular_RecvFuncUpdateMccMnc
  * for Cellular_CommonGetRegisteredNetwork to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_parseCopsRatToken_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2081,7 +2792,10 @@ void test_Cellular_CommonGetRegisteredNetwork_Cb__Cellular_RecvFuncUpdateMccMnc_
 void test_Cellular_CommonGetRegisteredNetwork_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2109,7 +2823,10 @@ void test_Cellular_CommonGetServiceStatus_Null_Handler( void )
 void test_Cellular_CommonGetServiceStatus_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, NULL );
@@ -2123,7 +2840,10 @@ void test_Cellular_CommonGetServiceStatus_Bad_Parameter( void )
 void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2147,20 +2867,55 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
 void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
     CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 5;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
-    cbCondition = 1;
+    cbCondition = 2;
+    commonCase = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
 
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
-    cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetNetworkReg
+ * for Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 5;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = sizeof( CellularNetworkRegType_t ) + 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
+
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
@@ -2171,19 +2926,114 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
 void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Null_AtCmd_Resp( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
     CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 1;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
-    cbCondition = 2;
+    cbCondition = 1;
+    commonCase = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
 
     /* called by atcmdUpdateMccMnc. */
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
+
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command item response in callback function _Cellular_RecvFuncGetNetworkReg
+ * for Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Null_AtCmd_Resp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 1;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
+
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command item line response in callback function _Cellular_RecvFuncGetNetworkReg
+ * for Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Null_AtCmd_Resp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 1;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    cbCondition = 1;
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
+
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that happy path in callback function _Cellular_RecvFuncGetNetworkReg at command failure
+ * for Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularServiceStatus_t serviceStatus;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
+
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
 
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
@@ -2196,7 +3046,10 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Nul
 void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2221,13 +3074,60 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Hap
 }
 
 /**
+ * @brief Test that wrong psRegStatus case Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
+ */
+void test_Cellular_CommonGetServiceStatus_Wrong_psRegStatus( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularServiceStatus_t serviceStatus;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.libAtData.psRegStatus = 1;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CGREG. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+
+    context.libAtData.psRegStatus = 5;
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CGREG. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    /* called by atcmdUpdateMccMnc. */
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetServiceStatus( ( CellularHandle_t ) &context, &serviceStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
  * @brief Test that happy path case Cellular_CommonGetServiceStatus to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetServiceStatus_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularServiceStatus_t serviceStatus;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
@@ -2239,13 +3139,15 @@ void test_Cellular_CommonGetServiceStatus_Happy_Path( void )
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
 
-    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CGREG -> queryNetworkStatus for CGREG. */
+    /* called by atcmdQueryRegStatus -> queryNetworkStatus for CGREG -> queryNetworkStatus for CEREG. */
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
 
     /* called by atcmdUpdateMccMnc. */
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_OK, CELLULAR_SUCCESS );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
@@ -2269,7 +3171,10 @@ void test_Cellular_CommonGetNetworkTime_Null_Handler( void )
 void test_Cellular_CommonGetNetworkTime_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, NULL );
@@ -2282,7 +3187,10 @@ void test_Cellular_CommonGetNetworkTime_Bad_Parameter( void )
 void test_Cellular_CommonGetNetworkTime_Retrieve_Network_Time_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2299,7 +3207,10 @@ void test_Cellular_CommonGetNetworkTime_Retrieve_Network_Time_Failure( void )
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2318,12 +3229,62 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Context( void )
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_AtCmd( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     /* Null at command response case condition. */
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command response item case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* Null at command response item case condition. */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command response item line case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* Null at command response item line case condition. */
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
@@ -2337,11 +3298,38 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_AtCmd( void )
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 2;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null data length case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
@@ -2355,7 +3343,10 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Null_Data( void )
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2376,12 +3367,165 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_AtCmd_Fa
 }
 
 /**
- * @brief Test that _parseTimeZoneInCCLKResponse at command failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseTimeZoneInCCLKResponse atoi return failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_CCLKResp_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Atoi_Failure_Case_I( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = 5;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeZoneInCCLKResponse atoi return failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Atoi_Failure_Case_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = 5;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeZoneInCCLKResponse atoi return failure case III in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Atoi_Failure_Case_III( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = 5;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeZoneInCCLKResponse negative case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Nagetive( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2428,12 +3572,109 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_CCLKResp
 }
 
 /**
- * @brief Test that _parseYearMonthDayInCCLKResponse year atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseTimeZoneInCCLKResponse negative case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Year_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Parse_Sign_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse sign failure case condition. */
+    cbCondition = 5;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeZoneInCCLKResponse atoi return failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse sign failure case condition. */
+    cbCondition = 6;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that at command failure case in _parseTimeZoneInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZoneInfo_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse sign failure case condition. */
+    cbCondition = 5;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse year atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Year_Atoi_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2450,7 +3691,6 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
     /* _parseTimeZoneInCCLKResponse */
     Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
-
     Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
 
     /* _parseYearMonthDayInCCLKResponse */
@@ -2462,12 +3702,89 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 }
 
 /**
- * @brief Test that _parseYearMonthDayInCCLKResponse month atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseYearMonthDayInCCLKResponse year atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Month_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Year_Atoi_Return_Number_Failure_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIRST_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse year atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Year_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIRST_CALL_FAILURE_CONDITION;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse month atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Month_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2484,7 +3801,6 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
     /* _parseTimeZoneInCCLKResponse */
     Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
-
     Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
 
     /* _parseYearMonthDayInCCLKResponse */
@@ -2496,12 +3812,90 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 }
 
 /**
- * @brief Test that _parseYearMonthDayInCCLKResponse day atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseYearMonthDayInCCLKResponse month atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Day_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Month_Return_Number_Failure_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_SECOND_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse month atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Month_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIRST_CALL_FAILURE_CONDITION;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse day atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Day_Atoi_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2530,12 +3924,92 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 }
 
 /**
- * @brief Test that _parseTimeInCCLKResponse hour atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseYearMonthDayInCCLKResponse day atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Hour_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Day_Atoi_Return_Number_Failure_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_THRID_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseYearMonthDayInCCLKResponse day atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLKResp_Day_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIRST_CALL_FAILURE_CONDITION;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM );
+
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeInCCLKResponse hour atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Hour_Atoi_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2564,12 +4038,53 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Ho
 }
 
 /**
- * @brief Test that _parseTimeInCCLKResponse minute atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseTimeInCCLKResponse hour atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Minute_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Hour_Atoi_Return_Number_Failure_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FOURTH_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeInCCLKResponse minute atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Minute_Atoi_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2598,12 +4113,149 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Mi
 }
 
 /**
- * @brief Test that _parseTimeInCCLKResponse second atoi failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ * @brief Test that _parseTimeInCCLKResponse minute atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Second_Atoi_Failure( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Minute_Atoi_Return_Number_Failure_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIFTH_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeInCCLKResponse minute atoi return failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Minute_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIFTH_CALL_FAILURE_CONDITION;
+
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeInCCLKResponse second atoi return failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Second_Atoi_Return_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_FIFTH_CALL_FAILURE_CONDITION;
+
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseTimeInCCLKResponse second atoi return number failure case I in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Second_Atoi_Return_Number_Failure_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2632,12 +4284,53 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Se
 }
 
 /**
+ * @brief Test that _parseTimeInCCLKResponse second atoi return number failure case II in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeInCCLKResp_Second_Atoi_Return_Number_Failure_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularTime_t networkTime;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* parse time failure case condition. */
+    cbCondition = PARSE_TIME_SIXTH_CALL_FAILURE_CONDITION;
+    negativeNumberCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* Enter _parseTimeZoneInfo. */
+    Cellular_ATRemoveOutermostDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseTimeZoneInCCLKResponse */
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    Cellular_ATGetSpecificNextTok_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+
+    /* _parseYearMonthDayInCCLKResponse */
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    cellularStatus = Cellular_CommonGetNetworkTime( cellularHandle, &networkTime );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
  * @brief Test that at command failure case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2659,7 +4352,10 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_AtCmd_Failure( void )
 void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2711,7 +4407,10 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Happy_Path( void )
 void test_Cellular_CommonGetNetworkTime_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularTime_t networkTime;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2738,7 +4437,10 @@ void test_Cellular_CommonGetModemInfo_Null_Handler( void )
 void test_Cellular_CommonGetModemInfo_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, NULL );
@@ -2751,7 +4453,10 @@ void test_Cellular_CommonGetModemInfo_Bad_Parameter( void )
 void test_Cellular_CommonGetModemInfo_Get_FW_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2780,7 +4485,10 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Failure( void )
 void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Null_Context_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2803,13 +4511,71 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Null_AtResp_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* atReqGetFirmwareVersion */
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
+
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get firmware version callback function null
+ * at command response item failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetFirmwareVersion */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
+
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get firmware version callback function null
+ * at command response item line failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetFirmwareVersion */
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
 
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
@@ -2825,17 +4591,99 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Null_Data_Pointer_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* atReqGetFirmwareVersion */
     cbCondition = 2;
+    commonCase = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
 
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get firmware version callback function wrong data length
+ * case Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetFirmwareVersion */
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = CELLULAR_FW_VERSION_MAX_SIZE + 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
+
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get firmware version callback function at command failure
+ * case I Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_AtCmd_Failure_Case_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetFirmwareVersion */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get firmware version callback function at command failure
+ * case II Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_AtCmd_Failure_Case_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetFirmwareVersion */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetFirmwareVersion );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveTrailingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
@@ -2847,7 +4695,10 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmwareVersion_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2870,7 +4721,10 @@ void test_Cellular_CommonGetModemInfo_Get_FW_Callback__Cellular_RecvFuncGetFirmw
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Null_Context_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2891,13 +4745,67 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Null_AtResp_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* atReqGetImei */
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetImei );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get imei version callback function null at command
+ * response item failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Null_AtResp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImei */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetImei );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get imei version callback function null at command
+ * response item line failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Null_AtResp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImei */
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetImei );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
@@ -2911,7 +4819,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Null_Data_Pointer_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2924,13 +4835,65 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 }
 
 /**
+ * @brief Test that get imei version callback function at command failure
+ * case I Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_AtCmd_Failure_Case_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetImei */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetImei );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get imei version callback function at command failure
+ * case II Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_AtCmd_Failure_Case_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetImei */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular__Cellular_RecvFuncGetImei );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that get imei version callback function happy path
  * case Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetImei_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2951,7 +4914,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetIme
 void test_Cellular_CommonGetModemInfo_Get_IMEI_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -2980,7 +4946,10 @@ void test_Cellular_CommonGetModemInfo_Get_IMEI_Failure( void )
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Null_Context_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3001,13 +4970,67 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Null_AtResp_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* atReqGetModelId */
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get model id callback function null at command
+ * response item failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Null_AtResp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetModelId */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get model id callback function null at command
+ * response item line failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Null_AtResp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetModelId */
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
@@ -3021,7 +5044,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Null_Data_Pointer_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3034,13 +5060,65 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 }
 
 /**
+ * @brief Test that get model id callback function at command failure
+ * case I Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_AtCmd_Failure_Case_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetModelId */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get model id callback function at command failure
+ * case II Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_AtCmd_Failure_Case_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetModelId */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetModelId );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveTrailingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that get model id callback function happy path
  * case Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetModelId_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3061,7 +5139,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMod
 void test_Cellular_CommonGetModemInfo_Get_ModelId_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3090,7 +5171,10 @@ void test_Cellular_CommonGetModemInfo_Get_ModelId_Failure( void )
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Null_Context_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3111,13 +5195,67 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Null_AtResp_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* atReqGetManufactureId */
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactureId );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get manufacture id callback function null at command
+ * response item failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Null_AtResp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetManufactureId */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactureId );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get manufacture id callback function null at command
+ * response item line failure case Cellular_CommonGetModemInfo
+ * to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Null_AtResp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetManufactureId */
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactureId );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
@@ -3131,7 +5269,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Null_Data_Pointer_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3144,13 +5285,65 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 }
 
 /**
+ * @brief Test that get manufacture id callback function at command
+ * case I Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_AtCmd_Failure_Case_I( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetManufactureId */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactureId );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that get manufacture id callback function at command
+ * case II Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_AtCmd_Failure_Case_II( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularModemInfo_t modemInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    /* atReqGetManufactureId */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetManufactureId );
+    Cellular_ATRemoveLeadingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveTrailingWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetModemInfo( cellularHandle, &modemInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that get manufacture id callback function happy path
  * case Cellular_CommonGetModemInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetManufactureId_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3171,7 +5364,10 @@ void test_Cellular_CommonGetModemInfo_Get_Imei_Callback__Cellular_RecvFuncGetMan
 void test_Cellular_CommonGetModemInfo_Get_ManufactureId_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3199,7 +5395,10 @@ void test_Cellular_CommonGetModemInfo_Get_ManufactureId_Failure( void )
 void test_Cellular_CommonGetModemInfo_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularModemInfo_t modemInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3238,10 +5437,18 @@ void test_Cellular_CommonGetIPAddress_Null_Handler( void )
 void test_Cellular_CommonGetIPAddress_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, NULL, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, 0 );
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
@@ -3251,7 +5458,10 @@ void test_Cellular_CommonGetIPAddress_Bad_Parameter( void )
 void test_Cellular_CommonGetIPAddress_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3272,7 +5482,10 @@ void test_Cellular_CommonGetIPAddress_AtCmd_Failure( void )
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3292,12 +5505,64 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Context
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 1;
+    commonCase = 0;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, sizeof( pBuffer ) );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command item case in callback function _Cellular_RecvFuncIpAddress
+ * for Cellular_CommonGetIPAddress to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    char pBuffer[ 10 ];
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, sizeof( pBuffer ) );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null at command item line case in callback function _Cellular_RecvFuncIpAddress
+ * for Cellular_CommonGetIPAddress to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    char pBuffer[ 10 ];
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
 
@@ -3312,15 +5577,68 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_AtCmd_F
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
     cbCondition = 2;
+    commonCase = 0;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
+    cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, sizeof( pBuffer ) );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncIpAddress
+ * for Cellular_CommonGetIPAddress to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    char pBuffer[ 10 ];
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 2;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, sizeof( pBuffer ) );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that at command failure case in callback function _Cellular_RecvFuncIpAddress
+ * for Cellular_CommonGetIPAddress to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    char pBuffer[ 10 ];
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncIpAddress );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
     cellularStatus = Cellular_CommonGetIPAddress( cellularHandle, 0, pBuffer, sizeof( pBuffer ) );
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
@@ -3332,7 +5650,10 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Data_Po
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3355,7 +5676,10 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path( 
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path_CGPADDR( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3378,7 +5702,10 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Happy_Path_C
 void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Input_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3400,7 +5727,10 @@ void test_Cellular_CommonGetIPAddress_Cb_Cellular_RecvFuncIpAddress_Null_Input_H
 void test_Cellular_CommonGetIPAddress_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     char pBuffer[ 10 ];
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3429,7 +5759,10 @@ void test_Cellular_CommonSetPdnConfig_Bad_Parameter( void )
 void test_Cellular_CommonSetPdnConfig_Bad_Pdn_Context_Type( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3446,7 +5779,10 @@ void test_Cellular_CommonSetPdnConfig_Bad_Pdn_Context_Type( void )
 void test_Cellular_CommonSetPdnConfig_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
     pdnConfig.pdnContextType = CELLULAR_PDN_CONTEXT_IPV4;
@@ -3465,7 +5801,10 @@ void test_Cellular_CommonSetPdnConfig_AtCmd_Failure( void )
 void test_Cellular_CommonSetPdnConfig_IPV6_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
     pdnConfig.pdnContextType = CELLULAR_PDN_CONTEXT_IPV6;
@@ -3484,7 +5823,10 @@ void test_Cellular_CommonSetPdnConfig_IPV6_Happy_Path( void )
 void test_Cellular_CommonSetPdnConfig_IPV4V6_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPdnConfig_t pdnConfig;
 
     pdnConfig.pdnContextType = CELLULAR_PDN_CONTEXT_IPV4V6;
@@ -3515,7 +5857,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Null_Handler( void )
 void test_Cellular_CommonGetSimCardLockStatus_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetSimCardLockStatus( cellularHandle, NULL );
@@ -3529,7 +5874,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Bad_Parameter( void )
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3549,7 +5897,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3569,12 +5920,88 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cbCondition = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockStatus );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardLockStatus( cellularHandle, &simCardStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetSimLockStatus
+ * for Cellular_CommonGetSimCardLockStatus to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardStatus_t simCardStatus;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = sizeof( CellularSimCardLockState_t ) + 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockStatus );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardLockStatus( cellularHandle, &simCardStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item case in callback function _Cellular_RecvFuncGetSimLockStatus
+ * for Cellular_CommonGetSimCardLockStatus to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardStatus_t simCardStatus;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockStatus );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardLockStatus( cellularHandle, &simCardStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item line case in callback function _Cellular_RecvFuncGetSimLockStatus
+ * for Cellular_CommonGetSimCardLockStatus to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardStatus_t simCardStatus;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetSimLockStatus );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
 
@@ -3589,7 +6016,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3611,7 +6041,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_READY( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3636,7 +6069,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_SIM_PIN( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3661,7 +6097,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_SIM_PUK( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3686,7 +6125,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_SIM_PIN2( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3711,7 +6153,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_SIM_PUK2( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3736,7 +6181,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_NET_PIN( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3761,7 +6209,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_NET_PUK( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3786,7 +6237,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_NETSUB_PIN( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3811,7 +6265,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_NETSUB_PUK( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3836,7 +6293,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_SP_PIN( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3861,7 +6321,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_SP_PUK( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3886,7 +6349,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_CORP_PIN( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3911,7 +6377,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_PH_CORP_PUK( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3936,7 +6405,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_Unknown( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3961,7 +6433,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -3984,7 +6459,10 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 void test_Cellular_CommonGetSimCardLockStatus_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardStatus_t simCardStatus;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4012,7 +6490,10 @@ void test_Cellular_CommonGetSimCardInfo_Null_Handler( void )
 void test_Cellular_CommonGetSimCardInfo_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, NULL );
@@ -4025,7 +6506,10 @@ void test_Cellular_CommonGetSimCardInfo_Bad_Parameter( void )
 void test_Cellular_CommonGetSimCardInfo_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4051,7 +6535,10 @@ void test_Cellular_CommonGetSimCardInfo_AtCmd_Failure( void )
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4072,7 +6559,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Contex
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4093,11 +6583,13 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_AtCmd_
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-
 
     cbCondition = 2;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid );
@@ -4114,7 +6606,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Data_P
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4131,13 +6626,41 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Happy_Path(
 }
 
 /**
+ * @brief Test that at command failure case in callback function _Cellular_RecvFuncGetIccid
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_ExpectAndReturn( CELLULAR_AT_ERROR, CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that too long string case in callback function _Cellular_RecvFuncGetIccid
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Too_Long_String( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4154,13 +6677,95 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Too_Long_St
 }
 
 /**
+ * @brief Test that null item case in callback function _Cellular_RecvFuncGetIccid
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item line case in callback function _Cellular_RecvFuncGetIccid
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 1;
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetIccid
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetIccid_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = CELLULAR_ICCID_MAX_SIZE + 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetIccid );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that null context case in callback function _Cellular_RecvFuncGetImsi
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4181,7 +6786,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Context
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4202,7 +6810,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_AtCmd_F
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4217,13 +6828,92 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Data_Po
 }
 
 /**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetImsi
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Wrong_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImsi case. */
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = CELLULAR_IMSI_MAX_SIZE + 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item case in callback function _Cellular_RecvFuncGetImsi
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImsi case. */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item line case in callback function _Cellular_RecvFuncGetImsi
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImsi case. */
+    cbCondition = 1;
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that string too long case in callback function _Cellular_RecvFuncGetImsi
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_String_Too_Long( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4241,13 +6931,42 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_String_Too_L
 }
 
 /**
+ * @brief Test that at command failure case in callback function _Cellular_RecvFuncGetImsi
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetImsi case. */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetImsi );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    _Cellular_TranslateAtCoreStatus_ExpectAndReturn( CELLULAR_AT_ERROR, CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that happy path case in callback function _Cellular_RecvFuncGetImsi
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4271,7 +6990,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetImsi_Happy_Path( 
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4292,7 +7014,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Contex
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4313,7 +7038,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_AtCmd_
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4328,13 +7056,119 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Data_P
 }
 
 /**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetHplmn
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetHplmn case. */
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = sizeof( CellularPlmnInfo_t ) + 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item case in callback function _Cellular_RecvFuncGetHplmn
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetHplmn case. */
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that null item line case in callback function _Cellular_RecvFuncGetHplmn
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Null_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetHplmn case. */
+    cbCondition = 1;
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that at command failure error case in callback function _Cellular_RecvFuncGetHplmn
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_AtCmd_Failure( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetHplmn case. */
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_ERROR );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that checkCrsmReadStatus error case in callback function _Cellular_RecvFuncGetHplmn
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmReadStatus_Error( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4361,7 +7195,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmRe
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmReadStatus_illegal_Token_Error( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4389,7 +7226,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmRe
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_Null_Token( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4397,6 +7237,7 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
     /* atReqGetHplmn case. */
     cbCondition = 3;
     recvFuncGetHplmnCase = 4;
+    checkCrsmReadStatusCase = 1;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
@@ -4411,13 +7252,16 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 }
 
 /**
- * @brief Test that _parseHplmn wrong data length case in callback function _Cellular_RecvFuncGetHplmn
+ * @brief Test that _parseHplmn data length less than CRSM_HPLMN_RAT_LENGTH case in callback function _Cellular_RecvFuncGetHplmn
  * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_Wrong_Data_Length( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4425,6 +7269,38 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
     /* atReqGetHplmn case. */
     cbCondition = 3;
     recvFuncGetHplmnCase = 5;
+    checkCrsmReadStatusCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
+    Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_recvFuncGetHplmnCase_ATGetNextTok_Calback );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetSimCardInfo( cellularHandle, &simCardInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that _parseHplmn data equal to FFFFFF CRSM_HPLMN_RAT_LENGTH case in callback function _Cellular_RecvFuncGetHplmn
+ * for Cellular_CommonGetSimCardInfo to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_Wrong_Data( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularSimCardInfo_t simCardInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    /* atReqGetHplmn case. */
+    cbCondition = 3;
+    recvFuncGetHplmnCase = 8;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetHplmn );
     Cellular_ATRemoveAllWhiteSpaces_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
@@ -4445,7 +7321,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4473,7 +7352,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_Happy_Path_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4501,7 +7383,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_parseHplmn_
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_CrsmMemoryStatus_False_Memory_Status( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4529,7 +7414,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_CrsmMemoryS
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmMemoryStatus_False_Memory_Status( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4557,7 +7445,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_checkCrsmMe
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4585,7 +7476,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path(
 void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path_Case_II( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4613,7 +7507,10 @@ void test_Cellular_CommonGetSimCardInfo_Cb_Cellular_RecvFuncGetHplmn_Happy_Path_
 void test_Cellular_CommonGetSimCardInfo_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularSimCardInfo_t simCardInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4649,7 +7546,10 @@ void test_Cellular_CommonSetPsmSettings_Null_Handler( void )
 void test_Cellular_CommonSetPsmSettings_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonSetPsmSettings( cellularHandle, NULL );
@@ -4662,10 +7562,16 @@ void test_Cellular_CommonSetPsmSettings_Bad_Parameter( void )
 void test_Cellular_CommonSetPsmSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
-    psmSettings.periodicRauValue = 0;
+    psmSettings.periodicRauValue = 0x0;
+    psmSettings.gprsReadyTimer = 0x9B;
+    psmSettings.periodicTauValue = 0xfc;
+    psmSettings.activeTimeValue = 0x1;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
@@ -4682,11 +7588,17 @@ void test_Cellular_CommonSetPsmSettings_AtCmd_Failure( void )
 void test_Cellular_CommonSetPsmSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
+    psmSettings.periodicRauValue = 0x0;
+    psmSettings.gprsReadyTimer = 0x99;
+    psmSettings.periodicTauValue = 0x4;
+    psmSettings.activeTimeValue = 0x0;
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
     cellularStatus = Cellular_CommonSetPsmSettings( cellularHandle, &psmSettings );
@@ -4711,7 +7623,10 @@ void test_Cellular_CommonGetPsmSettings_Null_Handler( void )
 void test_Cellular_CommonGetPsmSettings_Bad_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, NULL );
@@ -4724,7 +7639,10 @@ void test_Cellular_CommonGetPsmSettings_Bad_Parameter( void )
 void test_Cellular_CommonGetPsmSettings_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     psmSettings.periodicRauValue = 0;
@@ -4745,7 +7663,10 @@ void test_Cellular_CommonGetPsmSettings_AtCmd_Failure( void )
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
 
@@ -4766,7 +7687,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_AtCmd_Failure( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
 
@@ -4781,13 +7705,89 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 }
 
 /**
+ * @brief Test that null atResp item line case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_AtResp_Item_Line( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 2;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong data length case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Wrong_Data_Length( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 2;
+    commonCase = 1;
+    wrongDataLength = sizeof( CellularPsmSettings_t ) + 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that atResp item null case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_AtResp_Item( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 1;
+    commonCase = 1;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_BAD_PARAM, CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that null data pointer case in callback function _Cellular_RecvFuncGetPsmSettings
  * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_Data_Pointer( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
 
@@ -4802,15 +7802,111 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
 }
 
 /**
+ * @brief Test that Cellular_ATRemovePrefix error case in Cellular_CommonGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_AtCmd_Error_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    cpsms_pos_mode_error = 1;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that null token first error case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_Token_First( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    nullTokenFirst = 1;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that CPSMS_POS_MODE error case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS_AtStrtoi_Error_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    cpsms_pos_mode_error = 1;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_ERROR );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that CPSMS_POS_MODE error case in callback function _Cellular_RecvFuncGetPsmSettings
  * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS_Error_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
-    CellularPsmSettings_t psmSettings;
+    CellularContext_t context;
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4831,13 +7927,47 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
 }
 
 /**
+ * @brief Test that CPSMS_POS_MODE negative number error case in callback function _Cellular_RecvFuncGetPsmSettings
+ * for Cellular_CommonGetPsmSettings to return CELLULAR_INTERNAL_FAILURE.
+ */
+void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS_Negative_Number_Error_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPsmSettings_t psmSettings;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 3;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetPsmSettings );
+
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    cpsms_pos_mode_error = 2;
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
+
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
  * @brief Test that happy path case in callback function _Cellular_RecvFuncGetPsmSettings
  * for Cellular_CommonGetPsmSettings to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4864,7 +7994,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_2( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4891,7 +8024,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_3( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4918,7 +8054,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_4( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4945,7 +8084,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_5( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4972,7 +8114,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_6( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -4999,7 +8144,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy_Path_Idx_7( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -5026,7 +8174,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
 void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Timer_Error_Return( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
@@ -5053,7 +8204,10 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Timer
 void test_Cellular_CommonGetPsmSettings_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularHandle_t cellularHandle;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
     CellularPsmSettings_t psmSettings;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );

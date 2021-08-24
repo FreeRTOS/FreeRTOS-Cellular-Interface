@@ -45,7 +45,7 @@
 #define PKTIO_EVT_MASK_RX_DATA                               ( 0x0008UL )
 
 #define CELLULAR_URC_TOKEN_STRING_INPUT                      "RDY"
-#define CELLULAR_AT_CMD_MULTI_WO_PREFIX                      "TEST1\r\n_TEST2\r\n_TEST3"
+#define CELLULAR_AT_CMD_MULTI_WO_PREFIX                      "\rTEST1\r\n_TEST2\n_TEST3"
 
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP         "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING              "+QIRD:"
@@ -71,15 +71,15 @@
 
 #define MAX_QIRD_STRING_PREFIX_STRING                        ( 14U )           /* The max data prefix string is "+QIRD: 1460\r\n" */
 
-static uint16_t pktioEvtMask = 0x0000UL;
-static uint16_t evtGroupCreate = 0x0001UL;
+static uint16_t pktioEvtMask = 0x0000U;
+static uint16_t evtGroupCreate = 0x0001U;
 
-int NumLoops;
 
 static int recvCount = 0;
+static int testInfiniteLoop = 0;
 
 static int eventDesiredCount = 0;
-static uint16_t desiredPktioEvtMask = 0x0000UL;
+static uint16_t desiredPktioEvtMask = 0x0000U;
 
 static bool threadReturn = true;
 
@@ -96,11 +96,12 @@ static int pktDataPrefixCBReturn = 0;
 
 static int recvDataLenFail = 0;
 static int recvCommFail = 0;
+static int setpktDataPrefixCBReturn = 0;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-const CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
+CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
     { "CEREG",             NULL },
     { "CGREG",             NULL },
@@ -147,13 +148,40 @@ CellularTokenTable_t tokenTable =
     .cellularSrcExtraTokenSuccessTableSize = CellularSrcExtraTokenSuccessTableSize
 };
 
+CellularTokenTable_t tokenTableWithoutErrorTable =
+{
+    .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+    .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+    .pCellularSrcTokenErrorTable           = NULL,
+    .cellularSrcTokenErrorTableSize        = 0,
+    .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
+    .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
+    .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+    .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+    .pCellularSrcExtraTokenSuccessTable    = CellularSrcExtraTokenSuccessTable,
+    .cellularSrcExtraTokenSuccessTableSize = CellularSrcExtraTokenSuccessTableSize
+};
+
+CellularTokenTable_t tokenTableWithoutSuccessTable =
+{
+    .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
+    .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
+    .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
+    .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
+    .pCellularSrcTokenSuccessTable         = NULL,
+    .cellularSrcTokenSuccessTableSize      = 0,
+    .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
+    .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
+    .pCellularSrcExtraTokenSuccessTable    = CellularSrcExtraTokenSuccessTable,
+    .cellularSrcExtraTokenSuccessTableSize = CellularSrcExtraTokenSuccessTableSize
+};
+
 /* ============================   UNITY FIXTURES ============================ */
 
 /* Called before each test method. */
 void setUp()
 {
     /*Assume no loops unless we specify in a test */
-    NumLoops = 0;
     setBitFromIsrReturn = 1;
     higherPriorityTaskWokenReturn = 1;
     isWrongString = 0;
@@ -162,6 +190,8 @@ void setUp()
     recvDataLenFail = 0;
     tokenTableType = 0;
     recvCommFail = 0;
+    setpktDataPrefixCBReturn = 0;
+    testInfiniteLoop = 0;
 }
 
 /* Called after each test method. */
@@ -189,12 +219,15 @@ void * mock_malloc( size_t size )
 
 uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent )
 {
+    ( void ) groupEvent;
     return 0U;
 }
 
 uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup,
                                            TickType_t uxBitsToClear )
 {
+    ( void ) xEventGroup;
+    ( void ) uxBitsToClear;
     return 0;
 }
 
@@ -209,12 +242,30 @@ uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
                                           BaseType_t xWaitForAllBits,
                                           TickType_t xTicksToWait )
 {
+    ( void ) groupEvent;
+    ( void ) uxBitsToWaitFor;
+    ( void ) xClearOnExit;
+    ( void ) xWaitForAllBits;
+    ( void ) xTicksToWait;
+
+    if( testInfiniteLoop > 0 )
+    {
+        testInfiniteLoop--;
+    }
+    else if( recvCount == 0 )
+    {
+        return PKTIO_EVT_MASK_ABORT;
+    }
+
     return pktioEvtMask;
 }
 
 uint16_t MockPlatformEventGroup_SetBits( PlatformEventGroupHandle_t groupEvent,
                                          EventBits_t event )
 {
+    ( void ) groupEvent;
+    ( void ) event;
+
     return pktioEvtMask;
 }
 
@@ -223,6 +274,10 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupE
                                                BaseType_t * pHigherPriorityTaskWoken )
 {
     int32_t ret = pdFALSE;
+
+    ( void ) groupEvent;
+    ( void ) event;
+    ( void ) pHigherPriorityTaskWoken;
 
     if( setBitFromIsrReturn == 0 )
     {
@@ -247,6 +302,8 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupE
 
 uint16_t MockPlatformEventGroup_GetBits( PlatformEventGroupHandle_t groupEvent )
 {
+    ( void ) groupEvent;
+
     if( eventDesiredCount > 0 )
     {
         eventDesiredCount--;
@@ -271,7 +328,11 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument )
 
     if( threadReturn )
     {
-        pContext->PktioAtCmdType = atCmdType;
+        if( pContext )
+        {
+            pContext->PktioAtCmdType = atCmdType;
+        }
+
         threadRoutine( pArgument );
     }
 
@@ -300,10 +361,12 @@ static CellularCommInterfaceError_t _prvCommIntfOpenCallrecvCallbackNullContext(
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
     ( void ) receiveCallback;
-    ( void ) pUserData;
+    CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
     ( void ) pCommInterfaceHandle;
 
-    commIntRet = receiveCallback( NULL, NULL );
+    memset( pContext, 0, sizeof( CellularContext_t ) );
+
+    commIntRet = receiveCallback( pContext, NULL );
 
     return commIntRet;
 }
@@ -371,9 +434,27 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
         {
             pString = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
         }
+        else if( atCmdType == CELLULAR_AT_NO_COMMAND )
+        {
+            if( recvCount % 2 == 0 )
+            {
+                pString = CELLULAR_AT_WITH_PREFIX_STRING_RESP;
+            }
+            else
+            {
+                pString = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
+            }
+        }
         else if( atCmdType == CELLULAR_AT_WITH_PREFIX )
         {
-            pString = CELLULAR_AT_WITH_PREFIX_STRING_RESP;
+            if( recvCount > 0 )
+            {
+                pString = CELLULAR_AT_WITH_PREFIX_STRING_RESP;
+            }
+            else
+            {
+                pString = CELLULAR_AT_TOKEN_SUCCESS;
+            }
         }
         else if( atCmdType == CELLULAR_AT_WO_PREFIX )
         {
@@ -401,6 +482,14 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
                 pString[ 2 ] = 'i';
                 pString[ 3 ] = 's';
             }
+            else if( tokenTableType == 5 ) /* string w/o terminator. */
+            {
+                pString = ( char * ) malloc( sizeof( char ) * 4 );
+                pString[ 0 ] = '\r';
+                pString[ 1 ] = '\n';
+                pString[ 2 ] = '\r';
+                pString[ 3 ] = 'A';
+            }
         }
         else if( atCmdType == CELLULAR_AT_NO_RESULT )
         {
@@ -413,17 +502,22 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
 
         if( tokenTableType == 4 )
         {
-            strncpy( pBuffer, pString, strlen( pString ) );
+            strncpy( ( char * ) pBuffer, pString, strlen( pString ) );
             *pDataReceivedLength = strlen( pString );
+        }
+        else if( tokenTableType == 5 )
+        {
+            strncpy( ( char * ) pBuffer, pString, 4 );
+            *pDataReceivedLength = 2;
         }
         else if( recvCommFail > 0 )
         {
-            strncpy( pBuffer, pString, strlen( pString ) - 2 );
-            *pDataReceivedLength = strlen( pBuffer ) - 2;
+            strncpy( ( char * ) pBuffer, pString, strlen( pString ) - 2 );
+            *pDataReceivedLength = strlen( ( char * ) pBuffer ) - 2;
         }
         else
         {
-            strncpy( pBuffer, pString, strlen( pString ) + 1 );
+            strncpy( ( char * ) pBuffer, pString, strlen( pString ) + 1 );
             *pDataReceivedLength = strlen( pString ) + 1;
         }
     }
@@ -455,12 +549,18 @@ void PktioHandlePacketCallback_t( CellularContext_t * pContext,
                                   _atRespType_t atRespType,
                                   const void * pBuffer )
 {
+    ( void ) pContext;
+    ( void ) atRespType;
+    ( void ) pBuffer;
 }
 
 void pktioHandlePacketCallback( CellularContext_t * pContext,
                                 _atRespType_t atRespType,
                                 const void * pBuffer )
 {
+    ( void ) pContext;
+    ( void ) atRespType;
+    ( void ) pBuffer;
 }
 
 CellularPktStatus_t cellularATCommandDataPrefixCallback( void * pCallbackContext,
@@ -557,6 +657,11 @@ CellularPktStatus_t cellularATCommandDataPrefixCallback( void * pCallbackContext
         }
     }
 
+    if( setpktDataPrefixCBReturn )
+    {
+        pktDataPrefixCBReturn = 1;
+    }
+
     return pktStatus;
 }
 
@@ -564,12 +669,18 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
                                     char * pLine,
                                     uint32_t * pBytesRead )
 {
+    ( void ) pCallbackContext;
+    ( void ) pLine;
+    ( void ) pBytesRead;
+
     if( isSendDataPrefixCbkSuccess == 1 )
     {
+        isSendDataPrefixCbkSuccess = 0;
         return CELLULAR_PKT_STATUS_OK;
     }
     else
     {
+        isSendDataPrefixCbkSuccess = 1;
         return CELLULAR_PKT_STATUS_BAD_PARAM;
     }
 }
@@ -582,7 +693,6 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
 void test__Cellular_PktioInit_Invalid_Param( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularContext_t * pContext;
 
     /* Check that CELLULAR_PKT_STATUS_INVALID_HANDLE is returned. */
     pktStatus = _Cellular_PktioInit( NULL, PktioHandlePacketCallback_t );
@@ -679,7 +789,6 @@ void test__Cellular_PktioInit_Thread_Receive_Abort_Event( void )
 
     /* Test the abort event. */
     pktioEvtMask = PKTIO_EVT_MASK_ABORT;
-    NumLoops = 3;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -703,7 +812,7 @@ void test__Cellular_PktioInit_Thread_Empty_Case( void )
 
     /* Test PKTIO_EVT_MASK_STARTED event for _pktioReadThread empty else case. */
     pktioEvtMask = PKTIO_EVT_MASK_STARTED;
-    NumLoops = 3;
+    testInfiniteLoop = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -727,10 +836,39 @@ void test__Cellular_PktioInit_String_Wo_Terminator( void )
 
     /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 1;
     recvCount = 1;
     atCmdType = CELLULAR_AT_WO_PREFIX;
     tokenTableType = 4;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = NULL;
+    context.pRespPrefix = NULL;
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that string w/ new line in the beginging.
+ */
+void test__Cellular_PktioInit_String_With_NewLine( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_WO_PREFIX;
+    tokenTableType = 5;
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     context.pktDataPrefixCB = NULL;
@@ -763,7 +901,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_DATA_WO_PRE
 
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
 
@@ -796,7 +933,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB_CELLULAR_PKT_
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
     atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
-    NumLoops = 2;
     recvCount = 2;
 
     /* set pktDataPrefixCB return CELLULAR_PKT_STATUS_SIZE_MISMATCH. */
@@ -832,7 +968,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB_CELLULAR_PKT_
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
     atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
-    NumLoops = 2;
     recvCount = 2;
 
     /* set pktDataPrefixCB return CELLULAR_PKT_STATUS_BAD_PARAM. */
@@ -867,7 +1002,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB_RECV_DATA_LEN
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
     atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
-    NumLoops = 2;
     recvCount = 2;
 
     pktDataPrefixCBReturn = 0;
@@ -904,7 +1038,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__handleLeftov
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
-    NumLoops = 2;
     recvCount = 2;
     pktDataPrefixCBReturn = 0;
     recvDataLenFail = 1;
@@ -912,12 +1045,47 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__handleLeftov
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
 
     /* handle _handleLeftoverBuffer function case. */
-    NumLoops = 22;
-    recvCount = 22;
+    recvCount = 23;
     recvCommFail = 1;
     pktDataPrefixCBReturn = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that pAtResp null case in function _Cellular_ReadLine.
+ * Because the thread is called successfully, and that operation is in the thread. Thus _Cellular_PktioInit
+ * will still return CELLULAR_PKT_STATUS_OK. But we could check the calling graph in coverage report.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__Test( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING;
+    atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
+
+    /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+
+    recvCount = 3;
+    pktDataPrefixCBReturn = 0;
+    setpktDataPrefixCBReturn = 1;
+    recvDataLenFail = 1;
+    /* Call _Cellular_PktioInit to get partialDataRcvdLen. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
@@ -939,7 +1107,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WITH_PREFIX
 
     /* Test the rx_data event with CELLULAR_AT_MULTI_WITH_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_MULTI_WITH_PREFIX;
     /* copy the token table. */
@@ -969,7 +1136,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WO_PREFIX( 
 
     /* Test the rx_data event with CELLULAR_AT_MULTI_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_MULTI_WO_PREFIX;
     /* copy the token table. */
@@ -979,6 +1145,75 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WO_PREFIX( 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test thread receiving rx data event with CELLULAR_AT_NO_COMMAND resp for _Cellular_PktioInit to return CELLULAR_PKT_STATUS_OK.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_NO_COMMAND( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 2;
+    atCmdType = CELLULAR_AT_NO_COMMAND;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = NULL;
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test thread receiving rx data event with CELLULAR_AT_MULTI_WO_PREFIX resp for _Cellular_PktioInit to return CELLULAR_PKT_STATUS_OK.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WO_PREFIX_Without_SrcToken_Table( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_MULTI_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 2;
+    atCmdType = CELLULAR_AT_MULTI_WO_PREFIX;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableWithoutErrorTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = NULL;
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+
+    setUp();
+    /* Test the rx_data event with CELLULAR_AT_MULTI_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 2;
+    atCmdType = CELLULAR_AT_MULTI_WO_PREFIX;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableWithoutSuccessTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = NULL;
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
 }
 
 /**
@@ -999,8 +1234,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_STRIN
 
     /* Test the rx_data event with CELLULAR_AT_WITH_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
-    recvCount = 2;
+    recvCount = 4;
     atCmdType = CELLULAR_AT_WITH_PREFIX;
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
@@ -1029,7 +1263,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_STRIN
 
     /* Test the rx_data event with CELLULAR_AT_WITH_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_WITH_PREFIX;
     /* copy the token table. */
@@ -1037,7 +1270,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_STRIN
     context.pktDataPrefixCB = NULL;
     context.pRespPrefix = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
@@ -1059,7 +1292,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_STRING_
 
     /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_WO_PREFIX;
     /* copy the token table. */
@@ -1098,7 +1330,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_TOKEN_TABLE_SUCCESS_TOKEN( vo
 
     /* Set success token. */
     tokenTableType = 1;
-    NumLoops = 2;
     recvCount = 2;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
@@ -1131,7 +1362,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_TOKEN_TABLE_ERROR_TOKEN( void
 
     /* Set error token. */
     tokenTableType = 2;
-    NumLoops = 2;
     recvCount = 2;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
@@ -1164,10 +1394,9 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_TOKEN_TABLE_EXTRA_TOKEN( void
 
     /* Set extra token. */
     tokenTableType = 3;
-    NumLoops = 2;
     recvCount = 2;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, NULL );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
@@ -1197,7 +1426,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_TOKEN_TABLE_SUCCESS_TOKEN_MEM
 
     /* Set success token. */
     tokenTableType = 1;
-    NumLoops = 2;
     recvCount = 2;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
@@ -1222,7 +1450,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_NO_RESULT_URC_TOK
 
     /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_NO_RESULT;
     /* copy the token table. */
@@ -1252,7 +1479,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_URC_TOKEN_STRING_RESP( void )
 
     /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 2;
     recvCount = 2;
     atCmdType = CELLULAR_AT_NO_COMMAND;
     /* copy the token table. */
@@ -1276,12 +1502,12 @@ void test__Cellular_PktioInit_Event_Aborted( void )
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
 
-
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the aborted event. */
     pktioEvtMask = PKTIO_EVT_MASK_ABORTED;
     evtGroupCreate = 1U;
+    recvCount = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
@@ -1296,11 +1522,11 @@ void test__Cellular_PktioInit_Event_Group_Create_Null( void )
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
 
-
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the pPktioCommEvent NULL case. */
-    evtGroupCreate = 0U;
+    context.pPktioCommEvent = NULL;
+    evtGroupCreate = ( uintptr_t ) ( uintptr_t * ) NULL;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_CREATION_FAIL, pktStatus );
@@ -1344,7 +1570,6 @@ void test__Cellular_PktioInit_No_UrcToken_Prefix_Table( void )
 
     /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    NumLoops = 1;
     recvCount = 1;
     atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
     /* copy the token table. */
@@ -1364,8 +1589,6 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
-    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle;
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",
@@ -1373,7 +1596,7 @@ void test__Cellular_PktioSendAtCmd_Null_Context( void )
         "+QCFG",
         NULL,
         NULL,
-        NULL,
+        0,
     };
 
     memset( &context, 0, sizeof( CellularContext_t ) );
@@ -1392,7 +1615,6 @@ void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle;
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",
@@ -1400,12 +1622,19 @@ void test__Cellular_PktioSendAtCmd_Null_CommInf( void )
         "+QCFG",
         NULL,
         NULL,
-        NULL,
+        0,
     };
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.pCommIntf = NULL;
+    context.hPktioCommIntf = NULL;
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = NULL;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
                                           atReqSetRatPriority.atCmdType,
@@ -1429,7 +1658,7 @@ void test__Cellular_PktioSendAtCmd_Null_AtCmd( void )
         "+QCFG",
         NULL,
         NULL,
-        NULL,
+        0,
     };
 
     memset( &context, 0, sizeof( CellularContext_t ) );
@@ -1458,9 +1687,10 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
         "+QCFG",
         NULL,
         NULL,
-        NULL,
+        0,
     };
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
@@ -1485,9 +1715,10 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
         "+QCFG",
         NULL,
         NULL,
-        NULL,
+        0,
     };
 
+    memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
     context.hPktioCommIntf = commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
@@ -1509,21 +1740,27 @@ void test__Cellular_PktioSendData_Invalid_Param( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     sentLen = _Cellular_PktioSendData( NULL,
-                                       pString,
+                                       ( uint8_t * ) pString,
                                        strlen( pString ) + 1 );
     TEST_ASSERT_EQUAL( 0, sentLen );
     /* Not assign pCommIntf and hPktioCommIntf. */
     sentLen = _Cellular_PktioSendData( &context,
-                                       pString,
+                                       ( uint8_t * ) pString,
                                        strlen( pString ) + 1 );
     TEST_ASSERT_EQUAL( 0, sentLen );
 
     context.pCommIntf = pCommIntf;
+    sentLen = _Cellular_PktioSendData( &context,
+                                       NULL,
+                                       0 );
+    TEST_ASSERT_EQUAL( 0, sentLen );
+
     context.hPktioCommIntf = commInterfaceHandle;
     sentLen = _Cellular_PktioSendData( &context,
                                        NULL,
-                                       NULL );
+                                       0 );
     TEST_ASSERT_EQUAL( 0, sentLen );
+
     free( commInterfaceHandle );
 }
 
@@ -1543,14 +1780,48 @@ void test__Cellular_PktioSendData_Happy_Path( void )
     context.hPktioCommIntf = commInterfaceHandle;
 
     sentLen = _Cellular_PktioSendData( &context,
-                                       pString,
+                                       ( uint8_t * ) pString,
                                        strlen( pString ) + 1 );
     TEST_ASSERT_EQUAL( strlen( pString ) + 1, sentLen );
     free( commInterfaceHandle );
 }
 
 /**
- * @brief Test that any NULL parameter for _Cellular_PktioShutdown.
+ * @brief Test that any null parameter for _Cellular_PktioShutdown.
+ */
+void test__Cellular_PktioShutdown_Null_Parameter( void )
+{
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Mock null context */
+    _Cellular_PktioShutdown( NULL );
+
+    /* Mock context exist but member bPktioUp is fasle.*/
+    _Cellular_PktioShutdown( &context );
+}
+
+/**
+ * @brief Test that null pPktioCommEvent for _Cellular_PktioShutdown.
+ */
+void test__Cellular_PktioShutdown_Null_PktioCommEvent( void )
+{
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    eventDesiredCount = 2;
+    desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
+    context.bPktioUp = true;
+
+    context.pPktioCommEvent = ( PlatformEventGroupHandle_t ) 0;
+    _Cellular_PktioShutdown( &context );
+
+    TEST_ASSERT_EQUAL( false, context.bPktioUp );
+}
+
+/**
+ * @brief Test that happy path for _Cellular_PktioShutdown.
  */
 void test__Cellular_PktioShutdown_Happy_Path( void )
 {
@@ -1560,9 +1831,9 @@ void test__Cellular_PktioShutdown_Happy_Path( void )
     eventDesiredCount = 2;
     evtGroupCreate = 1U;
     desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
-    context.pPktioCommEvent = PlatformEventGroup_Create();
     context.bPktioUp = true;
 
+    context.pPktioCommEvent = PlatformEventGroup_Create();
     _Cellular_PktioShutdown( &context );
 
     TEST_ASSERT_EQUAL( false, context.bPktioUp );
