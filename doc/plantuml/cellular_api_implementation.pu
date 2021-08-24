@@ -1,14 +1,16 @@
+@startuml
+
 Title FreeRTOS Cellular Library API implementation
 
 participant Application
-participant FreeRTOS Cellular Library
+participant "FreeRTOS Cellular Library"
 participant Cellular_modules_porting
 participant Cellular_common
 participant Cellular_modem
 
-Application ->FreeRTOS Cellular Library : Cellular_GetSimCardStatus()
+Application ->"FreeRTOS Cellular Library" : Cellular_GetSimCardStatus()
 
-FreeRTOS Cellular Library->Cellular_modules_porting :Cellular_GetSimCardStatus()
+"FreeRTOS Cellular Library"->Cellular_modules_porting :Cellular_GetSimCardStatus()
 
 Cellular_modules_porting->Cellular_common:Get module context passed in Cellular_ModuleInt() :\n_Cellular_GetModuleContext()
 
@@ -26,4 +28,4 @@ Cellular_common ->Cellular_modules_porting : Call the callback function with cor
 
 Cellular_modules_porting ->Application : Return parsing status and data
 
-
+@enduml

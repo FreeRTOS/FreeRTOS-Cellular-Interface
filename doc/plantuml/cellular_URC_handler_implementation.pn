@@ -1,3 +1,5 @@
+@startuml
+
 Title FreeRTOS Cellular Library URC handler implementation
 
 participant Application
@@ -16,3 +18,5 @@ Cellular_modules_porting ->Application : Call the callback function registered i
 Cellular_modem ->Cellular_common : "+CREG: 2,0"
 Cellular_common -> Cellular_common : Call the callback function\nCellular_CommonUrcProcessCreg(  pContext, "+CREG: 2,0" )
 Cellular_common->Application : callback function registered in\nCellular_RegisterUrcNetworkRegistrationEventCallback()
+
+@enduml
