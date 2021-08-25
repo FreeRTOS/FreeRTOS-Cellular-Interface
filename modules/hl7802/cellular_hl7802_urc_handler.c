@@ -101,7 +101,7 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "error parsing _cellular_UrcProcessKtcpInd session ID" );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -114,20 +114,20 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpInd : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessKtcpInd : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpInd : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessKtcpInd : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else if( pSocketData->openCallback == NULL )
             {
-                CellularLogDebug( "_cellular_UrcProcessKtcpInd : Open callback not set!!" );
+                LogDebug( ( "_cellular_UrcProcessKtcpInd : Open callback not set!!" ) );
             }
             else
             {
-                CellularLogDebug( "Notify session %d with socket opened\r\n", sessionId );
+                LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
                 pSocketData->socketState = SOCKETSTATE_CONNECTED;
                 pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
                                            pSocketData, pSocketData->pOpenCallbackContext );
@@ -149,7 +149,7 @@ static void handleTcpNotif( CellularSocketContext_t * pSocketData,
 
             if( pSocketData->closedCallback != NULL )
             {
-                CellularLogDebug( "Notify session %d with socket disconnected\r\n", pSocketData->pModemData );
+                LogDebug( ( "Notify session %d with socket disconnected\r\n", pSocketData->pModemData ) );
                 pSocketData->closedCallback( pSocketData, pSocketData->pClosedCallbackContext );
             }
 
@@ -161,7 +161,7 @@ static void handleTcpNotif( CellularSocketContext_t * pSocketData,
 
             if( pSocketData->openCallback != NULL )
             {
-                CellularLogDebug( "Notify session %d with socket open failed\r\n", pSocketData->pModemData );
+                LogDebug( ( "Notify session %d with socket open failed\r\n", pSocketData->pModemData ) );
                 pSocketData->openCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
                                            pSocketData, pSocketData->pOpenCallbackContext );
             }
@@ -214,7 +214,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "error parsing _cellular_UrcProcessKtcpInd session ID" );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -238,7 +238,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "error parsing _cellular_UrcProcessKtcpInd session ID" );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -251,12 +251,12 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpNotif : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessKtcpNotif : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpNotif : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessKtcpNotif : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -300,7 +300,7 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "error parsing _cellular_UrcProcessKtcpData session ID" );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpData session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -314,16 +314,16 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpData : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessKtcpData : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
             {
-                CellularLogError( "_cellular_UrcProcessKtcpData : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessKtcpData : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else if( pSocketData->dataReadyCallback == NULL )
             {
-                CellularLogDebug( "_cellular_UrcProcessKtcpData : Data ready callback not set!!" );
+                LogDebug( ( "_cellular_UrcProcessKtcpData : Data ready callback not set!!" ) );
             }
             else
             {

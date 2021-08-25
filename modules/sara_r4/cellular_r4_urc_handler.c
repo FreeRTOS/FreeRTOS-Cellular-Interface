@@ -123,7 +123,7 @@ static CellularPktStatus_t _parseUrcIndicationCall( const CellularContext_t * pC
     {
         if( ( isActivated >= INT16_MIN ) && ( isActivated <= ( int32_t ) INT16_MAX ) )
         {
-            CellularLogDebug( "_parseUrcIndicationCall: PS status isActivated=[%d]", isActivated );
+            LogDebug( ( "_parseUrcIndicationCall: PS status isActivated=[%d]", isActivated ) );
 
             /* In SARA-R4, usually context 1 is used for PS. */
             uint8_t contextId = 1;
@@ -131,12 +131,12 @@ static CellularPktStatus_t _parseUrcIndicationCall( const CellularContext_t * pC
             /* Handle the callback function. */
             if( isActivated )
             {
-                CellularLogDebug( "_parseUrcIndicationCall: PDN activated. Context Id %d", contextId );
+                LogDebug( ( "_parseUrcIndicationCall: PDN activated. Context Id %d", contextId ) );
                 _Cellular_PdnEventCallback( pContext, CELLULAR_URC_EVENT_PDN_ACTIVATED, contextId );
             }
             else
             {
-                CellularLogDebug( "_parseUrcIndicationCall: PDN deactivated. Context Id %d", contextId );
+                LogDebug( ( "_parseUrcIndicationCall: PDN deactivated. Context Id %d", contextId ) );
                 _Cellular_PdnEventCallback( pContext, CELLULAR_URC_EVENT_PDN_DEACTIVATED, contextId );
             }
         }
@@ -193,7 +193,7 @@ static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pCo
     /* Handle the callback function. */
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        CellularLogDebug( "_parseUrcIndicationCsq: SIGNAL Strength Bar level [%d]", csqBarLevel );
+        LogDebug( ( "_parseUrcIndicationCsq: SIGNAL Strength Bar level [%d]", csqBarLevel ) );
         signalInfo.rssi = CELLULAR_INVALID_SIGNAL_VALUE;
         signalInfo.rsrp = CELLULAR_INVALID_SIGNAL_VALUE;
         signalInfo.rsrq = CELLULAR_INVALID_SIGNAL_VALUE;
@@ -259,7 +259,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
                     switch( indicatorDescr )
                     {
                         case CIEV_POS_SIGNAL:
-                            CellularLogDebug( "_cellular_UrcProcessCiev: CIEV_POS_SIGNAL" );
+                            LogDebug( ( "_cellular_UrcProcessCiev: CIEV_POS_SIGNAL" ) );
                             /* This URC only gives bar level and not the exact RSSI value. */
 
                             /*
@@ -275,7 +275,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
                             break;
 
                         case CIEV_POS_CALL:
-                            CellularLogDebug( "_cellular_UrcProcessCiev: CIEV_POS_CALL" );
+                            LogDebug( ( "_cellular_UrcProcessCiev: CIEV_POS_CALL" ) );
                             /* Parse PS ACT/DEACT from +CIEV URC indication. */
                             /* This URC does not tell which context ID number is ACT/DEACT. */
                             pktStatus = _parseUrcIndicationCall( ( const CellularContext_t * ) pContext, pUrcStr );
@@ -287,7 +287,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
                 }
                 else
                 {
-                    CellularLogError( "_cellular_UrcProcessCiev: parsing <descr> failed" );
+                    LogError( ( "_cellular_UrcProcessCiev: parsing <descr> failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -301,7 +301,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
 
     if( pktStatus != CELLULAR_PKT_STATUS_OK )
     {
-        CellularLogDebug( "_cellular_UrcProcessCiev: Parse failure" );
+        LogDebug( ( "_cellular_UrcProcessCiev: Parse failure" ) );
     }
 
     return pktStatus;
@@ -336,27 +336,27 @@ static void _cellular_UrcProcessUupsmr( CellularContext_t * pContext,
                     switch( psmState )
                     {
                         case PSM_MODE_EXIT:
-                            CellularLogInfo( "_cellular_UrcProcessUupsmr: PSM_MODE_EXIT" );
+                            LogInfo( ( "_cellular_UrcProcessUupsmr: PSM_MODE_EXIT" ) );
                             break;
 
                         case PSM_MODE_ENTER:
-                            CellularLogInfo( "_cellular_UrcProcessUupsmr: PSM_MODE_ENTER event received" );
+                            LogInfo( ( "_cellular_UrcProcessUupsmr: PSM_MODE_ENTER event received" ) );
                             /* Call the callback function. Indicate the upper layer about the PSM state change. */
                             _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_PSM_ENTER );
                             break;
 
                         case PSM_MODE_PREVENT_ENTRY:
-                            CellularLogInfo( "_cellular_UrcProcessUupsmr: PSM_MODE_PREVENT_ENTRY" );
+                            LogInfo( ( "_cellular_UrcProcessUupsmr: PSM_MODE_PREVENT_ENTRY" ) );
                             break;
 
                         case PSM_MODE_PREVENT_DEEP_ENTRY:
-                            CellularLogInfo( "_cellular_UrcProcessUupsmr: PSM_MODE_PREVENT_DEEP_ENTRY" );
+                            LogInfo( ( "_cellular_UrcProcessUupsmr: PSM_MODE_PREVENT_DEEP_ENTRY" ) );
                             break;
                     }
                 }
                 else
                 {
-                    CellularLogError( "_cellular_UrcProcessUupsmr: parsing <state> failed" );
+                    LogError( ( "_cellular_UrcProcessUupsmr: parsing <state> failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -397,7 +397,7 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "parsing _cellular_UrcProcessKtcpInd session ID failed" );
+                    LogError( ( "parsing _cellular_UrcProcessKtcpInd session ID failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -420,7 +420,7 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "parsing _cellular_UrcProcessUusoco socket error failed" );
+                    LogError( ( "parsing _cellular_UrcProcessUusoco socket error failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -433,19 +433,19 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessUusoco : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessUusoco : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
-                CellularLogError( "_cellular_UrcProcessUusoco : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessUusoco : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
                 if( socketError == 0 )
                 {
                     pSocketData->socketState = SOCKETSTATE_CONNECTED;
-                    CellularLogDebug( "Notify session %d with socket opened\r\n", sessionId );
+                    LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
 
                     if( pSocketData->openCallback != NULL )
                     {
@@ -497,7 +497,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "parsing _cellular_UrcProcessUusord session ID failed" );
+                    LogError( ( "parsing _cellular_UrcProcessUusord session ID failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -512,12 +512,12 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessUusord : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessUusord : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
-                CellularLogError( "_cellular_UrcProcessUusord : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessUusord : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -528,7 +528,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogDebug( "_cellular_UrcProcessUusord: Data ready callback not set!!" );
+                    LogDebug( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
                 }
             }
         }
@@ -566,7 +566,7 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogError( "parsing _cellular_UrcProcessUusocl session ID failed" );
+                    LogError( ( "parsing _cellular_UrcProcessUusocl session ID failed" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -579,12 +579,12 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                CellularLogError( "_cellular_UrcProcessUusocl : invalid socket index %d", socketIndex );
+                LogError( ( "_cellular_UrcProcessUusocl : invalid socket index %d", socketIndex ) );
             }
             else if( pSocketData->pModemData != ( void * ) sessionId )
             {
-                CellularLogError( "_cellular_UrcProcessUusocl : session not match %d socket index %d",
-                                  ( uint32_t ) pSocketData->pModemData, socketIndex );
+                LogError( "_cellular_UrcProcessUusocl : session not match %d socket index %d",
+                          ( uint32_t ) pSocketData->pModemData, socketIndex );
             }
             else
             {
@@ -595,7 +595,7 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
                 }
                 else
                 {
-                    CellularLogDebug( "_cellular_UrcProcessUusord: Data ready callback not set!!" );
+                    LogDebug( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
                 }
             }
         }
@@ -614,11 +614,11 @@ static void _Cellular_ProcessModemRdy( CellularContext_t * pContext,
 
     if( pContext == NULL )
     {
-        CellularLogWarn( "_Cellular_ProcessModemRdy: Context not set" );
+        LogWarn( ( "_Cellular_ProcessModemRdy: Context not set" ) );
     }
     else
     {
-        CellularLogDebug( "_Cellular_ProcessModemRdy: Modem Ready event received" );
+        LogDebug( ( "_Cellular_ProcessModemRdy: Modem Ready event received" ) );
         _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT );
     }
 }

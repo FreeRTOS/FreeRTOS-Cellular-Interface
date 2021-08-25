@@ -218,10 +218,4 @@
     #define LogDebug( message )
 #endif
 
-
-#define CellularLogError    LogError
-#define CellularLogDebug    LogDebug
-#define CellularLogWarn     LogWarn
-#define CellularLogInfo     LogInfo
-
 #endif /* __CELLULAR_CONFIG_DEFAULTS_H__ */
