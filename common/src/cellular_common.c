@@ -202,7 +202,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "pktio failed to initialize" );
+            LogError( ( "pktio failed to initialize" ) );
             _Cellular_PktioShutdown( pContext );
             _Cellular_PktHandlerCleanup( pContext );
         }
@@ -268,7 +268,7 @@ static void libClose( CellularContext_t * pContext )
     }
 
     PlatformMutex_Unlock( &pContext->libStatusMutex );
-    CellularLogDebug( "CELLULARLib closed" );
+    LogDebug( ( "CELLULARLib closed" ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -390,14 +390,14 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
 
     if( pCellularHandle == NULL )
     {
-        CellularLogError( "Invalid CellularHandler pointer." );
+        LogError( ( "Invalid CellularHandler pointer." ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
     else if( ( pCommInterface == NULL ) || ( pCommInterface->open == NULL ) ||
              ( pCommInterface->close == NULL ) || ( pCommInterface->send == NULL ) ||
              ( pCommInterface->recv == NULL ) )
     {
-        CellularLogError( "All the functions in the CellularCommInterface should be valid." );
+        LogError( ( "All the functions in the CellularCommInterface should be valid." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( ( pTokenTable == NULL ) || ( pTokenTable->pCellularUrcHandlerTable == NULL ) ||
@@ -405,7 +405,7 @@ static CellularError_t checkInitParameter( const CellularHandle_t * pCellularHan
              ( pTokenTable->pCellularSrcTokenSuccessTable == NULL ) ||
              ( pTokenTable->pCellularUrcTokenWoPrefixTable == NULL ) )
     {
-        CellularLogError( "All the token tables in the CellularTokenTable should be valid." );
+        LogError( ( "All the token tables in the CellularTokenTable should be valid." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -453,7 +453,7 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
 
         if( ( pContext->bLibShutdown == true ) || ( pContext->bLibClosing == true ) )
         {
-            CellularLogError( "Cellular Lib indicated a failure[%d][%d]", pContext->bLibShutdown, pContext->bLibClosing );
+            LogError( ( "Cellular Lib indicated a failure[%d][%d]", pContext->bLibShutdown, pContext->bLibClosing ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
 
@@ -484,7 +484,7 @@ CellularError_t _Cellular_TranslatePktStatus( CellularPktStatus_t status )
         case CELLULAR_PKT_STATUS_BAD_RESPONSE:
         case CELLULAR_PKT_STATUS_SIZE_MISMATCH:
         default:
-            CellularLogError( "_Cellular_TranslatePktStatus: Status %d", status );
+            LogError( ( "_Cellular_TranslatePktStatus: Status %d", status ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
             break;
     }
@@ -514,7 +514,7 @@ CellularPktStatus_t _Cellular_TranslateAtCoreStatus( CellularATError_t status )
         case CELLULAR_AT_ERROR:
         case CELLULAR_AT_UNKNOWN:
         default:
-            CellularLogError( "_Cellular_TranslateAtCoreStatus: Status %d", status );
+            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %d", status ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             break;
     }
@@ -571,11 +571,11 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
 
     if( cellularStatus == CELLULAR_NO_MEMORY )
     {
-        CellularLogError( "_Cellular_CreateSocket, Out of memory" );
+        LogError( ( "_Cellular_CreateSocket, Out of memory" ) );
     }
     else if( socketId >= CELLULAR_NUM_SOCKET_MAX )
     {
-        CellularLogError( "_Cellular_CreateSocket, No free socket slots are available" );
+        LogError( ( "_Cellular_CreateSocket, No free socket slots are available" ) );
         cellularStatus = CELLULAR_NO_MEMORY;
     }
     else
@@ -596,7 +596,7 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
 
     if( socketHandle->socketState == SOCKETSTATE_CONNECTING )
     {
-        CellularLogWarn( "_Cellular_RemoveSocket, socket is connecting state [%d]", socketHandle->socketId );
+        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%d]", socketHandle->socketId ) );
     }
 
     taskENTER_CRITICAL();
@@ -649,7 +649,7 @@ CellularError_t _Cellular_IsValidSocket( const CellularContext_t * pContext,
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            CellularLogError( "_Cellular_IsValidSocket, invalid socket handle %d", sockIndex );
+            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %d", sockIndex ) );
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
     }
@@ -665,8 +665,8 @@ CellularError_t _Cellular_IsValidPdn( uint8_t contextId )
 
     if( ( contextId > CELLULAR_PDN_CONTEXT_ID_MAX ) || ( contextId < CELLULAR_PDN_CONTEXT_ID_MIN ) )
     {
-        CellularLogError( "_Cellular_IsValidPdn: ContextId out of range %d",
-                          contextId );
+        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %d",
+                    contextId ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
 
@@ -794,12 +794,12 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
         if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rssi, rat );
-            CellularLogDebug( "_computeSignalBars: RSSI %d Bars %d", pSignalInfo->rssi, pSignalInfo->bars );
+            LogDebug( ( "_computeSignalBars: RSSI %d Bars %d", pSignalInfo->rssi, pSignalInfo->bars ) );
         }
         else if( ( rat == CELLULAR_RAT_LTE ) || ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_NBIOT ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rsrp, rat );
-            CellularLogDebug( "_computeSignalBars: RSRP %d Bars %d", pSignalInfo->rsrp, pSignalInfo->bars );
+            LogDebug( ( "_computeSignalBars: RSRP %d Bars %d", pSignalInfo->rsrp, pSignalInfo->bars ) );
         }
         else
         {
@@ -822,7 +822,7 @@ CellularError_t _Cellular_GetCurrentRat( CellularContext_t * pContext,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pRat == NULL )
     {
@@ -907,13 +907,13 @@ CellularSocketContext_t * _Cellular_GetSocketData( const CellularContext_t * pCo
 
     if( pContext == NULL )
     {
-        CellularLogError( "Invalid context" );
+        LogError( ( "Invalid context" ) );
     }
     else
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            CellularLogError( "_Cellular_GetSocketData, invalid socket handle %d", sockIndex );
+            LogError( ( "_Cellular_GetSocketData, invalid socket handle %d", sockIndex ) );
         }
         else
         {
@@ -941,7 +941,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CommonInit checkInitParameter failed" );
+        LogError( ( "_Cellular_CommonInit checkInitParameter failed" ) );
     }
     else
     {
@@ -949,7 +949,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
 
         if( pContext == NULL )
         {
-            CellularLogError( "CellularContext_t allocation failed" );
+            LogError( ( "CellularContext_t allocation failed" ) );
             cellularStatus = CELLULAR_NO_MEMORY;
         }
         else
@@ -967,7 +967,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     {
         if( _Cellular_CreateLibStatusMutex( pContext ) != true )
         {
-            CellularLogError( "Could not create CellularLib status mutex" );
+            LogError( ( "Could not create CellularLib status mutex" ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
         else
@@ -980,7 +980,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     {
         if( _Cellular_CreateAtDataMutex( pContext ) != true )
         {
-            CellularLogError( "Could not create CELLULAR AT Data mutex " );
+            LogError( ( "Could not create CELLULAR AT Data mutex " ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
         else
@@ -993,7 +993,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     {
         if( _Cellular_CreatePktRequestMutex( pContext ) != true )
         {
-            CellularLogError( "Could not create CELLULAR Pkt Req mutex " );
+            LogError( ( "Could not create CELLULAR Pkt Req mutex " ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
         else
@@ -1006,7 +1006,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
     {
         if( _Cellular_CreatePktResponseMutex( pContext ) != true )
         {
-            CellularLogError( "Could not create CELLULAR Pkt Resp mutex " );
+            LogError( ( "Could not create CELLULAR Pkt Resp mutex " ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
         else

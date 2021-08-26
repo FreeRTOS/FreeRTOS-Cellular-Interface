@@ -170,17 +170,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetCurrentMNOProfile( CellularConte
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_RecvFuncGetCurrentMNOProfile: Invalid handle" );
+        LogError( ( "_Cellular_RecvFuncGetCurrentMNOProfile: Invalid handle" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( MNOProfileType_t ) ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetCurrentMNOProfile: Invalid param" );
+        LogError( ( "_Cellular_RecvFuncGetCurrentMNOProfile: Invalid param" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetCurrentMNOProfile: Input Line passed is NULL" );
+        LogError( ( "_Cellular_RecvFuncGetCurrentMNOProfile: Input Line passed is NULL" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else
@@ -209,7 +209,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetCurrentMNOProfile( CellularConte
                     if( ( tempValue >= MNO_PROFILE_SW_DEFAULT ) && ( tempValue <= MNO_PROFILE_STANDARD_EUROPE ) )
                     {
                         *pCurrentMNOProfile = tempValue;
-                        CellularLogInfo( "_Cellular_RecvFuncGetCurrentMNOProfile: pCurrentMNOProfile [%d]", *pCurrentMNOProfile );
+                        LogInfo( ( "_Cellular_RecvFuncGetCurrentMNOProfile: pCurrentMNOProfile [%d]", *pCurrentMNOProfile ) );
                     }
                 }
                 else
@@ -271,7 +271,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
         0
     };
 
-    CellularLogInfo( "rebootCellularModem: Rebooting Modem." );
+    LogInfo( ( "rebootCellularModem: Rebooting Modem." ) );
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
     Platform_Delay( ENBABLE_MODULE_UE_REBOOT_POLL_TIME );
     count = count + ENBABLE_MODULE_UE_REBOOT_POLL_TIME;
@@ -279,7 +279,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
     /* wait for modem after reboot*/
     while( count < ENBABLE_MODULE_UE_REBOOT_MAX_TIME )
     {
-        CellularLogInfo( "rebootCellularModem: ..." );
+        LogInfo( ( "rebootCellularModem: ..." ) );
 
         atReqGetNoResult.pAtCmd = "ATE0";
 
@@ -288,7 +288,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            CellularLogInfo( "rebootCellularModem: Modem is now available." );
+            LogInfo( ( "rebootCellularModem: Modem is now available." ) );
 
             Platform_Delay( ENBABLE_MODULE_UE_REBOOT_POLL_TIME * 3 );
 
@@ -298,14 +298,14 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
 
             if( disablePsm && ( cellularStatus == CELLULAR_SUCCESS ) )
             {
-                CellularLogInfo( "rebootCellularModem: Disable +CPSMS setting." );
+                LogInfo( ( "rebootCellularModem: Disable +CPSMS setting." ) );
                 atReqGetNoResult.pAtCmd = "AT+CPSMS=0";
                 cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
             }
 
             if( disableEidrx && ( cellularStatus == CELLULAR_SUCCESS ) )
             {
-                CellularLogInfo( "rebootCellularModem: Disable +CEDRXS setting." );
+                LogInfo( ( "rebootCellularModem: Disable +CEDRXS setting." ) );
                 atReqGetNoResult.pAtCmd = "AT+CEDRXS=0,4";
                 cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
             }
@@ -382,7 +382,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             MNOProfileType_t currentMNOProfile = MNO_PROFILE_NOT_SET;
             cellularStatus = _Cellular_GetCurrentMNOProfile( pContext, &currentMNOProfile );
 
-            CellularLogInfo( "Cellular_ModuleEnableUE: currentMNOProfile = [%d], desiredProfile = [%d]", currentMNOProfile, CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE );
+            LogInfo( ( "Cellular_ModuleEnableUE: currentMNOProfile = [%d], desiredProfile = [%d]", currentMNOProfile, CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE ) );
 
             if( cellularStatus == CELLULAR_SUCCESS )
             {

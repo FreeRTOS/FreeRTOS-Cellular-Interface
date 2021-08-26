@@ -43,10 +43,10 @@
  *
  */
 
-#define CellularLogError
-#define CellularLogDebug
-#define CellularLogWarn
-#define CellularLogInfo
+#define LogError
+#define LogDebug
+#define LogWarn
+#define LogInfo
 
 #define configASSERT
 

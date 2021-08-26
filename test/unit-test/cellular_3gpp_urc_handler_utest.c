@@ -398,7 +398,6 @@ CellularPktStatus_t Mock__Cellular_TranslateAtCoreStatus_Callback( CellularATErr
         case CELLULAR_AT_ERROR:
         case CELLULAR_AT_UNKNOWN:
         default:
-            CellularLogError( "_Cellular_TranslateAtCoreStatus: Status %d", status );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             break;
     }

@@ -103,14 +103,14 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
         }
         else
         {
-            CellularLogError( "Cellular_SocketSetSockOpt: Cannot change the contextID in this state %d",
-                              socketHandle->socketState );
+            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the contextID in this state %d",
+                        socketHandle->socketState ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
     }
     else
     {
-        CellularLogError( "Cellular_SocketSetSockOpt: Option not supported" );
+        LogError( ( "Cellular_SocketSetSockOpt: Option not supported" ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
 
@@ -184,7 +184,7 @@ CellularError_t Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( Cell
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else
     {
@@ -209,7 +209,7 @@ CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cel
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else
     {
@@ -234,7 +234,7 @@ CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( Cellula
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else
     {
@@ -259,7 +259,7 @@ CellularError_t Cellular_CommonRegisterUrcGenericCallback( CellularHandle_t cell
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else
     {
@@ -284,7 +284,7 @@ CellularError_t Cellular_CommonRegisterModemEventCallback( CellularHandle_t cell
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else
     {
@@ -315,11 +315,11 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pATCommandPayload == NULL )
     {
-        CellularLogError( "Cellular_ATCommandRaw: Input parameter is NULL" );
+        LogError( ( "Cellular_ATCommandRaw: Input parameter is NULL" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -355,16 +355,16 @@ CellularError_t Cellular_CommonCreateSocket( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pSocketHandle == NULL )
     {
-        CellularLogError( "pSocketHandle is NULL" );
+        LogError( ( "pSocketHandle is NULL" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( _Cellular_IsValidPdn( pdnContextId ) != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_IsValidPdn failed" );
+        LogError( ( "_Cellular_IsValidPdn failed" ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
     else
@@ -393,7 +393,7 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( socketHandle == NULL )
     {
@@ -401,14 +401,14 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
     }
     else if( ( pOptionValue == NULL ) || ( optionValueLength == 0U ) )
     {
-        CellularLogError( "Cellular_SocketSetSockOpt: Invalid parameter" );
+        LogError( ( "Cellular_SocketSetSockOpt: Invalid parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
     {
         if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_IP )
         {
-            CellularLogError( "Cellular_SocketSetSockOpt: Option not supported" );
+            LogError( ( "Cellular_SocketSetSockOpt: Option not supported" ) );
             cellularStatus = CELLULAR_UNSUPPORTED;
         }
         else /* optionLevel CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT. */
@@ -435,7 +435,7 @@ CellularError_t Cellular_CommonSocketRegisterDataReadyCallback( CellularHandle_t
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( socketHandle == NULL )
     {
@@ -465,7 +465,7 @@ CellularError_t Cellular_CommonSocketRegisterSocketOpenCallback( CellularHandle_
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( socketHandle == NULL )
     {
@@ -495,7 +495,7 @@ CellularError_t Cellular_CommonSocketRegisterClosedCallback( CellularHandle_t ce
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogDebug( "_Cellular_CheckLibraryStatus failed" );
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( socketHandle == NULL )
     {

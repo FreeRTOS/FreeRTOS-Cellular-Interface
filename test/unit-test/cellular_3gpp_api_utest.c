@@ -187,8 +187,6 @@ static void _saveData( char * pLine,
 
     ( void ) dataLen;
 
-    CellularLogDebug( "_saveData : Save data %p with length %d", pLine, dataLen );
-
     pNew = ( CellularATCommandLine_t * ) malloc( sizeof( CellularATCommandLine_t ) );
     /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( ( int32_t ) ( pNew != NULL ) );

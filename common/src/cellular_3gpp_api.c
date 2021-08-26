@@ -265,7 +265,7 @@ static CellularPktStatus_t _parseTimeZoneInCCLKResponse( char ** ppToken,
         }
         else
         {
-            CellularLogError( "Error in Processing TimeZone Information. Token %s", *ppToken );
+            LogError( ( "Error in Processing TimeZone Information. Token %s", *ppToken ) );
         }
     }
 
@@ -294,7 +294,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
         }
         else
         {
-            CellularLogError( "Error in Processing Year. Token %s", *ppToken );
+            LogError( ( "Error in Processing Year. Token %s", *ppToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -318,7 +318,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
             }
             else
             {
-                CellularLogError( "Error in Processing month. Token %s", *ppToken );
+                ( "Error in Processing month. Token %s", *ppToken );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -342,7 +342,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
             }
             else
             {
-                CellularLogError( "Error in Processing Day. token %s", *ppToken );
+                LogError( ( "Error in Processing Day. token %s", *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -373,7 +373,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
         }
         else
         {
-            CellularLogError( "Error in Processing Hour. token %s", *ppToken );
+            LogError( ( "Error in Processing Hour. token %s", *ppToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -396,7 +396,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
             }
             else
             {
-                CellularLogError( "Error in Processing minute. Token %s", *ppToken );
+                LogError( ( "Error in Processing minute. Token %s", *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -428,7 +428,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
             }
             else
             {
-                CellularLogError( "Error in Processing Second. Token %s", *ppToken );
+                LogError( ( "Error in Processing Second. Token %s", *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -485,11 +485,11 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        CellularLogDebug( "\n TimeZoneInfo: Timezone %d Year %d Month %d day %d  Hour %d Minute %d Second %d ",
-                          pTimeInfo->timeZone, pTimeInfo->year,
-                          pTimeInfo->month, pTimeInfo->day,
-                          pTimeInfo->hour, pTimeInfo->minute,
-                          pTimeInfo->second );
+        LogDebug( ( "\n TimeZoneInfo: Timezone %d Year %d Month %d day %d  Hour %d Minute %d Second %d ",
+                    pTimeInfo->timeZone, pTimeInfo->year,
+                    pTimeInfo->month, pTimeInfo->day,
+                    pTimeInfo->hour, pTimeInfo->minute,
+                    pTimeInfo->second ) );
     }
 
     return pktStatus;
@@ -508,17 +508,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkTime( CellularContext_t *
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetNetworkTime: pContext is invalid" );
+        LogError( ( "GetNetworkTime: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetNetworkTime: Response is invalid" );
+        LogError( ( "GetNetworkTime: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen == 0u ) )
     {
-        CellularLogError( "GetNetworkTime: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetNetworkTime: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -557,17 +557,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetFirmwareVersion( CellularContext
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetFirmwareVersion: pContext is invalid" );
+        LogError( ( "GetFirmwareVersion: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetFirmwareVersion: Response is invalid" );
+        LogError( ( "GetFirmwareVersion: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_FW_VERSION_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "GetFirmwareVersion: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetFirmwareVersion: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -604,17 +604,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetImei( CellularContext_t * pConte
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetImei: pContext is invalid" );
+        LogError( ( "GetImei: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetImei: Response is invalid" );
+        LogError( ( "GetImei: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_IMEI_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "GetImei: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetImei: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -651,17 +651,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetModelId( CellularContext_t * pCo
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetModelId: pContext is invalid" );
+        LogError( ( "GetModelId: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetModelId: Response is invalid" );
+        LogError( ( "GetModelId: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_MODEL_ID_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "GetModelId: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetModelId: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -698,17 +698,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetManufactureId( CellularContext_t
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetManufactureId: pContext is invalid" );
+        LogError( ( "GetManufactureId: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetManufactureId: Response is invalid" );
+        LogError( ( "GetManufactureId: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_MANUFACTURE_ID_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "GetManufactureId: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetManufactureId: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -750,12 +750,12 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetPsreg: response is invalid" );
+        LogError( ( "_Cellular_RecvFuncGetPsreg: response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( CellularNetworkRegType_t ) ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetPsreg: ppData is invalid or dataLen is wrong" );
+        LogError( ( "_Cellular_RecvFuncGetPsreg: ppData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -773,7 +773,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
             _Cellular_UnlockAtDataMutex( pContext );
         }
 
-        CellularLogDebug( "atcmd network register status %d pktStatus:%d", regType, pktStatus );
+        LogDebug( ( "atcmd network register status %d pktStatus:%d", regType, pktStatus ) );
     }
 
     return pktStatus;
@@ -819,7 +819,7 @@ static bool _parseCopsRegModeToken( char * pToken,
 
     if( pToken == NULL )
     {
-        CellularLogError( "_parseCopsRegMode: Input Parameter NULL" );
+        LogError( ( "_parseCopsRegMode: Input Parameter NULL" ) );
         parseStatus = false;
     }
     else
@@ -838,7 +838,7 @@ static bool _parseCopsRegModeToken( char * pToken,
             }
             else
             {
-                CellularLogError( "_parseCopsRegMode: Error in processing Network Registration mode. Token %s", pToken );
+                LogError( ( "_parseCopsRegMode: Error in processing Network Registration mode. Token %s", pToken ) );
                 parseStatus = false;
             }
         }
@@ -858,7 +858,7 @@ static bool _parseCopsNetworkNameFormatToken( const char * pToken,
 
     if( pToken == NULL )
     {
-        CellularLogError( "_parseCopsNetworkNameFormat: Input Parameter NULL" );
+        LogError( ( "_parseCopsNetworkNameFormat: Input Parameter NULL" ) );
         parseStatus = false;
     }
     else
@@ -878,7 +878,7 @@ static bool _parseCopsNetworkNameFormatToken( const char * pToken,
             }
             else
             {
-                CellularLogError( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %s", pToken );
+                LogError( ( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %s", pToken ) );
                 parseStatus = false;
             }
         }
@@ -897,7 +897,7 @@ static bool _parseCopsNetworkNameToken( const char * pToken,
 
     if( pToken == NULL )
     {
-        CellularLogError( "_parseCopsNetworkName: Input Parameter NULL" );
+        LogError( ( "_parseCopsNetworkName: Input Parameter NULL" ) );
         parseStatus = false;
     }
     else
@@ -922,13 +922,13 @@ static bool _parseCopsNetworkNameToken( const char * pToken,
             }
             else
             {
-                CellularLogError( "_parseCopsNetworkName: Error in processing Network MCC MNC: Length not Valid" );
+                LogError( ( "_parseCopsNetworkName: Error in processing Network MCC MNC: Length not Valid" ) );
                 parseStatus = false;
             }
         }
         else
         {
-            CellularLogError( "Error in processing Operator Name: Format Unknown" );
+            LogError( ( "Error in processing Operator Name: Format Unknown" ) );
             parseStatus = false;
         }
     }
@@ -947,7 +947,7 @@ static bool _parseCopsRatToken( const char * pToken,
 
     if( pToken == NULL )
     {
-        CellularLogError( "_parseCopsNetworkName: Input Parameter NULL" );
+        LogError( ( "_parseCopsNetworkName: Input Parameter NULL" ) );
         parseStatus = false;
     }
     else
@@ -966,7 +966,7 @@ static bool _parseCopsRatToken( const char * pToken,
             }
             else
             {
-                CellularLogError( "_parseCopsNetworkName: Error in processing RAT. Token %s", pToken );
+                LogError( ( "_parseCopsNetworkName: Error in processing RAT. Token %s", pToken ) );
                 parseStatus = false;
             }
         }
@@ -1064,12 +1064,12 @@ static CellularPktStatus_t _Cellular_RecvFuncUpdateMccMnc( CellularContext_t * p
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "UpdateMccMnc: Response is invalid" );
+        LogError( ( "UpdateMccMnc: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( cellularOperatorInfo_t ) ) )
     {
-        CellularLogError( "UpdateMccMnc: pData is invalid or dataLen is wrong" );
+        LogError( ( "UpdateMccMnc: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else
@@ -1100,7 +1100,7 @@ static CellularPktStatus_t _Cellular_RecvFuncUpdateMccMnc( CellularContext_t * p
 
         if( atCoreStatus == CELLULAR_AT_ERROR )
         {
-            CellularLogError( "ERROR: COPS %s", pCopsResponse );
+            LogError( ( "ERROR: COPS %s", pCopsResponse ) );
             pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
         }
     }
@@ -1121,17 +1121,17 @@ static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pCon
 
     if( pContext == NULL )
     {
-        CellularLogError( "Recv IP address: Invalid context" );
+        LogError( ( "Recv IP address: Invalid context" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "Recv IP address: response is invalid" );
+        LogError( ( "Recv IP address: response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pData == NULL ) || ( dataLen == 0U ) )
     {
-        CellularLogError( "Recv IP address: pData is invalid or dataLen is wrong" );
+        LogError( ( "Recv IP address: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -1146,7 +1146,7 @@ static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pCon
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            CellularLogDebug( "Recv IP address: Context id: %s", pToken );
+            LogDebug( ( "Recv IP address: Context id: %s", pToken ) );
 
             if( pInputLine[ 0 ] != '\0' )
             {
@@ -1161,7 +1161,7 @@ static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pCon
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            CellularLogDebug( "Recv IP address: Ip Addr: %s", pToken );
+            LogDebug( ( "Recv IP address: Ip Addr: %s", pToken ) );
             ( void ) strncpy( pData, pToken, dataLen );
         }
 
@@ -1195,7 +1195,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
                 }
                 else
                 {
-                    CellularLogError( "Error in processing RAT value. Token %s", pToken );
+                    LogError( ( "Error in processing RAT value. Token %s", pToken ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -1214,7 +1214,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
                 }
                 else
                 {
-                    CellularLogError( "Error in processing Requested Edrx value. Token %s", pToken );
+                    LogError( ( "Error in processing Requested Edrx value. Token %s", pToken ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -1222,7 +1222,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
             break;
 
         default:
-            CellularLogError( "Unknown Parameter Position in AT+CEDRXS Response" );
+            LogError( ( "Unknown Parameter Position in AT+CEDRXS Response" ) );
             atCoreStatus = CELLULAR_AT_ERROR;
             break;
     }
@@ -1261,7 +1261,7 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
         {
             if( parseEidrxToken( pToken, tokenIndex, pEidrxSettingsList, count ) != CELLULAR_AT_SUCCESS )
             {
-                CellularLogInfo( "parseEidrxToken %s index %d failed", pToken, tokenIndex );
+                LogInfo( ( "parseEidrxToken %s index %d failed", pToken, tokenIndex ) );
             }
 
             tokenIndex++;
@@ -1275,13 +1275,13 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        CellularLogDebug( "GetEidrx setting[%d]: RAT: %d, Value: 0x%x",
-                          count, pEidrxSettingsList->eidrxList[ count ].rat,
-                          pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue );
+        LogDebug( ( "GetEidrx setting[%d]: RAT: %d, Value: 0x%x",
+                    count, pEidrxSettingsList->eidrxList[ count ].rat,
+                    pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue ) );
     }
     else
     {
-        CellularLogError( "GetEidrx: Parsing Error encountered, atCoreStatus: %d", atCoreStatus );
+        LogError( ( "GetEidrx: Parsing Error encountered, atCoreStatus: %d", atCoreStatus ) );
     }
 
     return atCoreStatus;
@@ -1303,17 +1303,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetEidrxSettings: Invalid context" );
+        LogError( ( "GetEidrxSettings: Invalid context" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetEidrxSettings: Response is invalid" );
+        LogError( ( "GetEidrxSettings: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != CELLULAR_EDRX_LIST_MAX_SIZE ) )
     {
-        CellularLogError( "GetEidrxSettings: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetEidrxSettings: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -1328,7 +1328,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
             if( ( strcmp( "+CEDRXS: 0", pInputLine ) == 0 ) ||
                 ( strcmp( "+CEDRXS:", pInputLine ) == 0 ) )
             {
-                CellularLogDebug( "GetEidrx: empty EDRXS setting %s", pInputLine );
+                LogDebug( ( "GetEidrx: empty EDRXS setting %s", pInputLine ) );
             }
             else
             {
@@ -1442,7 +1442,7 @@ static CellularATError_t parseT3412TimerValue( char * pToken,
     {
         if( tempValue < 0 )
         {
-            CellularLogError( "Error in processing Periodic Processing Active time value. Token %s", pToken );
+            LogError( ( "Error in processing Periodic Processing Active time value. Token %s", pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
         else
@@ -1488,7 +1488,7 @@ static CellularATError_t parseT3412TimerValue( char * pToken,
                 break;
 
             default:
-                CellularLogError( "Invalid T3412 timer unit index" );
+                LogError( ( "Invalid T3412 timer unit index" ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
                 break;
         }
@@ -1512,7 +1512,7 @@ static CellularATError_t parseT3324TimerValue( char * pToken,
     {
         if( tempValue < 0 )
         {
-            CellularLogError( "Error in processing Periodic Processing Active time value. Token %s", pToken );
+            LogError( ( "Error in processing Periodic Processing Active time value. Token %s", pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
         else
@@ -1546,7 +1546,7 @@ static CellularATError_t parseT3324TimerValue( char * pToken,
                 break;
 
             default:
-                CellularLogError( "Invalid T3324 timer unit index" );
+                LogError( ( "Invalid T3324 timer unit index" ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
                 break;
         }
@@ -1577,11 +1577,11 @@ CellularError_t Cellular_CommonGetEidrxSettings( CellularHandle_t cellularHandle
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pEidrxSettingsList == NULL )
     {
-        CellularLogError( "Cellular_CommonGetEidrxSettings : Bad parameter" );
+        LogError( ( "Cellular_CommonGetEidrxSettings : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1592,7 +1592,7 @@ CellularError_t Cellular_CommonGetEidrxSettings( CellularHandle_t cellularHandle
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Cellular_GetEidrxSettings: couldn't retrieve Eidrx settings" );
+            LogError( ( "Cellular_GetEidrxSettings: couldn't retrieve Eidrx settings" ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -1623,11 +1623,11 @@ CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pEidrxSettings == NULL )
     {
-        CellularLogError( "Cellular_CommonSetEidrxSettings : Bad parameter" );
+        LogError( ( "Cellular_CommonSetEidrxSettings : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1642,13 +1642,13 @@ CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle
                            pEidrxSettings->mode,
                            pEidrxSettings->rat,
                            PRINTF_BYTE_TO_BINARY_INT4( pEidrxSettings->requestedEdrxVaue ) );
-        CellularLogDebug( "Eidrx setting: %s ", cmdBuf );
+        LogDebug( ( "Eidrx setting: %s ", cmdBuf ) );
         /* Query the PSMsettings from the network. */
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetEidrx );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "_Cellular_SetEidrxSettings: couldn't set Eidrx settings" );
+            LogError( ( "_Cellular_SetEidrxSettings: couldn't set Eidrx settings" ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -1728,16 +1728,16 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pNetworkInfo == NULL )
     {
-        CellularLogError( "Cellular_CommonGetRegisteredNetwork : Bad parameter" );
+        LogError( ( "Cellular_CommonGetRegisteredNetwork : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( pOperatorInfo == NULL )
     {
-        CellularLogError( "Cellular_CommonGetRegisteredNetwork : Bad parameter" );
+        LogError( ( "Cellular_CommonGetRegisteredNetwork : Bad parameter" ) );
         cellularStatus = CELLULAR_NO_MEMORY;
     }
     else
@@ -1781,11 +1781,11 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pServiceStatus == NULL )
     {
-        CellularLogError( "Cellular_CommonGetServiceStatus : Bad parameter" );
+        LogError( ( "Cellular_CommonGetServiceStatus : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1800,13 +1800,13 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
         ( void ) strncpy( pServiceStatus->operatorName, operatorInfo.operatorName, CELLULAR_NETWORK_NAME_MAX_SIZE );
         pServiceStatus->operatorNameFormat = operatorInfo.operatorNameFormat;
 
-        CellularLogDebug( "SrvStatus: rat %d cs %d, ps %d, mode %d, csRejType %d, csRej %d, psRejType %d, psRej %d, plmn %s%s",
-                          pServiceStatus->rat,
-                          pServiceStatus->csRegistrationStatus, pServiceStatus->psRegistrationStatus,
-                          pServiceStatus->networkRegistrationMode,
-                          pServiceStatus->csRejectionType, pServiceStatus->csRejectionCause,
-                          pServiceStatus->psRejectionType, pServiceStatus->psRejectionCause,
-                          pServiceStatus->plmnInfo.mcc, pServiceStatus->plmnInfo.mnc );
+        LogDebug( ( "SrvStatus: rat %d cs %d, ps %d, mode %d, csRejType %d, csRej %d, psRejType %d, psRej %d, plmn %s%s",
+                    pServiceStatus->rat,
+                    pServiceStatus->csRegistrationStatus, pServiceStatus->psRegistrationStatus,
+                    pServiceStatus->networkRegistrationMode,
+                    pServiceStatus->csRejectionType, pServiceStatus->csRejectionCause,
+                    pServiceStatus->psRejectionType, pServiceStatus->psRejectionCause,
+                    pServiceStatus->plmnInfo.mcc, pServiceStatus->plmnInfo.mnc ) );
     }
 
     return cellularStatus;
@@ -1834,11 +1834,11 @@ CellularError_t Cellular_CommonGetNetworkTime( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pNetworkTime == NULL )
     {
-        CellularLogError( "Cellular_CommonGetNetworkTime : Bad parameter" );
+        LogError( ( "Cellular_CommonGetNetworkTime : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1847,7 +1847,7 @@ CellularError_t Cellular_CommonGetNetworkTime( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Cellular_GetNetworkTime: couldn't retrieve Network Time" );
+            LogError( ( "Cellular_GetNetworkTime: couldn't retrieve Network Time" ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -1905,11 +1905,11 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pModemInfo == NULL )
     {
-        CellularLogError( "Cellular_CommonGetModemInfo : Bad parameter" );
+        LogError( ( "Cellular_CommonGetModemInfo : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1938,9 +1938,9 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
         }
         else
         {
-            CellularLogDebug( "ModemInfo: hwVer:%s, fwVer:%s, serialNum:%s, IMEI:%s, manufactureId:%s, modelId:%s ",
-                              pModemInfo->hardwareVersion, pModemInfo->firmwareVersion, pModemInfo->serialNumber, pModemInfo->imei,
-                              pModemInfo->manufactureId, pModemInfo->modelId );
+            LogDebug( ( "ModemInfo: hwVer:%s, fwVer:%s, serialNum:%s, IMEI:%s, manufactureId:%s, modelId:%s ",
+                        pModemInfo->hardwareVersion, pModemInfo->firmwareVersion, pModemInfo->serialNumber, pModemInfo->imei,
+                        pModemInfo->manufactureId, pModemInfo->modelId ) );
         }
     }
 
@@ -1973,11 +1973,11 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( ( pBuffer == NULL ) || ( bufferLength == 0U ) )
     {
-        CellularLogError( "_Cellular_GetIPAddress: pBuffer is invalid or bufferLength is wrong" );
+        LogError( ( "_Cellular_GetIPAddress: pBuffer is invalid or bufferLength is wrong" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -1997,7 +1997,7 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%s, pktStatus: %d", cmdBuf, pktStatus );
+            LogError( ( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%s, pktStatus: %d", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2094,7 +2094,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
 
     if( pPdnConfig == NULL )
     {
-        CellularLogError( "Cellular_CommonSetPdnConfig: Input parameter is NULL" );
+        LogError( ( "Cellular_CommonSetPdnConfig: Input parameter is NULL" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -2114,8 +2114,8 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
                 break;
 
             default:
-                CellularLogError( "Cellular_CommonSetPdnConfig: Invalid pdn context type %d",
-                                  CELLULAR_PDN_CONTEXT_IPV4V6 );
+                LogError( ( "Cellular_CommonSetPdnConfig: Invalid pdn context type %d",
+                            CELLULAR_PDN_CONTEXT_IPV4V6 ) );
                 cellularStatus = CELLULAR_BAD_PARAMETER;
                 break;
         }
@@ -2148,7 +2148,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%s, PktRet: %d", cmdBuf, pktStatus );
+            LogError( ( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%s, PktRet: %d", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2218,7 +2218,7 @@ static CellularSimCardLockState_t _getSimLockState( char * pToken )
         }
         else
         {
-            CellularLogError( "Unknown SIM Lock State %s", pToken );
+            LogError( ( "Unknown SIM Lock State %s", pToken ) );
         }
     }
 
@@ -2239,17 +2239,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSimLockStatus( CellularContext_t
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: pContext is invalid" );
+        LogError( ( "_Cellular_RecvFuncGetSimLockStatus: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: Response pData is invalid" );
+        LogError( ( "_Cellular_RecvFuncGetSimLockStatus: Response pData is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( CellularSimCardLockState_t ) ) )
     {
-        CellularLogError( "_Cellular_RecvFuncGetSimLockStatus: pData is invalid or dataLen is wrong" );
+        LogError( ( "_Cellular_RecvFuncGetSimLockStatus: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -2274,7 +2274,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSimLockStatus( CellularContext_t
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            CellularLogDebug( "SIM Lock State: %s", pToken );
+            LogDebug( ( "SIM Lock State: %s", pToken ) );
             *pSimLockState = _getSimLockState( pToken );
         }
 
@@ -2295,7 +2295,7 @@ static bool _checkCrsmMemoryStatus( const char * pToken )
 
     if( pToken == NULL )
     {
-        CellularLogError( "Input Parameter NULL" );
+        LogError( ( "Input Parameter NULL" ) );
         memoryStatus = false;
     }
 
@@ -2305,7 +2305,7 @@ static bool _checkCrsmMemoryStatus( const char * pToken )
          * Refer 3GPP Spec TS 51.011 Section 9.4. */
         if( strcmp( pToken, "64" ) == 0 ) /* '40' memory problem. */
         {
-            CellularLogError( "_checkCrsmMemoryStatus: Error in Processing HPLMN: CRSM Memory Error" );
+            LogError( ( "_checkCrsmMemoryStatus: Error in Processing HPLMN: CRSM Memory Error" ) );
             memoryStatus = false;
         }
     }
@@ -2321,7 +2321,7 @@ static bool _checkCrsmReadStatus( const char * pToken )
 
     if( pToken == NULL )
     {
-        CellularLogError( "Input Parameter NULL" );
+        LogError( ( "Input Parameter NULL" ) );
         readStatus = false;
     }
 
@@ -2333,7 +2333,7 @@ static bool _checkCrsmReadStatus( const char * pToken )
             ( strcmp( pToken, "145" ) != 0 ) && /* '91' normal ending of the command, with extra information. */
             ( strcmp( pToken, "146" ) != 0 ) )  /* '92' command successful but after using an internal update retry routine 'X' times. */
         {
-            CellularLogError( "_checkCrsmReadStatus: Error in Processing HPLMN: CRSM Read Error" );
+            LogError( ( "_checkCrsmReadStatus: Error in Processing HPLMN: CRSM Read Error" ) );
             readStatus = false;
         }
     }
@@ -2351,12 +2351,12 @@ static bool _parseHplmn( char * pToken,
 
     if( pToken == NULL )
     {
-        CellularLogError( "_parseHplmn: pToken is NULL or pData is NULL" );
+        LogError( ( "_parseHplmn: pToken is NULL or pData is NULL" ) );
         parseStatus = false;
     }
     else if( ( strlen( pToken ) < ( CRSM_HPLMN_RAT_LENGTH ) ) || ( strncmp( pToken, "FFFFFF", 6 ) == 0 ) )
     {
-        CellularLogError( "_parseHplmn: Error in processing HPLMN invalid token %s", pToken );
+        LogError( ( "_parseHplmn: Error in processing HPLMN invalid token %s", pToken ) );
         parseStatus = false;
     }
     else
@@ -2399,17 +2399,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetHplmn( CellularContext_t * pCont
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetHplmn: pContext is invalid" );
+        LogError( ( "GetHplmn: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetHplmn: Response is invalid" );
+        LogError( ( "GetHplmn: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( CellularPlmnInfo_t ) ) )
     {
-        CellularLogError( "GetHplmn: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetHplmn: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -2494,18 +2494,18 @@ static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pCont
 
     if( pContext == NULL )
     {
-        CellularLogError( "getIccid: pContext is invalid" );
+        LogError( ( "getIccid: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) ||
              ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "getIccid: Response is invalid" );
+        LogError( ( "getIccid: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_ICCID_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "getIccid: pData is invalid or dataLen is wrong" );
+        LogError( ( "getIccid: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -2551,17 +2551,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetImsi( CellularContext_t * pConte
 
     if( pContext == NULL )
     {
-        CellularLogError( "getImsi: pContext is invalid" );
+        LogError( ( "getImsi: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "getImsi: Response is invalid" );
+        LogError( ( "getImsi: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_IMSI_MAX_SIZE + 1U ) ) )
     {
-        CellularLogError( "getImsi: pData is invalid or dataLen is wrong" );
+        LogError( ( "getImsi: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -2612,11 +2612,11 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pSimCardStatus == NULL )
     {
-        CellularLogError( "Cellular_CommonGetSimCardLockStatus : Bad paremeter" );
+        LogError( ( "Cellular_CommonGetSimCardLockStatus : Bad paremeter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -2630,8 +2630,8 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetSimLockStatus );
 
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        CellularLogDebug( "_Cellular_GetSimStatus, Sim Insert State[%d], Lock State[%d]",
-                          pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
+        LogDebug( ( "_Cellular_GetSimStatus, Sim Insert State[%d], Lock State[%d]",
+                    pSimCardStatus->simCardState, pSimCardStatus->simCardLockState ) );
     }
 
     return cellularStatus;
@@ -2679,11 +2679,11 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pSimCardInfo == NULL )
     {
-        CellularLogError( "Cellular_CommonGetSimCardInfo : Bad paremeter" );
+        LogError( ( "Cellular_CommonGetSimCardInfo : Bad paremeter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -2707,9 +2707,9 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
         }
         else
         {
-            CellularLogDebug( "SimInfo updated: IMSI:%s, Hplmn:%s%s, ICCID:%s",
-                              pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
-                              pSimCardInfo->iccid );
+            LogDebug( ( "SimInfo updated: IMSI:%s, Hplmn:%s%s, ICCID:%s",
+                        pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
+                        pSimCardInfo->iccid ) );
         }
     }
 
@@ -2770,11 +2770,11 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pPsmSettings == NULL )
     {
-        CellularLogError( "Cellular_CommonSetPsmSettings : Bad parameter" );
+        LogError( ( "Cellular_CommonSetPsmSettings : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -2795,14 +2795,14 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
         ( void ) appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                       pPsmSettings->activeTimeValue, true );
 
-        CellularLogDebug( "PSM setting: %s ", cmdBuf );
+        LogDebug( ( "PSM setting: %s ", cmdBuf ) );
 
         /* Query the PSMsettings from the network. */
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetPsm );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Cellular_SetPsmSettings: couldn't set PSM settings" );
+            LogError( ( "Cellular_SetPsmSettings: couldn't set PSM settings" ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2826,7 +2826,7 @@ static CellularATError_t parseCpsmsMode( char * pToken,
         }
         else
         {
-            CellularLogError( "Error in processing mode. Token %s", pToken );
+            LogError( ( "Error in processing mode. Token %s", pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -2865,7 +2865,7 @@ static CellularATError_t parseGetPsmToken( char * pToken,
             break;
 
         default:
-            CellularLogError( "Unknown Parameter Position in AT+QPSMS Response" );
+            LogError( ( "Unknown Parameter Position in AT+QPSMS Response" ) );
             atCoreStatus = CELLULAR_AT_ERROR;
             break;
     }
@@ -2888,17 +2888,17 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
 
     if( pContext == NULL )
     {
-        CellularLogError( "GetPsmSettings: pContext is invalid" );
+        LogError( ( "GetPsmSettings: pContext is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) || ( pAtResp->pItm->pLine == NULL ) )
     {
-        CellularLogError( "GetPsmSettings: Response is invalid" );
+        LogError( ( "GetPsmSettings: Response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( ( pData == NULL ) || ( dataLen != sizeof( CellularPsmSettings_t ) ) )
     {
-        CellularLogError( "GetPsmSettings: pData is invalid or dataLen is wrong" );
+        LogError( ( "GetPsmSettings: pData is invalid or dataLen is wrong" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -2927,7 +2927,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
 
                 if( atCoreStatus != CELLULAR_AT_SUCCESS )
                 {
-                    CellularLogInfo( "parseGetPsmToken %s index %d failed", pToken, tokenIndex );
+                    LogInfo( ( "parseGetPsmToken %s index %d failed", pToken, tokenIndex ) );
                 }
 
                 tokenIndex++;
@@ -2939,12 +2939,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
             }
         }
 
-        CellularLogDebug( "PSM setting: mode: %d, RAU: %d, RDY_Timer: %d, TAU: %d, Active_time: %d",
-                          pPsmSettings->mode,
-                          pPsmSettings->periodicRauValue,
-                          pPsmSettings->gprsReadyTimer,
-                          pPsmSettings->periodicTauValue,
-                          pPsmSettings->activeTimeValue );
         pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
     }
 
@@ -2973,11 +2967,11 @@ CellularError_t Cellular_CommonGetPsmSettings( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        CellularLogError( "_Cellular_CheckLibraryStatus failed" );
+        LogError( ( "_Cellular_CheckLibraryStatus failed" ) );
     }
     else if( pPsmSettings == NULL )
     {
-        CellularLogError( "Cellular_CommonGetPsmSettings : Bad parameter" );
+        LogError( ( "Cellular_CommonGetPsmSettings : Bad parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else
@@ -2991,7 +2985,7 @@ CellularError_t Cellular_CommonGetPsmSettings( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            CellularLogError( "Cellular_GetPsmSettings: couldn't retrieve PSM settings" );
+            LogError( ( "Cellular_GetPsmSettings: couldn't retrieve PSM settings" ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
