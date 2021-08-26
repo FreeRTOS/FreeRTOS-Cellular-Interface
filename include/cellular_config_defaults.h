@@ -23,8 +23,37 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_config_defaults.h
+ * @brief This represents the default values for the configuration macros
+ * for the Cellular library.
+ *
+ * @note This file SHOULD NOT be modified. If custom values are needed for
+ * any configuration macro, a cellular_config.h file should be provided to
+ * the Cellular library to override the default values defined in this file.
+ * To use the custom config file, the CELLULAR_DO_NOT_USE_CUSTOM_CONFIG preprocessor
+ * macro SHOULD NOT be set.
+ */
+
 #ifndef __CELLULAR_CONFIG_DEFAULTS_H__
 #define __CELLULAR_CONFIG_DEFAULTS_H__
+
+/* The macro definition for CELLULAR_DO_NOT_USE_CUSTOM_CONFIG is for Doxygen
+ * documentation only. */
+
+/**
+ * @brief Define this macro to build the Cellular library without the custom config
+ * file cellular_config.h.
+ *
+ * Without the custom config, the Cellular library builds with
+ * default values of config macros defined in cellular_config_defaults.h file.
+ *
+ * If a custom config is provided, then CELLULAR_DO_NOT_USE_CUSTOM_CONFIG should not
+ * be defined.
+ */
+#ifdef DOXYGEN
+    #define CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+#endif
 
 #ifndef CELLULAR_MCC_MAX_SIZE
     #define CELLULAR_MCC_MAX_SIZE    ( 3U )

@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_common_portable.h
+ */
+
 #ifndef __CELLULAR_COMMON_PORTABLE_H__
 #define __CELLULAR_COMMON_PORTABLE_H__
 

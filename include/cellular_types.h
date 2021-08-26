@@ -22,6 +22,9 @@
  * http://aws.amazon.com/freertos
  * http://www.FreeRTOS.org
  */
+/**
+ * @file cellular_types.h
+ */
 
 #ifndef __CELLULAR_TYPES_H__
 #define __CELLULAR_TYPES_H__

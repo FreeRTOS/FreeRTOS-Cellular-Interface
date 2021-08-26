@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_comm_interface.h
+ */
+
 #ifndef __CELLULAR_COMM_INTERFACE_H__
 #define __CELLULAR_COMM_INTERFACE_H__
 

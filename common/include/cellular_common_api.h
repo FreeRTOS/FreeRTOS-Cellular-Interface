@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_common_api.h
+ */
+
 #ifndef __CELLULAR_COMMON_API_H__
 #define __CELLULAR_COMMON_API_H__
 

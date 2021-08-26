@@ -22,6 +22,9 @@
  * http://aws.amazon.com/freertos
  * http://www.FreeRTOS.org
  */
+/**
+ * @file cellular_common.h
+ */
 
 #ifndef __CELLULAR_COMMON_H__
 #define __CELLULAR_COMMON_H__

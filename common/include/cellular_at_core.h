@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_at_core.h
+ */
+
 #ifndef __CELLULAR_AT_CORE_H__
 #define __CELLULAR_AT_CORE_H__
 
