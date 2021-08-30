@@ -38,21 +38,10 @@
 
 /*-----------------------------------------------------------*/
 
-/* Users should define their platform dependent method if they need.
- * Otherwise use our predefine method which has no effect but pass
- * the coverity check.
- */
-#ifdef DEBUG_METHOD
-    #define configASSERT
-    #define Platform_Delay
-    #define taskENTER_CRITICAL()
-    #define taskEXIT_CRITICAL()
-#else
-    #define configASSERT( X )       ( { 1U; } )
-    #define Platform_Delay( X )     ( { ( void ) X; 1U; } )
-    #define taskENTER_CRITICAL()    ( { 1U; } )
-    #define taskEXIT_CRITICAL()     ( { 1U; } )
-#endif /* ifdef DEBUG_METHOD */
+#define configASSERT                         dummyAssert
+#define Platform_Delay                       dummyDelay
+#define taskENTER_CRITICAL                   dummyTaskENTER_CRITICAL
+#define taskEXIT_CRITICAL                    dummyTaskEXIT_CRITICAL
 
 #define PlatformEventGroupHandle_t           uint16_t
 #define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete
@@ -249,5 +238,10 @@ uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t groupEvent
 int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupEvent,
                                                EventBits_t event,
                                                BaseType_t * pHigherPriorityTaskWoken );
+
+void dummyAssert( int condition );
+void dummyDelay( int milliseconds );
+void dummyTaskENTER_CRITICAL( void );
+void dummyTaskEXIT_CRITICAL( void );
 
 #endif /* __CELLULAR_PLATFORM_H__ */

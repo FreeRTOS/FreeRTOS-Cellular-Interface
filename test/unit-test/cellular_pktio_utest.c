@@ -212,6 +212,16 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
+void dummyDelay( int milliseconds )
+{
+    ( void ) milliseconds;
+}
+
+void dummyAssert( int condition )
+{
+    ( void ) condition;
+}
+
 void * mock_malloc( size_t size )
 {
     return ( void * ) malloc( size );
@@ -545,22 +555,18 @@ static void _shutdownCallback( CellularContext_t * pContext )
     }
 }
 
-void PktioHandlePacketCallback_t( CellularContext_t * pContext,
-                                  _atRespType_t atRespType,
-                                  const void * pBuffer )
+CellularPktStatus_t PktioHandlePacketCallback_t( CellularContext_t * pContext,
+                                                 _atRespType_t atRespType,
+                                                 const void * pBuffer )
 {
-    ( void ) pContext;
-    ( void ) atRespType;
-    ( void ) pBuffer;
-}
+    CellularPktStatus_t status = CELLULAR_PKT_STATUS_OK;
 
-void pktioHandlePacketCallback( CellularContext_t * pContext,
-                                _atRespType_t atRespType,
-                                const void * pBuffer )
-{
     ( void ) pContext;
     ( void ) atRespType;
     ( void ) pBuffer;
+    ( void ) status;
+
+    return status;
 }
 
 CellularPktStatus_t cellularATCommandDataPrefixCallback( void * pCallbackContext,
@@ -1186,6 +1192,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_MULTI_WO_PREFIX_W
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
 
     threadReturn = true;
+    ( void ) pktStatus;
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Assign the comm interface to pContext. */
@@ -1487,7 +1494,6 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_URC_TOKEN_STRING_RESP( void )
     context.pktDataSendPrefixCB = sendDataPrefix;
     isSendDataPrefixCbkSuccess = 0;
     context.pRespPrefix = CELLULAR_URC_TOKEN_PREFIX_STRING;
-    context.pPktioHandlepktCB = pktioHandlePacketCallback;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -1500,7 +1506,6 @@ void test__Cellular_PktioInit_Event_Aborted( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
-    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
@@ -1520,12 +1525,11 @@ void test__Cellular_PktioInit_Event_Group_Create_Null( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
-    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the pPktioCommEvent NULL case. */
-    context.pPktioCommEvent = NULL;
+    context.pPktioCommEvent = ( PlatformEventGroupHandle_t ) 0U;
     evtGroupCreate = ( uintptr_t ) ( uintptr_t * ) NULL;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
@@ -1539,8 +1543,6 @@ void test__Cellular_PktioInit_Create_Thread_Fail( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
-    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
@@ -1650,7 +1652,7 @@ void test__Cellular_PktioSendAtCmd_Null_AtCmd( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle;
+    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",
@@ -1679,7 +1681,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle;
+    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"Story for Littel Red Riding Hood: Once upon a time there was a dear little girl who was loved by every one who looked at her, but most of all by her grandmother, and there was nothing that she would not have given to the child. Once she gave her a little cap of red velvet, which suited her so well that she would never wear anything else. So she was always called Little Red Riding Hood.\"",
@@ -1707,7 +1709,7 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle;
+    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",

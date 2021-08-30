@@ -174,7 +174,7 @@ static void _saveRawData( char * pLine,
 static void _saveATData( char * pLine,
                          CellularATCommandResponse_t * pResp )
 {
-    LogDebug( ( "Save [%s] %d AT data to pResp", pLine, strlen( pLine ) ) );
+    LogDebug( ( "Save [%s] %lu AT data to pResp", pLine, strlen( pLine ) ) );
     _saveData( pLine, pResp, ( uint32_t ) ( strlen( pLine ) + 1U ) );
 }
 
@@ -676,7 +676,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         if( *ppAtResp == NULL )
         {
             *ppAtResp = _Cellular_AtResponseNew();
-            LogDebug( ( "Allocat at response %p", *ppAtResp ) );
+            LogDebug( ( "Allocat at response %p", ( void * ) *ppAtResp ) );
         }
 
         LogDebug( ( "AT solicited Resp[%s]", pLine ) );

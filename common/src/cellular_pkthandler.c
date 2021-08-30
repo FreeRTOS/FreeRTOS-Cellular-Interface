@@ -190,7 +190,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            LogWarn( ( "Couldn't allocate memory of %d for urc", strlen( pBuf ) ) );
+            LogWarn( ( "Couldn't allocate memory of %lu for urc", strlen( pBuf ) ) );
         }
     }
     else
