@@ -24,12 +24,12 @@ Three cellular modules are supported in this library.
 New cellular module can reference these module porting to be integrated into FreeRTOS Cellular Library.<br>
 Please reference cellular common library document for detail information about porting new cellular module.
 - <b>Currently Supported Features in FreeRTOS Cellular Library</b>
-- User of FreeRTOS Cellular Library is able to use Cat-M1 cellular technology to connect to network.
-- User of FreeRTOS Cellular Library is able to perform control plane operations like (initialize modem, register on a network etc.) in a vendor agnostic way.
-- User of FreeRTOS Cellular Library is able to send and receive data using TCP/IP in a vendor agnostic way given that TCP/IP stack is running on the cellular modem.
-- User of FreeRTOS Cellular Library is able to put the modem in different low power modes (PSM and eDRX) in a vendor agnostic way.
-- User of FreeRTOS Cellular Library is able to receive asynchronous notifications about various events like "disconnected", "signal strength changed" etc. to enable them to take appropriate action as desired.
-- User of FreeRTOS Cellular Library is able to use the existing application protocol clients (MQTT, HTTP) over cellular seamlessly. i.e. any existing user application using MQTT which works over WiFi/Ethernet shall work over Cellular given the underlying cellular technology permits that.<br>
+ - User of FreeRTOS Cellular Library is able to use Cat-M1 cellular technology to connect to network.
+ - User of FreeRTOS Cellular Library is able to perform control plane operations like (initialize modem, register on a network etc.) in a vendor agnostic way.
+ - User of FreeRTOS Cellular Library is able to send and receive data using TCP/IP in a vendor agnostic way given that TCP/IP stack is running on the cellular modem.
+ - User of FreeRTOS Cellular Library is able to put the modem in different low power modes (PSM and eDRX) in a vendor agnostic way.
+ - User of FreeRTOS Cellular Library is able to receive asynchronous notifications about various events like "disconnected", "signal strength changed" etc. to enable them to take appropriate action as desired.
+ - User of FreeRTOS Cellular Library is able to use the existing application protocol clients (MQTT, HTTP) over cellular seamlessly. i.e. any existing user application using MQTT which works over WiFi/Ethernet shall work over Cellular given the underlying cellular technology permits that.<br>
 
 
 @section mqtt_memory_requirements Memory Requirements
@@ -53,7 +53,6 @@ The following communication interface implementation can be used as reference.
 - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c"> STM32 L475 discovery board comm interface </a>
 - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c"> Sierra sensorhub board comm interface </a>
 <b></b>
-
 */
 
 /**
@@ -66,207 +65,94 @@ Some configuration settings are C pre-processor constants, and some are function
 @copydoc CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
 
 @section CELLULAR_MCC_MAX_SIZE
-
-Mobile country code max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 3
+@copydoc CELLULAR_MCC_MAX_SIZE
 
 @section CELLULAR_MNC_MAX_SIZE
-
-Mobile network code max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 3
+@copydoc CELLULAR_MNC_MAX_SIZE
 
 @section CELLULAR_ICCID_MAX_SIZE
-
-Integrate circuit card identity max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 20
+@copydoc CELLULAR_ICCID_MAX_SIZE
 
 @section CELLULAR_IMSI_MAX_SIZE
-
-International Mobile Subscriber Identity max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 15
+@copydoc CELLULAR_IMSI_MAX_SIZE
 
 @section CELLULAR_FW_VERSION_MAX_SIZE
-
-Cellular module firmware version max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 32
+@copydoc CELLULAR_FW_VERSION_MAX_SIZE
 
 @section CELLULAR_HW_VERSION_MAX_SIZE
-
-Cellular module hardware version max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 12
+@copydoc CELLULAR_HW_VERSION_MAX_SIZE
 
 @section CELLULAR_SERIAL_NUM_MAX_SIZE
-
-Cellular module serial number max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 12
+@copydoc CELLULAR_SERIAL_NUM_MAX_SIZE
 
 @section CELLULAR_IMEI_MAX_SIZE
-
-International Mobile Equipment Identity number max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 15
+@copydoc CELLULAR_IMEI_MAX_SIZE
 
 @section CELLULAR_NETWORK_NAME_MAX_SIZE
-
-Registered network operator name max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 32
+@copydoc CELLULAR_NETWORK_NAME_MAX_SIZE
 
 @section CELLULAR_APN_MAX_SIZE
-
-Access point name max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 32
+@copydoc CELLULAR_APN_MAX_SIZE
 
 @section CELLULAR_PDN_USERNAME_MAX_SIZE
-
-Packet data network username max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 32
+@copydoc CELLULAR_PDN_USERNAME_MAX_SIZE
 
 @section CELLULAR_PDN_PASSWORD_MAX_SIZE
-
-Packet data network password max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 32
+@copydoc CELLULAR_PDN_PASSWORD_MAX_SIZE
 
 @section CELLULAR_IP_ADDRESS_MAX_SIZE
-
-Cellular data network IP address max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 40
+@copydoc CELLULAR_IP_ADDRESS_MAX_SIZE
 
 @section CELLULAR_AT_CMD_MAX_SIZE
-
-Cellular AT command max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 200
+@copydoc CELLULAR_AT_CMD_MAX_SIZE
 
 @section CELLULAR_NUM_SOCKET_MAX
-
-Cellular module number of socket max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 12
+@copydoc CELLULAR_NUM_SOCKET_MAX
 
 @section CELLULAR_MANUFACTURE_ID_MAX_SIZE
-
-Cellular module manufacture ID max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 20
+@copydoc CELLULAR_MANUFACTURE_ID_MAX_SIZE
 
 @section CELLULAR_MODEL_ID_MAX_SIZE
-
-Cellular module ID max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 10
+@copydoc CELLULAR_MODEL_ID_MAX_SIZE
 
 @section CELLULAR_EDRX_LIST_MAX_SIZE
-
-Cellular EDRX list max size
-
-@configpossible `Any positive integer`<br>
-@configdefault 4
+@copydoc CELLULAR_EDRX_LIST_MAX_SIZE
 
 @section CELLULAR_PDN_CONTEXT_ID_MIN
-
-Cellular PDN context ID min value
-
-@configpossible `Any positive integer`<br>
-@configdefault 1
+@copydoc CELLULAR_PDN_CONTEXT_ID_MIN
 
 @section CELLULAR_PDN_CONTEXT_ID_MAX
-
-Cellular PDN context ID max value
-
-@configpossible `Any positive integer`<br>
-@configdefault 1
+@copydoc CELLULAR_PDN_CONTEXT_ID_MAX
 
 @section CELLULAR_MAX_RAT_PRIORITY_COUNT
-
-Cellular RAT ( radio access technology ) priority count
-
-@configpossible `Any positive integer`<br>
-@configdefault 1
+@copydoc CELLULAR_MAX_RAT_PRIORITY_COUNT
 
 @section CELLULAR_MAX_SEND_DATA_LEN
-
-Cellular socket max send data length.
-
-@configpossible `Any positive integer`<br>
-@configdefault 1460
+@copydoc CELLULAR_MAX_SEND_DATA_LEN
 
 @section CELLULAR_MAX_RECV_DATA_LEN
-
-Cellular socket max receive data length
-
-@configpossible `Any positive integer`<br>
-@configdefault 1500
+@copydoc CELLULAR_MAX_RECV_DATA_LEN
 
 @section CELLULAR_SUPPORT_GETHOSTBYNAME
-
-Cellular module support getHostByName
-
-@configpossible `0 or 1`<br>
-@configdefault 1
+@copydoc CELLULAR_SUPPORT_GETHOSTBYNAME
 
 @section CELLULAR_COMM_IF_SEND_TIMEOUT_MS
-
-Cellular comm interface send timeout in MS
-
-@configpossible `Any positive integer`<br>
-@configdefault 1000
+@copydoc CELLULAR_COMM_IF_SEND_TIMEOUT_MS
 
 @section CELLULAR_COMM_IF_RECV_TIMEOUT_MS
-
-Cellular comm interface receive timeout in MS
-
-@configpossible `Any positive integer`<br>
-@configdefault 1000
+@copydoc CELLULAR_COMM_IF_RECV_TIMEOUT_MS
 
 @section CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
-
-FreeRTOS Cellular Library use static context
-
-@configpossible `0 or 1`<br>
-@configdefault 0
+@copydoc CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
 
 @section CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT
-
-Cellular comm interface use static context
-
-@configpossible `0 or 1`<br>
-@configdefault 0
+@copydoc CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT
 
 @section CELLULAR_CONFIG_DEFAULT_RAT
+@copydoc CELLULAR_CONFIG_DEFAULT_RAT
 
-Default radio access technoloyg
-
-@configpossible `Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t ) <br>
-@configdefault CELLULAR_RAT_CATM1
+@section CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
+@copydoc CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
 
 @section cellular_logerror LogError
 @copydoc LogError
@@ -282,111 +168,110 @@ Default radio access technoloyg
 */
 
 /**
- * @functions_page{cellular,cellular}
- * @functions_brief{cellular}
+@functions_page{cellular,cellular}
+@functions_brief{cellular}
 
- * <b>Control plane APIs</b>
- *
- * - @function_name{Cellular_Init}
- * @function_brief{Cellular_Init}
- * - @function_name{Cellular_Cleanup}
- * @function_brief{Cellular_Cleanup}
- * - @function_name{Cellular_SetRatPriority}
- * @function_brief{Cellular_SetRatPriority}
- * - @function_name{Cellular_GetRatPriority}
- * @function_brief{Cellular_GetRatPriority}
- * - @function_name{Cellular_RfOn}
- * @function_brief{Cellular_RfOn}
- * - @function_name{Cellular_RfOff}
- * @function_brief{Cellular_RfOff}
- *
- * <b>Hardware info</b>
- *
- * - @function_name{Cellular_GetSimCardStatus}
- * @function_brief{Cellular_GetSimCardStatus}
- * - @function_name{Cellular_GetSimCardInfo}
- * @function_brief{Cellular_GetSimCardInfo}
- * - @function_name{Cellular_GetModemInfo}
- * @function_brief{Cellular_GetModemInfo}
- *
- * <b>Network registration</b>
- *
- * - @function_name{Cellular_GetRegisteredNetwork}
- * @function_brief{Cellular_GetRegisteredNetwork}
- * - @function_name{Cellular_GetNetworkTime}
- * @function_brief{Cellular_GetNetworkTime}
- * - @function_name{Cellular_GetSignalInfo}
- * @function_brief{Cellular_GetSignalInfo}
- * - @function_name{Cellular_GetServiceStatus}
- * @function_brief{Cellular_GetServiceStatus}
- *
- * <b>Enable data network</b>
- *
- * - @function_name{Cellular_SetPdnConfig}
- * @function_brief{Cellular_SetPdnConfig}
- * - @function_name{Cellular_GetPdnStatus}
- * @function_brief{Cellular_GetPdnStatus}
- * - @function_name{Cellular_ActivatePdn}
- * @function_brief{Cellular_ActivatePdn}
- * - @function_name{Cellular_DeactivatePdn}
- * @function_brief{Cellular_DeactivatePdn}
- * - @function_name{Cellular_GetIPAddress}
- * @function_brief{Cellular_GetIPAddress}
- * - @function_name{Cellular_SetDns}
- * @function_brief{Cellular_SetDns}
- *
- * <b>Device and network status callback functions</b>
- *
- * - @function_name{Cellular_RegisterUrcNetworkRegistrationEventCallback}
- * @function_brief{Cellular_RegisterUrcNetworkRegistrationEventCallback}
- * - @function_name{Cellular_RegisterUrcPdnEventCallback}
- * @function_brief{Cellular_RegisterUrcPdnEventCallback}
- * - @function_name{Cellular_RegisterUrcSignalStrengthChangedCallback}
- * @function_brief{Cellular_RegisterUrcSignalStrengthChangedCallback}
- * - @function_name{Cellular_RegisterModemEventCallback}
- * @function_brief{Cellular_RegisterModemEventCallback}
- * - @function_name{Cellular_RegisterUrcGenericCallback}
- * @function_brief{Cellular_RegisterUrcGenericCallback}
- *
- * <b>Power saveing modes</b>
- *
- * - @function_name{Cellular_GetPsmSettings}
- * @function_brief{Cellular_GetPsmSettings}
- * - @function_name{Cellular_SetPsmSettings}
- * @function_brief{Cellular_SetPsmSettings}
- * - @function_name{Cellular_GetEidrxSettings}
- * @function_brief{Cellular_GetEidrxSettings}
- * - @function_name{Cellular_SetEidrxSettings}
- * @function_brief{Cellular_SetEidrxSettings}
- *
- * <b>Custom AT command</b>
- *
- * - @function_name{Cellular_ATCommandRaw}
- * @function_brief{Cellular_ATCommandRaw}
- *
- * <b>Data plan APIs</b>
- *
- * - @function_name{Cellular_CreateSocket}
- * @function_brief{Cellular_CreateSocket}
- * - @function_name{Cellular_SocketConnect}
- * @function_brief{Cellular_SocketConnect}
- * - @function_name{Cellular_SocketSend}
- * @function_brief{Cellular_SocketSend}
- * - @function_name{Cellular_SocketRecv}
- * @function_brief{Cellular_SocketRecv}
- * - @function_name{Cellular_SocketClose}
- * @function_brief{Cellular_SocketClose}
- * - @function_name{Cellular_GetHostByName}
- * @function_brief{Cellular_GetHostByName}
- * - @function_name{Cellular_SocketSetSockOpt}
- * @function_brief{Cellular_SocketSetSockOpt}
- * - @function_name{Cellular_SocketRegisterSocketOpenCallback}
- * @function_brief{Cellular_SocketRegisterSocketOpenCallback}
- * - @function_name{Cellular_SocketRegisterDataReadyCallback}
- * @function_brief{Cellular_SocketRegisterDataReadyCallback}
- * - @function_name{Cellular_SocketRegisterClosedCallback}
- * @function_brief{Cellular_SocketRegisterClosedCallback}
+<b>Control plane APIs</b>
 
+- @function_name{Cellular_Init}
+@function_brief{Cellular_Init}
+- @function_name{Cellular_Cleanup}
+@function_brief{Cellular_Cleanup}
+- @function_name{Cellular_SetRatPriority}
+@function_brief{Cellular_SetRatPriority}
+- @function_name{Cellular_GetRatPriority}
+@function_brief{Cellular_GetRatPriority}
+- @function_name{Cellular_RfOn}
+@function_brief{Cellular_RfOn}
+- @function_name{Cellular_RfOff}
+@function_brief{Cellular_RfOff}
+
+<b>Hardware info</b>
+
+- @function_name{Cellular_GetSimCardStatus}
+@function_brief{Cellular_GetSimCardStatus}
+- @function_name{Cellular_GetSimCardInfo}
+@function_brief{Cellular_GetSimCardInfo}
+- @function_name{Cellular_GetModemInfo}
+@function_brief{Cellular_GetModemInfo}
+
+<b>Network registration</b>
+
+- @function_name{Cellular_GetRegisteredNetwork}
+@function_brief{Cellular_GetRegisteredNetwork}
+- @function_name{Cellular_GetNetworkTime}
+@function_brief{Cellular_GetNetworkTime}
+- @function_name{Cellular_GetSignalInfo}
+@function_brief{Cellular_GetSignalInfo}
+- @function_name{Cellular_GetServiceStatus}
+@function_brief{Cellular_GetServiceStatus}
+
+<b>Enable data network</b>
+
+- @function_name{Cellular_SetPdnConfig}
+@function_brief{Cellular_SetPdnConfig}
+- @function_name{Cellular_GetPdnStatus}
+@function_brief{Cellular_GetPdnStatus}
+- @function_name{Cellular_ActivatePdn}
+@function_brief{Cellular_ActivatePdn}
+- @function_name{Cellular_DeactivatePdn}
+@function_brief{Cellular_DeactivatePdn}
+- @function_name{Cellular_GetIPAddress}
+@function_brief{Cellular_GetIPAddress}
+- @function_name{Cellular_SetDns}
+@function_brief{Cellular_SetDns}
+
+<b>Device and network status callback functions</b>
+
+- @function_name{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+@function_brief{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+- @function_name{Cellular_RegisterUrcPdnEventCallback}
+@function_brief{Cellular_RegisterUrcPdnEventCallback}
+- @function_name{Cellular_RegisterUrcSignalStrengthChangedCallback}
+@function_brief{Cellular_RegisterUrcSignalStrengthChangedCallback}
+- @function_name{Cellular_RegisterModemEventCallback}
+@function_brief{Cellular_RegisterModemEventCallback}
+- @function_name{Cellular_RegisterUrcGenericCallback}
+@function_brief{Cellular_RegisterUrcGenericCallback}
+
+<b>Power saveing modes</b>
+
+- @function_name{Cellular_GetPsmSettings}
+@function_brief{Cellular_GetPsmSettings}
+- @function_name{Cellular_SetPsmSettings}
+@function_brief{Cellular_SetPsmSettings}
+- @function_name{Cellular_GetEidrxSettings}
+@function_brief{Cellular_GetEidrxSettings}
+- @function_name{Cellular_SetEidrxSettings}
+@function_brief{Cellular_SetEidrxSettings}
+
+<b>Custom AT command</b>
+
+- @function_name{Cellular_ATCommandRaw}
+@function_brief{Cellular_ATCommandRaw}
+
+<b>Data plan APIs</b>
+
+- @function_name{Cellular_CreateSocket}
+@function_brief{Cellular_CreateSocket}
+- @function_name{Cellular_SocketConnect}
+@function_brief{Cellular_SocketConnect}
+- @function_name{Cellular_SocketSend}
+@function_brief{Cellular_SocketSend}
+- @function_name{Cellular_SocketRecv}
+@function_brief{Cellular_SocketRecv}
+- @function_name{Cellular_SocketClose}
+@function_brief{Cellular_SocketClose}
+- @function_name{Cellular_GetHostByName}
+@function_brief{Cellular_GetHostByName}
+- @function_name{Cellular_SocketSetSockOpt}
+@function_brief{Cellular_SocketSetSockOpt}
+- @function_name{Cellular_SocketRegisterSocketOpenCallback}
+@function_brief{Cellular_SocketRegisterSocketOpenCallback}
+- @function_name{Cellular_SocketRegisterDataReadyCallback}
+@function_brief{Cellular_SocketRegisterDataReadyCallback}
+- @function_name{Cellular_SocketRegisterClosedCallback}
+@function_brief{Cellular_SocketRegisterClosedCallback}
 */
 
 /**
@@ -396,6 +281,7 @@ Default radio access technoloyg
 To use the Cellular library, a platform must implement the following components:
 1. [Configuration Macros](@ref cellular_porting_config)
 2. [Cellular Communication Interface](@ref cellular_porting_comm_if)
+3. [Cellular platform dependency](@ref cellular_platform_dependency)
 
 @section cellular_porting_config Configuration Macros
 @brief Settings that must be set as macros in the config header `cellular_config.h`, or passed in as compiler options.
@@ -483,7 +369,5 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 ```
 // Example implementation of FreeRTOS Task Control
 #define Platform_Delay( delayMs )           vTaskDelay( pdMS_TO_TICKS( delayMs ) )
-
 ```
-
 */

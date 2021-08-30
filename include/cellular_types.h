@@ -44,7 +44,16 @@
  */
 #define CELLULAR_INVALID_SIGNAL_BAR_VALUE    ( 0xFFU )
 
+/**
+ * @ingroup cellular_datatypes_handles
+ * @brief Opaque Cellular context structure.
+ */
 struct CellularContext;
+
+/**
+ * @ingroup cellular_datatypes_handles
+ * @brief Opaque Cellular context structure type.
+ */
 typedef struct CellularContext         CellularContext_t;
 
 /**
@@ -353,8 +362,8 @@ typedef enum CellularATCommandType
  */
 typedef struct CellularSimCardStatus
 {
-    CellularSimCardState_t simCardState;
-    CellularSimCardLockState_t simCardLockState;
+    CellularSimCardState_t simCardState;         /**<  Cellular sim card state. */
+    CellularSimCardLockState_t simCardLockState; /**<  Cellular sim card lock state. */
 } CellularSimCardStatus_t;
 
 /**
@@ -449,8 +458,8 @@ typedef struct CellularServiceStatus
  */
 typedef struct CellularATCommandLine
 {
-    struct CellularATCommandLine * pNext;
-    char * pLine;
+    struct CellularATCommandLine * pNext; /**< The CellularATCommandLine structure pointer points to the next element of the liniked list. */
+    char * pLine;                         /**< The content of the at command. */
 } CellularATCommandLine_t;
 
 /**
@@ -459,8 +468,8 @@ typedef struct CellularATCommandLine
  */
 typedef struct CellularATCommandResponse
 {
-    bool status;                    /* true: modem returns Success, false: Error. */
-    CellularATCommandLine_t * pItm; /* Any intermediate responses. */
+    bool status;                    /**< true: modem returns Success, false: Error. */
+    CellularATCommandLine_t * pItm; /**< Any intermediate responses. */
 } CellularATCommandResponse_t;
 
 /**
@@ -639,8 +648,8 @@ typedef struct CellularEidrxSettings
  */
 typedef struct CellularEidrxSettingsList
 {
-    CellularEidrxSettings_t eidrxList[ CELLULAR_EDRX_LIST_MAX_SIZE ];
-    uint8_t count;
+    CellularEidrxSettings_t eidrxList[ CELLULAR_EDRX_LIST_MAX_SIZE ]; /**<  Cellular e-I-DRX settings list. */
+    uint8_t count;                                                    /**<  Cellular e-I-DRX settings list number. */
 } CellularEidrxSettingsList_t;
 
 /**
@@ -694,7 +703,7 @@ typedef struct CellularSocketAddress
  * using Cellular_ATCommandRaw API.
  *
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pResponse The response received for the AT command.
+ * @param[in] pAtResp The response received for the AT command.
  * @param[in] pData is pATCommandPayload pointer in Cellular_ATCommandRaw parameters.
  * @param[in] dataLen is the string length of pATCommandPayloadin in Cellular_ATCommandRaw parameters.
  *

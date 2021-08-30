@@ -49,7 +49,9 @@
  */
 #define CELLULAR_AT_MAX_PREFIX_SIZE    ( 32 )
 
-
+/**
+ * @brief The arrary size of an array.
+ */
 #define ARRY_SIZE( x )    ( sizeof( x ) / sizeof( x[ 0 ] ) )
 
 /*-----------------------------------------------------------*/
