@@ -10,7 +10,7 @@
     <tr>
         <td>cellular_3gpp_api.c</td>
         <td><center>6.3K</center></td>
-        <td><center>5.7K</center></td>
+        <td><center>5.8K</center></td>
     </tr>
     <tr>
         <td>cellular_3gpp_urc_handler.c</td>
@@ -30,12 +30,12 @@
     <tr>
         <td>cellular_common.c</td>
         <td><center>1.6K</center></td>
-        <td><center>1.4K</center></td>
+        <td><center>1.5K</center></td>
     </tr>
     <tr>
         <td>cellular_pkthandler.c</td>
         <td><center>1.4K</center></td>
-        <td><center>1.2K</center></td>
+        <td><center>1.3K</center></td>
     </tr>
     <tr>
         <td>cellular_pktio.c</td>
@@ -45,6 +45,6 @@
     <tr>
         <td><b>Total estimates</b></td>
         <td><b><center>13.9K</center></b></td>
-        <td><b><center>12.4K</center></b></td>
+        <td><b><center>12.7K</center></b></td>
     </tr>
 </table>

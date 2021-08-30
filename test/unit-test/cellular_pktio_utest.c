@@ -212,14 +212,9 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
-void dummyDelay( int milliseconds )
+void dummyDelay( uint32_t milliseconds )
 {
     ( void ) milliseconds;
-}
-
-void dummyAssert( int condition )
-{
-    ( void ) condition;
 }
 
 void * mock_malloc( size_t size )

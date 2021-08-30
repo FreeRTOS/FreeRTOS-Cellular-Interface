@@ -331,8 +331,8 @@
  * <b>Possible values:</b>`0 or 1`<br>
  * <b>Default value (if undefined):</b> 0
  */
-#ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT
-    #define CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT    ( 0U )
+#ifndef CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION
+    #define CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION    ( 0U )
 #endif
 
 /**

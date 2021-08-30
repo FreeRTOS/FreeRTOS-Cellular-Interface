@@ -38,7 +38,7 @@
 
 /*-----------------------------------------------------------*/
 
-#define configASSERT                         dummyAssert
+#define configASSERT                         assert
 #define Platform_Delay                       dummyDelay
 #define taskENTER_CRITICAL                   dummyTaskENTER_CRITICAL
 #define taskEXIT_CRITICAL                    dummyTaskEXIT_CRITICAL
@@ -239,9 +239,10 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupE
                                                EventBits_t event,
                                                BaseType_t * pHigherPriorityTaskWoken );
 
-void dummyAssert( int condition );
-void dummyDelay( int milliseconds );
+void dummyDelay( uint32_t milliseconds );
+
 void dummyTaskENTER_CRITICAL( void );
+
 void dummyTaskEXIT_CRITICAL( void );
 
 #endif /* __CELLULAR_PLATFORM_H__ */
