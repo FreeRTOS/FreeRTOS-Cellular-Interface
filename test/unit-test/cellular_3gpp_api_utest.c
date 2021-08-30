@@ -135,11 +135,6 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
-void dummyAssert( int condition )
-{
-    ( void ) condition;
-}
-
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
