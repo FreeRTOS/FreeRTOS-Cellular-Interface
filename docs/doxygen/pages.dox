@@ -32,7 +32,7 @@ Please reference cellular common library document for detail information about p
  - User of FreeRTOS Cellular Library is able to use the existing application protocol clients (MQTT, HTTP) over cellular seamlessly. i.e. any existing user application using MQTT which works over WiFi/Ethernet shall work over Cellular given the underlying cellular technology permits that.<br>
 
 
-@section mqtt_memory_requirements Memory Requirements
+@section cellular_memory_requirements Memory Requirements
 @brief Memory requirements of the Cellular library.
 
 @include{doc} size_table.md
@@ -275,7 +275,7 @@ Some configuration settings are C pre-processor constants, and some are function
 */
 
 /**
-@page cellular_portin Porting Guide
+@page cellular_porting Porting Guide
 @brief Guide for porting Cellular library to a new platform.
 
 To use the Cellular library, a platform must implement the following components:
@@ -371,3 +371,23 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 #define Platform_Delay( delayMs )           vTaskDelay( pdMS_TO_TICKS( delayMs ) )
 ```
 */
+
+/**
+ * @paramstructs_group{cellular,Cellular}
+ * @paramstructs_brief{cellular,cellular}
+ */
+
+/**
+ * @handles_group{cellular,Cellular}
+ * @handles_brief{cellular library}
+ */
+
+/**
+ * @functionpointers_group{cellular,Cellular}
+ * @functionpointers_brief{cellular library}
+ */
+
+/**
+ * @enums_group{cellular,Cellular}
+ * @enums_brief{cellular library}
+ */

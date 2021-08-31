@@ -183,17 +183,17 @@ uint32_t CellularUrcHandlerTableSize = 4;
 */
 
 /**
-@paramstructs_group{cellular_common}
+@paramstructs_group{cellular_common,Cellular_common}
 @paramstructs_brief{cellular_common,cellular_common}
 */
 
 /**
-@functionpointers_group{cellular_common}
+@functionpointers_group{cellular_common,Cellular_common}
 @functionpointers_brief{cellular_common library}
 */
 
 /**
-@enums_group{cellular_common}
+@enums_group{cellular_common,Cellular_common}
 @enums_brief{cellular_common library}
 */
 
