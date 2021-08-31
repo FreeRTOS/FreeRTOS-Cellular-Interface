@@ -99,17 +99,17 @@ typedef enum CellularError
  */
 typedef enum CellularRat
 {
-    CELLULAR_RAT_GSM = 0,
-    CELLULAR_RAT_WCDMA = 2,
-    CELLULAR_RAT_EDGE = 3,
-    CELLULAR_RAT_HSDPA = 4,
-    CELLULAR_RAT_HSUPA = 5,
-    CELLULAR_RAT_HSDPAHSUPA = 6,
-    CELLULAR_RAT_LTE = 7,
-    CELLULAR_RAT_CATM1 = 8,
-    CELLULAR_RAT_NBIOT = 9,
-    CELLULAR_RAT_MAX,
-    CELLULAR_RAT_INVALID = 0xFF
+    CELLULAR_RAT_GSM = 0,        /**< The GSM RATs network. */
+    CELLULAR_RAT_WCDMA = 2,      /**< The WCDMA RATs network. */
+    CELLULAR_RAT_EDGE = 3,       /**< The EDGE RATs network. */
+    CELLULAR_RAT_HSDPA = 4,      /**< The HSDPA RATs network. */
+    CELLULAR_RAT_HSUPA = 5,      /**< The HSUPA RATs network. */
+    CELLULAR_RAT_HSDPAHSUPA = 6, /**< The HSDPAHSUPA RATs network. */
+    CELLULAR_RAT_LTE = 7,        /**< The LTE RATs network. */
+    CELLULAR_RAT_CATM1 = 8,      /**< The CAT M1 RATs network. */
+    CELLULAR_RAT_NBIOT = 9,      /**< The NBIOT RATs network. */
+    CELLULAR_RAT_MAX,            /**< The max supported number for RATs network. */
+    CELLULAR_RAT_INVALID = 0xFF  /**< Any other error other than the above mentioned ones. */
 } CellularRat_t;
 
 /**
@@ -118,10 +118,10 @@ typedef enum CellularRat
  */
 typedef enum CellularSimCardState
 {
-    CELLULAR_SIM_CARD_REMOVED = 0,
-    CELLULAR_SIM_CARD_INSERTED,
-    CELLULAR_SIM_CARD_STATUS_MAX,
-    CELLULAR_SIM_CARD_UNKNOWN
+    CELLULAR_SIM_CARD_REMOVED = 0, /**< The state stands for cellular sim card removed. */
+    CELLULAR_SIM_CARD_INSERTED,    /**< The state stands for cellular sim card inserted. */
+    CELLULAR_SIM_CARD_STATUS_MAX,  /**< The number of supported sim card status. */
+    CELLULAR_SIM_CARD_UNKNOWN      /**< The state stands for unknown cellular sim card. */
 } CellularSimCardState_t;
 
 /**
@@ -130,23 +130,23 @@ typedef enum CellularSimCardState
  */
 typedef enum CellularSimCardLockState
 {
-    CELLULAR_SIM_CARD_READY = 0,
-    CELLULAR_SIM_CARD_PIN,
-    CELLULAR_SIM_CARD_PUK,
-    CELLULAR_SIM_CARD_PIN2,
-    CELLULAR_SIM_CARD_PUK2,
-    CELLULAR_SIM_CARD_PH_NET_PIN,
-    CELLULAR_SIM_CARD_PH_NET_PUK,
-    CELLULAR_SIM_CARD_PH_NETSUB_PIN,
-    CELLULAR_SIM_CARD_PH_NETSUB_PUK,
-    CELLULAR_SIM_CARD_SP_PIN,
-    CELLULAR_SIM_CARD_SP_PUK,
-    CELLULAR_SIM_CARD_CORP_PIN,
-    CELLULAR_SIM_CARD_CORP_PUK,
-    CELLULAR_SIM_CARD_IMSI_PIN,
-    CELLULAR_SIM_CARD_IMSI_PUK,
-    CELLULAR_SIM_CARD_INVALID,
-    CELLULAR_SIM_CARD_LOCK_UNKNOWN
+    CELLULAR_SIM_CARD_READY = 0,     /**< The cellular sim card in a lock state of ready. */
+    CELLULAR_SIM_CARD_PIN,           /**< The cellular sim card in a lock state of pin(personal identification number). */
+    CELLULAR_SIM_CARD_PUK,           /**< The cellular sim card in a lock state of puk(personal unlocking key). */
+    CELLULAR_SIM_CARD_PIN2,          /**< The cellular sim card in a lock state of pin2. */
+    CELLULAR_SIM_CARD_PUK2,          /**< The cellular sim card in a lock state of puk2. */
+    CELLULAR_SIM_CARD_PH_NET_PIN,    /**< The cellular sim card in a lock state of ph-net pin. */
+    CELLULAR_SIM_CARD_PH_NET_PUK,    /**< The cellular sim card in a lock state of ph-net puk. */
+    CELLULAR_SIM_CARD_PH_NETSUB_PIN, /**< The cellular sim card in a lock state of ph-netsub pin. */
+    CELLULAR_SIM_CARD_PH_NETSUB_PUK, /**< The cellular sim card in a lock state of ph-netsub puk. */
+    CELLULAR_SIM_CARD_SP_PIN,        /**< The cellular sim card in a lock state of ph-sp pin. */
+    CELLULAR_SIM_CARD_SP_PUK,        /**< The cellular sim card in a lock state of ph-sp puk. */
+    CELLULAR_SIM_CARD_CORP_PIN,      /**< The cellular sim card in a lock state of ph-corp pin. */
+    CELLULAR_SIM_CARD_CORP_PUK,      /**< The cellular sim card in a lock state of ph-sp puk. */
+    CELLULAR_SIM_CARD_IMSI_PIN,      /**< The cellular sim card in a lock state of imsi pin. */
+    CELLULAR_SIM_CARD_IMSI_PUK,      /**< The cellular sim card in a lock state of imsi puk. */
+    CELLULAR_SIM_CARD_INVALID,       /**< The cellular sim card in a lock state of invalid. */
+    CELLULAR_SIM_CARD_LOCK_UNKNOWN   /**< The cellular sim card in a lock state of unknown. */
 } CellularSimCardLockState_t;
 
 /**
@@ -155,12 +155,12 @@ typedef enum CellularSimCardLockState
  */
 typedef enum CellularNetworkRegistrationMode
 {
-    REGISTRATION_MODE_AUTO = 0,
-    REGISTRATION_MODE_MANUAL = 1,
-    REGISTRATION_MODE_DEREGISTER = 2,
-    REGISTRATION_MODE_MANUAL_THEN_AUTO = 4,
-    REGISTRATION_MODE_MAX,
-    REGISTRATION_MODE_UNKNOWN
+    REGISTRATION_MODE_AUTO = 0,             /**< Auto network registration mode. */
+    REGISTRATION_MODE_MANUAL = 1,           /**< Manual network registration mode. */
+    REGISTRATION_MODE_DEREGISTER = 2,       /**< Deregister network registration mode. */
+    REGISTRATION_MODE_MANUAL_THEN_AUTO = 4, /**< Manual then auto network registration mode. */
+    REGISTRATION_MODE_MAX,                  /**< The number of supported registration mode. */
+    REGISTRATION_MODE_UNKNOWN               /**< Unknown network registration mode. */
 } CellularNetworkRegistrationMode_t;
 
 /**
@@ -169,16 +169,16 @@ typedef enum CellularNetworkRegistrationMode
  */
 typedef enum CellularNetworkRegistrationStatus
 {
-    REGISTRATION_STATUS_NO_REGISTERED_SEARCHING = 0,
-    REGISTRATION_STATUS_REGISTERED_HOME = 1,
-    REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING = 2,
-    REGISTRATION_STATUS_REGISTRATION_DENIED = 3,
-    REGISTRATION_STATUS_UNKNOWN = 4,
-    REGISTRATION_STATUS_ROAMING_REGISTERED = 5,
-    REGISTRATION_STATUS_HOME_SMS_ONLY_REGISTERED = 6,
-    REGISTRATION_STATUS_SMS_ONLY_ROAMING_REGISTERED = 7,
-    REGISTRATION_STATUS_ATTACHED_EMERG_SERVICES_ONLY = 8,
-    REGISTRATION_STATUS_MAX
+    REGISTRATION_STATUS_NO_REGISTERED_SEARCHING = 0,      /**< No registered searching network registration status. */
+    REGISTRATION_STATUS_REGISTERED_HOME = 1,              /**< Registered home network registration status. */
+    REGISTRATION_STATUS_NOT_REGISTERED_SEARCHING = 2,     /**< Not registered searching network registration status. */
+    REGISTRATION_STATUS_REGISTRATION_DENIED = 3,          /**< Registration denied network registration status. */
+    REGISTRATION_STATUS_UNKNOWN = 4,                      /**< Unknown network registration status. */
+    REGISTRATION_STATUS_ROAMING_REGISTERED = 5,           /**< Roaming registered network registration status. */
+    REGISTRATION_STATUS_HOME_SMS_ONLY_REGISTERED = 6,     /**< Home SMS only registered network registration status. */
+    REGISTRATION_STATUS_SMS_ONLY_ROAMING_REGISTERED = 7,  /**< SMS only roaming registered network registration status. */
+    REGISTRATION_STATUS_ATTACHED_EMERG_SERVICES_ONLY = 8, /**< Attached emergency service only network registration status. */
+    REGISTRATION_STATUS_MAX                               /**< The max supported number for registration status. */
 } CellularNetworkRegistrationStatus_t;
 
 /**
@@ -187,11 +187,11 @@ typedef enum CellularNetworkRegistrationStatus
  */
 typedef enum CellularOperatorNameFormat
 {
-    OPERATOR_NAME_FORMAT_LONG = 0,
-    OPERATOR_NAME_FORMAT_SHORT = 1,
-    OPERATOR_NAME_FORMAT_NUMERIC = 2,
-    OPERATOR_NAME_FORMAT_NOT_PRESENT = 9,
-    OPERATOR_NAME_FORMAT_MAX
+    OPERATOR_NAME_FORMAT_LONG = 0,        /**< Long operator name format. */
+    OPERATOR_NAME_FORMAT_SHORT = 1,       /**< Short operator name format. */
+    OPERATOR_NAME_FORMAT_NUMERIC = 2,     /**< Numeric operator name format. */
+    OPERATOR_NAME_FORMAT_NOT_PRESENT = 9, /**< Not present operator name format. */
+    OPERATOR_NAME_FORMAT_MAX              /**< The max supported number for operator name format. */
 } CellularOperatorNameFormat_t;
 
 /**
@@ -200,14 +200,14 @@ typedef enum CellularOperatorNameFormat
  */
 typedef enum CellularUrcEvent
 {
-    CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION,
-    CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION,
-    CELLULAR_URC_EVENT_PDN_ACTIVATED,
-    CELLULAR_URC_EVENT_PDN_DEACTIVATED,
-    CELLULAR_URC_EVENT_SIGNAL_CHANGED,
-    CELLULAR_URC_SOCKET_OPENED,
-    CELLULAR_URC_SOCKET_OPEN_FAILED,
-    CELLULAR_URC_EVENT_OTHER /* Any URC event other than above. */
+    CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION, /**< Network CS registration URC event. */
+    CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION, /**< Network PS registration URC event. */
+    CELLULAR_URC_EVENT_PDN_ACTIVATED,           /**< PDN activated registration URC event. */
+    CELLULAR_URC_EVENT_PDN_DEACTIVATED,         /**< PDN deactivated registration URC event. */
+    CELLULAR_URC_EVENT_SIGNAL_CHANGED,          /**< Signal changed registration URC event. */
+    CELLULAR_URC_SOCKET_OPENED,                 /**< Socket opened registration URC event. */
+    CELLULAR_URC_SOCKET_OPEN_FAILED,            /**< Socket open failed registration URC event. */
+    CELLULAR_URC_EVENT_OTHER                    /**< Any URC event other than above. */
 } CellularUrcEvent_t;
 
 /**
@@ -216,9 +216,9 @@ typedef enum CellularUrcEvent
  */
 typedef enum CellularModemEvent
 {
-    CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT,
-    CELLULAR_MODEM_EVENT_POWERED_DOWN,
-    CELLULAR_MODEM_EVENT_PSM_ENTER
+    CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT, /**< Bootup or reboot modem event. */
+    CELLULAR_MODEM_EVENT_POWERED_DOWN,     /**< Power down modem event. */
+    CELLULAR_MODEM_EVENT_PSM_ENTER         /**< PSM enter modem event. */
 } CellularModemEvent_t;
 
 /**
@@ -227,10 +227,10 @@ typedef enum CellularModemEvent
  */
 typedef enum CellularPdnContextType
 {
-    CELLULAR_PDN_CONTEXT_IPV4 = 1,
-    CELLULAR_PDN_CONTEXT_IPV6 = 2,
-    CELLULAR_PDN_CONTEXT_IPV4V6 = 3,
-    CELLULAR_PDN_CONTEXT_TYPE_MAX
+    CELLULAR_PDN_CONTEXT_IPV4 = 1,   /**< IPV4 PDN CONTEXT. */
+    CELLULAR_PDN_CONTEXT_IPV6 = 2,   /**< IPV6 PDN CONTEXT. */
+    CELLULAR_PDN_CONTEXT_IPV4V6 = 3, /**< IPV4V6 PDN CONTEXT. */
+    CELLULAR_PDN_CONTEXT_TYPE_MAX    /**< The max number of supported PDN CONTEXT. */
 } CellularPdnContextType_t;
 
 /**
@@ -293,8 +293,8 @@ typedef enum CellularSocketAccessMode
  */
 typedef enum CellularIPAddressType
 {
-    CELLULAR_IP_ADDRESS_V4,
-    CELLULAR_IP_ADDRESS_V6
+    CELLULAR_IP_ADDRESS_V4, /**< IP V4 IP address. */
+    CELLULAR_IP_ADDRESS_V6  /**< IP V6 IP address. */
 } CellularIPAddressType_t;
 
 /**
