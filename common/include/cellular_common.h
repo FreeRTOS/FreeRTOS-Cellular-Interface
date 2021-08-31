@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_common.h
+ */
+
 #ifndef __CELLULAR_COMMON_H__
 #define __CELLULAR_COMMON_H__
 
@@ -48,12 +52,12 @@
  */
 typedef struct CellularAtReq
 {
-    const char * pAtCmd;
-    CellularATCommandType_t atCmdType;
-    const char * pAtRspPrefix;
-    CellularATCommandResponseReceivedCallback_t respCallback;
-    void * pData;
-    uint16_t dataLen;
+    const char * pAtCmd;                                      /**< The At command string used for at command request. */
+    CellularATCommandType_t atCmdType;                        /**< The At command type. */
+    const char * pAtRspPrefix;                                /**< The prefix of at command response. */
+    CellularATCommandResponseReceivedCallback_t respCallback; /**< The callback function #CellularATCommandResponseReceivedCallback_t. */
+    void * pData;                                             /**< The data pointer to the data. */
+    uint16_t dataLen;                                         /**< The length of the data pointer . */
 } CellularAtReq_t;
 
 /**
@@ -62,19 +66,21 @@ typedef struct CellularAtReq
  */
 typedef struct CellularAtDataReq
 {
-    const uint8_t * pData;       /* Data to send. */
-    uint32_t dataLen;            /* Data length to send. */
-    uint32_t * pSentDataLength;  /* Data actually sent. */
-    const uint8_t * pEndPattern; /* End pattern after pData is sent completely.
+    const uint8_t * pData;       /**< Data to send. */
+    uint32_t dataLen;            /**< Data length to send. */
+    uint32_t * pSentDataLength;  /**< Data actually sent. */
+    const uint8_t * pEndPattern; /**< End pattern after pData is sent completely.
                                   * Set NULL if not required. Cellular modem uses
                                   * end pattern instead of length in AT command
                                   * can make use of this variable. */
-    uint32_t endPatternLen;      /* End pattern length. */
+    uint32_t endPatternLen;      /**< End pattern length. */
 } CellularAtDataReq_t;
 
 /**
  * @ingroup cellular_common_datatypes_functionpointers
  * @brief URC handler function.
+ *
+ * @return Void.
  */
 typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
                                                   char * pInputStr );
@@ -85,8 +91,8 @@ typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
  */
 typedef struct CellularAtParseTokenMap
 {
-    const char * pStrValue;
-    CellularAtParseTokenHandler_t parserFunc;
+    const char * pStrValue;                   /**< The URC token string. */
+    CellularAtParseTokenHandler_t parserFunc; /**< The function pointer points to #CellularAtParseTokenHandler_t. */
 } CellularAtParseTokenMap_t;
 
 /**
@@ -95,10 +101,10 @@ typedef struct CellularAtParseTokenMap
  */
 typedef enum CellularSocketState
 {
-    SOCKETSTATE_ALLOCATED = 0, /* Socket is created. */
-    SOCKETSTATE_CONNECTING,    /* Socket is connecting in progress with remote peer. */
-    SOCKETSTATE_CONNECTED,     /* Socket is connected. */
-    SOCKETSTATE_DISCONNECTED   /* Socket is disconnected by remote peer or due to network error. */
+    SOCKETSTATE_ALLOCATED = 0, /**< Socket is created. */
+    SOCKETSTATE_CONNECTING,    /**< Socket is connecting in progress with remote peer. */
+    SOCKETSTATE_CONNECTED,     /**< Socket is connected. */
+    SOCKETSTATE_DISCONNECTED   /**< Socket is disconnected by remote peer or due to network error. */
 } CellularSocketState_t;
 
 /**
@@ -107,33 +113,33 @@ typedef enum CellularSocketState
  */
 typedef struct CellularSocketContext
 {
-    uint8_t contextId;                       /* PDN context ID on which this socket exists. */
-    uint32_t socketId;                       /* Socket ID of this socket. */
-    CellularSocketState_t socketState;       /* State of the socket, Allocated, Free etc. */
-    CellularSocketType_t socketType;         /* Type of socket, DGRAM or STREAM. */
-    CellularSocketDomain_t socketDomain;     /* Socket domain, IPV4 or V6. */
-    CellularSocketProtocol_t socketProtocol; /* Socket transport protocol, TCP or UDP. */
-    CellularIPAddress_t localIpAddress;      /* IP address assigned to the device. */
-    uint16_t localPort;                      /* Local Port. */
-    CellularSocketAccessMode_t dataMode;     /* Data Access mode enabled for this socket. */
+    uint8_t contextId;                       /**< PDN context ID on which this socket exists. */
+    uint32_t socketId;                       /**< Socket ID of this socket. */
+    CellularSocketState_t socketState;       /**< State of the socket, Allocated, Free etc. */
+    CellularSocketType_t socketType;         /**< Type of socket, DGRAM or STREAM. */
+    CellularSocketDomain_t socketDomain;     /**< Socket domain, IPV4 or V6. */
+    CellularSocketProtocol_t socketProtocol; /**< Socket transport protocol, TCP or UDP. */
+    CellularIPAddress_t localIpAddress;      /**< IP address assigned to the device. */
+    uint16_t localPort;                      /**< Local Port. */
+    CellularSocketAccessMode_t dataMode;     /**< Data Access mode enabled for this socket. */
 
     /* Set using socket options. */
-    uint32_t sendTimeoutMs; /* Send timeout value in milliseconds. */
-    uint32_t recvTimeoutMs; /* Receive timeout value in milliseconds. */
+    uint32_t sendTimeoutMs; /**< Send timeout value in milliseconds. */
+    uint32_t recvTimeoutMs; /**< Receive timeout value in milliseconds. */
 
     /* Set during socket connect. */
-    CellularSocketAddress_t remoteSocketAddress; /* Remote IP address and port. */
+    CellularSocketAddress_t remoteSocketAddress; /**< Remote IP address and port. */
 
     /* Callback functions. */
-    CellularSocketDataReadyCallback_t dataReadyCallback; /* Informs data on this socket. */
-    void * pDataReadyCallbackContext;                    /* Data ready callback context. */
-    CellularSocketOpenCallback_t openCallback;           /* Informs the socket open status. */
-    void * pOpenCallbackContext;                         /* socket open callback context. */
-    CellularSocketClosedCallback_t closedCallback;       /* Informs the socket is closed. */
-    void * pClosedCallbackContext;                       /* socket closed callback context. */
+    CellularSocketDataReadyCallback_t dataReadyCallback; /**< Informs data on this socket. */
+    void * pDataReadyCallbackContext;                    /**< Data ready callback context. */
+    CellularSocketOpenCallback_t openCallback;           /**< Informs the socket open status. */
+    void * pOpenCallbackContext;                         /**< socket open callback context. */
+    CellularSocketClosedCallback_t closedCallback;       /**< Informs the socket is closed. */
+    void * pClosedCallbackContext;                       /**< socket closed callback context. */
 
     /* Modem data. */
-    void * pModemData; /* Modem specific data. */
+    void * pModemData; /**< Modem specific data. */
 } CellularSocketContext_t;
 
 /**
@@ -143,22 +149,22 @@ typedef struct CellularSocketContext
 typedef struct CellularTokenTable
 {
     /* URC handler mapping table. */
-    CellularAtParseTokenMap_t * pCellularUrcHandlerTable;
-    uint32_t cellularPrefixToParserMapSize;
+    CellularAtParseTokenMap_t * pCellularUrcHandlerTable; /**< URC handler table. */
+    uint32_t cellularPrefixToParserMapSize;               /**< URC handler table size. */
 
     /* Table to decide AT command respone status. */
-    const char ** pCellularSrcTokenErrorTable;
-    uint32_t cellularSrcTokenErrorTableSize;
-    const char ** pCellularSrcTokenSuccessTable;
-    uint32_t cellularSrcTokenSuccessTableSize;
+    const char ** pCellularSrcTokenErrorTable;   /**< Solicited error token table. */
+    uint32_t cellularSrcTokenErrorTableSize;     /**< Solicited error token table size. */
+    const char ** pCellularSrcTokenSuccessTable; /**< Solicited success token table. */
+    uint32_t cellularSrcTokenSuccessTableSize;   /**< Solicited success token table size. */
 
     /* Table to URC with prefix Token. */
-    const char ** pCellularUrcTokenWoPrefixTable;
-    uint32_t cellularUrcTokenWoPrefixTableSize;
+    const char ** pCellularUrcTokenWoPrefixTable; /**< URC token without prefix table. */
+    uint32_t cellularUrcTokenWoPrefixTableSize;   /**< URC token without prefix table size. */
 
     /* Extra success token for specific AT command. */
-    const char ** pCellularSrcExtraTokenSuccessTable;
-    uint32_t cellularSrcExtraTokenSuccessTableSize;
+    const char ** pCellularSrcExtraTokenSuccessTable; /**< Extra token success table. */
+    uint32_t cellularSrcExtraTokenSuccessTableSize;   /**< Extra token success table size. */
 } CellularTokenTable_t;
 
 /**
@@ -168,7 +174,7 @@ typedef struct CellularTokenTable
  * @param[in] pCallbackContext The pCallbackContext in _Cellular_TimeoutAtcmdDataRecvRequestWithCallback.
  * @param[in] pLine The input line form cellular modem.
  * @param[in] lineLength The length of the input line from cellular modem.
- * @param[out] pData Is the start of of data in pLine.
+ * @param[out] pDataStart Is the start of of data in pLine.
  * @param[out] pDataLength Is the data length.
  *
  * @return CELLULAR_PKT_STATUS_OK if the operation is successful.

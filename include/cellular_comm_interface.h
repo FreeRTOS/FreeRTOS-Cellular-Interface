@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_comm_interface.h
+ */
+
 #ifndef __CELLULAR_COMM_INTERFACE_H__
 #define __CELLULAR_COMM_INTERFACE_H__
 
@@ -147,10 +151,10 @@ typedef CellularCommInterfaceError_t ( * CellularCommInterfaceClose_t )( Cellula
  */
 typedef struct CellularCommInterface
 {
-    CellularCommInterfaceOpen_t open;
-    CellularCommInterfaceSend_t send;
-    CellularCommInterfaceRecv_t recv;
-    CellularCommInterfaceClose_t close;
+    CellularCommInterfaceOpen_t open;   /**< Cellular communication open interface. */
+    CellularCommInterfaceSend_t send;   /**< Cellular communication send interface. */
+    CellularCommInterfaceRecv_t recv;   /**< Cellular communication recv interface. */
+    CellularCommInterfaceClose_t close; /**< Cellular communication close interface. */
 } CellularCommInterface_t;
 
 #endif /* __CELLULAR_COMM_INTERFACE_H__ */

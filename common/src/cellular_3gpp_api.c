@@ -318,7 +318,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
             }
             else
             {
-                ( "Error in Processing month. Token %s", *ppToken );
+                LogError( ( "Error in Processing month. Token %s", *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }

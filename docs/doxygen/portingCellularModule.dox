@@ -1,0 +1,338 @@
+/**
+@page cellular_porting_module_guide Porting Module Guide
+@brief FreeRTOS Cellular Common Library<br>
+
+
+FreeRTOS Cellular Common Library provides the following functions to help cellular module implementing FreeRTOS Cellular Library APIs.<br>
+- FreeRTOS Cellular Library APIs implementation with 3GPP TS v27.007 AT commands.
+- AT command functions to help implementing FreeRTOS Cellular Library APIs with vendor specific AT commands.
+<br>
+
+The following diagram illustrates the relation between cellular common and cellular module porting.<br>
+Reference @subpage porting_cellular_module for detail porting information and implemented @subpage cellular_common_functions.
+@image html cellular_common_module.png width=70%
+<br>
+*/
+
+/**
+@page porting_cellular_module Porting cellular module
+@brief Introduction to cellular module porting<br>
+
+Cellular common library provides APIS and URC handler implemented with 3GPP v27.007 AT commands.<br>
+These APIs and URC handler can be reused when porting cellular module. <br>
+Reference the following pages for detail information.
+- @subpage cellular_common_APIs
+- @subpage cellular_common_URC_handlers
+
+Porting cellular module with cellular common portable with the following steps.<br>
+-# <b>Create a folder in modules with the following files. </b>
+ - modules/(module_name)/cellular_(module_name).c
+ - modules/(module_name)/cellular_(module_name)_api.c
+ - modules/(module_name)/cellular_(module_name)_urc_handler.c
+ - modules/(module_name)/cellular_(module_name)_wrapper.c
+-# <b>Implement cellular module porting interface @ref cellular_common_portable.h in cellular_(module_name).c </b><br>
+Reference @subpage cellular_module for detail information.
+-# <b>Implement FreeRTOS Cellular Library API with cellular module specific AT commands in cellular_(module_name)_api.c </b><br>
+Reference @subpage cellular_module_api for detail information.
+-# <b>Implement URC handler to handle URC event and call the corresponding callback function in cellular_(module_name)_urc_handler.c </b><br>
+Reference @subpage cellular_module_urc_handler for detail information.
+-# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
+
+<b>Cellular module porting examples</b><br>
+Three cellular module portings can be referenced.<br>
+It is recommended that you start by cloning the implementation of one of the existing modems,<br>
+then make modifications where your modem's vendor-specific (non-3GPP) AT commands are different. <br>
+- <a href="">BG96</a>
+- <a href="">HL7802</a>
+- <a href="">SARA R4 series</a>
+*/
+
+/**
+@page cellular_common_APIs Cellular common APIs
+@brief Cellular common supported APIs
+
+<b>Cellular common supported APIs</b><br>
+Cellular common library has 3GPP AT command implemented APIs.<br>
+They can be used to minimize porting efforts when implement FreeRTOS Cellular Library APIs.<br>
+| FreeRTOS Cellular Library APIs                                       | Cellular common supported |
+| :-------------------------------------------------------| :-----------------------: |
+| Cellular_Init                                           | O                         |
+| Cellular_Cleanup                                        | O                         |
+| Cellular_SetRatPriority                                 |                           |
+| Cellular_GetRatPriority                                 |                           |
+| Cellular_RfOn                                           | O                         |
+| Cellular_RfOff                                          | O                         |
+| Cellular_GetSimCardStatus                               |                           |
+| Cellular_GetSimCardInfo                                 | O                         |
+| Cellular_GetModemInfo                                   | O                         |
+| Cellular_GetRegisteredNetwork                           | O                         |
+| Cellular_GetNetworkTime                                 | O                         |
+| Cellular_GetSignalInfo                                  |                           |
+| Cellular_GetServiceStatus                               | O                         |
+| Cellular_SetPdnConfig                                   | O                         |
+| Cellular_GetPdnStatus                                   |                           |
+| Cellular_ActivatePdn                                    |                           |
+| Cellular_DeactivatePdn                                  |                           |
+| Cellular_GetIPAddress                                   | O                         |
+| Cellular_SetDns                                         |                           |
+| Cellular_RegisterUrcNetworkRegistrationEventCallback    | O                         |
+| Cellular_RegisterUrcPdnEventCallback                    | O                         |
+| Cellular_RegisterUrcSignalStrengthChangedCallback       |                           |
+| Cellular_RegisterModemEventCallback                     | O                         |
+| Cellular_RegisterUrcGenericCallback                     | O                         |
+| Cellular_GetPsmSettings                                 | O                         |
+| Cellular_SetPsmSettings                                 | O                         |
+| Cellular_GetEidrxSettings                               | O                         |
+| Cellular_SetEidrxSettings                               | O                         |
+| Cellular_ATCommandRaw                                   | O                         |
+| Cellular_CreateSocket                                   | O                         |
+| Cellular_SocketConnect                                  |                           |
+| Cellular_SocketSend                                     |                           |
+| Cellular_SocketRecv                                     |                           |
+| Cellular_SocketClose                                    |                           |
+| Cellular_GetHostByName                                  |                           |
+| Cellular_SocketSetSockOpt                               | O                         |
+| Cellular_SocketRegisterSocketOpenCallback               | O                         |
+| Cellular_SocketRegisterDataReadyCallback                | O                         |
+| Cellular_SocketRegisterClosedCallback                   | O                         |
+*/
+
+/**
+@page cellular_common_URC_handlers Cellular common URC handlers
+@brief Cellular common supported URC handlers
+
+<b>Cellular common supported URC handler</b><br>
+FreeRTOS Cellular Library APIs callback function is called in URC handler. <br>
+3GPP URC handlers are also provided by cellular common library. <br>
+They can be used to reduce porting effort. <br>
+| FreeRTOS Cellular Library callback functions                      | Event                                      | Cellular common supported |
+| :----------------------------------------------------| :----------------------------------------- | :-----------------------: |
+| Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_CS_REGISTRATION | O                         |
+| Cellular_RegisterUrcNetworkRegistrationEventCallback | CELLULAR_URC_EVENT_NETWORK_PS_REGISTRATION | O                         |
+| Cellular_RegisterUrcPdnEventCallback                 | CELLULAR_URC_EVENT_PDN_ACTIVATED           |                           |
+| Cellular_RegisterUrcPdnEventCallback                 | CELLULAR_URC_EVENT_PDN_DEACTIVATED         |                           |
+| Cellular_RegisterUrcSignalStrengthChangedCallback    | CELLULAR_URC_EVENT_SIGNAL_CHANGED          |                           |
+| Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT      |                           |
+| Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_POWERED_DOWN          |                           |
+| Cellular_RegisterModemEventCallback                  | CELLULAR_MODEM_EVENT_PSM_ENTER             |                           |
+| Cellular_SocketRegisterSocketOpenCallback            | CELLULAR_URC_SOCKET_OPENED                 |                           |
+| Cellular_SocketRegisterSocketOpenCallback            | CELLULAR_URC_SOCKET_OPEN_FAILED            |                           |
+| Cellular_SocketRegisterDataReadyCallback             | None                                       |                           |
+| Cellular_SocketRegisterClosedCallback                | None                                       |                           |
+
+*/
+
+/**
+@page cellular_module cellular_module
+@brief Implement cellular module porting interface. <br>
+- Implement functions defined cellular_common_portable.h
+- @ref Cellular_ModuleInit
+- @ref Cellular_ModuleCleanUp
+- @ref Cellular_ModuleEnableUE
+- @ref Cellular_ModuleEnableUrc
+@image html cellular_module_porting_functions.png width=80%
+- Create variable instance defined in cellular_common_portable.h
+  - AT command response token tables.
+    - \ref CellularTokenTable_t.pCellularSrcTokenErrorTable : indicate AT command is success
+    - @ref CellularTokenTable_t.cellularSrcTokenErrorTableSize
+    - @ref CellularTokenTable_t.pCellularSrcTokenSuccessTable : indicat AT command fails
+    - @ref CellularTokenTable_t.cellularSrcTokenSuccessTableSize
+  - URC handler table
+    - @ref CellularTokenTable_t.pCellularUrcTokenWoPrefixTable : URC token without prefix "+". These tokens are used in URC handler tables.<br>
+    ( E.X "APP READY", "POWER ON" )
+    - @ref CellularTokenTable_t.cellularUrcTokenWoPrefixTableSize
+*/
+
+/**
+@page cellular_module_api cellular_module_api
+@brief Implement FreeRTOS Cellular Library API with cellular module specific AT commands. <br>
+- Create FreeRTOS Cellular Library APIs implemented with module specific AT commands with cellular_common.h and cellular_at_core.h
+- AT command related data structure
+ - @ref CellularAtReq_t : AT command request data structure
+ - @ref CellularAtDataReq_t : Data send data structure
+- Send AT command APIs
+ - @ref _Cellular_AtcmdRequestWithCallback : Default timeout
+ - @ref _Cellular_TimeoutAtcmdRequestWithCallback : Custom timeout
+- Send AT command APIs for data receive ( E.X socket data receive )
+ - @ref _Cellular_TimeoutAtcmdDataRecvRequestWithCallback
+- Send AT command APIS for data send ( E.X socket data send )
+ - @ref _Cellular_TimeoutAtcmdDataSendRequestWithCallback : Basic data send API
+ - @ref _Cellular_AtcmdDataSend : Prefix callback function to indicate data mode start
+ - @ref _Cellular_TimeoutAtcmdDataSendSuccessToken : Extra success token to indicate AT commnad success
+@image html cellular_API_implementation.png width=80%
+
+*/
+
+/**
+@page cellular_module_urc_handler cellular_module_urc_handler
+@brief Implement URC handler to handle URC event and call the corresponding callback function. <br>
+- @ref CellularTokenTable_t.pCellularUrcHandlerTable : URC handler table of @ref CellularAtParseTokenHandler_t
+- @ref CellularTokenTable_t.cellularPrefixToParserMapSize
+Example URC handler table.
+```
+CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
+{
+{ "CEREG",             Cellular_CommonUrcProcessCereg },
+{ "CGREG",             Cellular_CommonUrcProcessCgreg },
+{ "CREG",              Cellular_CommonUrcProcessCreg  },
+{ "NORMAL POWER DOWN", _Cellular_ProcessPowerDown     },
+}
+uint32_t CellularUrcHandlerTableSize = 4;
+```
+@image html cellular_URC_handler_implementation.png width=80%
+*/
+
+/**
+@paramstructs_group{cellular_common,Cellular_common}
+@paramstructs_brief{cellular_common,cellular_common}
+*/
+
+/**
+@functionpointers_group{cellular_common,Cellular_common}
+@functionpointers_brief{cellular_common library}
+*/
+
+/**
+@enums_group{cellular_common,Cellular_common}
+@enums_brief{cellular_common library}
+*/
+
+/**
+@functions_page{cellular_common,cellular_common}
+@functions_brief{cellular_common}
+
+<b>The following APIs are 3GPP v27.007 AT command implemented FreeRTOS Cellular Library APIs.</b><br>
+- @function_name{Cellular_CommonInit}
+@function_brief{Cellular_CommonInit}
+- @function_name{Cellular_CommonCleanup}
+@function_brief{Cellular_CommonCleanup}
+- @function_name{Cellular_CommonRegisterUrcNetworkRegistrationEventCallback}
+@function_brief{Cellular_CommonRegisterUrcNetworkRegistrationEventCallback}
+- @function_name{Cellular_CommonRegisterUrcPdnEventCallback}
+@function_brief{Cellular_CommonRegisterUrcPdnEventCallback}
+- @function_name{Cellular_CommonRegisterUrcSignalStrengthChangedCallback}
+@function_brief{Cellular_CommonRegisterUrcSignalStrengthChangedCallback}
+- @function_name{Cellular_CommonRegisterUrcGenericCallback}
+@function_brief{Cellular_CommonRegisterUrcGenericCallback}
+- @function_name{Cellular_CommonRegisterModemEventCallback}
+@function_brief{Cellular_CommonRegisterModemEventCallback}
+- @function_name{Cellular_CommonATCommandRaw}
+@function_brief{Cellular_CommonATCommandRaw}
+- @function_name{Cellular_CommonCreateSocket}
+@function_brief{Cellular_CommonCreateSocket}
+- @function_name{Cellular_CommonSocketSetSockOpt}
+@function_brief{Cellular_CommonSocketSetSockOpt}
+- @function_name{Cellular_CommonSocketRegisterDataReadyCallback}
+@function_brief{Cellular_CommonSocketRegisterDataReadyCallback}
+- @function_name{Cellular_CommonSocketRegisterSocketOpenCallback}
+@function_brief{Cellular_CommonSocketRegisterSocketOpenCallback}
+- @function_name{Cellular_CommonSocketRegisterClosedCallback}
+@function_brief{Cellular_CommonSocketRegisterClosedCallback}
+- @function_name{Cellular_CommonRfOn}
+@function_brief{Cellular_CommonRfOn}
+- @function_name{Cellular_CommonRfOff}
+@function_brief{Cellular_CommonRfOff}
+- @function_name{Cellular_CommonGetIPAddress}
+@function_brief{Cellular_CommonGetIPAddress}
+- @function_name{Cellular_CommonGetModemInfo}
+@function_brief{Cellular_CommonGetModemInfo}
+- @function_name{Cellular_CommonGetEidrxSettings}
+@function_brief{Cellular_CommonGetEidrxSettings}
+- @function_name{Cellular_CommonSetEidrxSettings}
+@function_brief{Cellular_CommonSetEidrxSettings}
+- @function_name{Cellular_CommonGetRegisteredNetwork}
+@function_brief{Cellular_CommonGetRegisteredNetwork}
+- @function_name{Cellular_CommonGetNetworkTime}
+@function_brief{Cellular_CommonGetNetworkTime}
+- @function_name{Cellular_CommonGetServiceStatus}
+@function_brief{Cellular_CommonGetServiceStatus}
+- @function_name{Cellular_CommonSetPdnConfig}
+@function_brief{Cellular_CommonSetPdnConfig}
+- @function_name{Cellular_CommonGetPsmSettings}
+@function_brief{Cellular_CommonGetPsmSettings}
+- @function_name{Cellular_CommonSetPsmSettings}
+@function_brief{Cellular_CommonSetPsmSettings}
+- @function_name{Cellular_CommonGetSimCardInfo}
+@function_brief{Cellular_CommonGetSimCardInfo}
+- @function_name{Cellular_CommonGetSimCardLockStatus}
+@function_brief{Cellular_CommonGetSimCardLockStatus}
+
+The following APIs can be used when implementating FreeRTOS Cellular Library APIs with module specific AT command.<br>
+<b>AT command parsing functions</b><br>
+- @function_name{Cellular_ATRemovePrefix}
+@function_brief{Cellular_ATRemovePrefix}
+- @function_name{Cellular_ATRemoveLeadingWhiteSpaces}
+@function_brief{Cellular_ATRemoveLeadingWhiteSpaces}
+- @function_name{Cellular_ATRemoveTrailingWhiteSpaces}
+@function_brief{Cellular_ATRemoveTrailingWhiteSpaces}
+- @function_name{Cellular_ATRemoveAllWhiteSpaces}
+@function_brief{Cellular_ATRemoveAllWhiteSpaces}
+- @function_name{Cellular_ATRemoveOutermostDoubleQuote}
+@function_brief{Cellular_ATRemoveOutermostDoubleQuote}
+- @function_name{Cellular_ATRemoveAllDoubleQuote}
+@function_brief{Cellular_ATRemoveAllDoubleQuote}
+- @function_name{Cellular_ATGetNextTok}
+@function_brief{Cellular_ATGetNextTok}
+- @function_name{Cellular_ATGetSpecificNextTok}
+@function_brief{Cellular_ATGetSpecificNextTok}
+- @function_name{Cellular_ATHexStrToHex}
+@function_brief{Cellular_ATHexStrToHex}
+- @function_name{Cellular_ATIsStrDigit}
+@function_brief{Cellular_ATIsStrDigit}
+- @function_name{Cellular_ATIsPrefixPresent}
+@function_brief{Cellular_ATIsPrefixPresent}
+- @function_name{Cellular_ATStrDup}
+@function_brief{Cellular_ATStrDup}
+- @function_name{Cellular_ATStrStartWith}
+@function_brief{Cellular_ATStrStartWith}
+- @function_name{Cellular_ATcheckErrorCode}
+@function_brief{Cellular_ATcheckErrorCode}
+- @function_name{Cellular_ATStrtoi}
+@function_brief{Cellular_ATStrtoi}
+
+<b>Cellular common library helper functions</b><br>
+- @function_name{_Cellular_LibInit}
+@function_brief{_Cellular_LibInit}
+- @function_name{_Cellular_LibCleanup}
+@function_brief{_Cellular_LibCleanup}
+- @function_name{_Cellular_CheckLibraryStatus}
+@function_brief{_Cellular_CheckLibraryStatus}
+- @function_name{_Cellular_TranslatePktStatus}
+@function_brief{_Cellular_TranslatePktStatus}
+- @function_name{_Cellular_CreateSocketData}
+@function_brief{_Cellular_CreateSocketData}
+- @function_name{_Cellular_RemoveSocketData}
+@function_brief{_Cellular_RemoveSocketData}
+- @function_name{_Cellular_IsValidSocket}
+@function_brief{_Cellular_IsValidSocket}
+- @function_name{_Cellular_IsValidPdn}
+@function_brief{_Cellular_IsValidPdn}
+- @function_name{_Cellular_ConvertCsqSignalRssi}
+@function_brief{_Cellular_ConvertCsqSignalRssi}
+- @function_name{_Cellular_ConvertCsqSignalBer}
+@function_brief{_Cellular_ConvertCsqSignalBer}
+- @function_name{_Cellular_GetModuleContext}
+@function_brief{_Cellular_GetModuleContext}
+- @function_name{_Cellular_ComputeSignalBars}
+@function_brief{_Cellular_ComputeSignalBars}
+- @function_name{_Cellular_GetCurrentRat}
+@function_brief{_Cellular_GetCurrentRat}
+- @function_name{_Cellular_TranslatePktStatus}
+@function_brief{_Cellular_TranslatePktStatus}
+- @function_name{_Cellular_TranslateAtCoreStatus}
+@function_brief{_Cellular_TranslateAtCoreStatus}
+- @function_name{_Cellular_AtcmdRequestWithCallback}
+@function_brief{_Cellular_AtcmdRequestWithCallback}
+- @function_name{_Cellular_TimeoutAtcmdRequestWithCallback}
+@function_brief{_Cellular_TimeoutAtcmdRequestWithCallback}
+- @function_name{_Cellular_TimeoutAtcmdDataRecvRequestWithCallback}
+@function_brief{_Cellular_TimeoutAtcmdDataRecvRequestWithCallback}
+- @function_name{_Cellular_TimeoutAtcmdDataSendRequestWithCallback}
+@function_brief{_Cellular_TimeoutAtcmdDataSendRequestWithCallback}
+- @function_name{_Cellular_AtcmdDataSend}
+@function_brief{_Cellular_AtcmdDataSend}
+- @function_name{_Cellular_TimeoutAtcmdDataSendSuccessToken}
+@function_brief{_Cellular_TimeoutAtcmdDataSendSuccessToken}
+
+*/
+

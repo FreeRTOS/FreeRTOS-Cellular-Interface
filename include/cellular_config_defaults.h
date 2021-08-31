@@ -23,125 +23,334 @@
  * http://www.FreeRTOS.org
  */
 
+/**
+ * @file cellular_config_defaults.h
+ * @brief This represents the default values for the configuration macros
+ * for the Cellular library.
+ *
+ * @note This file SHOULD NOT be modified. If custom values are needed for
+ * any configuration macro, a cellular_config.h file should be provided to
+ * the Cellular library to override the default values defined in this file.
+ * To use the custom config file, the CELLULAR_DO_NOT_USE_CUSTOM_CONFIG preprocessor
+ * macro SHOULD NOT be set.
+ */
+
 #ifndef __CELLULAR_CONFIG_DEFAULTS_H__
 #define __CELLULAR_CONFIG_DEFAULTS_H__
 
+/* The macro definition for CELLULAR_DO_NOT_USE_CUSTOM_CONFIG is for Doxygen
+ * documentation only. */
+
+/**
+ * @brief Define this macro to build the Cellular library without the custom config
+ * file cellular_config.h.
+ *
+ * Without the custom config, the Cellular library builds with
+ * default values of config macros defined in cellular_config_defaults.h file.
+ *
+ * If a custom config is provided, then CELLULAR_DO_NOT_USE_CUSTOM_CONFIG should not
+ * be defined.
+ */
+#ifdef DOXYGEN
+    #define CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+#endif
+
+/**
+ * @brief Mobile country code max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 3
+ */
 #ifndef CELLULAR_MCC_MAX_SIZE
     #define CELLULAR_MCC_MAX_SIZE    ( 3U )
 #endif
 
+/**
+ * @brief Mobile network code max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 3
+ */
 #ifndef CELLULAR_MNC_MAX_SIZE
     #define CELLULAR_MNC_MAX_SIZE    ( 3U )
 #endif
 
+/**
+ * @brief Integrate circuit card identity max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 20
+ */
 #ifndef CELLULAR_ICCID_MAX_SIZE
     #define CELLULAR_ICCID_MAX_SIZE    ( 20U )
 #endif
 
+/**
+ * @brief International Mobile Subscriber Identity max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 15
+ */
 #ifndef CELLULAR_IMSI_MAX_SIZE
     #define CELLULAR_IMSI_MAX_SIZE    ( 15U )
 #endif
 
+/**
+ * @brief Cellular module firmware version max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
 #ifndef CELLULAR_FW_VERSION_MAX_SIZE
     #define CELLULAR_FW_VERSION_MAX_SIZE    ( 32U )
 #endif
 
+/**
+ * @brief Cellular module hardware version max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 12
+ */
 #ifndef CELLULAR_HW_VERSION_MAX_SIZE
     #define CELLULAR_HW_VERSION_MAX_SIZE    ( 12U )
 #endif
 
+/**
+ * @brief Cellular module serial number max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 12
+ */
 #ifndef CELLULAR_SERIAL_NUM_MAX_SIZE
     #define CELLULAR_SERIAL_NUM_MAX_SIZE    ( 12U )
 #endif
 
+/**
+ * @brief International Mobile Equipment Identity number max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 15
+ */
 #ifndef CELLULAR_IMEI_MAX_SIZE
     #define CELLULAR_IMEI_MAX_SIZE    ( 15U )
 #endif
 
+/**
+ * @brief Registered network operator name max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
 #ifndef CELLULAR_NETWORK_NAME_MAX_SIZE
     #define CELLULAR_NETWORK_NAME_MAX_SIZE    ( 32U )
 #endif
 
+/**
+ * @brief Access point name max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
 #ifndef CELLULAR_APN_MAX_SIZE
     #define CELLULAR_APN_MAX_SIZE    ( 64U )
 #endif
 
+/**
+ * @brief Packet data network username max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
 #ifndef CELLULAR_PDN_USERNAME_MAX_SIZE
     #define CELLULAR_PDN_USERNAME_MAX_SIZE    ( 32U )
 #endif
 
+/**
+ * @brief Packet data network password max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
 #ifndef CELLULAR_PDN_PASSWORD_MAX_SIZE
     #define CELLULAR_PDN_PASSWORD_MAX_SIZE    ( 32u )
 #endif
 
+/**
+ * @brief Cellular data network IP address max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 40
+ */
 #ifndef CELLULAR_IP_ADDRESS_MAX_SIZE
     #define CELLULAR_IP_ADDRESS_MAX_SIZE    ( 40U )
 #endif
 
+/**
+ * @brief Cellular AT command max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 200
+ */
 #ifndef CELLULAR_AT_CMD_MAX_SIZE
     #define CELLULAR_AT_CMD_MAX_SIZE    ( 200U )
 #endif
 
+/**
+ * @brief Cellular module number of socket max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 12
+ */
 #ifndef CELLULAR_NUM_SOCKET_MAX
     #define CELLULAR_NUM_SOCKET_MAX    ( 12U )
 #endif
 
+/**
+ * @brief Cellular module manufacture ID max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 20
+ */
 #ifndef CELLULAR_MANUFACTURE_ID_MAX_SIZE
     #define CELLULAR_MANUFACTURE_ID_MAX_SIZE    ( 20U )
 #endif
 
+/**
+ * @brief Cellular module ID max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 10
+ */
 #ifndef CELLULAR_MODEL_ID_MAX_SIZE
     #define CELLULAR_MODEL_ID_MAX_SIZE    ( 10U )
 #endif
 
+/**
+ * @brief Cellular EDRX list max size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 4
+ */
 #ifndef CELLULAR_EDRX_LIST_MAX_SIZE
     #define CELLULAR_EDRX_LIST_MAX_SIZE    ( 4U )
 #endif
 
+/**
+ * @brief Cellular PDN context ID min value.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
 #ifndef CELLULAR_PDN_CONTEXT_ID_MIN
     #define CELLULAR_PDN_CONTEXT_ID_MIN    ( 1U )
 #endif
 
+/**
+ * @brief Cellular PDN context ID max value.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
 #ifndef CELLULAR_PDN_CONTEXT_ID_MAX
     #define CELLULAR_PDN_CONTEXT_ID_MAX    ( 16U )
 #endif
 
+/**
+ * @brief Cellular RAT ( radio access technology ) priority count.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
 #ifndef CELLULAR_MAX_RAT_PRIORITY_COUNT
     #define CELLULAR_MAX_RAT_PRIORITY_COUNT    ( 3U )
 #endif
 
+/**
+ * @brief Cellular socket max send data length.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1460
+ */
 #ifndef CELLULAR_MAX_SEND_DATA_LEN
     #define CELLULAR_MAX_SEND_DATA_LEN    ( 1460U )
 #endif
 
+/**
+ * @brief Cellular socket max receive data length.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1500
+ */
 #ifndef CELLULAR_MAX_RECV_DATA_LEN
     #define CELLULAR_MAX_RECV_DATA_LEN    ( 1500U )
 #endif
 
+/**
+ * @brief Cellular module support getHostByName.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
 #ifndef CELLULAR_SUPPORT_GETHOSTBYNAME
     #define CELLULAR_SUPPORT_GETHOSTBYNAME    ( 1U )
 #endif
 
+/**
+ * @brief Cellular comm interface send timeout in MS.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1000
+ */
 #ifndef CELLULAR_COMM_IF_SEND_TIMEOUT_MS
     #define CELLULAR_COMM_IF_SEND_TIMEOUT_MS    ( 1000U )
 #endif
 
+/**
+ * @brief Cellular comm interface receive timeout in MS.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1000
+ */
 #ifndef CELLULAR_COMM_IF_RECV_TIMEOUT_MS
     #define CELLULAR_COMM_IF_RECV_TIMEOUT_MS    ( 1000U )
 #endif
 
+/**
+ * @brief FreeRTOS Cellular Library use static context.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 0
+ */
 #ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
     #define CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT    ( 0U )
 #endif
 
-#ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
+/**
+ * @brief Cellular comm interface use static context.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 0
+ */
+#ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT
     #define CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT    ( 0U )
 #endif
 
+/**
+ * @brief Default radio access technoloyg.<br>
+ *
+ * <b>Possible values:</b>`Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t )<br>
+ * <b>Default value (if undefined):</b> CELLULAR_RAT_CATM1
+ */
 #ifndef CELLULAR_CONFIG_DEFAULT_RAT
     #define CELLULAR_CONFIG_DEFAULT_RAT    ( 8 )   /* Set default RAT to CELLULAR_RAT_CATM1 @ref CellularRat_t. */
 #endif
 
+/**
+ * @brief Cellular comm interface use static socket context.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 0
+ */
 #ifndef CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
     #define CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION    ( 0 )
 #endif
