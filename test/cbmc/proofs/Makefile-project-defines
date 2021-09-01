@@ -22,9 +22,10 @@ PROJECT_NAME = "FreeRTOS cellular"
 
 # Preprocessor include paths -I...
 INCLUDES += -I$(SRCDIR)/test/cbmc/include
-INCLUDES += -I$(SRCDIR)/common/include
-INCLUDES += -I$(SRCDIR)/common/include/private
-INCLUDES += -I$(SRCDIR)/include
+INCLUDES += -I$(SRCDIR)/source/include
+INCLUDES += -I$(SRCDIR)/source/include/common
+INCLUDES += -I$(SRCDIR)/source/include/private
+INCLUDES += -I$(SRCDIR)/source/interface
 INCLUDES += -I$(SRCDIR)/source
 
 # Preprocessor definitions -D...

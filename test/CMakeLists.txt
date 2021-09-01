@@ -32,10 +32,11 @@ set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib )
 # ===================================== Coverity Analysis Configuration =================================================
 
 # Set the source path and include path
-set( CELLULAR_COMMON_SOURCE ${MODULE_ROOT_DIR}/common/src )
-set( CELLULAR_INCLUDE_DIRS ${MODULE_ROOT_DIR}/include )
-set( CELLULAR_COMMON_INCLUDE_DIRS ${MODULE_ROOT_DIR}/common/include )
-set( CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS ${MODULE_ROOT_DIR}/common/include/private )
+set( CELLULAR_COMMON_SOURCE ${MODULE_ROOT_DIR}/source )
+set( CELLULAR_INCLUDE_DIRS ${CELLULAR_COMMON_SOURCE}/include )
+set( CELLULAR_COMMON_INCLUDE_DIRS ${CELLULAR_INCLUDE_DIRS}/common )
+set( CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS ${CELLULAR_INCLUDE_DIRS}/private )
+set( CELLULAR_INTERFACE_INCLUDE_DIRS ${CELLULAR_COMMON_SOURCE}/interface )
 set( CELLULAR_TEST_DIRS ${MODULE_ROOT_DIR}/test/unit-test )
 
 # Target for Coverity analysis that builds the library.
@@ -52,7 +53,7 @@ add_library( coverity_analysis
 target_compile_definitions( coverity_analysis PUBLIC CELLULAR_DO_NOT_USE_CUSTOM_CONFIG=1 )
 
 # Cellular include path.
-target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} ${CELLULAR_TEST_DIRS})
+target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} ${CELLULAR_INTERFACE_INCLUDE_DIRS} ${CELLULAR_TEST_DIRS})
 
 # Cellular private include path.
 target_include_directories( coverity_analysis PRIVATE ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS} )
