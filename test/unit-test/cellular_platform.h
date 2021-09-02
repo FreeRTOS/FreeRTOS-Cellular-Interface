@@ -170,6 +170,13 @@ typedef struct PlatformMutex
  */
 typedef TickType_t EventBits_t;
 
+struct _cellularCommContext
+{
+    int test1;
+    int test2;
+    int test3;
+};
+
 /*-----------------------------------------------------------*/
 
 /**

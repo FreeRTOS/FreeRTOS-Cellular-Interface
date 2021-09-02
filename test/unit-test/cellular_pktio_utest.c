@@ -1647,7 +1647,7 @@ void test__Cellular_PktioSendAtCmd_Null_AtCmd( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
+    struct _cellularCommContext commInterfaceHandle = { 0 };
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",
@@ -1661,7 +1661,7 @@ void test__Cellular_PktioSendAtCmd_Null_AtCmd( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     context.pCommIntf = pCommIntf;
-    context.hPktioCommIntf = commInterfaceHandle;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, NULL,
                                           atReqSetRatPriority.atCmdType,
                                           atReqSetRatPriority.pAtRspPrefix );
@@ -1676,7 +1676,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
+    struct _cellularCommContext commInterfaceHandle = { 0 };
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"Story for Littel Red Riding Hood: Once upon a time there was a dear little girl who was loved by every one who looked at her, but most of all by her grandmother, and there was nothing that she would not have given to the child. Once she gave her a little cap of red velvet, which suited her so well that she would never wear anything else. So she was always called Little Red Riding Hood.\"",
@@ -1689,7 +1689,7 @@ void test__Cellular_PktioSendAtCmd_Invalid_String( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
-    context.hPktioCommIntf = commInterfaceHandle;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
                                           atReqSetRatPriority.atCmdType,
                                           atReqSetRatPriority.pAtRspPrefix );
@@ -1704,7 +1704,7 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
+    struct _cellularCommContext commInterfaceHandle = { 0 };
     CellularAtReq_t atReqSetRatPriority =
     {
         "AT+QCFG=\"nwscanseq\"",
@@ -1717,7 +1717,7 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
-    context.hPktioCommIntf = commInterfaceHandle;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
     pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
                                           atReqSetRatPriority.atCmdType,
                                           atReqSetRatPriority.pAtRspPrefix );
@@ -1732,7 +1732,7 @@ void test__Cellular_PktioSendData_Invalid_Param( void )
     uint32_t sentLen = 0;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
+    struct _cellularCommContext commInterfaceHandle = { 0 };
     char pString[] = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
@@ -1752,13 +1752,11 @@ void test__Cellular_PktioSendData_Invalid_Param( void )
                                        0 );
     TEST_ASSERT_EQUAL( 0, sentLen );
 
-    context.hPktioCommIntf = commInterfaceHandle;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
     sentLen = _Cellular_PktioSendData( &context,
                                        NULL,
                                        0 );
     TEST_ASSERT_EQUAL( 0, sentLen );
-
-    free( commInterfaceHandle );
 }
 
 /**
@@ -1769,18 +1767,17 @@ void test__Cellular_PktioSendData_Happy_Path( void )
     uint32_t sentLen = 0;
     CellularContext_t context;
     CellularCommInterface_t * pCommIntf = &CellularCommInterface;
-    CellularCommInterfaceHandle_t commInterfaceHandle = ( CellularCommInterfaceHandle_t ) malloc( sizeof( CellularCommInterfaceHandle_t ) );
+    struct _cellularCommContext commInterfaceHandle = { 0 };
     char pString[] = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     context.pCommIntf = pCommIntf;
-    context.hPktioCommIntf = commInterfaceHandle;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
 
     sentLen = _Cellular_PktioSendData( &context,
                                        ( uint8_t * ) pString,
                                        strlen( pString ) + 1 );
     TEST_ASSERT_EQUAL( strlen( pString ) + 1, sentLen );
-    free( commInterfaceHandle );
 }
 
 /**
