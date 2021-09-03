@@ -676,7 +676,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         if( *ppAtResp == NULL )
         {
             *ppAtResp = _Cellular_AtResponseNew();
-            LogDebug( ( "Allocat at response %p", ( void * ) *ppAtResp ) );
+            LogDebug( ( "Allocate at response %p", ( void * ) *ppAtResp ) );
         }
 
         LogDebug( ( "AT solicited Resp[%s]", pLine ) );
