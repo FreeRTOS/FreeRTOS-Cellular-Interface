@@ -419,7 +419,7 @@ static _atRespType_t _getMsgType( const CellularContext_t * pContext,
         /* Check if prefix exist in pLine. */
         ( void ) Cellular_ATIsPrefixPresent( pLine, &inputWithPrefix );
 
-        if( inputWithPrefix == true )
+        if( ( inputWithPrefix == true ) && ( pRespPrefix != NULL ) )
         {
             /* Check if SRC prefix exist in pLine. */
             atStatus = Cellular_ATStrStartWith( pLine, pRespPrefix, &inputWithSrcPrefix );
