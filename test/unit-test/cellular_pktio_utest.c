@@ -71,6 +71,13 @@
 
 #define MAX_QIRD_STRING_PREFIX_STRING                        ( 14U )           /* The max data prefix string is "+QIRD: 1460\r\n" */
 
+struct _cellularCommContext
+{
+    int test1;
+    int test2;
+    int test3;
+};
+
 static uint16_t pktioEvtMask = 0x0000U;
 static uint16_t evtGroupCreate = 0x0001U;
 
