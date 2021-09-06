@@ -136,7 +136,7 @@ static void _saveData( char * pLine,
     LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
-    configASSERT( ( int32_t ) ( pNew != NULL ) );
+    configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
     pNew->pLine = pLine;
@@ -174,7 +174,7 @@ static void _saveRawData( char * pLine,
 static void _saveATData( char * pLine,
                          CellularATCommandResponse_t * pResp )
 {
-    LogDebug( ( "Save [%s] %d AT data to pResp", pLine, strlen( pLine ) ) );
+    LogDebug( ( "Save [%s] %lu AT data to pResp", pLine, strlen( pLine ) ) );
     _saveData( pLine, pResp, ( uint32_t ) ( strlen( pLine ) + 1U ) );
 }
 
@@ -254,7 +254,7 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
     CellularATCommandResponse_t * pNew = NULL;
 
     pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
-    configASSERT( ( int32_t ) ( pNew != NULL ) );
+    configASSERT( ( pNew != NULL ) );
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -676,7 +676,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         if( *ppAtResp == NULL )
         {
             *ppAtResp = _Cellular_AtResponseNew();
-            LogDebug( ( "Allocat at response %p", *ppAtResp ) );
+            LogDebug( ( "Allocate at response %p", ( void * ) *ppAtResp ) );
         }
 
         LogDebug( ( "AT solicited Resp[%s]", pLine ) );

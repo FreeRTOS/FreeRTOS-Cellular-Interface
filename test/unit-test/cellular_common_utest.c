@@ -230,6 +230,14 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
+void dummyTaskENTER_CRITICAL( void )
+{
+}
+
+void dummyTaskEXIT_CRITICAL( void )
+{
+}
+
 static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
                                                       void * pUserData,
                                                       CellularCommInterfaceHandle_t * pCommInterfaceHandle )
