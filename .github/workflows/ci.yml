@@ -43,7 +43,6 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/complexity@main
         with:
           path: ./
-          source_path: common
   doxygen:
     runs-on: ubuntu-latest
     steps:

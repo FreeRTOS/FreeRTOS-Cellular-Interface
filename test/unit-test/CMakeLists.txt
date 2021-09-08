@@ -17,6 +17,7 @@ list(APPEND mock_include_list
             ${CMAKE_CURRENT_LIST_DIR}/logging
             ${CELLULAR_COMMON_INCLUDE_DIRS}
             ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
+            ${CELLULAR_INTERFACE_INCLUDE_DIRS}
             ${CELLULAR_INCLUDE_DIRS}
         )
 #list the definitions of your mocks to control what to be included
@@ -40,6 +41,7 @@ list(APPEND real_include_directories
             .
             ${CMAKE_CURRENT_LIST_DIR}/logging
             ${CELLULAR_INCLUDE_DIRS}
+            ${CELLULAR_INTERFACE_INCLUDE_DIRS}
             ${CELLULAR_COMMON_INCLUDE_DIRS}
             ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
         )
@@ -51,6 +53,7 @@ list(APPEND test_include_directories
             .
             ${CELLULAR_COMMON_INCLUDE_DIRS}
             ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
+            ${CELLULAR_INTERFACE_INCLUDE_DIRS}
         )
 
 # =============================  (end edit)  ===================================
