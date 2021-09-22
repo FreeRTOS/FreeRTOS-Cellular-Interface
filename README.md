@@ -98,7 +98,7 @@ git submodule update --checkout --init --recursive --test/unit-test/CMock
 
 ### Platform Prerequisites
 
-- For building the library, **CMake 3.13.0** or later and a **C90 compiler**.
+- For building the unit tests, **CMake 3.13.0** or later and a **C90 compiler**.
 - For running unit tests, **Ruby 2.0.0** or later is additionally required for the CMock test framework (that we use).
 - For running the coverage target, **gcov** and **lcov** are additionally required.
 
