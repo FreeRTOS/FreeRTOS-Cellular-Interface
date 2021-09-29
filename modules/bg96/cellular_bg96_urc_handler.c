@@ -96,7 +96,7 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
         if( sockStatus != 0 )
         {
             pSocketData->socketState = SOCKETSTATE_DISCONNECTED;
-            LogError( ( ( "_parseSocketOpen: Socket open failed, conn %d, status %d", sockIndex, sockStatus ) ) );
+            LogError( ( "_parseSocketOpen: Socket open failed, conn %d, status %d", sockIndex, sockStatus ) );
         }
         else
         {
