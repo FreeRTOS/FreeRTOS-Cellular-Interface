@@ -982,8 +982,8 @@ CellularError_t Cellular_GetSimCardStatus( CellularHandle_t cellularHandle,
                 pSimCardStatus->simCardState = CELLULAR_SIM_CARD_UNKNOWN;
             }
 
-            LogInfo( "Cellular_GetSimCardStatus, Sim Insert State[%d], Lock State[%d]",
-                     pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
+            LogInfo( ( "Cellular_GetSimCardStatus, Sim Insert State[%d], Lock State[%d]",
+                       pSimCardStatus->simCardState, pSimCardStatus->simCardLockState ) );
         }
     }
 
@@ -1044,8 +1044,8 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
                 {
-                    LogDebug( "Context [%d], Act State [%d], Operator <Act> [%d]\r\n", i + 1,
-                              pdpContextsActInfo.contextActState[ i ], serviceStatus.rat );
+                    LogDebug( ( "Context [%d], Act State [%d], Operator <Act> [%d]\r\n", i + 1,
+                                pdpContextsActInfo.contextActState[ i ], serviceStatus.rat ) );
                 }
             }
 
@@ -1409,8 +1409,8 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
                 {
-                    LogDebug( "Cellular_ActivatePdn: Context [%d], Act State [%d]\r\n", i + 1,
-                              pdpContextsActInfo.contextActState[ i ] );
+                    LogDebug( ( "Cellular_ActivatePdn: Context [%d], Act State [%d]\r\n", i + 1,
+                                pdpContextsActInfo.contextActState[ i ] ) );
                 }
             }
         }
@@ -2543,8 +2543,8 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
                 break;
 
             default:
-                LogDebug( "Cellular_SetPdnConfig: Invalid pdn context type %d",
-                          CELLULAR_PDN_CONTEXT_IPV4V6 );
+                LogDebug( ( "Cellular_SetPdnConfig: Invalid pdn context type %d",
+                            CELLULAR_PDN_CONTEXT_IPV4V6 ) );
                 cellularStatus = CELLULAR_BAD_PARAMETER;
                 break;
         }
@@ -2588,8 +2588,8 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
                 /* Print only those contexts that are present in +CGDCONT response */
                 if( pdpContextsInfo.contextsPresent[ i ] )
                 {
-                    LogDebug( "Context [%d], IP Type [%s], APN Name [%s], IP Address [%s]\r\n", i + 1,
-                              pdpContextsInfo.ipType[ i ], pdpContextsInfo.apnName, pdpContextsInfo.ipAddress );
+                    LogDebug( ( "Context [%d], IP Type [%s], APN Name [%s], IP Address [%s]\r\n", i + 1,
+                                pdpContextsInfo.ipType[ i ], pdpContextsInfo.apnName, pdpContextsInfo.ipAddress ) );
                 }
             }
         }
