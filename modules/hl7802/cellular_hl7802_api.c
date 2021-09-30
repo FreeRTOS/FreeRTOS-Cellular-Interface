@@ -411,8 +411,8 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( "Data is turncated, received data length %d, out buffer size %d",
-                  *pDataRecv->pDataLen, outBufSize );
+        LogError( ( "Data is turncated, received data length %d, out buffer size %d",
+                    *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
     }
@@ -433,8 +433,8 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
         }
         else
         {
-            LogError( "Receive Data: paramerter error, data pointer %p, data to copy %d",
-                      pInputLine, dataLenToCopy );
+            LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %d",
+                        pInputLine, dataLenToCopy ) );
             atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
@@ -531,8 +531,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
     }
     else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
     {
-        LogError( "buildSocketConfig: socket protocol unsupported %d",
-                  socketHandle->socketProtocol );
+        LogError( ( "buildSocketConfig: socket protocol unsupported %d",
+                    socketHandle->socketProtocol ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -575,14 +575,14 @@ static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
     }
     else if( socketHandle->socketState != SOCKETSTATE_ALLOCATED )
     {
-        LogError( "storeAccessModeAndAddress, bad socket state %d",
-                  socketHandle->socketState );
+        LogError( ( "storeAccessModeAndAddress, bad socket state %d",
+                    socketHandle->socketState ) );
         cellularStatus = CELLULAR_INTERNAL_FAILURE;
     }
     else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
     {
-        LogError( "storeAccessModeAndAddress, Access mode not supported %d",
-                  dataAccessMode );
+        LogError( ( "storeAccessModeAndAddress, Access mode not supported %d",
+                    dataAccessMode ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -898,8 +898,8 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
             }
             else
             {
-                LogDebug( "GetEidrx setting[%d]: RAT: %d, Value: 0x%x",
-                          count, pEidrxSettingsList->eidrxList[ count ].rat, pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue );
+                LogDebug( ( "GetEidrx setting[%d]: RAT: %d, Value: 0x%x",
+                            count, pEidrxSettingsList->eidrxList[ count ].rat, pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue ) );
             }
 
             pCommnadItem = pCommnadItem->pNext;
@@ -2021,8 +2021,8 @@ static CellularATError_t getPdnStatusParseToken( char * pToken,
             break;
 
         default:
-            LogError( "Unknown token in getPdnStatusParseToken %s %d",
-                      pToken, tokenIndex );
+            LogError( ( "Unknown token in getPdnStatusParseToken %s %d",
+                        pToken, tokenIndex ) );
             atCoreStatus = CELLULAR_AT_ERROR;
             break;
     }

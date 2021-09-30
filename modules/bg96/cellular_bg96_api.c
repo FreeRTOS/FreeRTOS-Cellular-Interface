@@ -1051,8 +1051,8 @@ static CellularATError_t getPdnStatusParseToken( char * pToken,
             break;
 
         default:
-            LogError( "Unknown token in getPdnStatusParseToken %s %d",
-                      pToken, tokenIndex );
+            LogError( ( "Unknown token in getPdnStatusParseToken %s %d",
+                        pToken, tokenIndex ) );
             atCoreStatus = CELLULAR_AT_ERROR;
             break;
     }
@@ -1229,8 +1229,8 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( "Data is turncated, received data length %d, out buffer size %d",
-                  *pDataRecv->pDataLen, outBufSize );
+        LogError( ( "Data is turncated, received data length %d, out buffer size %d",
+                    *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
     }
@@ -1643,11 +1643,13 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
 
             while( pToken != NULL )
             {
-                atCoreStatus = parseGetPsmToken( pToken, tokenIndex, pPsmSettings );
-
-                if( atCoreStatus != CELLULAR_AT_SUCCESS )
+                if( tokenIndex == 0 )
                 {
-                    LogInfo( ( "parseGetPsmToken %s index %d failed", pToken, tokenIndex ) );
+                    atCoreStatus = parseGetPsmToken( pToken, tokenIndex, pPsmSettings );
+                }
+                else
+                {
+                    parseGetPsmToken( pToken, tokenIndex, pPsmSettings );
                 }
 
                 tokenIndex++;
@@ -1670,12 +1672,12 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
             }
         }
 
-        LogDebug( "PSM setting: mode: %d, RAU: %d, RDY_Timer: %d, TAU: %d, Active_time: %d",
-                  pPsmSettings->mode,
-                  pPsmSettings->periodicRauValue,
-                  pPsmSettings->gprsReadyTimer,
-                  pPsmSettings->periodicTauValue,
-                  pPsmSettings->activeTimeValue );
+        LogDebug( ( "PSM setting: mode: %d, RAU: %d, RDY_Timer: %d, TAU: %d, Active_time: %d",
+                    pPsmSettings->mode,
+                    pPsmSettings->periodicRauValue,
+                    pPsmSettings->gprsReadyTimer,
+                    pPsmSettings->periodicTauValue,
+                    pPsmSettings->activeTimeValue ) );
         pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
     }
 
@@ -1794,14 +1796,14 @@ static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
     }
     else if( socketHandle->socketState != SOCKETSTATE_ALLOCATED )
     {
-        LogError( "storeAccessModeAndAddress, bad socket state %d",
-                  socketHandle->socketState );
+        LogError( ( "storeAccessModeAndAddress, bad socket state %d",
+                    socketHandle->socketState ) );
         cellularStatus = CELLULAR_INTERNAL_FAILURE;
     }
     else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
     {
-        LogError( "storeAccessModeAndAddress, Access mode not supported %d",
-                  dataAccessMode );
+        LogError( ( "storeAccessModeAndAddress, Access mode not supported %d",
+                    dataAccessMode ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
     else
@@ -2921,8 +2923,8 @@ CellularError_t Cellular_GetSimCardStatus( CellularHandle_t cellularHandle,
         }
 
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        LogDebug( "_Cellular_GetSimStatus, Sim Insert State[%d], Lock State[%d]",
-                  pSimCardStatus->simCardState, pSimCardStatus->simCardLockState );
+        LogDebug( ( "_Cellular_GetSimStatus, Sim Insert State[%d], Lock State[%d]",
+                    pSimCardStatus->simCardState, pSimCardStatus->simCardLockState ) );
     }
 
     return cellularStatus;
@@ -2999,9 +3001,9 @@ CellularError_t Cellular_GetSimCardInfo( CellularHandle_t cellularHandle,
         }
         else
         {
-            LogDebug( "SimInfo updated: IMSI:%s, Hplmn:%s%s, ICCID:%s",
-                      pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
-                      pSimCardInfo->iccid );
+            LogDebug( ( "SimInfo updated: IMSI:%s, Hplmn:%s%s, ICCID:%s",
+                        pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
+                        pSimCardInfo->iccid ) );
         }
     }
 
