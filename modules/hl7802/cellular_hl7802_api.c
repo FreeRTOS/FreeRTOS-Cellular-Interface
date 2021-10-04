@@ -1973,7 +1973,7 @@ static CellularATError_t parsePdnStatusContextType( char * pToken,
     else if( strcmp( pToken, "IPV4V6" ) == 0 )
     {
         pPdnStatusBuffers->pdnContextType = CELLULAR_PDN_CONTEXT_IPV4V6;
-        /* The IP addres depends on the format returned. */
+        /* The IP address depends on the format returned. */
     }
     else
     {
