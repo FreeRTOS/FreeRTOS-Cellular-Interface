@@ -50,10 +50,11 @@ git clone git@github.com/FreeRTOS/FreeRTOS-Cellular-Interface.git
 
 At the root of this repository are these folders:
 
-* source/include : Cellular API definitions
-* source/include/common : reusable common code that implements the standard AT commands defined by 3GPP TS v27.007
-* modules : vendor-specific code that implements non-3GPP AT commands for each cellular modem
-* docs : documentations
+* source : reusable common code that implements the standard AT commands defined by 3GPP TS v27.007.
+* modules : vendor-specific code that implements non-3GPP AT commands for each cellular modem.
+* docs : documentations.
+* test : unit test and cbmc.
+* tools : tools for Coverity static analysis and CMock.
 
 ## Integrate FreeRTOS Cellular Interface with MCU platforms
 
