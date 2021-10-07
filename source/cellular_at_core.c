@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
     /* Include custom config file before other headers. */
@@ -43,10 +42,10 @@
 
 /*-----------------------------------------------------------*/
 
-#define CHECK_IS_PREFIX_CHAR( inputChar )                                 \
-    ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
+#define CHECK_IS_PREFIX_CHAR( inputChar )                                   \
+    ( ( ( ( int32_t ) _isalpha( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
+      ( ( ( int32_t ) _isdigit( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
+      ( ( inputChar ) != ( uint8_t ) '+' ) && ( ( inputChar ) != ( uint8_t ) '_' ) )
 
 /*-----------------------------------------------------------*/
 
@@ -66,6 +65,10 @@ typedef enum CellularATStringValidationResult
 static void validateString( const char * pString,
                             CellularATStringValidationResult_t * pStringValidationResult );
 static uint8_t _charToNibble( char c );
+
+static int32_t _isspace( uint8_t c );
+static int32_t _isalpha( uint8_t c );
+static int32_t _isdigit( uint8_t c );
 
 /*-----------------------------------------------------------*/
 
@@ -95,6 +98,61 @@ static void validateString( const char * pString,
     {
         *pStringValidationResult = CELLULAR_AT_STRING_VALID;
     }
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t _isspace( uint8_t c )
+{
+    int32_t ret = 0;
+
+    if( ( ( int32_t ) c == 32 ) || ( ( ( int32_t ) c >= 9 ) && ( ( int32_t ) c <= 13 ) ) )
+    {
+        ret = 1;
+    }
+    else
+    {
+        ret = 0;
+    }
+
+    return ret;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t _isalpha( uint8_t c )
+{
+    int32_t ret = 0;
+
+    if( ( ( ( int32_t ) c >= 65 ) && ( ( int32_t ) c <= 90 ) ) ||
+        ( ( ( int32_t ) c >= 97 ) && ( ( int32_t ) c <= 122 ) ) )
+    {
+        ret = 1;
+    }
+    else
+    {
+        ret = 0;
+    }
+
+    return ret;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t _isdigit( uint8_t c )
+{
+    int32_t ret = 0;
+
+    if( ( ( int32_t ) c >= 48 ) && ( ( int32_t ) c <= 57 ) )
+    {
+        ret = 1;
+    }
+    else
+    {
+        ret = 0;
+    }
+
+    return ret;
 }
 
 /*-----------------------------------------------------------*/
@@ -138,10 +196,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
             /* There should be only '+', '_', characters or digit before seperator. */
             for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
-                /* It's caused by stanard api isalpha and isdigit. */
-                /* coverity[misra_c_2012_directive_4_6_violation] */
-                /* coverity[misra_c_2012_rule_10_8_violation] */
-                if( CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
+                if( CHECK_IS_PREFIX_CHAR( ( uint8_t ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;
@@ -277,13 +332,8 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        /* isspace is a standard library function and we cannot control it. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
-        /* coverity[misra_c_2012_rule_10_1_violation] */
-        /* coverity[misra_c_2012_rule_10_4_violation] */
-        /* coverity[misra_c_2012_rule_18_4_violation] */
-        /* coverity[misra_c_2012_rule_21_13_violation] */
-        while( ( **ppString != '\0' ) && ( isspace( ( ( int ) ( **ppString ) ) ) != 0 ) )
+        while( ( ( int32_t ) **ppString != 0 ) &&
+               ( _isspace( ( ( uint8_t ) ( **ppString ) ) ) != 0 ) )
         {
             ( *ppString )++;
         }
@@ -329,13 +379,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
             do
             {
                 --p;
-                /* isspace is a standard library function and we cannot control it. */
-                /* coverity[misra_c_2012_directive_4_6_violation] */
-                /* coverity[misra_c_2012_rule_10_1_violation] */
-                /* coverity[misra_c_2012_rule_10_4_violation] */
-                /* coverity[misra_c_2012_rule_18_4_violation] */
-                /* coverity[misra_c_2012_rule_21_13_violation] */
-            } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0 ) );
+            } while( ( p > pString ) && ( _isspace( ( uint8_t ) ( *p ) ) != 0 ) );
 
             p[ 1 ] = '\0';
         }
@@ -375,13 +419,7 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
 
         while( ( *pTempString ) != '\0' )
         {
-            /* isspace is a standard library function and we cannot control it. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
-            /* coverity[misra_c_2012_rule_10_1_violation] */
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_18_4_violation] */
-            /* coverity[misra_c_2012_rule_21_13_violation] */
-            if( isspace( ( ( int ) ( *pTempString ) ) ) == 0 )
+            if( _isspace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
             {
                 p[ ind ] = *pTempString;
                 ind++;
@@ -694,13 +732,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
 
         while( ( *pTempString != '\0' ) )
         {
-            /* isdigit is a standard library function and we cannot control it. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
-            /* coverity[misra_c_2012_rule_10_1_violation] */
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_18_4_violation] */
-            /* coverity[misra_c_2012_rule_21_13_violation] */
-            if( isdigit( ( ( int ) ( *pTempString ) ) ) == 0 )
+            if( _isspace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
             {
                 *pResult = false;
             }
