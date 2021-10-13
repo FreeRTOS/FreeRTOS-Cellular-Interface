@@ -105,6 +105,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
     char * ptrPrefixChar = NULL;
+    char * ptrPrefixChar_nonURC = NULL;
     char * ptrChar = NULL;
 
     if( ( pResult == NULL ) || ( pString == NULL ) )
@@ -131,7 +132,17 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
 
         if( ptrPrefixChar == NULL )
         {
-            *pResult = false;
+            /* Find location of first ','. */
+            ptrPrefixChar_nonURC = strchr( pString, ( int32_t ) ',' );
+
+            if( ptrPrefixChar_nonURC != NULL )
+            {
+                *pResult = true;
+            }
+            else
+            {
+                *pResult = false;
+            }
         }
         else
         {

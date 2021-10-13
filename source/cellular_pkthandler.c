@@ -47,6 +47,7 @@
 /*-----------------------------------------------------------*/
 
 #define MIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+#define MAX( a, b )    ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
 
 /* Windows simulator implementation. */
 #if defined( _WIN32 ) || defined( _WIN64 )
@@ -152,6 +153,18 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
         if( pTokenPtr == NULL )
         {
             LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine ) );
+            pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
+        }
+    }
+    /* Some modems (such as Quectel GSM Modules) send events without the \"+\"  character in the  format [<index>,] EVENT */
+    else
+    if( *( ++pSavePtr ) == ',' )
+    {
+        pSavePtr++;
+
+        if( pTokenPtr == NULL )
+        {
+            CellularLogError( "_Cellular_AtParse : input string error, contains  \",\" but no token %s", pInputLine );
             pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
         }
     }
@@ -377,6 +390,20 @@ static int _searchCompareFunc( const void * pInputToken,
     compareValue = strncmp( pToken,
                             pBasePtr->pStrValue,
                             MIN( tokenLen, strLen ) );
+
+    /* Some modems (such as Quectel GSM Modules) send events in the  format [<index>,] EVENT. Check the second character to see if this is the case */
+    const char * pToken_nonURC = ( const char * ) pInputToken + 1;
+
+    if( ( compareValue != 0 ) && ( pToken_nonURC[ 0 ] == ',' ) )
+    {
+        /* Skip the socket index and check the event */
+        pToken_nonURC = ( const char * ) pInputToken + 3;
+        tokenLen = strlen( pInputToken ) - 3;
+
+        compareValue = strncmp( pToken_nonURC,
+                                pBasePtr->pStrValue,
+                                MAX( tokenLen, strLen ) );
+    }
 
     /* To avoid undefined behavior, the table should not contain duplicated item and
      * compareValue is 0 only if the string is exactly the same. */

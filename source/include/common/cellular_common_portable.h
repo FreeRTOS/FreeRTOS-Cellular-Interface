@@ -73,6 +73,23 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext );
  */
 CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
 
+#ifdef CELLULAR_GSM_MODEM
+
+/**
+ * 1
+ * @brief Cellular module TCPIP enable function.
+ *
+ * This function start the TCPIP task.
+ *
+ * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+    CellularError_t Cellular_StartTCPIP( CellularContext_t * pContext );
+
+#endif
+
 /**
  * @brief Cellular module URC enable function.
  *

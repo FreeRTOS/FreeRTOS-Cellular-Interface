@@ -681,6 +681,19 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         LogDebug( ( "AT solicited Resp[%s]", pLine ) );
 
+        /* Quectel GSM Modules might send a data ready event while another command is processing. In this case, inform upper layers that more data is avaialabe */
+        #ifdef CELLULAR_GSM_MODEM
+            char * location = NULL;
+            location = strstr( pLine, "QIRDI" );
+
+            if( location != NULL )
+            {
+                CellularSocketContext_t * pSocketData = NULL;
+                pSocketData = _Cellular_GetSocketData( pContext, 0 );
+                pSocketData->dataReadyCallback( pSocketData, pSocketData->pDataReadyCallbackContext );
+            }
+        #endif
+
         /* Process Line will store the Line data in AT response. */
         pkStatus = _Cellular_ProcessLine( pContext, pLine, *ppAtResp, pContext->PktioAtCmdType, pContext->pRespPrefix );
 
