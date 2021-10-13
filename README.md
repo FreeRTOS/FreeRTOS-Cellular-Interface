@@ -16,6 +16,9 @@
 The FreeRTOS Cellular Interface exposes the capability of a few popular cellular modems through a uniform API. Currently, this repository contains libraries for these three cellular modems.
 
 * [Quectel BG96](https://www.quectel.com/product/lte-bg96-cat-m1-nb1-egprs/)
+* Quectel GSM Modules, tested with:
+   * [Quectel M95](https://www.quectel.com/product/gsm-gprs-m95/)
+   * [Quectel M66](https://www.quectel.com/product/gsm-gprs-m66/)
 * [Sierra Wireless HL7802](https://www.sierrawireless.com/products-and-solutions/embedded-solutions/products/hl7802/)
 * [U-Blox Sara-R4](https://www.u-blox.com/en/product/sara-r4-series)
 
@@ -83,6 +86,7 @@ It is recommended that you start by cloning the implementation of one of the exi
  Current Example Implementations:
 
 * [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/bg96)
+* [Quectel GSM](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/qgsm)
 * [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/hl7802)
 * [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/sara_r4)
 
