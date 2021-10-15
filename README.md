@@ -117,7 +117,7 @@ git submodule update --checkout --init --recursive --test/unit-test/CMock
 
 ## Reference examples
 
-Please refer to the demos of the FreeRTOS Cellular Interface in the associated [FreeRTOS Labs repository](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) for reference examples.
+Please refer to the [FreeRTOS Cellular Demos repository](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) for reference examples.
 
 ## Generating documentation
 
