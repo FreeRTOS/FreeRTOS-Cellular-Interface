@@ -115,6 +115,10 @@ git submodule update --checkout --init --recursive --test/unit-test/CMock
 
 1. Run `cd build && ctest` to execute all tests and view the test run summary.
 
+## Reference examples
+
+Please refer to the demos of the FreeRTOS Cellular Interface in the associated [FreeRTOS Labs repository](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) for reference examples.
+
 ## Generating documentation
 
 The Doxygen references were created using Doxygen version 1.9.2. To generate the
