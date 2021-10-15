@@ -28,7 +28,7 @@ Most cellular modems implement more or less the AT commands defined by the [3GPP
 The common component that implements the 3GPP TS v27.007 standard has been written in compliance of the following code quality criteria:
 
 * GNU Complexity scores are not over 8.
-* MISRA coding standard. Any deviations from the MISRA C:2012 guidelines are documented in source code comments marked by “`coverity`”.
+* MISRA coding standard. Any deviations from the MISRA C:2012 guidelines are documented in source code comments marked by "`coverity`".
 
 ## Getting Started
 
@@ -74,11 +74,11 @@ FreeRTOS Cellular Interface now supports AT commands, TCP offloaded Cellular abs
 In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html):
 
 1. Implement the cellular modem porting interface defined in [cellular_common_portable.h](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common/cellular_common_portable.h).
-2. Implement the subset of Cellular Library APIs that use vendor-specific (non-3GPP) AT commands. The APIs to be implemented are the ones not marked with an “o” in [this table](https://www.freertos.org/Documentation/api-ref/cellular_common/cellular_common_APIs.html).
-3. Implement Cellular Library callback functions that handle vendor-specific (non-3GPP) Unsolicited Result Code (URC). The URC handlers to be implemented are the ones not marked with an “o” in [this table](https://www.freertos.org/Documentation/api-ref/cellular_common/cellular_common_URC_handlers.html).
+2. Implement the subset of Cellular Library APIs that use vendor-specific (non-3GPP) AT commands. The APIs to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular_common/cellular_common_APIs.html).
+3. Implement Cellular Library callback functions that handle vendor-specific (non-3GPP) Unsolicited Result Code (URC). The URC handlers to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular_common/cellular_common_URC_handlers.html).
 
 The [Cellular common APIs document](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html) provides detail information required in each steps.
-It is recommended that you start by cloning the implementation of one of the existing modems, then make modifications where your modem’s vendor-specific (non-3GPP) AT commands are different.
+It is recommended that you start by cloning the implementation of one of the existing modems, then make modifications where your modem's vendor-specific (non-3GPP) AT commands are different.
 
  Current Example Implementations:
 
