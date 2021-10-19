@@ -264,7 +264,7 @@ CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
         0
     };
 
-    /*Enable multiple TCPIP session at the same time */
+    /*Enable multiple TCP IP session at the same time */
     atReqGetNoResult.pAtCmd = "AT+QIMUX=1";
     ( void ) _Cellular_AtcmdRequestWithCallback( pContext, atReqGetNoResult );
     /*Set the method to Handle Receive TCP/IP Data */
@@ -282,7 +282,7 @@ CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
     /*Network Time Synchronization Report */
     atReqGetNoResult.pAtCmd = "AT+CTZR=1";
     ( void ) _Cellular_AtcmdRequestWithCallback( pContext, atReqGetNoResult );
-    /*TCPIP Transfer Mode */
+    /*TCP IP Transfer Mode */
     atReqGetNoResult.pAtCmd = "AT+QIMODE=0";
     ( void ) _Cellular_AtcmdRequestWithCallback( pContext, atReqGetNoResult );
     /*Connect with Domain Name Server */

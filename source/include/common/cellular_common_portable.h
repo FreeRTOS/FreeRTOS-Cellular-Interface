@@ -77,9 +77,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
 
 /**
  * 1
- * @brief Cellular module TCPIP enable function.
+ * @brief Cellular module TCP IP enable function.
  *
- * This function start the TCPIP task.
+ * This function start the TCP IP task.
  *
  * @param[in,out] pContext FreeRTOS Cellular Library context created in Cellular_Init.
  *

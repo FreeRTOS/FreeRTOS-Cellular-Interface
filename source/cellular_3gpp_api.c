@@ -1399,6 +1399,7 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     #endif /* ifndef CELLULAR_MODEM_NO_GSM_NETWORK */
 
     #ifndef CELLULAR_GSM_MODEM
+
         /*
          *  +CEREG is not supported in GSM module (eg. QGSM, M66).
          */

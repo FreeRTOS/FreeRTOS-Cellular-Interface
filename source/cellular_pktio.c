@@ -681,7 +681,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         LogDebug( ( "AT solicited Resp[%s]", pLine ) );
 
-        /* Quectel GSM Modules might send a data ready event while another command is processing. In this case, inform upper layers that more data is avaialabe */
+        /* Quectel GSM Modules might send a data ready event while another command is processing. In this case, inform upper layers that more data is available */
         #ifdef CELLULAR_GSM_MODEM
             char * location = NULL;
             location = strstr( pLine, "QIRDI" );

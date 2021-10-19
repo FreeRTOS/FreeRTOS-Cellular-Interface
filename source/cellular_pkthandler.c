@@ -164,7 +164,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
 
         if( pTokenPtr == NULL )
         {
-            CellularLogError( "_Cellular_AtParse : input string error, contains  \",\" but no token %s", pInputLine );
+            LogError( ( "_Cellular_AtParse : input string error, contains \",\" but no token %s", pInputLine ) );
             pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
         }
     }
@@ -383,6 +383,7 @@ static int _searchCompareFunc( const void * pInputToken,
     /* coverity[misra_c_2012_directive_4_6_violation] */
     int compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
+    const char * pToken_nonURC = ( const char * ) pInputToken + 1; /* Some modems (such as Quectel GSM Modules) send events in the  format [<index>,] EVENT. Check the second character to see if this is the case */
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
     uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
     uint32_t strLen = ( uint32_t ) strlen( pBasePtr->pStrValue );
@@ -390,9 +391,6 @@ static int _searchCompareFunc( const void * pInputToken,
     compareValue = strncmp( pToken,
                             pBasePtr->pStrValue,
                             MIN( tokenLen, strLen ) );
-
-    /* Some modems (such as Quectel GSM Modules) send events in the  format [<index>,] EVENT. Check the second character to see if this is the case */
-    const char * pToken_nonURC = ( const char * ) pInputToken + 1;
 
     if( ( compareValue != 0 ) && ( pToken_nonURC[ 0 ] == ',' ) )
     {

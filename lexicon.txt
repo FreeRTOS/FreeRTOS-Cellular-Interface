@@ -203,6 +203,7 @@ corp
 coverity
 cpin
 cpsms
+cr
 createatdatamutex
 createdetachedthread
 createlibstatusmutex
@@ -262,6 +263,7 @@ ecn
 ecno
 edrx
 ef
+eg
 efhplmnwact
 eidrxlist
 eidrxsettingslist
@@ -378,6 +380,7 @@ ktcprcv
 ktcpstat
 lac
 len
+lf
 libatdata
 libcleanup
 libinit
@@ -522,6 +525,7 @@ phexdata
 pinputbuf
 pinputline
 pinputptr
+pinputtoken
 pitm
 pkio
 pkt
@@ -635,13 +639,16 @@ ptokenptr
 ptokentable
 ptr
 puk
+purcstr
 puserdata
 pvportmalloc
 pwr
 px
 qccid
 qcfg
+qgsm
 qird
+qirdi
 qsort
 qual
 quectel
@@ -716,6 +723,7 @@ saveing
 scanseq
 sdk
 searchcomparefunc
+sc
 sec
 semophores
 sendendpatternlen
@@ -734,6 +742,7 @@ setratpriority
 setsocketopt
 setsockopt
 shutdowncallback
+sid
 signalstrengthchangedcallback
 simcardlockstate
 simcardstate
@@ -774,6 +783,7 @@ stringlength
 strlen
 strncpy
 strnlen
+strstr
 strtok
 strtol
 struct
