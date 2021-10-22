@@ -157,12 +157,11 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
         }
     }
     /* Some modems (such as Quectel GSM Modules) send events without the \"+\"  character in the  format [<index>,] EVENT */
-    else
-    if( *( ++pSavePtr ) == ',' )
+    else if( *( ++pSavePtr ) == ',' )
     {
         pSavePtr++;
 
-        if( pTokenPtr == NULL )
+        if( *pSavePtr == '\0' )
         {
             LogError( ( "_Cellular_AtParse : input string error, contains \",\" but no token %s", pInputLine ) );
             pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;

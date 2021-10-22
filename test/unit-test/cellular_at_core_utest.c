@@ -43,6 +43,11 @@
 #define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN_000:READY"
 
 /**
+ * @brief Cellular sample prefix nonurc string input.
+ */
+#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT_NONURC                 "0, CONNECT OK"
+
+/**
  * @brief Cellular sample prefix string wrong input.
  */
 #define CELLULAR_SAMPLE_PREFIX_STRING_WRONG_INPUT                  "+CPINREADY"
@@ -1002,6 +1007,22 @@ void test_Cellular_ATIsPrefixPresent_Happy_Path( void )
     bool Result;
 
     strcpy( pStr, CELLULAR_SAMPLE_PREFIX_STRING_INPUT );
+
+    cellularStatus = Cellular_ATIsPrefixPresent( pStr, &Result );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( true, Result );
+}
+
+/**
+ * @brief Test happy path for Cellular_ATIsPrefixPresent (NONURC) to return CELLULAR_AT_SUCCESS and got expected results.
+ */
+void test_Cellular_ATIsPrefixPresent_NONURC_Happy_Path( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char pStr[ sizeof( CELLULAR_SAMPLE_PREFIX_STRING_INPUT_NONURC ) ] = { 0 };
+    bool Result;
+
+    strcpy( pStr, CELLULAR_SAMPLE_PREFIX_STRING_INPUT_NONURC );
 
     cellularStatus = Cellular_ATIsPrefixPresent( pStr, &Result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );

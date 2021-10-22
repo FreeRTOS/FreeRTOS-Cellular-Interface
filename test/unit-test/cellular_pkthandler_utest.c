@@ -45,9 +45,11 @@
 
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_URC_TOKEN_STRING_INPUT                 "RDY"
+#define CELLULAR_NONURC_TOKEN_STRING_INPUT              "0, CONNECT OK"
 #define CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS      "+RDY"
 #define CELLULAR_URC_TOKEN_STRING_GREATER_INPUT         "RDYY"
 #define CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT         "RD"
+#define CELLULAR_NONURC_TOKEN_ONLY_STRING               "0,"
 #define CELLULAR_PLUS_TOKEN_ONLY_STRING                 "+"
 #define CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT       "+CPIN:Story for Littel Red Riding Hood: Once upon a time there was a dear little girl who was loved by every one who looked at her, but most of all by her grandmother, and there was nothing that she would not have given to the child. Once she gave her a little cap of red velvet, which suited her so well that she would never wear anything else. So she was always called Little Red Riding Hood."
 #define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE                ( 32U )
@@ -516,6 +518,21 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Start_Plus_No_Token_String( void
 }
 
 /**
+ * @brief Test that include , but no token string case for _Cellular_HandlePacket.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Start_NONURC_No_Token_String( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
+    _Cellular_GenericCallback_Ignore();
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_NONURC_TOKEN_ONLY_STRING );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+}
+
+/**
  * @brief Test that too large string case for _Cellular_HandlePacket.
  */
 void test__Cellular_HandlePacket_AT_UNSOLICITED_Too_Large_String( void )
@@ -562,6 +579,23 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
     _Cellular_GenericCallback_Ignore();
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that happy path case for _Cellular_HandlePacket(NONURC).
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_NONURC_Happy_Path( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
+    _Cellular_GenericCallback_Ignore();
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_NONURC_TOKEN_STRING_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
