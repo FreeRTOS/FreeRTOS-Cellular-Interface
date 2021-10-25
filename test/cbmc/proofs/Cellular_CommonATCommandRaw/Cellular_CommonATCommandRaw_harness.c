@@ -90,7 +90,8 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
                                              CellularATCommandType_t atCommandType,
                                              CellularATCommandResponseReceivedCallback_t responseReceivedCallback,
                                              void * pData,
-                                             uint16_t dataLen );
+                                             uint16_t dataLen,
+                                             uint32_t timeoutMs );
 
 /****************************************************************
 * The proof of Cellular_CommonATCommandRaw
@@ -105,6 +106,7 @@ void harness()
     uint32_t lATCommandPrefixLen;
     uint32_t lATCommandPayload;
     CellularATCommandType_t atCommandType;
+    uint32_t timeoutMs;
 
     pATCommandPrefix = safeMalloc( lATCommandPrefixLen );
     pATCommandPayload = safeMalloc( lATCommandPayload );
@@ -124,6 +126,7 @@ void harness()
                                      atCommandType,
                                      NULL,
                                      pData,
-                                     lDataLen );
+                                     lDataLen,
+                                     timeoutMs );
     }
 }
