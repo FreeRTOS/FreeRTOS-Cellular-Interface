@@ -18,7 +18,7 @@ jobs:
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
-          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG'
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
           make -C build/ all
       - name: Test
         run: |
@@ -43,9 +43,8 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/complexity@main
         with:
           path: ./
-          source_path: common
   doxygen:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Run doxygen build

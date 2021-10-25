@@ -30,34 +30,18 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
+#include "cellular_config_defaults.h"
 
 /*-----------------------------------------------------------*/
 
-
-/* Users should define their platform dependent method if they need.
- * Otherwise use our predefine method which has no effect but pass
- * the coverity check.
- */
-#ifdef DEBUG_METHOD
-    #define CellularLogError
-    #define CellularLogDebug
-    #define CellularLogWarn
-    #define CellularLogInfo
-    #define configASSERT
-    #define Platform_Delay
-    #define taskENTER_CRITICAL()
-    #define taskEXIT_CRITICAL()
-#else
-    #define CellularLogError( ... )    ( { 1U; } )
-    #define CellularLogDebug( ... )    ( { 1U; } )
-    #define CellularLogWarn( ... )     ( { 1U; } )
-    #define CellularLogInfo( ... )     ( { 1U; } )
-    #define configASSERT( X )          ( { 1U; } )
-    #define Platform_Delay( X )        ( { ( void ) X; 1U; } )
-    #define taskENTER_CRITICAL()       ( { 1U; } )
-    #define taskEXIT_CRITICAL()        ( { 1U; } )
-#endif /* ifdef DEBUG_METHOD */
-
+#define configASSERT                         assert
+#define Platform_Delay                       dummyDelay
+#define taskENTER_CRITICAL                   dummyTaskENTER_CRITICAL
+#define taskEXIT_CRITICAL                    dummyTaskEXIT_CRITICAL
 
 #define PlatformEventGroupHandle_t           uint16_t
 #define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete
@@ -254,5 +238,11 @@ uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t groupEvent
 int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupEvent,
                                                EventBits_t event,
                                                BaseType_t * pHigherPriorityTaskWoken );
+
+void dummyDelay( uint32_t milliseconds );
+
+void dummyTaskENTER_CRITICAL( void );
+
+void dummyTaskEXIT_CRITICAL( void );
 
 #endif /* __CELLULAR_PLATFORM_H__ */

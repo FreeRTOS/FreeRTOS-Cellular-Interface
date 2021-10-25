@@ -42,8 +42,8 @@ UNWINDSET += __builtin___strncpy_chk.0:$(CBMC_MAX_BUFSIZE)
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common_api.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_common.c
-PROJECT_SOURCES += $(SRCDIR)/common/src/cellular_pkthandler.c
+PROJECT_SOURCES += $(SRCDIR)/source/cellular_common_api.c
+PROJECT_SOURCES += $(SRCDIR)/source/cellular_common.c
+PROJECT_SOURCES += $(SRCDIR)/source/cellular_pkthandler.c
 
 include ../Makefile.common
