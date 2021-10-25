@@ -436,6 +436,7 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
  * command is received.
  * @param[in] pData The pData pointer will be passed in responseReceivedCallback.
  * @param[in] dataLen The dataLen value will be passed in responseReceivedCallback.
+ * @param[in] timeoutMs Maximum time in milliseconds to wait the AT command response.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -446,7 +447,8 @@ CellularError_t Cellular_ATCommandRaw( CellularHandle_t cellularHandle,
                                        CellularATCommandType_t atCommandType,
                                        CellularATCommandResponseReceivedCallback_t responseReceivedCallback,
                                        void * pData,
-                                       uint16_t dataLen );
+                                       uint16_t dataLen,
+                                       uint32_t timeoutMs );
 
 /**
  * @brief Create a socket.

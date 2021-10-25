@@ -99,7 +99,8 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
                                              CellularATCommandType_t atCommandType,
                                              CellularATCommandResponseReceivedCallback_t responseReceivedCallback,
                                              void * pData,
-                                             uint16_t dataLen );
+                                             uint16_t dataLen,
+                                             uint32_t timeoutMs );
 
 /**
  * @brief This function is the common implementation of FreeRTOS Cellular Library API.

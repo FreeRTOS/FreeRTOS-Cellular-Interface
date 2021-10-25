@@ -498,7 +498,7 @@ void test_Cellular_CommonATCommandRaw_Null_Handler( void )
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
 
-    cellularStatus = Cellular_CommonATCommandRaw( NULL, NULL, NULL, 0, NULL, NULL, 0 );
+    cellularStatus = Cellular_CommonATCommandRaw( NULL, NULL, NULL, 0, NULL, NULL, 0, 0 );
 
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
@@ -515,13 +515,13 @@ void test_Cellular_CommonATCommandRaw_Null_AtCmdPayload( void )
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
-    cellularStatus = Cellular_CommonATCommandRaw( &context, NULL, NULL, 0, NULL, NULL, 0 );
+    cellularStatus = Cellular_CommonATCommandRaw( &context, NULL, NULL, 0, NULL, NULL, 0, 0 );
 
     TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
 }
 
 /**
- * @brief Test that _Cellular_AtcmdRequestWithCallback return CELLULAR_PKT_STATUS_BAD_REQUEST case for Cellular_CommonATCommandRaw.
+ * @brief Test that _Cellular_TimeoutAtcmdRequestWithCallback return CELLULAR_PKT_STATUS_BAD_REQUEST case for Cellular_CommonATCommandRaw.
  */
 void test_Cellular_CommonATCommandRaw_AtCmd_Bad_Request( void )
 {
@@ -533,10 +533,10 @@ void test_Cellular_CommonATCommandRaw_AtCmd_Bad_Request( void )
     char pData[] = "Test Data";
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_REQUEST );
+    _Cellular_TimeoutAtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_REQUEST );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
 
-    cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0 );
+    cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0, 0 );
 
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
@@ -554,10 +554,10 @@ void test_Cellular_CommonATCommandRaw_Happy_Path( void )
     char pData[] = "Test Data";
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TimeoutAtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
-    cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0 );
+    cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0, 0 );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }

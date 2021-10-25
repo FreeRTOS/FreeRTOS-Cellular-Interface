@@ -100,10 +100,11 @@ CellularError_t Cellular_ATCommandRaw( CellularHandle_t cellularHandle,
                                        CellularATCommandType_t atCommandType,
                                        CellularATCommandResponseReceivedCallback_t responseReceivedCallback,
                                        void * pData,
-                                       uint16_t dataLen )
+                                       uint16_t dataLen,
+                                       uint32_t tiemoutMs )
 {
     return Cellular_CommonATCommandRaw( cellularHandle, pATCommandPrefix, pATCommandPayload, atCommandType,
-                                        responseReceivedCallback, pData, dataLen );
+                                        responseReceivedCallback, pData, dataLen, tiemoutMs );
 }
 
 /*-----------------------------------------------------------*/

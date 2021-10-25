@@ -303,7 +303,8 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
                                              CellularATCommandType_t atCommandType,
                                              CellularATCommandResponseReceivedCallback_t responseReceivedCallback,
                                              void * pData,
-                                             uint16_t dataLen )
+                                             uint16_t dataLen,
+                                             uint32_t timeoutMs )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
@@ -331,7 +332,7 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
         atReqGetResult.dataLen = dataLen;
         atReqGetResult.respCallback = responseReceivedCallback;
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetResult );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetResult, timeoutMs );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
