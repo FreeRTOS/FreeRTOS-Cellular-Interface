@@ -75,7 +75,7 @@ typedef enum MNOProfileType
 
 /* Select network MNO profile. Default value is MNO_PROFILE_NOT_SET */
 #ifndef CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE
-    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE                ( MNO_PROFILE_NOT_SET )
+    #define CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE    ( MNO_PROFILE_NOT_SET )
 #endif
 
 /*
@@ -114,7 +114,7 @@ typedef enum MNOProfileType
  */
 typedef struct CellularPdnContextInfo
 {
-    BOOL contextsPresent[ MAX_PDP_CONTEXTS ];                             /**< Context present in +CGDCONT response or not. */
+    bool contextsPresent[ MAX_PDP_CONTEXTS ];                             /**< Context present in +CGDCONT response or not. */
     char ipType[ MAX_PDP_CONTEXTS ][ CELULAR_PDN_CONTEXT_TYPE_MAX_SIZE ]; /**< PDN Context type. */
     char apnName[ MAX_PDP_CONTEXTS ][ CELLULAR_APN_MAX_SIZE ];            /**< APN name. */
     char ipAddress[ MAX_PDP_CONTEXTS ][ CELLULAR_IP_ADDRESS_MAX_SIZE ];   /**< IP address. */
@@ -125,11 +125,24 @@ typedef struct CellularPdnContextInfo
  */
 typedef struct CellularPdnContextActInfo
 {
-    BOOL contextsPresent[ MAX_PDP_CONTEXTS ]; /**< Context present in +CGACT response or not. */
-    BOOL contextActState[ MAX_PDP_CONTEXTS ]; /**< Context active state from +CGACT response. */
+    bool contextsPresent[ MAX_PDP_CONTEXTS ]; /**< Context present in +CGACT response or not. */
+    bool contextActState[ MAX_PDP_CONTEXTS ]; /**< Context active state from +CGACT response. */
 } CellularPdnContextActInfo_t;
 
 /*-----------------------------------------------------------*/
 
+extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
+extern uint32_t CellularUrcHandlerTableSize;
+
+extern const char * CellularSrcTokenErrorTable[];
+extern uint32_t CellularSrcTokenErrorTableSize;
+
+extern const char * CellularSrcTokenSuccessTable[];
+extern uint32_t CellularSrcTokenSuccessTableSize;
+
+extern const char * CellularUrcTokenWoPrefixTable[];
+extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
+/*-----------------------------------------------------------*/
 
 #endif /* ifndef __CELLULAR_R4_H__ */

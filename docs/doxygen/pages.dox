@@ -1,0 +1,393 @@
+/**
+@mainpage Overview
+@anchor cellular
+@brief FreeRTOS Cellular library
+
+FreeRTOS Cellular Library use communication interface to communicate with cellular modules to provide cellular network connectivity.
+
+<b>FreeRTOS Cellular Library</b>
+- <b>Repository structure</b><br>
+This library contains the following three components in three folders.
+| FreeRTOS Cellular Library folders | High Level Description |
+| :--------------------| :--------------------- |
+| include              | FreeRTOS Cellular Library APIs definitions help to abstract the control of cellular module. |
+| common               | FreeRTOS Cellular Library APIs implemenation with 3GPP TS v27.007 AT commands. |
+| modules              | FreeRTOS Cellular Library APIs implemenation with cellular module specific AT commands. |
+
+- <b>Supported cellular modules</b><br>
+Three cellular modules are supported in this library.
+| Cellular module |
+| :--------------------|
+| quectel BG96         |
+| Sierra HL7802        |
+| Ublox SARA R4 series |
+New cellular module can reference these module porting to be integrated into FreeRTOS Cellular Library.<br>
+Please reference cellular common library document for detail information about porting new cellular module.
+- <b>Currently Supported Features in FreeRTOS Cellular Library</b>
+ - User of FreeRTOS Cellular Library is able to use Cat-M1 cellular technology to connect to network.
+ - User of FreeRTOS Cellular Library is able to perform control plane operations like (initialize modem, register on a network etc.) in a vendor agnostic way.
+ - User of FreeRTOS Cellular Library is able to send and receive data using TCP/IP in a vendor agnostic way given that TCP/IP stack is running on the cellular modem.
+ - User of FreeRTOS Cellular Library is able to put the modem in different low power modes (PSM and eDRX) in a vendor agnostic way.
+ - User of FreeRTOS Cellular Library is able to receive asynchronous notifications about various events like "disconnected", "signal strength changed" etc. to enable them to take appropriate action as desired.
+ - User of FreeRTOS Cellular Library is able to use the existing application protocol clients (MQTT, HTTP) over cellular seamlessly. i.e. any existing user application using MQTT which works over WiFi/Ethernet shall work over Cellular given the underlying cellular technology permits that.<br>
+
+
+@section cellular_memory_requirements Memory Requirements
+@brief Memory requirements of the Cellular library.
+
+@include{doc} size_table.md
+ */
+
+/**
+@page cellular_design Design
+@brief FreeRTOS Cellular Library Design
+
+FreeRTOS Cellular Library uses communication interface to communicate with cellular modules.<br>
+Users of FreeRTOS Cellular Library should create a instance of CellularCommInterface and pass it
+to Cellular_Init function as paremeters.
+
+\image html comm_interaction.png "Cellular library interacts with comm interface" width=800px
+
+The following communication interface implementation can be used as reference.
+- <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/pc/boards/windows/ports/comm_if/comm_if_windows.c">FreeRTOS windows simulator comm interface </a>
+- <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c"> STM32 L475 discovery board comm interface </a>
+- <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c"> Sierra sensorhub board comm interface </a>
+<b></b>
+*/
+
+/**
+@page cellular_config Configurations
+@brief Configurations of the Cellular Library.
+
+Some configuration settings are C pre-processor constants, and some are function-like macros for logging. They can be set with a `#define` in the config file (**cellular_config.h**) or by using a compiler option such as -D in gcc.
+
+@section CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+@copydoc CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+
+@section CELLULAR_MCC_MAX_SIZE
+@copydoc CELLULAR_MCC_MAX_SIZE
+
+@section CELLULAR_MNC_MAX_SIZE
+@copydoc CELLULAR_MNC_MAX_SIZE
+
+@section CELLULAR_ICCID_MAX_SIZE
+@copydoc CELLULAR_ICCID_MAX_SIZE
+
+@section CELLULAR_IMSI_MAX_SIZE
+@copydoc CELLULAR_IMSI_MAX_SIZE
+
+@section CELLULAR_FW_VERSION_MAX_SIZE
+@copydoc CELLULAR_FW_VERSION_MAX_SIZE
+
+@section CELLULAR_HW_VERSION_MAX_SIZE
+@copydoc CELLULAR_HW_VERSION_MAX_SIZE
+
+@section CELLULAR_SERIAL_NUM_MAX_SIZE
+@copydoc CELLULAR_SERIAL_NUM_MAX_SIZE
+
+@section CELLULAR_IMEI_MAX_SIZE
+@copydoc CELLULAR_IMEI_MAX_SIZE
+
+@section CELLULAR_NETWORK_NAME_MAX_SIZE
+@copydoc CELLULAR_NETWORK_NAME_MAX_SIZE
+
+@section CELLULAR_APN_MAX_SIZE
+@copydoc CELLULAR_APN_MAX_SIZE
+
+@section CELLULAR_PDN_USERNAME_MAX_SIZE
+@copydoc CELLULAR_PDN_USERNAME_MAX_SIZE
+
+@section CELLULAR_PDN_PASSWORD_MAX_SIZE
+@copydoc CELLULAR_PDN_PASSWORD_MAX_SIZE
+
+@section CELLULAR_IP_ADDRESS_MAX_SIZE
+@copydoc CELLULAR_IP_ADDRESS_MAX_SIZE
+
+@section CELLULAR_AT_CMD_MAX_SIZE
+@copydoc CELLULAR_AT_CMD_MAX_SIZE
+
+@section CELLULAR_NUM_SOCKET_MAX
+@copydoc CELLULAR_NUM_SOCKET_MAX
+
+@section CELLULAR_MANUFACTURE_ID_MAX_SIZE
+@copydoc CELLULAR_MANUFACTURE_ID_MAX_SIZE
+
+@section CELLULAR_MODEL_ID_MAX_SIZE
+@copydoc CELLULAR_MODEL_ID_MAX_SIZE
+
+@section CELLULAR_EDRX_LIST_MAX_SIZE
+@copydoc CELLULAR_EDRX_LIST_MAX_SIZE
+
+@section CELLULAR_PDN_CONTEXT_ID_MIN
+@copydoc CELLULAR_PDN_CONTEXT_ID_MIN
+
+@section CELLULAR_PDN_CONTEXT_ID_MAX
+@copydoc CELLULAR_PDN_CONTEXT_ID_MAX
+
+@section CELLULAR_MAX_RAT_PRIORITY_COUNT
+@copydoc CELLULAR_MAX_RAT_PRIORITY_COUNT
+
+@section CELLULAR_MAX_SEND_DATA_LEN
+@copydoc CELLULAR_MAX_SEND_DATA_LEN
+
+@section CELLULAR_MAX_RECV_DATA_LEN
+@copydoc CELLULAR_MAX_RECV_DATA_LEN
+
+@section CELLULAR_SUPPORT_GETHOSTBYNAME
+@copydoc CELLULAR_SUPPORT_GETHOSTBYNAME
+
+@section CELLULAR_COMM_IF_SEND_TIMEOUT_MS
+@copydoc CELLULAR_COMM_IF_SEND_TIMEOUT_MS
+
+@section CELLULAR_COMM_IF_RECV_TIMEOUT_MS
+@copydoc CELLULAR_COMM_IF_RECV_TIMEOUT_MS
+
+@section CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
+@copydoc CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
+
+@section CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION
+@copydoc CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION
+
+@section CELLULAR_CONFIG_DEFAULT_RAT
+@copydoc CELLULAR_CONFIG_DEFAULT_RAT
+
+@section CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
+@copydoc CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
+
+@section cellular_logerror LogError
+@copydoc LogError
+
+@section cellular_logwarn LogWarn
+@copydoc LogWarn
+
+@section cellular_loginfo LogInfo
+@copydoc LogInfo
+
+@section cellular_logdebug LogDebug
+@copydoc LogDebug
+*/
+
+/**
+@functions_page{cellular,cellular}
+@functions_brief{cellular}
+
+<b>Control plane APIs</b>
+
+- @function_name{Cellular_Init}
+@function_brief{Cellular_Init}
+- @function_name{Cellular_Cleanup}
+@function_brief{Cellular_Cleanup}
+- @function_name{Cellular_SetRatPriority}
+@function_brief{Cellular_SetRatPriority}
+- @function_name{Cellular_GetRatPriority}
+@function_brief{Cellular_GetRatPriority}
+- @function_name{Cellular_RfOn}
+@function_brief{Cellular_RfOn}
+- @function_name{Cellular_RfOff}
+@function_brief{Cellular_RfOff}
+
+<b>Hardware info</b>
+
+- @function_name{Cellular_GetSimCardStatus}
+@function_brief{Cellular_GetSimCardStatus}
+- @function_name{Cellular_GetSimCardInfo}
+@function_brief{Cellular_GetSimCardInfo}
+- @function_name{Cellular_GetModemInfo}
+@function_brief{Cellular_GetModemInfo}
+
+<b>Network registration</b>
+
+- @function_name{Cellular_GetRegisteredNetwork}
+@function_brief{Cellular_GetRegisteredNetwork}
+- @function_name{Cellular_GetNetworkTime}
+@function_brief{Cellular_GetNetworkTime}
+- @function_name{Cellular_GetSignalInfo}
+@function_brief{Cellular_GetSignalInfo}
+- @function_name{Cellular_GetServiceStatus}
+@function_brief{Cellular_GetServiceStatus}
+
+<b>Enable data network</b>
+
+- @function_name{Cellular_SetPdnConfig}
+@function_brief{Cellular_SetPdnConfig}
+- @function_name{Cellular_GetPdnStatus}
+@function_brief{Cellular_GetPdnStatus}
+- @function_name{Cellular_ActivatePdn}
+@function_brief{Cellular_ActivatePdn}
+- @function_name{Cellular_DeactivatePdn}
+@function_brief{Cellular_DeactivatePdn}
+- @function_name{Cellular_GetIPAddress}
+@function_brief{Cellular_GetIPAddress}
+- @function_name{Cellular_SetDns}
+@function_brief{Cellular_SetDns}
+
+<b>Device and network status callback functions</b>
+
+- @function_name{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+@function_brief{Cellular_RegisterUrcNetworkRegistrationEventCallback}
+- @function_name{Cellular_RegisterUrcPdnEventCallback}
+@function_brief{Cellular_RegisterUrcPdnEventCallback}
+- @function_name{Cellular_RegisterUrcSignalStrengthChangedCallback}
+@function_brief{Cellular_RegisterUrcSignalStrengthChangedCallback}
+- @function_name{Cellular_RegisterModemEventCallback}
+@function_brief{Cellular_RegisterModemEventCallback}
+- @function_name{Cellular_RegisterUrcGenericCallback}
+@function_brief{Cellular_RegisterUrcGenericCallback}
+
+<b>Power saveing modes</b>
+
+- @function_name{Cellular_GetPsmSettings}
+@function_brief{Cellular_GetPsmSettings}
+- @function_name{Cellular_SetPsmSettings}
+@function_brief{Cellular_SetPsmSettings}
+- @function_name{Cellular_GetEidrxSettings}
+@function_brief{Cellular_GetEidrxSettings}
+- @function_name{Cellular_SetEidrxSettings}
+@function_brief{Cellular_SetEidrxSettings}
+
+<b>Custom AT command</b>
+
+- @function_name{Cellular_ATCommandRaw}
+@function_brief{Cellular_ATCommandRaw}
+
+<b>Data plan APIs</b>
+
+- @function_name{Cellular_CreateSocket}
+@function_brief{Cellular_CreateSocket}
+- @function_name{Cellular_SocketConnect}
+@function_brief{Cellular_SocketConnect}
+- @function_name{Cellular_SocketSend}
+@function_brief{Cellular_SocketSend}
+- @function_name{Cellular_SocketRecv}
+@function_brief{Cellular_SocketRecv}
+- @function_name{Cellular_SocketClose}
+@function_brief{Cellular_SocketClose}
+- @function_name{Cellular_GetHostByName}
+@function_brief{Cellular_GetHostByName}
+- @function_name{Cellular_SocketSetSockOpt}
+@function_brief{Cellular_SocketSetSockOpt}
+- @function_name{Cellular_SocketRegisterSocketOpenCallback}
+@function_brief{Cellular_SocketRegisterSocketOpenCallback}
+- @function_name{Cellular_SocketRegisterDataReadyCallback}
+@function_brief{Cellular_SocketRegisterDataReadyCallback}
+- @function_name{Cellular_SocketRegisterClosedCallback}
+@function_brief{Cellular_SocketRegisterClosedCallback}
+*/
+
+/**
+@page cellular_porting Porting Guide
+@brief Guide for porting Cellular library to a new platform.
+
+To use the Cellular library, a platform must implement the following components:
+1. [Configuration Macros](@ref cellular_porting_config)
+2. [Cellular Communication Interface](@ref cellular_porting_comm_if)
+3. [Cellular platform dependency](@ref cellular_platform_dependency)
+
+@section cellular_porting_config Configuration Macros
+@brief Settings that must be set as macros in the config header `cellular_config.h`, or passed in as compiler options.
+
+@note If a custom configuration header `cellular_config.h` is not provided, then the @ref CELLULAR_DO_NOT_USE_CUSTOM_CONFIG macro must be defined.
+
+@see [Configurations](@ref cellular_config)
+
+In addition, the following logging macros are used throughout the library:
+ - @ref LogError
+ - @ref LogWarn
+ - @ref LogInfo
+ - @ref LogDebug
+
+@section cellular_porting_comm_if Cellular Communication Interface
+@brief FreeRTOS Cellular Library use communication interface to communicate with cellular modules.
+
+CellularCommInterface includes the following four function pointers.
+Reference the document page for prototype.
+- @subpage CellularCommInterfaceOpen_t
+@copybrief CellularCommInterfaceOpen_t
+- @subpage CellularCommInterfaceSend_t
+@copybrief CellularCommInterfaceSend_t
+- @subpage CellularCommInterfaceRecv_t
+@copybrief CellularCommInterfaceRecv_t
+- @subpage CellularCommInterfaceClose_t
+@copybrief CellularCommInterfaceClose_t
+
+@section cellular_platform_dependency Cellular platform dependency
+@brief Cellular platform depndency
+
+FreeRTOS Cellular Library makes use of the following OS platform functions.<br>
+<b>"cellular_platform.h"</b> is referenced during FreeRTOS Cellular Library compilation.<br>
+User of FreeRTOS Cellular Library should provide these APIs and data structures in "cellular_platform.h".<br>
+A default implementation with FreeRTOS is provided in FreeRTOS Labs cellular demo.
+ - <b>Threads</b><br>The following APIs and macros should be provided in cellular_platform.h
+```
+
+bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
+                                    void * pArgument,
+                                    int32_t priority,
+                                    size_t stackSize );
+
+#define PLATFORM_THREAD_DEFAULT_STACK_SIZE    ( 2048U )
+#define PLATFORM_THREAD_DEFAULT_PRIORITY      ( 5U )
+```
+ - <b>Mutex</b><br>The following APIs and data structure should be provided in cellular_platform.h.<br>
+ FreeRTOS Cellular Library use static mutex allocation. Data fields in PlatformMutex can be defined by developers.
+```
+typedef struct PlatformMutex
+{
+    ...
+} PlatformMutex_t;
+
+bool PlatformMutex_Create( PlatformMutex_t * pNewMutex,
+                           bool recursive );
+void PlatformMutex_Destroy( PlatformMutex_t * pMutex );
+void PlatformMutex_Lock( PlatformMutex_t * pMutex );
+bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
+void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
+```
+ - <b>Memory</b><br>The following malloc/free style APIs should be provided in cellular_platform.h.<br>
+ The <a href="https://www.freertos.org/a00111.html">FreeRTOS memory management document</a> can be referenced for these APIs.
+```
+// Example implementation of FreeRTOS malloc/free
+#define Platform_Malloc    pvPortMalloc
+#define Platform_Free      vPortFree
+```
+ - <b>EventGroup</b><br>The following APIs and handle should be provided in cellular_platform.h.<br>
+ Please reference <a href="https://www.freertos.org/event-groups-API.html">FreeRTOS EvengGroup function prototypes</a>.
+```
+// Example implementation of FreeRTOS EvengGroup
+#define PlatformEventGroupHandle_t           EventGroupHandle_t
+#define PlatformEventGroup_Delete            vEventGroupDelete
+#define PlatformEventGroup_ClearBits         xEventGroupClearBits
+#define PlatformEventGroup_Create            xEventGroupCreate
+#define PlatformEventGroup_GetBits           xEventGroupGetBits
+#define PlatformEventGroup_SetBits           xEventGroupSetBits
+#define PlatformEventGroup_SetBitsFromISR    xEventGroupSetBitsFromISR
+#define PlatformEventGroup_WaitBits          xEventGroupWaitBits
+
+```
+ - <b>Delay</b><br>The following API should be provided in cellular_platform.h.<br>
+ Please reference <a href="https://www.freertos.org/a00127.html">FreeRTOS Task Control function prototypes</a>.
+```
+// Example implementation of FreeRTOS Task Control
+#define Platform_Delay( delayMs )           vTaskDelay( pdMS_TO_TICKS( delayMs ) )
+```
+*/
+
+/**
+ * @paramstructs_group{cellular,Cellular}
+ * @paramstructs_brief{cellular,cellular}
+ */
+
+/**
+ * @handles_group{cellular,Cellular}
+ * @handles_brief{cellular library}
+ */
+
+/**
+ * @functionpointers_group{cellular,Cellular}
+ * @functionpointers_brief{cellular library}
+ */
+
+/**
+ * @enums_group{cellular,Cellular}
+ * @enums_brief{cellular library}
+ */

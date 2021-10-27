@@ -259,20 +259,24 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             /* Configure RAT Searching Sequence to default radio access technology. */
             switch( CELLULAR_CONFIG_DEFAULT_RAT )
             {
-            case CELLULAR_RAT_CATM1:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",02,1";
-                break;
-            case CELLULAR_RAT_NBIOT:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",03,1";
-                break;
-            case CELLULAR_RAT_GSM:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",01,1";
-                break;
-            default:
-                /* Configure RAT Searching Sequence to automatic. */
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",00,1";
-                break;
+                case CELLULAR_RAT_CATM1:
+                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",02,1";
+                    break;
+
+                case CELLULAR_RAT_NBIOT:
+                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",03,1";
+                    break;
+
+                case CELLULAR_RAT_GSM:
+                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",01,1";
+                    break;
+
+                default:
+                    /* Configure RAT Searching Sequence to automatic. */
+                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",00,1";
+                    break;
             }
+
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 

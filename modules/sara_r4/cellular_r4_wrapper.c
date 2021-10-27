@@ -41,16 +41,6 @@
 
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
-                               const CellularCommInterface_t * pCommInterface )
-{
-    return Cellular_CommonInit( pCellularHandle, pCommInterface );
-}
-
-/*-----------------------------------------------------------*/
-
-/* FreeRTOS Cellular Library API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_Cleanup( CellularHandle_t cellularHandle )
 {
     return Cellular_CommonCleanup( cellularHandle );
