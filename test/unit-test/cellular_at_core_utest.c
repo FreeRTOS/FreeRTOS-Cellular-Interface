@@ -40,7 +40,7 @@
 /**
  * @brief Cellular sample prefix string input.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN_000:READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN_a000:RrEADY"
 
 /**
  * @brief Cellular sample prefix string wrong input.
@@ -55,7 +55,7 @@
 /**
  * @brief Cellular sample prefix string output.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_OUTPUT                       "READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_OUTPUT                       "RrEADY"
 
 /**
  * @brief Cellular sample string leading white space.
@@ -160,7 +160,7 @@
 /**
  * @brief Cellular sample prefix string wrong input.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT             "*CPIN:READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT             "~CPIN:READY"
 
 static int mallocAllocFail = 0;
 
@@ -289,12 +289,16 @@ void test_Cellular_ATRemoveLeadingWhiteSpaces_Happy_Path( void )
 {
     CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
     char * pString = CELLULAR_SAMPLE_STRING_LEADING_WHITE_SPACE;
-    char * pEmptyString = "        ";
+    char * pMixString = "    \t\b    ";
+    char * pEmptyString = "       ";
 
     cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
     TEST_ASSERT_EQUAL_STRING( CELLULAR_SAMPLE_STRING_NO_WHITE_SPACE, pString );
+
+    cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pMixString );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
 
     cellularStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pEmptyString );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
@@ -1022,7 +1026,7 @@ void test_Cellular_ATIsPrefixPresent_Empty_String( void )
 }
 
 /**
- * @brief Test the string without delimiter case for Cellular_ATIsPrefixPresent to return CELLULAR_AT_BAD_PARAMETER.
+ * @brief Test the string without delimiter case for Cellular_ATIsPrefixPresent to return CELLULAR_AT_SUCCESS.
  */
 void test_Cellular_ATIsPrefixPresent_No_Delimiter( void )
 {
@@ -1037,7 +1041,7 @@ void test_Cellular_ATIsPrefixPresent_No_Delimiter( void )
 }
 
 /**
- * @brief Test the string with wrong prefix case for Cellular_ATIsPrefixPresent to return CELLULAR_AT_BAD_PARAMETER.
+ * @brief Test the string with wrong prefix case for Cellular_ATIsPrefixPresent to return CELLULAR_AT_SUCCESS.
  */
 void test_Cellular_ATIsPrefixPresent_Wrong_Prefix( void )
 {
