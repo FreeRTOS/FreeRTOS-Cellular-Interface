@@ -38,6 +38,12 @@
 #ifndef __CELLULAR_CONFIG_DEFAULTS_H__
 #define __CELLULAR_CONFIG_DEFAULTS_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /* The macro definition for CELLULAR_DO_NOT_USE_CUSTOM_CONFIG is for Doxygen
  * documentation only. */
 
@@ -426,5 +432,11 @@
 #ifndef LogDebug
     #define LogDebug( message )
 #endif
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_CONFIG_DEFAULTS_H__ */

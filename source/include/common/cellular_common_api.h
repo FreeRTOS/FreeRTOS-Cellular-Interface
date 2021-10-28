@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_COMMON_API_H__
 #define __CELLULAR_COMMON_API_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #include "cellular_types.h"
 #include "cellular_comm_interface.h"
 
@@ -295,5 +301,11 @@ CellularPktStatus_t Cellular_CommonUrcProcessCgreg( CellularContext_t * pContext
  */
 CellularPktStatus_t Cellular_CommonUrcProcessCreg( CellularContext_t * pContext,
                                                    char * pInputLine );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_COMMON_API_H__ */

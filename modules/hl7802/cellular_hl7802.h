@@ -26,6 +26,12 @@
 #ifndef __CELLULAR_HL7802_H__
 #define __CELLULAR_HL7802_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #define MIN_TCP_SESSION_ID                ( 1U )
 #define MAX_TCP_SESSION_ID                ( 6U )
 #define TCP_SESSION_TABLE_LEGNTH          ( MAX_TCP_SESSION_ID + 1 )
@@ -93,5 +99,11 @@ extern uint32_t CellularSrcTokenSuccessTableSize;
 
 extern const char * CellularUrcTokenWoPrefixTable[];
 extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* ifndef __CELLULAR_HL7802_H__ */

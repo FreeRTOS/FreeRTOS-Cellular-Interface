@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_COMMON_H__
 #define __CELLULAR_COMMON_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /* Standard includes. */
 #include <stdbool.h>
 
@@ -560,5 +566,11 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
                                                                 uint32_t dataTimeoutMS,
                                                                 const char ** pCellularSrcTokenSuccessTable,
                                                                 uint32_t cellularSrcTokenSuccessTableSize );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_COMMON_H__ */
