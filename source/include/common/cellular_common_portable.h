@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_COMMON_PORTABLE_H__
 #define __CELLULAR_COMMON_PORTABLE_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #include <stdint.h>
 #include "cellular_common.h"
 
@@ -84,5 +90,11 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
  * code indicating the cause of the error.
  */
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* End of __CELLULAR_COMMON_PORTABLE_H__. */

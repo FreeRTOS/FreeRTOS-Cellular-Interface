@@ -27,6 +27,12 @@
 #ifndef __CELLULAR_PKTIO_INTERNAL_H__
 #define __CELLULAR_PKTIO_INTERNAL_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
     /* Include custom config file before other headers. */
     #include "cellular_config.h"
@@ -126,5 +132,11 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
 uint32_t _Cellular_PktioSendData( const CellularContext_t * pContext,
                                   const uint8_t * pData,
                                   uint32_t dataLen );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_PKTIO_INTERNAL_H__ */

@@ -1,6 +1,12 @@
 #ifndef __CELLULAR_BG96_H__
 #define __CELLULAR_BG96_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /* AT Command timeout for PDN activation */
 #define PDN_ACTIVATION_PACKET_REQ_TIMEOUT_MS       ( 150000UL )
 
@@ -65,5 +71,11 @@ extern uint32_t CellularSrcTokenSuccessTableSize;
 
 extern const char * CellularUrcTokenWoPrefixTable[];
 extern uint32_t CellularUrcTokenWoPrefixTableSize;
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* ifndef __CELLULAR_BG96_H__ */

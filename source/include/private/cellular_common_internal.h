@@ -26,7 +26,11 @@
 #ifndef __CELLULAR_COMMON_INTERNAL_H__
 #define __CELLULAR_COMMON_INTERNAL_H__
 
-
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /* Cellular includes. */
 #include "cellular_platform.h"
@@ -217,5 +221,11 @@ void _Cellular_LockAtDataMutex( CellularContext_t * pContext );
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  */
 void _Cellular_UnlockAtDataMutex( CellularContext_t * pContext );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* ifndef __CELLULAR_COMMON_INTERNAL_H__ */

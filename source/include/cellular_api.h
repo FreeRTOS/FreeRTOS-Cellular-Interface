@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_API_H__
 #define __CELLULAR_API_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /* IoT Cellular data types. */
 #include "cellular_types.h"
 #include "cellular_common.h"
@@ -631,5 +637,11 @@ CellularError_t Cellular_SocketRegisterClosedCallback( CellularHandle_t cellular
                                                        CellularSocketHandle_t socketHandle,
                                                        CellularSocketClosedCallback_t closedCallback,
                                                        void * pCallbackContext );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_API_H__ */

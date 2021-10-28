@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_AT_CORE_H__
 #define __CELLULAR_AT_CORE_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /* Standard includes */
 #include <stdbool.h>
 #include <string.h>
@@ -395,5 +401,11 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
 CellularATError_t Cellular_ATStrtoi( const char * pStr,
                                      int32_t base,
                                      int32_t * pResult );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_AT_CORE_H__ */

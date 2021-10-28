@@ -26,6 +26,18 @@
 #ifndef __CELLULAR_INTERNAL_H__
 #define __CELLULAR_INTERNAL_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #include "cellular_platform.h"
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_INTERNAL_H__ */

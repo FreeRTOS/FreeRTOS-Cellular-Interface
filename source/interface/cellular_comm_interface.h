@@ -30,6 +30,11 @@
 #ifndef __CELLULAR_COMM_INTERFACE_H__
 #define __CELLULAR_COMM_INTERFACE_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 #include "cellular_types.h"
 
@@ -156,5 +161,11 @@ typedef struct CellularCommInterface
     CellularCommInterfaceRecv_t recv;   /**< Cellular communication recv interface. */
     CellularCommInterfaceClose_t close; /**< Cellular communication close interface. */
 } CellularCommInterface_t;
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_COMM_INTERFACE_H__ */
