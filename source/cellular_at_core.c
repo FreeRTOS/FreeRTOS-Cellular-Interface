@@ -42,9 +42,9 @@
 
 /*-----------------------------------------------------------*/
 
-#define CHECK_IS_PREFIX_CHAR( inputChar )                                   \
-    ( ( ( ( int32_t ) _isalpha( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( ( int32_t ) _isdigit( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
+#define CHECK_IS_PREFIX_CHAR( inputChar )                                  \
+    ( ( ( ( int32_t ) isAlpha( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
+      ( ( ( int32_t ) isDigit( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( inputChar ) != ( uint8_t ) '+' ) && ( ( inputChar ) != ( uint8_t ) '_' ) )
 
 /*-----------------------------------------------------------*/
@@ -64,11 +64,11 @@ typedef enum CellularATStringValidationResult
 
 static void validateString( const char * pString,
                             CellularATStringValidationResult_t * pStringValidationResult );
-static uint8_t _charToNibble( char c );
+static uint8_t charToNibble( char c );
 
-static int32_t _isspace( uint8_t c );
-static int32_t _isalpha( uint8_t c );
-static int32_t _isdigit( uint8_t c );
+static int8_t isSpace( uint8_t c );
+static int8_t isAlpha( uint8_t c );
+static int8_t isDigit( uint8_t c );
 
 /*-----------------------------------------------------------*/
 
@@ -102,9 +102,9 @@ static void validateString( const char * pString,
 
 /*-----------------------------------------------------------*/
 
-static int32_t _isspace( uint8_t c )
+static int8_t isSpace( uint8_t c )
 {
-    int32_t ret = 0;
+    int8_t ret = 0;
 
     if( ( ( int32_t ) c == 32 ) || ( ( ( int32_t ) c >= 9 ) && ( ( int32_t ) c <= 13 ) ) )
     {
@@ -120,9 +120,9 @@ static int32_t _isspace( uint8_t c )
 
 /*-----------------------------------------------------------*/
 
-static int32_t _isalpha( uint8_t c )
+static int8_t isAlpha( uint8_t c )
 {
-    int32_t ret = 0;
+    int8_t ret = 0;
 
     if( ( ( ( int32_t ) c >= 65 ) && ( ( int32_t ) c <= 90 ) ) ||
         ( ( ( int32_t ) c >= 97 ) && ( ( int32_t ) c <= 122 ) ) )
@@ -139,9 +139,9 @@ static int32_t _isalpha( uint8_t c )
 
 /*-----------------------------------------------------------*/
 
-static int32_t _isdigit( uint8_t c )
+static int8_t isDigit( uint8_t c )
 {
-    int32_t ret = 0;
+    int8_t ret = 0;
 
     if( ( ( int32_t ) c >= 48 ) && ( ( int32_t ) c <= 57 ) )
     {
@@ -333,7 +333,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         while( ( ( int32_t ) **ppString != 0 ) &&
-               ( _isspace( ( ( uint8_t ) ( **ppString ) ) ) != 0 ) )
+               ( isSpace( ( ( uint8_t ) ( **ppString ) ) ) != 0 ) )
         {
             ( *ppString )++;
         }
@@ -379,7 +379,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
             do
             {
                 --p;
-            } while( ( p > pString ) && ( _isspace( ( uint8_t ) ( *p ) ) != 0 ) );
+            } while( ( p > pString ) && ( isSpace( ( uint8_t ) ( *p ) ) != 0 ) );
 
             p[ 1 ] = '\0';
         }
@@ -419,7 +419,7 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
 
         while( ( *pTempString ) != '\0' )
         {
-            if( _isspace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
+            if( isSpace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
             {
                 p[ ind ] = *pTempString;
                 ind++;
@@ -616,7 +616,7 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
 
 /*-----------------------------------------------------------*/
 
-static uint8_t _charToNibble( char c )
+static uint8_t charToNibble( char c )
 {
     uint8_t ret = 0xFF;
 
@@ -682,8 +682,8 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
 
         for( i = 0; i < strHexLen; i++ )
         {
-            firstNibble = _charToNibble( *p );
-            secondNibble = _charToNibble( p[ 1 ] );
+            firstNibble = charToNibble( *p );
+            secondNibble = charToNibble( p[ 1 ] );
 
             if( firstNibble == 0xFFU )
             {
@@ -732,7 +732,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
 
         while( ( *pTempString != '\0' ) )
         {
-            if( _isspace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
+            if( isDigit( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
             {
                 *pResult = false;
             }
