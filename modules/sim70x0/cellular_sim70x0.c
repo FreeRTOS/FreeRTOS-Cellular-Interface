@@ -57,25 +57,25 @@ const char * CellularSrcTokenSuccessTable[] =
 uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * );
 
 const char * CellularUrcTokenWoPrefixTable[] =
-//{ "+APP PDP: 0,ACTIVE", "+APP PDP: 0,DEACTIVE", "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
+/*{ "+APP PDP: 0,ACTIVE", "+APP PDP: 0,DEACTIVE", "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" }; */
 { "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
 uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
 
 
-static  BYTE    nCID_Min = 0;
-static  BYTE    nCID_Max = CELLULAR_NUM_SOCKET_MAX;     /* 0-12 */
+static BYTE nCID_Min = 0;
+static BYTE nCID_Max = CELLULAR_NUM_SOCKET_MAX; /* 0-12 */
 
-static  BYTE    nPDP_Min = 0;
-static  BYTE    nPDP_Max = CELLULAR_PDP_INDEX_MAX;      /* 0-4  */
+static BYTE nPDP_Min = 0;
+static BYTE nPDP_Max = CELLULAR_PDP_INDEX_MAX; /* 0-4  */
 
-BOOL    IsValidCID(int cid)
+BOOL IsValidCID( int cid )
 {
-    return cid >= (int)nCID_Min && cid <= (int)nCID_Max;
+    return cid >= ( int ) nCID_Min && cid <= ( int ) nCID_Max;
 }
 
-BOOL    IsValidPDP(int cid)
+BOOL IsValidPDP( int cid )
 {
-    return cid >= (int)nPDP_Min && cid <= (int)nPDP_Max;
+    return cid >= ( int ) nPDP_Min && cid <= ( int ) nPDP_Max;
 }
 
 
@@ -84,8 +84,8 @@ BOOL    IsValidPDP(int cid)
 static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pContext,
                                                       const CellularAtReq_t * pAtReq )
 {
-    CellularError_t cellularStatus  = CELLULAR_SUCCESS;
-    CellularPktStatus_t pktStatus   = CELLULAR_PKT_STATUS_OK;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     uint8_t tryCount = 0;
 
     if( pAtReq == NULL )
@@ -100,7 +100,9 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
             if( cellularStatus == CELLULAR_SUCCESS )
+            {
                 break;
+            }
         }
     }
 
@@ -127,7 +129,7 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
     else
     {
         /* Initialize the module context. */
-        (void)memset( &cellularSIM70XXContext, 0, sizeof( cellularModuleContext_t ) );
+        ( void ) memset( &cellularSIM70XXContext, 0, sizeof( cellularModuleContext_t ) );
 
         /* Create the mutex for DNS. */
         status = PlatformMutex_Create( &cellularSIM70XXContext.dnsQueryMutex, false );
@@ -181,36 +183,36 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
     return cellularStatus;
 }
 
-static CellularPktStatus_t set_CID_range_cb(CellularContext_t* pContext,
-    const CellularATCommandResponse_t* pAtResp,
-    void* pData,
-    uint16_t dataLen)
+static CellularPktStatus_t set_CID_range_cb( CellularContext_t * pContext,
+                                             const CellularATCommandResponse_t * pAtResp,
+                                             void * pData,
+                                             uint16_t dataLen )
 {
-    UNREFERENCED_PARAMETER(pContext);
-    UNREFERENCED_PARAMETER(pData);
-    UNREFERENCED_PARAMETER(dataLen);
+    UNREFERENCED_PARAMETER( pContext );
+    UNREFERENCED_PARAMETER( pData );
+    UNREFERENCED_PARAMETER( dataLen );
 
-    if (pAtResp != NULL && pAtResp->pItm != NULL && pAtResp->pItm->pLine != NULL)
+    if( ( pAtResp != NULL ) && ( pAtResp->pItm != NULL ) && ( pAtResp->pItm->pLine != NULL ) )
     {
         /* Handling: +CACID:(0-12)   */
-        char    ns[8];
-        char*   pLine = pAtResp->pItm->pLine;
-        char*   pB1, * pE1, * pB2, * pE2;
+        char ns[ 8 ];
+        char * pLine = pAtResp->pItm->pLine;
+        char * pB1, * pE1, * pB2, * pE2;
 
-        if ((pB1 = strchr(pLine, '(')) != NULL
-         && (pE1 = strchr(pLine, '-')) != NULL
-         && (pE2 = strchr(pLine, ')')) != NULL)
+        if( ( ( pB1 = strchr( pLine, '(' ) ) != NULL ) &&
+            ( ( pE1 = strchr( pLine, '-' ) ) != NULL ) &&
+            ( ( pE2 = strchr( pLine, ')' ) ) != NULL ) )
         {
-            memset(ns, 0, sizeof(ns));
-            strncpy(ns, pB1, pE1 - pB1);
-            nCID_Min = (uint8_t)atoi(ns);
+            memset( ns, 0, sizeof( ns ) );
+            strncpy( ns, pB1, pE1 - pB1 );
+            nCID_Min = ( uint8_t ) atoi( ns );
 
             pB2 = pE1 + 1;
-            memset(ns, 0, sizeof(ns));
-            strncpy(ns, pB2, pE2 - pB2);
-            nCID_Max = (uint8_t)atoi(ns);
+            memset( ns, 0, sizeof( ns ) );
+            strncpy( ns, pB2, pE2 - pB2 );
+            nCID_Max = ( uint8_t ) atoi( ns );
 
-            CellularLogDebug("CID range: %d - %d", (int)nCID_Min, (int)nCID_Max);
+            CellularLogDebug( "CID range: %d - %d", ( int ) nCID_Min, ( int ) nCID_Max );
             return CELLULAR_AT_SUCCESS;
         }
     }
@@ -218,36 +220,36 @@ static CellularPktStatus_t set_CID_range_cb(CellularContext_t* pContext,
     return CELLULAR_AT_ERROR;
 }
 
-static CellularPktStatus_t set_PDP_range_cb(CellularContext_t* pContext,
-    const CellularATCommandResponse_t* pAtResp,
-    void* pData,
-    uint16_t dataLen)
+static CellularPktStatus_t set_PDP_range_cb( CellularContext_t * pContext,
+                                             const CellularATCommandResponse_t * pAtResp,
+                                             void * pData,
+                                             uint16_t dataLen )
 {
-    UNREFERENCED_PARAMETER(pContext);
-    UNREFERENCED_PARAMETER(pData);
-    UNREFERENCED_PARAMETER(dataLen);
+    UNREFERENCED_PARAMETER( pContext );
+    UNREFERENCED_PARAMETER( pData );
+    UNREFERENCED_PARAMETER( dataLen );
 
-    if (pAtResp != NULL && pAtResp->pItm != NULL && pAtResp->pItm->pLine != NULL)
+    if( ( pAtResp != NULL ) && ( pAtResp->pItm != NULL ) && ( pAtResp->pItm->pLine != NULL ) )
     {
         /*Handling: +CNACT:(0-3),(0-2)  */
-        char    ns[8];
-        char*   pLine = pAtResp->pItm->pLine;
-        char*   pB1, * pE1, * pB2, * pE2;
+        char ns[ 8 ];
+        char * pLine = pAtResp->pItm->pLine;
+        char * pB1, * pE1, * pB2, * pE2;
 
-        if ((pB1 = strchr(pLine, '(')) != NULL
-            && (pE1 = strchr(pLine, '-')) != NULL
-            && (pE2 = strchr(pLine, ')')) != NULL)
+        if( ( ( pB1 = strchr( pLine, '(' ) ) != NULL ) &&
+            ( ( pE1 = strchr( pLine, '-' ) ) != NULL ) &&
+            ( ( pE2 = strchr( pLine, ')' ) ) != NULL ) )
         {
-            memset(ns, 0, sizeof(ns));
-            strncpy(ns, pB1, pE1 - pB1);
-            nPDP_Min = (uint8_t)atoi(ns);
+            memset( ns, 0, sizeof( ns ) );
+            strncpy( ns, pB1, pE1 - pB1 );
+            nPDP_Min = ( uint8_t ) atoi( ns );
 
             pB2 = pE1 + 1;
-            memset(ns, 0, sizeof(ns));
-            strncpy(ns, pB2, pE2 - pB2);
-            nPDP_Max = (uint8_t)atoi(ns);
+            memset( ns, 0, sizeof( ns ) );
+            strncpy( ns, pB2, pE2 - pB2 );
+            nPDP_Max = ( uint8_t ) atoi( ns );
 
-            CellularLogDebug("PDP range: %d - %d", nPDP_Min, nPDP_Max);
+            CellularLogDebug( "PDP range: %d - %d", nPDP_Min, nPDP_Max );
             return CELLULAR_AT_SUCCESS;
         }
     }
@@ -281,71 +283,101 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         0
     };
 
-    if (pContext == NULL)
+    if( pContext == NULL )
+    {
         return CELLULAR_INVALID_HANDLE;
+    }
 
     /* Disable echo. */
     atReqGetWithResult.pAtCmd = "ATE0";
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWithResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Disable DTR function. */
     atReqGetNoResult.pAtCmd = "AT&D0";
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Enable RTS/CTS hardware flow control. */
     atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Configure Band configuration to all Cat-M1 bands. */
-    atReqGetNoResult.pAtCmd = "AT+CBANDCFG=\"CAT-M\",1,3,8,18,19,26";   /*for Japan     */
+    atReqGetNoResult.pAtCmd = "AT+CBANDCFG=\"CAT-M\",1,3,8,18,19,26"; /*for Japan     */
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Configure Band configuration to all NB-IOT bands. */
-    atReqGetNoResult.pAtCmd = "AT+CBANDCFG=\"NB-IOT\",1,3,8,18,19,26";   /*for Japan    */
+    atReqGetNoResult.pAtCmd = "AT+CBANDCFG=\"NB-IOT\",1,3,8,18,19,26"; /*for Japan    */
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Configure RAT(s) to be Searched to Automatic. */
     atReqGetNoResult.pAtCmd = "AT+CNMP=2";
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Configure Network Category to be Searched under LTE  */
-    atReqGetNoResult.pAtCmd = "AT+CNMP=38";     /*Only LTE, no GSM support  */
+    atReqGetNoResult.pAtCmd = "AT+CNMP=38"; /*Only LTE, no GSM support  */
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     /* Configure RAT Searching Sequence to default radio access technology. */
     switch( CELLULAR_CONFIG_DEFAULT_RAT )
     {
-    case CELLULAR_RAT_CATM1:
-        atReqGetNoResult.pAtCmd = "AT+CMNB=1";
-        break;
-    case CELLULAR_RAT_NBIOT:
-        atReqGetNoResult.pAtCmd = "AT+CMNB=2";
-        break;
-    case CELLULAR_RAT_GSM:
-        atReqGetNoResult.pAtCmd = "AT+CNMP=13";
-        break;
-    default:
-        /* Configure RAT Searching Sequence to automatic. */
-        atReqGetNoResult.pAtCmd = "AT+CMNB=3";
-        break;
+        case CELLULAR_RAT_CATM1:
+            atReqGetNoResult.pAtCmd = "AT+CMNB=1";
+            break;
+
+        case CELLULAR_RAT_NBIOT:
+            atReqGetNoResult.pAtCmd = "AT+CMNB=2";
+            break;
+
+        case CELLULAR_RAT_GSM:
+            atReqGetNoResult.pAtCmd = "AT+CNMP=13";
+            break;
+
+        default:
+            /* Configure RAT Searching Sequence to automatic. */
+            atReqGetNoResult.pAtCmd = "AT+CMNB=3";
+            break;
     }
+
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-    if (cellularStatus != CELLULAR_SUCCESS)
+
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
         return cellularStatus;
+    }
 
     atReqGetNoResult.pAtCmd = "AT+CFUN=1";
     cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
@@ -353,20 +385,20 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
     atReqGetWithResult.pAtCmd = "AT+CACID=?";
     atReqGetWithResult.pAtRspPrefix = "+CACID";
     atReqGetWithResult.respCallback = set_CID_range_cb;
-    cellularStatus = _Cellular_AtcmdRequestWithCallback(pContext, atReqGetWithResult);
+    cellularStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetWithResult );
 
     atReqGetWithResult.pAtCmd = "AT+CNACT=?";
     atReqGetWithResult.pAtRspPrefix = "+CNACT";
     atReqGetWithResult.respCallback = set_PDP_range_cb;
-    cellularStatus = _Cellular_AtcmdRequestWithCallback(pContext, atReqGetWithResult);
+    cellularStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetWithResult );
 
-#if 0
-    atReqGetNoResult.pAtCmd = "AT+CACLOSE=0,0";
-    _Cellular_AtcmdRequestWithCallback(pContext, atReqGetWithResult);
+    #if 0
+        atReqGetNoResult.pAtCmd = "AT+CACLOSE=0,0";
+        _Cellular_AtcmdRequestWithCallback( pContext, atReqGetWithResult );
 
-    atReqGetNoResult.pAtCmd = "AT+CNACT=0,0";
-    _Cellular_AtcmdRequestWithCallback(pContext, atReqGetWithResult);
-#endif // 0
+        atReqGetNoResult.pAtCmd = "AT+CNACT=0,0";
+        _Cellular_AtcmdRequestWithCallback( pContext, atReqGetWithResult );
+    #endif // 0
 
     return cellularStatus;
 }
