@@ -105,7 +105,9 @@ static void validateString( const char * pString,
 static int8_t isSpace( int8_t c )
 {
     int8_t ret = 0;
-
+    /* According to the http://www.cplusplus.com/reference/cctype/, the API
+     * isspace should be return true if input character is space(0x20), tab(0x9),
+     * white space control code(0x0A ~ 0xD). */
     if( ( ( int32_t ) c == 32 ) || ( ( ( int32_t ) c >= 9 ) && ( ( int32_t ) c <= 13 ) ) )
     {
         ret = 1;
@@ -123,7 +125,9 @@ static int8_t isSpace( int8_t c )
 static int8_t isAlpha( int8_t c )
 {
     int8_t ret = 0;
-
+    /* According to the http://www.cplusplus.com/reference/cctype/, the API
+     * isalpha should be return true if input character is upper case(0x41~0x5A)
+     * or lower case(0x61~0x7A). */
     if( ( ( c >= 65 ) && ( c <= 90 ) ) ||
         ( ( c >= 97 ) && ( c <= 122 ) ) )
     {
@@ -142,7 +146,9 @@ static int8_t isAlpha( int8_t c )
 static int8_t isDigit( int8_t c )
 {
     int8_t ret = 0;
-
+    /* According to the http://www.cplusplus.com/reference/cctype/, the API
+     * isdigit should be return true if input character is digit
+     * character(0x30 ~ 0x39). */
     if( ( c >= 48 ) && ( c <= 57 ) )
     {
         ret = 1;
