@@ -42,9 +42,9 @@
 
 /*-----------------------------------------------------------*/
 
-#define CHECK_IS_PREFIX_CHAR( inputChar )                                  \
-    ( ( ( ( int32_t ) isAlpha( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( ( int32_t ) isDigit( ( ( uint8_t ) ( inputChar ) ) ) ) == 0 ) && \
+#define CHECK_IS_PREFIX_CHAR( inputChar )                                 \
+    ( ( ( ( int32_t ) isAlpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
+      ( ( ( int32_t ) isDigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( inputChar ) != ( uint8_t ) '+' ) && ( ( inputChar ) != ( uint8_t ) '_' ) )
 
 /*-----------------------------------------------------------*/
@@ -66,9 +66,9 @@ static void validateString( const char * pString,
                             CellularATStringValidationResult_t * pStringValidationResult );
 static uint8_t charToNibble( char c );
 
-static int8_t isSpace( uint8_t c );
-static int8_t isAlpha( uint8_t c );
-static int8_t isDigit( uint8_t c );
+static int8_t isSpace( int8_t c );
+static int8_t isAlpha( int8_t c );
+static int8_t isDigit( int8_t c );
 
 /*-----------------------------------------------------------*/
 
@@ -102,7 +102,7 @@ static void validateString( const char * pString,
 
 /*-----------------------------------------------------------*/
 
-static int8_t isSpace( uint8_t c )
+static int8_t isSpace( int8_t c )
 {
     int8_t ret = 0;
 
@@ -120,12 +120,12 @@ static int8_t isSpace( uint8_t c )
 
 /*-----------------------------------------------------------*/
 
-static int8_t isAlpha( uint8_t c )
+static int8_t isAlpha( int8_t c )
 {
     int8_t ret = 0;
 
-    if( ( ( ( int32_t ) c >= 65 ) && ( ( int32_t ) c <= 90 ) ) ||
-        ( ( ( int32_t ) c >= 97 ) && ( ( int32_t ) c <= 122 ) ) )
+    if( ( ( c >= 65 ) && ( c <= 90 ) ) ||
+        ( ( c >= 97 ) && ( c <= 122 ) ) )
     {
         ret = 1;
     }
@@ -139,11 +139,11 @@ static int8_t isAlpha( uint8_t c )
 
 /*-----------------------------------------------------------*/
 
-static int8_t isDigit( uint8_t c )
+static int8_t isDigit( int8_t c )
 {
     int8_t ret = 0;
 
-    if( ( ( int32_t ) c >= 48 ) && ( ( int32_t ) c <= 57 ) )
+    if( ( c >= 48 ) && ( c <= 57 ) )
     {
         ret = 1;
     }
@@ -196,7 +196,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
             /* There should be only '+', '_', characters or digit before seperator. */
             for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
-                if( CHECK_IS_PREFIX_CHAR( ( uint8_t ) ( *ptrChar ) ) )
+                if( CHECK_IS_PREFIX_CHAR( ( int8_t ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;
@@ -333,7 +333,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         while( ( ( int32_t ) **ppString != 0 ) &&
-               ( isSpace( ( ( uint8_t ) ( **ppString ) ) ) != 0 ) )
+               ( isSpace( ( ( int8_t ) ( **ppString ) ) ) != 0 ) )
         {
             ( *ppString )++;
         }
@@ -379,7 +379,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
             do
             {
                 --p;
-            } while( ( p > pString ) && ( isSpace( ( uint8_t ) ( *p ) ) != 0 ) );
+            } while( ( p > pString ) && ( isSpace( ( int8_t ) ( *p ) ) != 0 ) );
 
             p[ 1 ] = '\0';
         }
@@ -419,7 +419,7 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
 
         while( ( *pTempString ) != '\0' )
         {
-            if( isSpace( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
+            if( isSpace( ( ( int8_t ) ( *pTempString ) ) ) == 0 )
             {
                 p[ ind ] = *pTempString;
                 ind++;
@@ -732,7 +732,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
 
         while( ( *pTempString != '\0' ) )
         {
-            if( isDigit( ( ( uint8_t ) ( *pTempString ) ) ) == 0 )
+            if( isDigit( ( ( int8_t ) ( *pTempString ) ) ) == 0 )
             {
                 *pResult = false;
             }
