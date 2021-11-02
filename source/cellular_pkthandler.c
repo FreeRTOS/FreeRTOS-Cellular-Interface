@@ -190,7 +190,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            LogWarn( ( "Couldn't allocate memory of %lu for urc", (unsigned long)strlen( pBuf ) ) );
+            LogWarn( ( "Couldn't allocate memory of %lu for urc", ( unsigned long ) strlen( pBuf ) ) );
         }
     }
     else
@@ -731,7 +731,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                LogError( ( "AtParseFail for %u: %d %s %s", (unsigned)i, (int)result,
+                LogError( ( "AtParseFail for %u: %d %s %s", ( unsigned ) i, ( int ) result,
                             pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }

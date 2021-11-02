@@ -433,12 +433,12 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                LogError( ( "_cellular_UrcProcessUusoco : invalid socket index %u", (unsigned)socketIndex ) );
+                LogError( ( "_cellular_UrcProcessUusoco : invalid socket index %u", ( unsigned ) socketIndex ) );
             }
-            else if( pSocketData->pModemData != ( void * ) (intptr_t)sessionId )
+            else if( pSocketData->pModemData != ( void * ) ( intptr_t ) sessionId )
             {
                 LogError( ( "_cellular_UrcProcessUusoco : session not match %u socket index %u",
-                            ( uintptr_t ) pSocketData->pModemData, (unsigned)socketIndex ) );
+                            ( uintptr_t ) pSocketData->pModemData, ( unsigned ) socketIndex ) );
             }
             else
             {
@@ -512,12 +512,12 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                LogError( ( "_cellular_UrcProcessUusord : invalid socket index %u", (unsigned)socketIndex ) );
+                LogError( ( "_cellular_UrcProcessUusord : invalid socket index %u", ( unsigned ) socketIndex ) );
             }
-            else if( pSocketData->pModemData != ( void * ) (uintptr_t)sessionId )
+            else if( pSocketData->pModemData != ( void * ) ( uintptr_t ) sessionId )
             {
                 LogError( ( "_cellular_UrcProcessUusord : session not match %u socket index %u",
-                            ( uintptr_t ) pSocketData->pModemData, (unsigned)socketIndex ) );
+                            ( uintptr_t ) pSocketData->pModemData, ( unsigned ) socketIndex ) );
             }
             else
             {
@@ -579,12 +579,12 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                LogError( ( "_cellular_UrcProcessUusocl : invalid socket index %u", (unsigned)socketIndex ) );
+                LogError( ( "_cellular_UrcProcessUusocl : invalid socket index %u", ( unsigned ) socketIndex ) );
             }
-            else if( pSocketData->pModemData != ( void * ) (uintptr_t)sessionId )
+            else if( pSocketData->pModemData != ( void * ) ( uintptr_t ) sessionId )
             {
                 LogError( ( "_cellular_UrcProcessUusocl : session not match %u socket index %u",
-                            ( uintptr_t ) pSocketData->pModemData, (unsigned)socketIndex ) );
+                            ( uintptr_t ) pSocketData->pModemData, ( unsigned ) socketIndex ) );
             }
             else
             {

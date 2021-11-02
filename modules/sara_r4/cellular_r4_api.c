@@ -232,7 +232,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     if( *pDataRecv->pDataLen > outBufSize )
     {
         LogError( ( "Data is turncated, received data length %u, out buffer size %u",
-                    (unsigned)*pDataRecv->pDataLen, (unsigned)outBufSize ) );
+                    ( unsigned ) *pDataRecv->pDataLen, ( unsigned ) outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
     }
@@ -254,7 +254,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
         else
         {
             LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %u",
-                        pInputLine, (unsigned)dataLenToCopy ) );
+                        pInputLine, ( unsigned ) dataLenToCopy ) );
             atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
         }
     }
@@ -820,7 +820,7 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         if( socketHandle->socketState == SOCKETSTATE_CONNECTED )
         {
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u,%d",
-                               "AT+USOCL=", (unsigned)sessionId, CELLULAR_CONFIG_SET_SOCKET_CLOSE_ASYNC_MODE );
+                               "AT+USOCL=", ( unsigned ) sessionId, CELLULAR_CONFIG_SET_SOCKET_CLOSE_ASYNC_MODE );
             pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketClose, SOCKET_CLOSE_PACKET_REQ_TIMEOUT_MS );
 
             /* Delete the socket config. */
@@ -903,7 +903,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Store the session ID in the pointer directly instead allocate extra memory. */
-            socketHandle->pModemData = ( void * ) (uintptr_t)sessionId;
+            socketHandle->pModemData = ( void * ) ( uintptr_t ) sessionId;
 
             /* Create the reverse table to store the socketIndex to sessionId. */
             pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
