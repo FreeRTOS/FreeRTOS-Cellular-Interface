@@ -466,7 +466,7 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
     ( void ) commInterfaceHandle; /* Comm if is not used in this function. */
 
     /* The context of this function is a ISR. */
-    if( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL )
+    if( pContext->pPktioCommEvent == NULL )
     {
         retComm = IOT_COMM_INTERFACE_BAD_PARAMETER;
     }
@@ -1108,7 +1108,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
         /* coverity[misra_c_2012_directive_4_6_violation] */
         pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) PlatformEventGroup_Create();
 
-        if( pContext->pPktioCommEvent == ( uintptr_t ) ( uintptr_t * ) NULL )
+        if( pContext->pPktioCommEvent == NULL )
         {
             LogError( ( "Can't create event group" ) );
             pktStatus = CELLULAR_PKT_STATUS_CREATION_FAIL;
@@ -1157,7 +1157,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
         {
             pContext->pPktioHandlepktCB = NULL;
 
-            if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
+            if( pContext->pPktioCommEvent != NULL )
             {
                 /* It's platform-dependent declaration. */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
@@ -1264,7 +1264,7 @@ void _Cellular_PktioShutdown( CellularContext_t * pContext )
 
     if( ( pContext != NULL ) && ( pContext->bPktioUp ) )
     {
-        if( pContext->pPktioCommEvent != ( uintptr_t ) ( uintptr_t * ) NULL )
+        if( pContext->pPktioCommEvent != NULL )
         {
             ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORT );
             /* It's platform-dependent declaration. */
