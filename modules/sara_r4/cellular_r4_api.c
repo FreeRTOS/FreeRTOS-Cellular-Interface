@@ -66,12 +66,7 @@
 
 #define SOCKET_DATA_PREFIX_TOKEN                "+USORD: "
 #define SOCKET_DATA_PREFIX_TOKEN_LEN            ( 8U )
-#define SOCKET_DATA_PREFIX_STRING_LENGTH        ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )       /* +USORD: <socket_number>,<length>,\" ./
-                                                                                             *
-                                                                                             #define USOCR_PROTOCOL_TCP                            ( 6U )
-                                                                                             #define USOCR_PROTOCOL_UDP                            ( 17U )
-                                                                                             *
-                                                                                             * /*-----------------------------------------------------------*/
+#define SOCKET_DATA_PREFIX_STRING_LENGTH        ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )
 #define RAT_PRIOIRTY_LIST_LENGTH                ( 3U )
 
 /**
@@ -97,8 +92,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
                                                    const CellularATCommandResponse_t * pAtResp,
                                                    void * pData,
                                                    uint16_t dataLen );
-static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
-                                          char * pCmdBuf );
 static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
                                                   CellularSocketHandle_t socketHandle,
                                                   CellularSocketAccessMode_t dataAccessMode,
@@ -149,6 +142,8 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char pLocalLine[ SOCKET_DATA_PREFIX_STRING_LENGTH + 1 ] = { '\0' };
     char * pDataStart = pLocalLine;
+
+    ( void ) lineLength;
 
     /* pCallbackContext is not used in this function. It should be NULL. */
     if( ( pLine == NULL ) || ( ppDataStart == NULL ) || ( pDataLength == NULL ) || ( pCallbackContext != NULL ) )
@@ -287,6 +282,8 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     const _socketDataRecv_t * pDataRecv = ( _socketDataRecv_t * ) pData;
     int32_t tempValue = 0;
 
+    ( void ) dataLen;
+
     if( pContext == NULL )
     {
         LogError( ( "Receive Data: invalid context" ) );
@@ -356,40 +353,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     }
 
     return pktStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
-                                          char * pCmdBuf )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-
-    if( pCmdBuf == NULL )
-    {
-        LogDebug( ( "buildSocketConfig: Invalid command buffer" ) );
-        cellularStatus = CELLULAR_BAD_PARAMETER;
-    }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
-    {
-        LogError( ( "buildSocketConfig: socket protocol unsupported %d",
-                    socketHandle->socketProtocol ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else
-    {
-        /* Form the AT command. The socket number is returned in response.
-         * AT+USOCR=<protocol>[,<local_port>[,<IP_type>]]
-         * protocol=6 => TCP, local_port=0 => random port. */
-
-        /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
-        /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+USOCR=6,0" );
-    }
-
-    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -521,6 +484,8 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
         sizeof( uint8_t ),
     };
 
+    ( void ) socketHandle;
+
     atReqSocketConnect.pData = pSessionId;
 
     /* Internal function. Caller checks parameters. */
@@ -570,7 +535,6 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     };
     uint32_t sessionId = 0;
 
-    /* Assign dataRecv variales. */
     dataRecv.pDataLen = pReceivedDataLength;
     dataRecv.pData = pBuffer;
 
@@ -914,8 +878,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     /* Start the tcp connection. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        /*
-         * /* The return value of snprintf is not used.
+        /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
@@ -2141,6 +2104,9 @@ CellularError_t Cellular_SetDns( CellularHandle_t cellularHandle,
                                  const char * pDnsServerAddress )
 {
     /* Modem use dynamic DNS addresses. Return unsupported. */
+    ( void ) cellularHandle;
+    ( void ) contextId;
+    ( void ) pDnsServerAddress;
     return CELLULAR_UNSUPPORTED;
 }
 
@@ -2338,6 +2304,8 @@ CellularError_t Cellular_GetHostByName( CellularHandle_t cellularHandle,
         NULL,
         CELLULAR_IP_ADDRESS_MAX_SIZE,
     };
+
+    ( void ) contextId;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
