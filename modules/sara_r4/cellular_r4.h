@@ -34,11 +34,12 @@
 
 /*-----------------------------------------------------------*/
 
-#define MIN_TCP_SESSION_ID          ( 0U )
-#define MAX_TCP_SESSION_ID          ( 6U )
+#define MIN_TCP_SESSION_ID          ( 0 )
+#define MAX_TCP_SESSION_ID          ( 6 )
 #define TCP_SESSION_TABLE_LEGNTH    ( MAX_TCP_SESSION_ID + 1 )
 
 #define INVALID_SOCKET_INDEX        ( UINT32_MAX )
+#define INVALID_SESSION_ID          ( UINT32_MAX )
 
 /*-----------------------------------------------------------*/
 
@@ -51,6 +52,9 @@ typedef struct cellularModuleContext
 
 uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
                                 uint8_t sessionId );
+
+uint32_t _Cellular_GetSessionId( CellularContext_t * pContext,
+                                 uint32_t socketIndex );
 
 CellularError_t rebootCellularModem( CellularContext_t * pContext,
                                      bool disablePsm,

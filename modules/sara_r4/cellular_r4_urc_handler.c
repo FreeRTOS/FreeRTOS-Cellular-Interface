@@ -66,13 +66,18 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
 
 static void _cellular_UrcProcessUupsmr( CellularContext_t * pContext,
                                         char * pInputLine );
-static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * pContext,
-                                                     char * pInputLine );
+static void _cellular_UrcProcessCiev( CellularContext_t * pContext,
+                                      char * pInputLine );
 static void _Cellular_ProcessModemRdy( CellularContext_t * pContext,
                                        char * pInputLine );
-static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pContext,
+static CellularPktStatus_t _parseUrcIndicationCsq( CellularContext_t * pContext,
                                                    char * pUrcStr );
-
+static void _Cellular_UrcProcessCereg( CellularContext_t * pContext,
+                                       char * pInputLine );
+static void _Cellular_UrcProcessCgreg( CellularContext_t * pContext,
+                                       char * pInputLine );
+static void _Cellular_UrcProcessCreg( CellularContext_t * pContext,
+                                      char * pInputLine );
 
 /*-----------------------------------------------------------*/
 
@@ -81,16 +86,16 @@ static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pCo
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
-    { "CEREG",  Cellular_CommonUrcProcessCereg },
-    { "CGREG",  Cellular_CommonUrcProcessCgreg },
+    { "CEREG",  _Cellular_UrcProcessCereg  },
+    { "CGREG",  _Cellular_UrcProcessCgreg  },
     /*{ "CGEV",   _cellular_UrcProcessCgev     },                 / * TODO: PS event reporting URC. * / */
-    { "CIEV",   _cellular_UrcProcessCiev       },               /* PS ACT/DEACT and Signal strength status change indication URC. */
-    { "CREG",   Cellular_CommonUrcProcessCreg  },
-    { "RDY",    _Cellular_ProcessModemRdy      },               /* Modem bootup indication. */
-    { "UUPSMR", _cellular_UrcProcessUupsmr     },               /* Power saving mode indication URC. */
-    { "UUSOCL", _cellular_UrcProcessUusocl     },               /* Socket close URC. */
-    { "UUSOCO", _cellular_UrcProcessUusoco     },               /* Socket connect URC. */
-    { "UUSORD", _cellular_UrcProcessUusord     }                /* Socket receive URC. */
+    { "CIEV",   _cellular_UrcProcessCiev   }, /* PS ACT/DEACT and Signal strength status change indication URC. */
+    { "CREG",   _Cellular_UrcProcessCreg   },
+    { "RDY",    _Cellular_ProcessModemRdy  }, /* Modem bootup indication. */
+    { "UUPSMR", _cellular_UrcProcessUupsmr }, /* Power saving mode indication URC. */
+    { "UUSOCL", _cellular_UrcProcessUusocl }, /* Socket close URC. */
+    { "UUSOCO", _cellular_UrcProcessUusoco }, /* Socket connect URC. */
+    { "UUSORD", _cellular_UrcProcessUusord } /* Socket receive URC. */
 };
 
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -108,6 +113,8 @@ static CellularPktStatus_t _parseUrcIndicationCall( const CellularContext_t * pC
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     int32_t isActivated = 0;
+    /* In SARA-R4, usually context 1 is used for PS. */
+    uint8_t contextId = 1;
 
     if( ( pContext == NULL ) || ( pUrcStr == NULL ) )
     {
@@ -124,9 +131,6 @@ static CellularPktStatus_t _parseUrcIndicationCall( const CellularContext_t * pC
         if( ( isActivated >= INT16_MIN ) && ( isActivated <= ( int32_t ) INT16_MAX ) )
         {
             LogDebug( ( "_parseUrcIndicationCall: PS status isActivated=[%d]", isActivated ) );
-
-            /* In SARA-R4, usually context 1 is used for PS. */
-            uint8_t contextId = 1;
 
             /* Handle the callback function. */
             if( isActivated )
@@ -159,7 +163,7 @@ static CellularPktStatus_t _parseUrcIndicationCall( const CellularContext_t * pC
 /* Parse signal level from +CIEV URC indication. */
 /* This URC only gives bar level and not the exact RSSI value. */
 
-static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pContext,
+static CellularPktStatus_t _parseUrcIndicationCsq( CellularContext_t * pContext,
                                                    char * pUrcStr )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
@@ -212,8 +216,8 @@ static CellularPktStatus_t _parseUrcIndicationCsq( const CellularContext_t * pCo
 
 /*-----------------------------------------------------------*/
 
-static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * pContext,
-                                                     char * pInputLine )
+static void _cellular_UrcProcessCiev( CellularContext_t * pContext,
+                                      char * pInputLine )
 {
     char * pUrcStr = NULL, * pToken = NULL;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -252,7 +256,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
 
             if( atCoreStatus == CELLULAR_AT_SUCCESS )
             {
-                if( ( tempValue >= CIEV_POS_MIN ) && ( tempValue <= CIEV_POS_MAX ) )
+                if( ( tempValue >= ( ( int32_t ) CIEV_POS_MIN ) ) && ( tempValue <= ( ( int32_t ) CIEV_POS_MAX ) ) )
                 {
                     indicatorDescr = ( uint8_t ) tempValue;
 
@@ -271,7 +275,7 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
                              *  o 5 : >= -57 dBm
                              */
                             /* Parse the signal Bar level from string. */
-                            pktStatus = _parseUrcIndicationCsq( ( const CellularContext_t * ) pContext, pUrcStr );
+                            pktStatus = _parseUrcIndicationCsq( pContext, pUrcStr );
                             break;
 
                         case CIEV_POS_CALL:
@@ -303,8 +307,6 @@ static CellularPktStatus_t _cellular_UrcProcessCiev( const CellularContext_t * p
     {
         LogDebug( ( "_cellular_UrcProcessCiev: Parse failure" ) );
     }
-
-    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -329,7 +331,7 @@ static void _cellular_UrcProcessUupsmr( CellularContext_t * pContext,
 
             if( atCoreStatus == CELLULAR_AT_SUCCESS )
             {
-                if( ( tempValue >= PSM_MODE_EXIT ) && ( tempValue <= PSM_MODE_PREVENT_DEEP_ENTRY ) )
+                if( ( tempValue >= ( ( int32_t ) PSM_MODE_EXIT ) ) && ( tempValue <= ( ( int32_t ) PSM_MODE_PREVENT_DEEP_ENTRY ) ) )
                 {
                     psmState = ( uint8_t ) tempValue;
 
@@ -433,12 +435,7 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
 
             if( pSocketData == NULL )
             {
-                LogError( ( "_cellular_UrcProcessUusoco : invalid socket index %d", socketIndex ) );
-            }
-            else if( pSocketData->pModemData != ( void * ) sessionId )
-            {
-                LogError( ( "_cellular_UrcProcessUusoco : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
+                LogError( ( "_cellular_UrcProcessUusoco : invalid socket index %u", socketIndex ) );
             }
             else
             {
@@ -514,11 +511,6 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
             {
                 LogError( ( "_cellular_UrcProcessUusord : invalid socket index %d", socketIndex ) );
             }
-            else if( pSocketData->pModemData != ( void * ) sessionId )
-            {
-                LogError( ( "_cellular_UrcProcessUusord : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
-            }
             else
             {
                 /* Indicate the upper layer about the data reception. */
@@ -581,11 +573,6 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
             {
                 LogError( ( "_cellular_UrcProcessUusocl : invalid socket index %d", socketIndex ) );
             }
-            else if( pSocketData->pModemData != ( void * ) sessionId )
-            {
-                LogError( ( "_cellular_UrcProcessUusocl : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
-            }
             else
             {
                 /* Indicate the upper layer about the data reception. */
@@ -621,6 +608,30 @@ static void _Cellular_ProcessModemRdy( CellularContext_t * pContext,
         LogDebug( ( "_Cellular_ProcessModemRdy: Modem Ready event received" ) );
         _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT );
     }
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_UrcProcessCereg( CellularContext_t * pContext,
+                                       char * pInputLine )
+{
+    ( void ) Cellular_CommonUrcProcessCereg( pContext, pInputLine );
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_UrcProcessCgreg( CellularContext_t * pContext,
+                                       char * pInputLine )
+{
+    ( void ) Cellular_CommonUrcProcessCgreg( pContext, pInputLine );
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_UrcProcessCreg( CellularContext_t * pContext,
+                                      char * pInputLine )
+{
+    ( void ) Cellular_CommonUrcProcessCreg( pContext, pInputLine );
 }
 
 /*-----------------------------------------------------------*/
