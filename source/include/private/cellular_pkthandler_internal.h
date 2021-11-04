@@ -26,6 +26,12 @@
 #ifndef __CELLULAR_PKTHANDLER_INTERNAL_H__
 #define __CELLULAR_PKTHANDLER_INTERNAL_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
     /* Include custom config file before other headers. */
     #include "cellular_config.h"
@@ -141,5 +147,11 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext );
 CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                                    CellularAtReq_t atReq,
                                                                    uint32_t timeoutMS );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_PKTHANDLER_INTERNAL_H__ */

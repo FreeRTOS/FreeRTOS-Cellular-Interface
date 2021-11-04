@@ -30,6 +30,12 @@
 #ifndef __CELLULAR_TYPES_H__
 #define __CELLULAR_TYPES_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 #include <stdbool.h>
 
 /**
@@ -812,5 +818,11 @@ typedef void ( * CellularSocketDataReadyCallback_t )( CellularSocketHandle_t soc
  */
 typedef void ( * CellularSocketClosedCallback_t )( CellularSocketHandle_t socketHandle,
                                                    void * pCallbackContext );
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* __CELLULAR_TYPES_H__ */

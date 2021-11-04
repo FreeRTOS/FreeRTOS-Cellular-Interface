@@ -26,6 +26,12 @@
 #ifndef __CELLULAR_R4_H__
 #define __CELLULAR_R4_H__
 
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
+
 /*-----------------------------------------------------------*/
 
 #define MIN_TCP_SESSION_ID          ( 0U )
@@ -144,5 +150,11 @@ extern const char * CellularUrcTokenWoPrefixTable[];
 extern uint32_t CellularUrcTokenWoPrefixTableSize;
 
 /*-----------------------------------------------------------*/
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    }
+#endif
+/* *INDENT-ON* */
 
 #endif /* ifndef __CELLULAR_R4_H__ */
