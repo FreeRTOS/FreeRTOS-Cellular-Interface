@@ -36,7 +36,7 @@
 #endif
 /* *INDENT-ON* */
 
-/* Includes for stdbool and stdint. */
+/* Includes for standard bool and int. */
 #include <stdbool.h>
 #include <stdint.h>
 
