@@ -560,10 +560,11 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     else
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
         if( sessionId == INVALID_SESSION_ID )
         {
             LogError( ( "Cellular_SocketRecv : invalid session ID for socket index %u",
-                socketHandle->socketId ) );
+                        socketHandle->socketId ) );
             cellularStatus = CELLULAR_INVALID_HANDLE;
         }
     }
@@ -702,10 +703,11 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     else
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
         if( sessionId == INVALID_SESSION_ID )
         {
             LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
-                socketHandle->socketId ) );
+                        socketHandle->socketId ) );
             cellularStatus = CELLULAR_INVALID_HANDLE;
         }
     }
@@ -796,10 +798,11 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
         if( sessionId == INVALID_SESSION_ID )
         {
             LogError( ( "Cellular_SocketClose : invalid session ID for socket index %u",
-                socketHandle->socketId ) );
+                        socketHandle->socketId ) );
             cellularStatus = CELLULAR_INVALID_HANDLE;
         }
     }
