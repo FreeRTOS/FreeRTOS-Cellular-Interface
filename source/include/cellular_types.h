@@ -36,7 +36,9 @@
 #endif
 /* *INDENT-ON* */
 
+/* Includes for stdbool and stdint. */
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @ingroup cellular_datatypes_paramstructs
