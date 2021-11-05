@@ -38,7 +38,6 @@
 
 /* IoT Cellular data types. */
 #include "cellular_types.h"
-#include "cellular_common.h"
 
 /* Hardware interface. */
 #include "cellular_comm_interface.h"
