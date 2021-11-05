@@ -903,3 +903,15 @@ pdnevent
 purcstr
 reqcnt
 ulbw
+atcipccfg
+atciphead
+atciprxget
+atcipsrip
+atcorestatus
+behand
+cellularlogdebug
+cipopen
+ciprxget
+cipsend
+confirmcnt
+cr
