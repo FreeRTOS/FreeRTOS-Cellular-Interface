@@ -892,3 +892,14 @@ rssnr
 scellid
 stat
 statusx
+earfcn
+enguth
+ipd
+lf
+netclose
+netopen
+pdndatacnt
+pdnevent
+purcstr
+reqcnt
+ulbw
