@@ -62,14 +62,6 @@ execute_process(
                          --no-external
                          --rc lcov_branch_coverage=1
         )
-
-# Filter out modules code coverage
-execute_process(
-            COMMAND lcov --remove ${CMAKE_BINARY_DIR}/coverage.info
-                         --output-file ${CMAKE_BINARY_DIR}/coverage.info
-                         "*modules/*.c"
-        )
-
 execute_process(
             COMMAND genhtml --rc lcov_branch_coverage=1
                             --branch-coverage
