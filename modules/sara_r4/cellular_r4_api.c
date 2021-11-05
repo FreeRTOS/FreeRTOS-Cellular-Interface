@@ -560,7 +560,16 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     else
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketRecv : invalid session ID for socket index %u",
+                socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
 
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Update recvLen to maximum module length. */
         if( CELLULAR_MAX_RECV_DATA_LEN <= bufferLength )
         {
@@ -693,7 +702,16 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     else
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
+                socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
 
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Send data length check. */
         if( dataLength > ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN )
         {
@@ -778,7 +796,16 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketClose : invalid session ID for socket index %u",
+                socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
 
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Remove the mapping. */
         pModuleContext->pSessionMap[ sessionId ] = INVALID_SOCKET_INDEX;
 
