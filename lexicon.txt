@@ -870,7 +870,7 @@ CAOPEN
 CARECV
 CASTATE
 CBANDCFG
-cellularStatus 
+cellularStatus
 ci
 cid
 CNACT
@@ -880,7 +880,7 @@ DEACTIVE
 dlbw
 EUTRAN
 IsValidPDP
-nRecvCnt 
+nRecvCnt
 PCellID
 pdnCfg
 pdpidx
