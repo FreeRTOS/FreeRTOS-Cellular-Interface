@@ -492,7 +492,7 @@ uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
 
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( sessionId <= MAX_TCP_SESSION_ID ) )
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( sessionId <= ( ( uint8_t ) MAX_TCP_SESSION_ID ) ) )
     {
         socketIndex = pModuleContext->pSessionMap[ sessionId ];
     }
