@@ -1036,7 +1036,7 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_DeactivatePdn: Listing operator and context details below." ) );
 
-            for( i = 0; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -1408,7 +1408,7 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_ActivatePdn: Listing operator and context details below." ) );
 
-            for( i = 0; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -1480,7 +1480,7 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_GetPdnStatus: Listing operator and context details below." ) );
 
-            for( i = 0; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -2609,7 +2609,7 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_SetPdnConfig: Listing operator and context details below." ) );
 
-            for( i = 0; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGDCONT response */
                 if( pdpContextsInfo.contextsPresent[ i ] )
