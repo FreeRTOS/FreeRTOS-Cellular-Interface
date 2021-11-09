@@ -238,9 +238,11 @@ static CellularError_t _Cellular_GetCurrentMNOProfile( CellularContext_t * pCont
         CELLULAR_AT_WITH_PREFIX,
         "+UMNOPROF",
         _Cellular_RecvFuncGetCurrentMNOProfile,
-        pCurrentMNOProfile,
+        NULL,
         sizeof( MNOProfileType_t ),
     };
+
+    atReqGetCurrentMNOProfile.pData = pCurrentMNOProfile;
 
     /* Internal function. Callee check parameters. */
     pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetCurrentMNOProfile );
@@ -259,7 +261,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    int count = 0;
+    uint32_t count = 0;
 
     CellularAtReq_t atReqGetNoResult =
     {
@@ -490,11 +492,58 @@ uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
 
-    if( ( cellularStatus == CELLULAR_SUCCESS ) &&
-        ( sessionId >= MIN_TCP_SESSION_ID ) && ( sessionId <= MAX_TCP_SESSION_ID ) )
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( sessionId <= ( ( uint8_t ) MAX_TCP_SESSION_ID ) ) )
     {
         socketIndex = pModuleContext->pSessionMap[ sessionId ];
     }
 
     return socketIndex;
+}
+
+/*-----------------------------------------------------------*/
+
+uint32_t _Cellular_GetSessionId( CellularContext_t * pContext,
+                                 uint32_t socketIndex )
+{
+    cellularModuleContext_t * pModuleContext = NULL;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    uint32_t sessionId = INVALID_SESSION_ID;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_GetSessionId invalid cellular context" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketIndex == INVALID_SOCKET_INDEX )
+    {
+        LogError( ( "_Cellular_GetSessionId invalid socketIndex" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else
+    {
+        cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        for( sessionId = 0; sessionId < TCP_SESSION_TABLE_LEGNTH; sessionId++ )
+        {
+            if( pModuleContext->pSessionMap[ sessionId ] == socketIndex )
+            {
+                break;
+            }
+        }
+
+        /* Mapping is not found in the session mapping table. */
+        if( sessionId == TCP_SESSION_TABLE_LEGNTH )
+        {
+            sessionId = INVALID_SESSION_ID;
+        }
+    }
+    else
+    {
+        sessionId = INVALID_SESSION_ID;
+    }
+
+    return sessionId;
 }
