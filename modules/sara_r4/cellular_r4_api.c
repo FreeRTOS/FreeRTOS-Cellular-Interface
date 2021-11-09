@@ -66,12 +66,7 @@
 
 #define SOCKET_DATA_PREFIX_TOKEN                "+USORD: "
 #define SOCKET_DATA_PREFIX_TOKEN_LEN            ( 8U )
-#define SOCKET_DATA_PREFIX_STRING_LENGTH        ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )       /* +USORD: <socket_number>,<length>,\" ./
-                                                                                             *
-                                                                                             #define USOCR_PROTOCOL_TCP                            ( 6U )
-                                                                                             #define USOCR_PROTOCOL_UDP                            ( 17U )
-                                                                                             *
-                                                                                             * /*-----------------------------------------------------------*/
+#define SOCKET_DATA_PREFIX_STRING_LENGTH        ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )
 #define RAT_PRIOIRTY_LIST_LENGTH                ( 3U )
 
 /**
@@ -97,8 +92,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
                                                    const CellularATCommandResponse_t * pAtResp,
                                                    void * pData,
                                                    uint16_t dataLen );
-static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
-                                          char * pCmdBuf );
 static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
                                                   CellularSocketHandle_t socketHandle,
                                                   CellularSocketAccessMode_t dataAccessMode,
@@ -150,6 +143,8 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
     char pLocalLine[ SOCKET_DATA_PREFIX_STRING_LENGTH + 1 ] = { '\0' };
     char * pDataStart = pLocalLine;
 
+    ( void ) lineLength;
+
     /* pCallbackContext is not used in this function. It should be NULL. */
     if( ( pLine == NULL ) || ( ppDataStart == NULL ) || ( pDataLength == NULL ) || ( pCallbackContext != NULL ) )
     {
@@ -189,7 +184,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
             {
                 atResult = Cellular_ATStrtoi( pToken, 10, &tempValue );
 
-                if( ( tempValue < 0 ) && ( tempValue > CELLULAR_MAX_RECV_DATA_LEN ) )
+                if( ( tempValue < 0 ) && ( ( uint32_t ) tempValue > CELLULAR_MAX_RECV_DATA_LEN ) )
                 {
                     LogError( ( "socketRecvData: Bad parameters" ) );
                     atResult = CELLULAR_AT_ERROR;
@@ -231,7 +226,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( ( "Data is turncated, received data length %d, out buffer size %d",
+        LogError( ( "Data is turncated, received data length %u, out buffer size %u",
                     *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
@@ -253,7 +248,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
         }
         else
         {
-            LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %d",
+            LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %u",
                         pInputLine, dataLenToCopy ) );
             atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
         }
@@ -286,6 +281,8 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     char * pInputLine = NULL, * pToken = NULL;
     const _socketDataRecv_t * pDataRecv = ( _socketDataRecv_t * ) pData;
     int32_t tempValue = 0;
+
+    ( void ) dataLen;
 
     if( pContext == NULL )
     {
@@ -356,40 +353,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     }
 
     return pktStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
-                                          char * pCmdBuf )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-
-    if( pCmdBuf == NULL )
-    {
-        LogDebug( ( "buildSocketConfig: Invalid command buffer" ) );
-        cellularStatus = CELLULAR_BAD_PARAMETER;
-    }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
-    {
-        LogError( ( "buildSocketConfig: socket protocol unsupported %d",
-                    socketHandle->socketProtocol ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else
-    {
-        /* Form the AT command. The socket number is returned in response.
-         * AT+USOCR=<protocol>[,<local_port>[,<IP_type>]]
-         * protocol=6 => TCP, local_port=0 => random port. */
-
-        /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
-        /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+USOCR=6,0" );
-    }
-
-    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -517,9 +480,13 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
         CELLULAR_AT_WITH_PREFIX,
         "+USOCR",
         _Cellular_RecvFuncGetSocketId,
-        pSessionId,
+        NULL,
         sizeof( uint8_t ),
     };
+
+    ( void ) socketHandle;
+
+    atReqSocketConnect.pData = pSessionId;
 
     /* Internal function. Caller checks parameters. */
 
@@ -556,21 +523,24 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
     uint32_t recvTimeout = DATA_READ_TIMEOUT_MS;
     uint32_t recvLen = bufferLength;
-    _socketDataRecv_t dataRecv =
-    {
-        pReceivedDataLength,
-        pBuffer
-    };
+    _socketDataRecv_t dataRecv = { 0 };
     CellularAtReq_t atReqSocketRecv =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_MULTI_DATA_WO_PREFIX,
         "+USORD",
         _Cellular_RecvFuncData,
-        ( void * ) &dataRecv,
-        bufferLength,
+        NULL,
+        0,
     };
     uint32_t sessionId = 0;
+
+    dataRecv.pDataLen = pReceivedDataLength;
+    dataRecv.pData = pBuffer;
+
+    atReqSocketRecv.pAtCmd = cmdBuf;
+    atReqSocketRecv.pData = ( void * ) &dataRecv;
+    atReqSocketRecv.dataLen = bufferLength;
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -589,8 +559,18 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = ( uint32_t ) socketHandle->pModemData;
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketRecv : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Update recvLen to maximum module length. */
         if( CELLULAR_MAX_RECV_DATA_LEN <= bufferLength )
         {
@@ -609,7 +589,7 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
              * The max length of the string is fixed and checked offline. */
             /* coverity[misra_c_2012_rule_21_6_violation]. */
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-                               "%s%ld,%ld", "AT+USORD=", sessionId, recvLen );
+                               "%s%u,%u", "AT+USORD=", sessionId, recvLen );
             pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,
                                                                            atReqSocketRecv,
                                                                            recvTimeout,
@@ -681,24 +661,16 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     uint32_t sendTimeout = DATA_SEND_TIMEOUT_MS;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    CellularAtReq_t atReqSocketSend =
-    {
-        cmdBuf,
-        CELLULAR_AT_NO_RESULT,
-        NULL,
-        NULL,
-        NULL,
-        0,
-    };
-    CellularAtDataReq_t atDataReqSocketSend =
-    {
-        pData,
-        dataLength,
-        pSentDataLength,
-        NULL,
-        0
-    };
+    CellularAtReq_t atReqSocketSend = { 0 };
+    CellularAtDataReq_t atDataReqSocketSend = { 0 };
     uint32_t sessionId = 0;
+
+    atReqSocketSend.atCmdType = CELLULAR_AT_NO_RESULT;
+    atReqSocketSend.pAtCmd = cmdBuf;
+
+    atDataReqSocketSend.pData = pData;
+    atDataReqSocketSend.dataLen = dataLength;
+    atDataReqSocketSend.pSentDataLength = pSentDataLength;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -730,8 +702,18 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = ( uint32_t ) socketHandle->pModemData;
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Send data length check. */
         if( dataLength > ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN )
         {
@@ -747,7 +729,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%lu,%ld",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u,%u",
                            "AT+USOWR=", sessionId, atDataReqSocketSend.dataLen );
 
         pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
@@ -785,15 +767,17 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
     CellularAtReq_t atReqSocketClose =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0,
     };
-    uint32_t sessionId = ( uint32_t ) socketHandle->pModemData;
+    uint32_t sessionId = INVALID_SESSION_ID;
     cellularModuleContext_t * pModuleContext = NULL;
+
+    atReqSocketClose.pAtCmd = cmdBuf;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -809,6 +793,18 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     else
     {
         cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketClose : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
     }
 
     if( cellularStatus == CELLULAR_SUCCESS )
@@ -853,7 +849,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     uint8_t sessionId = 0;
     CellularAtReq_t atReqSocketConnect =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
@@ -861,6 +857,8 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         0,
     };
     cellularModuleContext_t * pModuleContext = NULL;
+
+    atReqSocketConnect.pAtCmd = cmdBuf;
 
     /* Make sure the library is open. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -902,9 +900,6 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Store the session ID in the pointer directly instead allocate extra memory. */
-            socketHandle->pModemData = ( void * ) sessionId;
-
             /* Create the reverse table to store the socketIndex to sessionId. */
             pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
         }
@@ -913,8 +908,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     /* Start the tcp connection. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        /*
-         * /* The return value of snprintf is not used.
+        /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
@@ -1002,19 +996,22 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
     bool packetSwitchStatus = false;
+    uint32_t i = 0;
 
     CellularServiceStatus_t serviceStatus = { 0 };
     CellularPdnContextActInfo_t pdpContextsActInfo = { 0 };
 
     CellularAtReq_t atReqDeactPdn =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0,
     };
+
+    atReqDeactPdn.pAtCmd = cmdBuf;
 
     cellularStatus = _Cellular_IsValidPdn( contextId );
 
@@ -1039,7 +1036,7 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_DeactivatePdn: Listing operator and context details below." ) );
 
-            for( int i = 0; i < MAX_PDP_CONTEXTS - 1; i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -1327,9 +1324,11 @@ static CellularError_t _Cellular_GetContextActivationStatus( CellularHandle_t ce
         CELLULAR_AT_MULTI_WITH_PREFIX,
         "+CGACT",
         _Cellular_RecvFuncGetPdpContextActState,
-        pPdpContextsActInfo,
+        NULL,
         sizeof( CellularPdnContextActInfo_t ),
     };
+
+    atReqPacketSwitchStatus.pData = pPdpContextsActInfo;
 
     /* Internal function. Callee check parameters. */
     pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqPacketSwitchStatus );
@@ -1352,9 +1351,11 @@ static CellularError_t _Cellular_GetPacketSwitchStatus( CellularHandle_t cellula
         CELLULAR_AT_WITH_PREFIX,
         "+CGATT",
         _Cellular_RecvFuncPacketSwitchStatus,
-        pPacketSwitchStatus,
+        NULL,
         sizeof( bool ),
     };
+
+    atReqPacketSwitchStatus.pData = pPacketSwitchStatus;
 
     /* Internal function. Callee check parameters. */
     pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqPacketSwitchStatus, PDN_ACT_PACKET_REQ_TIMEOUT_MS );
@@ -1374,12 +1375,13 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
+    uint32_t i = 0;
 
     CellularPdnContextActInfo_t pdpContextsActInfo = { 0 };
 
     CellularAtReq_t atReqActPdn =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
@@ -1388,6 +1390,8 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
     };
 
     cellularStatus = _Cellular_IsValidPdn( contextId );
+
+    atReqActPdn.pAtCmd = cmdBuf;
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
@@ -1404,7 +1408,7 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_ActivatePdn: Listing operator and context details below." ) );
 
-            for( int i = 0; i < MAX_PDP_CONTEXTS - 1; i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -1451,6 +1455,7 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    uint32_t i = 0;
 
     CellularPdnContextActInfo_t pdpContextsActInfo = { 0 };
 
@@ -1475,7 +1480,7 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_GetPdnStatus: Listing operator and context details below." ) );
 
-            for( int i = 0; i < MAX_PDP_CONTEXTS - 1; i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGACT response */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
@@ -1508,7 +1513,7 @@ CellularError_t Cellular_SetRatPriority( CellularHandle_t cellularHandle,
 
     CellularAtReq_t atReqSetRatPriority =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
@@ -1517,6 +1522,8 @@ CellularError_t Cellular_SetRatPriority( CellularHandle_t cellularHandle,
     };
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+
+    atReqSetRatPriority.pAtCmd = cmdBuf;
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
@@ -1688,9 +1695,12 @@ CellularError_t Cellular_GetRatPriority( CellularHandle_t cellularHandle,
         CELLULAR_AT_WITH_PREFIX,
         "+URAT",
         _Cellular_RecvFuncGetRatPriority,
-        pRatPriorities,
-        ( uint16_t ) ratPrioritiesLength,
+        NULL,
+        0U,
     };
+
+    atReqSetRatPriority.pData = pRatPriorities;
+    atReqSetRatPriority.dataLen = ( uint16_t ) ratPrioritiesLength;
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -2062,7 +2072,7 @@ CellularError_t Cellular_GetSignalInfo( CellularHandle_t cellularHandle,
         CELLULAR_AT_WITH_PREFIX,
         "+CSQ",
         _Cellular_RecvFuncGetSignalInfo,
-        pSignalInfo,
+        NULL,
         sizeof( CellularSignalInfo_t ),
     };
     CellularAtReq_t atReqQueryExtendedSignalInfo =
@@ -2071,11 +2081,13 @@ CellularError_t Cellular_GetSignalInfo( CellularHandle_t cellularHandle,
         CELLULAR_AT_WITH_PREFIX,
         "+CESQ",
         _Cellular_RecvFuncGetSignalInfo,
-        pSignalInfo,
+        NULL,
         sizeof( CellularSignalInfo_t ),
     };
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+    atReqQuerySignalInfo.pData = pSignalInfo;
+    atReqQueryExtendedSignalInfo.pData = pSignalInfo;
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
@@ -2122,6 +2134,9 @@ CellularError_t Cellular_SetDns( CellularHandle_t cellularHandle,
                                  const char * pDnsServerAddress )
 {
     /* Modem use dynamic DNS addresses. Return unsupported. */
+    ( void ) cellularHandle;
+    ( void ) contextId;
+    ( void ) pDnsServerAddress;
     return CELLULAR_UNSUPPORTED;
 }
 
@@ -2136,13 +2151,15 @@ static CellularError_t controlSignalStrengthIndication( CellularContext_t * pCon
     uint8_t enable_value = 0;
     CellularAtReq_t atReqControlSignalStrengthIndication =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0,
     };
+
+    atReqControlSignalStrengthIndication.pAtCmd = cmdBuf;
 
     if( enable == true )
     {
@@ -2310,16 +2327,21 @@ CellularError_t Cellular_GetHostByName( CellularHandle_t cellularHandle,
 
     CellularAtReq_t atReqQueryDns =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_MULTI_WITH_PREFIX,
         "+UDNSRN",
         _Cellular_RecvFuncResolveDomainToIpAddress,
-        pResolvedAddress,
+        NULL,
         CELLULAR_IP_ADDRESS_MAX_SIZE,
     };
 
+    ( void ) contextId;
+
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+
+    atReqQueryDns.pAtCmd = cmdBuf;
+    atReqQueryDns.pData = pResolvedAddress;
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
@@ -2507,19 +2529,22 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
     char pPdpTypeStr[ CELULAR_PDN_CONTEXT_TYPE_MAX_SIZE ] = { '\0' };
+    uint32_t i = 0;
 
     CellularPdnContextInfo_t pdpContextsInfo = { 0 };
     CellularPdnContextInfo_t * pPdpContextsInfo = &pdpContextsInfo;
 
     CellularAtReq_t atReqSetPdn =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0,
     };
+
+    atReqSetPdn.pAtCmd = cmdBuf;
 
     if( pPdnConfig == NULL )
     {
@@ -2572,9 +2597,10 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
             CELLULAR_AT_MULTI_WITH_PREFIX,
             "+CGDCONT",
             _Cellular_RecvFuncGetPdpContextSettings,
-            pPdpContextsInfo,
+            NULL,
             sizeof( CellularPdnContextInfo_t ),
         };
+        atReqGetCurrentApnName.pData = pPdpContextsInfo;
 
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetCurrentApnName );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
@@ -2583,13 +2609,14 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
         {
             LogDebug( ( "Cellular_SetPdnConfig: Listing operator and context details below." ) );
 
-            for( int i = 0; i < MAX_PDP_CONTEXTS - 1; i++ )
+            for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
                 /* Print only those contexts that are present in +CGDCONT response */
                 if( pdpContextsInfo.contextsPresent[ i ] )
                 {
                     LogDebug( ( "Context [%d], IP Type [%s], APN Name [%s], IP Address [%s]\r\n", i + 1,
-                                pdpContextsInfo.ipType[ i ], pdpContextsInfo.apnName, pdpContextsInfo.ipAddress ) );
+                                pdpContextsInfo.ipType[ i ], ( char * ) pdpContextsInfo.apnName,
+                                ( char * ) pdpContextsInfo.ipAddress ) );
                 }
             }
         }
@@ -2659,13 +2686,15 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
 
     CellularAtReq_t atReqSetPsm =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0
     };
+
+    atReqSetPsm.pAtCmd = cmdBuf;
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -2726,13 +2755,15 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
 
     CellularAtReq_t atReqSetEidrx =
     {
-        cmdBuf,
+        NULL,
         CELLULAR_AT_NO_RESULT,
         NULL,
         NULL,
         NULL,
         0
     };
+
+    atReqSetEidrx.pAtCmd = cmdBuf;
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -2784,19 +2815,18 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
 CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
                                const CellularCommInterface_t * pCommInterface )
 {
-    CellularTokenTable_t cellularTokenTable =
-    {
-        .pCellularUrcHandlerTable              = CellularUrcHandlerTable,
-        .cellularPrefixToParserMapSize         = CellularUrcHandlerTableSize,
-        .pCellularSrcTokenErrorTable           = CellularSrcTokenErrorTable,
-        .cellularSrcTokenErrorTableSize        = CellularSrcTokenErrorTableSize,
-        .pCellularSrcTokenSuccessTable         = CellularSrcTokenSuccessTable,
-        .cellularSrcTokenSuccessTableSize      = CellularSrcTokenSuccessTableSize,
-        .pCellularUrcTokenWoPrefixTable        = CellularUrcTokenWoPrefixTable,
-        .cellularUrcTokenWoPrefixTableSize     = CellularUrcTokenWoPrefixTableSize,
-        .pCellularSrcExtraTokenSuccessTable    = NULL,
-        .cellularSrcExtraTokenSuccessTableSize = 0
-    };
+    CellularTokenTable_t cellularTokenTable = { 0 };
+
+    cellularTokenTable.pCellularUrcHandlerTable = CellularUrcHandlerTable;
+    cellularTokenTable.cellularPrefixToParserMapSize = CellularUrcHandlerTableSize;
+    cellularTokenTable.pCellularSrcTokenErrorTable = CellularSrcTokenErrorTable;
+    cellularTokenTable.cellularSrcTokenErrorTableSize = CellularSrcTokenErrorTableSize;
+    cellularTokenTable.pCellularSrcTokenSuccessTable = CellularSrcTokenSuccessTable;
+    cellularTokenTable.cellularSrcTokenSuccessTableSize = CellularSrcTokenSuccessTableSize;
+    cellularTokenTable.pCellularUrcTokenWoPrefixTable = CellularUrcTokenWoPrefixTable;
+    cellularTokenTable.cellularUrcTokenWoPrefixTableSize = CellularUrcTokenWoPrefixTableSize;
+    cellularTokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
+    cellularTokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
 
     return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
 }
