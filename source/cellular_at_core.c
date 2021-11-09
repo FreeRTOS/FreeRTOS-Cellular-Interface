@@ -43,7 +43,7 @@
 
 /*-----------------------------------------------------------*/
 
-#if ( CELLULAR_CUSTOM_CHECK_PFREFIX_CHAR == 0 )
+#if ( CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR == 0 )
     #define CHECK_IS_PREFIX_CHAR( inputChar )                             \
     ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
