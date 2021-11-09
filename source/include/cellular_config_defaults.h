@@ -362,6 +362,20 @@
 #endif
 
 /**
+ * @brief Use module check prefix char function.<br>
+ *
+ * Enable this macro to use module defined prefix char function.
+ * Cellular_ModuleCheckIsPrefixChar function should be provided in cellular module
+ * porting.
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 0
+ */
+#ifndef CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR
+    #define CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR    ( 0 )
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *

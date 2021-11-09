@@ -91,6 +91,19 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext );
  */
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext );
 
+/**
+ * @brief Cellular module check prefix char function.
+ *
+ * This function check if the input char is valid in AT command prefix. To enable
+ * the module specific check function, set CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR
+ * to 1 in "cellular_config.h".
+ *
+ * @param[in] inputChar Charactor in prefix to be checked.
+ *
+ * @return true if this is valid prefix char. Otherwise, return false.
+ */
+bool Cellular_ModuleCheckInvalidPrefixChar( char inputChar );
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
