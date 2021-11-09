@@ -348,7 +348,7 @@ inet
 ingroup
 inidcate
 init
-inputChar
+inputchar
 inputline
 int
 interdelayms
