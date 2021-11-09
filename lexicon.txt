@@ -348,6 +348,7 @@ inet
 ingroup
 inidcate
 init
+inputChar
 inputline
 int
 interdelayms
@@ -863,4 +864,3 @@ xqueuereceive
 xqueuesend
 xxxx
 yd
-inputChar
