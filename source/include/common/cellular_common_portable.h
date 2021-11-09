@@ -98,7 +98,7 @@ CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext );
  * the module specific check function, set CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR
  * to 1 in "cellular_config.h".
  *
- * @param[in] inputChar Charactor in prefix to be checked.
+ * @param[in] inputChar character in prefix to be checked.
  *
  * @return true if this is valid prefix char. Otherwise, return false.
  */

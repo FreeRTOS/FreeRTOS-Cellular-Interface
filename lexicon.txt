@@ -863,3 +863,4 @@ xqueuereceive
 xqueuesend
 xxxx
 yd
+inputChar
