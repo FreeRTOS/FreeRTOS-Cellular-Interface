@@ -37,6 +37,7 @@
 /* *INDENT-ON* */
 
 #include "cellular_types.h"
+#include "cellular_common.h"
 #include "cellular_comm_interface.h"
 
 /*-----------------------------------------------------------*/
