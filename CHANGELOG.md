@@ -8,7 +8,7 @@
  - [#57](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/57) Fix unknown type issue.
 
 ### Other
- - [#24](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/52) Resolve ublox sara r4 build warnings.
+ - [#52](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/52) Resolve ublox sara r4 build warnings.
  - [#42](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/42) Fix spelling check failure in CI tools.
  - [#43](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/43) [#46](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/46) [#54](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/54) Minor documentation updates.
  - [#48](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/48) Header Guards for C++ linkage.
