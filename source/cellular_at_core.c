@@ -43,13 +43,11 @@
 
 /*-----------------------------------------------------------*/
 
-#if ( CELLULAR_CONFIG_MODULE_CHECK_PFREFIX_CHAR == 0 )
-    #define CHECK_IS_PREFIX_CHAR( inputChar )                             \
+#ifndef CELLULAR_CHECK_IS_PREFIX_CHAR
+    #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar )                    \
     ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
-#else
-    #define CHECK_IS_PREFIX_CHAR( inputChar )    Cellular_ModuleCheckInvalidPrefixChar( inputChar )
 #endif
 
 /*-----------------------------------------------------------*/
@@ -145,7 +143,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
                 /* It's caused by stanard api isalpha and isdigit. */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
                 /* coverity[misra_c_2012_rule_10_8_violation] */
-                if( CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
+                if( CELLULAR_CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;
