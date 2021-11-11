@@ -362,15 +362,6 @@
 #endif
 
 /**
- * @brief Use module check prefix char function.<br>
- *
- * If the modem has specific prefix char. Define this macro to override the default
- * check function in "cellular_at_core.c".
- *
- * #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar ) ...
- */
-
-/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *
