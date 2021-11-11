@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * FreeRTOS-Cellular-Interface v1.1.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://aws.amazon.com/freertos
- * http://www.FreeRTOS.org
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  */
 
 /**
@@ -43,10 +43,12 @@
 
 /*-----------------------------------------------------------*/
 
-#define CHECK_IS_PREFIX_CHAR( inputChar )                                 \
+#ifndef CELLULAR_CHECK_IS_PREFIX_CHAR
+    #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar )                    \
     ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -141,7 +143,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
                 /* It's caused by stanard api isalpha and isdigit. */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
                 /* coverity[misra_c_2012_rule_10_8_violation] */
-                if( CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
+                if( CELLULAR_CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;

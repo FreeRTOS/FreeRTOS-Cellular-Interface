@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * FreeRTOS-Cellular-Interface v1.1.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -19,8 +19,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * http://aws.amazon.com/freertos
- * http://www.FreeRTOS.org
+ * https://www.FreeRTOS.org
+ * https://github.com/FreeRTOS
  */
 
 /**
@@ -596,7 +596,7 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
 
     if( socketHandle->socketState == SOCKETSTATE_CONNECTING )
     {
-        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%d]", socketHandle->socketId ) );
+        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%u]", socketHandle->socketId ) );
     }
 
     taskENTER_CRITICAL();
@@ -649,7 +649,7 @@ CellularError_t _Cellular_IsValidSocket( const CellularContext_t * pContext,
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %d", sockIndex ) );
+            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %u", sockIndex ) );
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
     }
@@ -913,7 +913,7 @@ CellularSocketContext_t * _Cellular_GetSocketData( const CellularContext_t * pCo
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_GetSocketData, invalid socket handle %d", sockIndex ) );
+            LogError( ( "_Cellular_GetSocketData, invalid socket handle %u", sockIndex ) );
         }
         else
         {
