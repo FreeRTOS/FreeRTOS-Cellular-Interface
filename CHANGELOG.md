@@ -2,7 +2,7 @@
 
 ## v1.1.0 (November 2021)
 ### Updates
- - [#40](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/40) Fix the module logging mechanism foramt.
+ - [#40](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/40) Fix the module logging mechanism format.
  - [#53](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/53) Use the stdint.h header file for integer types.
  - [#55](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/55) Add function for validating the prefix character of cellular module response.
  - [#57](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/57) Fix unknown type issue.
