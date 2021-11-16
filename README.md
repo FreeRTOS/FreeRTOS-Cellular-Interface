@@ -73,7 +73,7 @@ FreeRTOS Cellular Interface now supports AT commands, TCP offloaded Cellular abs
 
 In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html):
 
-1. Implement the cellular modem porting interface defined in [cellular_common_portable.h](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common/cellular_common_portable.h)([Document](https://www.freertos.org/Documentation/api-ref/cellular/cellular__common__portable_8h.html)).
+1. Implement the cellular modem porting interface defined in [cellular_common_portable.h](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common/cellular_common_portable.h) ([Document](https://www.freertos.org/Documentation/api-ref/cellular/cellular__common__portable_8h.html)).
 2. Implement the subset of Cellular Library APIs that use vendor-specific (non-3GPP) AT commands. The APIs to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular/cellular_common__a_p_is.html).
 3. Implement Cellular Library callback functions that handle vendor-specific (non-3GPP) Unsolicited Result Code (URC). The URC handlers to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular/cellular_common__u_r_c_handlers.html).
 
