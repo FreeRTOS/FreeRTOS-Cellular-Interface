@@ -43,7 +43,7 @@
 #define taskENTER_CRITICAL                   dummyTaskENTER_CRITICAL
 #define taskEXIT_CRITICAL                    dummyTaskEXIT_CRITICAL
 
-#define PlatformEventGroupHandle_t           uint16_t
+#define PlatformEventGroupHandle_t           MockPlatformEventGroupHandle_t
 #define PlatformEventGroup_Delete            MockPlatformEventGroup_Delete
 #define PlatformEventGroup_ClearBits         MockPlatformEventGroup_ClearBits
 #define PlatformEventGroup_Create            MockPlatformEventGroup_Create
@@ -170,6 +170,15 @@ typedef struct PlatformMutex
  */
 typedef TickType_t EventBits_t;
 
+/*
+ * @brief The structure to hold the mocked event group structure.
+ */
+typedef struct MockPlatformEventGroup
+{
+    uint16_t mockedEventGroupValue;
+} MockPlatformEventGroup_t;
+typedef MockPlatformEventGroup_t * MockPlatformEventGroupHandle_t;
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -223,7 +232,7 @@ uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
                                           BaseType_t xWaitForAllBits,
                                           TickType_t xTicksToWait );
 
-uint16_t MockPlatformEventGroup_Create( void );
+MockPlatformEventGroupHandle_t MockPlatformEventGroup_Create( void );
 
 uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent );
 
