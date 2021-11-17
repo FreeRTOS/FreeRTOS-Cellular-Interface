@@ -82,8 +82,9 @@ struct _cellularCommContext
 };
 
 static uint16_t pktioEvtMask = 0x0000U;
-static uint16_t evtGroupCreate = 0x0001U;
 
+static MockPlatformEventGroup_t evtGroup = { 0 };
+static MockPlatformEventGroupHandle_t evtGroupHandle = NULL;
 
 static int recvCount = 0;
 static int testInfiniteLoop = 0;
@@ -202,6 +203,7 @@ void setUp()
     recvCommFail = 0;
     setpktDataPrefixCBReturn = 0;
     testInfiniteLoop = 0;
+    evtGroupHandle = &evtGroup;
 }
 
 /* Called after each test method. */
@@ -246,9 +248,9 @@ uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGrou
     return 0;
 }
 
-uint16_t MockPlatformEventGroup_Create( void )
+MockPlatformEventGroupHandle_t MockPlatformEventGroup_Create( void )
 {
-    return evtGroupCreate;
+    return evtGroupHandle;
 }
 
 uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
@@ -362,6 +364,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceRecei
 
     ( void ) receiveCallback;
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
+
     ( void ) pCommInterfaceHandle;
 
     commIntRet = receiveCallback( pContext, NULL );
@@ -377,6 +380,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpenCallrecvCallbackNullContext(
 
     ( void ) receiveCallback;
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
+
     ( void ) pCommInterfaceHandle;
 
     memset( pContext, 0, sizeof( CellularContext_t ) );
@@ -731,6 +735,7 @@ void test__Cellular_PktioInit_Thread_ReceiveCallback_xHigherPriorityTaskWoken_Fa
     /* Make PlatformEventGroup_SetBitsFromISR return true. */
     setBitFromIsrReturn = 1;
     higherPriorityTaskWokenReturn = 0;
+
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -1516,7 +1521,6 @@ void test__Cellular_PktioInit_Event_Aborted( void )
 
     /* Test the aborted event. */
     pktioEvtMask = PKTIO_EVT_MASK_ABORTED;
-    evtGroupCreate = 1U;
     recvCount = 1;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
@@ -1534,8 +1538,8 @@ void test__Cellular_PktioInit_Event_Group_Create_Null( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Test the pPktioCommEvent NULL case. */
-    context.pPktioCommEvent = ( PlatformEventGroupHandle_t ) 0U;
-    evtGroupCreate = ( uintptr_t ) ( uintptr_t * ) NULL;
+    context.pPktioCommEvent = NULL;
+    evtGroupHandle = NULL;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_CREATION_FAIL, pktStatus );
@@ -1553,7 +1557,6 @@ void test__Cellular_PktioInit_Create_Thread_Fail( void )
 
     /* Test the Platform_CreateDetachedThread fail case. */
     threadReturn = false;
-    evtGroupCreate = 1U;
     /* Check that CELLULAR_PKT_STATUS_CREATION_FAIL is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_CREATION_FAIL, pktStatus );
@@ -1818,7 +1821,7 @@ void test__Cellular_PktioShutdown_Null_PktioCommEvent( void )
     desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
     context.bPktioUp = true;
 
-    context.pPktioCommEvent = ( PlatformEventGroupHandle_t ) 0;
+    context.pPktioCommEvent = NULL;
     _Cellular_PktioShutdown( &context );
 
     TEST_ASSERT_EQUAL( false, context.bPktioUp );
@@ -1833,7 +1836,6 @@ void test__Cellular_PktioShutdown_Happy_Path( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     eventDesiredCount = 2;
-    evtGroupCreate = 1U;
     desiredPktioEvtMask = PKTIO_EVT_MASK_ABORTED;
     context.bPktioUp = true;
 
