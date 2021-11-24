@@ -28,12 +28,12 @@ DEFINES +=
 INCLUDES +=
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
-CBMC_MAX_BUFSIZE=256
+CBMC_MAX_BUFSIZE=259
 
 DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
 
 UNWINDSET += Cellular_ATStrStartWith.0:$(CBMC_MAX_BUFSIZE)
-
+UNWINDSET += strlen.0:$(CBMC_MAX_BUFSIZE)
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
