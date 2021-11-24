@@ -76,14 +76,10 @@ static void validateString( const char * pString,
 {
     size_t stringLength = 0U;
 
-    /* The strnlen() function returns strlen(s), if that is less than maxlen,
-     * or maxlen if there is no null terminating ('\0') among the first
-     * maxlen characters pointed to by s.
-     *
-     * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
-     * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
-     * character.*/
-    stringLength = strnlen( pString, CELLULAR_AT_MAX_STRING_SIZE + 1U );
+    /* Validate the string length. If the string length is longer than expected, return
+     * error to stop further processing.
+     */
+    stringLength = strlen( pString );
 
     if( stringLength == 0U )
     {
@@ -766,10 +762,20 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
     char * p = NULL;
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     const char * pTempSrc = pSrc;
+    CellularATStringValidationResult_t stringValidationResult = CELLULAR_AT_STRING_UNKNOWN;
 
-    if( ( ppDst == NULL ) || ( pTempSrc == NULL ) || ( strnlen( pTempSrc, CELLULAR_AT_MAX_STRING_SIZE ) >= CELLULAR_AT_MAX_STRING_SIZE ) )
+    if( ( ppDst == NULL ) || ( pTempSrc == NULL ) )
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
+    }
+    else
+    {
+        validateString( pTempSrc, &stringValidationResult );
+
+        if( stringValidationResult != CELLULAR_AT_STRING_VALID )
+        {
+            atStatus = CELLULAR_AT_BAD_PARAMETER;
+        }
     }
 
     if( atStatus == CELLULAR_AT_SUCCESS )

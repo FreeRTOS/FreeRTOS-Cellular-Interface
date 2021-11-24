@@ -99,6 +99,7 @@
 
 #define DATA_PREFIX_STRING                       "+QIRD:"
 #define DATA_PREFIX_STRING_LENGTH                ( 6U )
+#define DATA_PREFIX_STRING_CHANGELINE_LENGTH     ( 2U )     /* The length of the changeline "\r\n". */
 
 #define MAX_QIRD_STRING_PREFIX_STRING            ( 14U )    /* The max data prefix string is "+QIRD: 1460\r\n" */
 
@@ -1693,7 +1694,6 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                                                  uint32_t * pDataLength )
 {
     char * pDataStart = NULL;
-    uint32_t tempStrlen = 0;
     int32_t tempValue = 0;
     CellularATError_t atResult = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -1735,14 +1735,13 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
 
         if( pDataStart != NULL )
         {
-            tempStrlen = strlen( "+QIRD:" );
-            atResult = Cellular_ATStrtoi( &pDataStart[ tempStrlen ], 10, &tempValue );
+            atResult = Cellular_ATStrtoi( &pDataStart[ DATA_PREFIX_STRING_LENGTH ], 10, &tempValue );
 
             if( ( atResult == CELLULAR_AT_SUCCESS ) && ( tempValue >= 0 ) &&
                 ( tempValue <= ( int32_t ) CELLULAR_MAX_RECV_DATA_LEN ) )
             {
-                /* Save the start of data point in pTemp. */
-                if( ( uint32_t ) ( strnlen( pDataStart, MAX_QIRD_STRING_PREFIX_STRING ) + 2 ) > lineLength )
+                /* pDataStart is a NULL terminated string. Length is less than lineLength. */
+                if( ( uint32_t ) ( strlen( pDataStart ) + DATA_PREFIX_STRING_CHANGELINE_LENGTH ) > lineLength )
                 {
                     /* More data is required. */
                     *pDataLength = 0;
@@ -1751,9 +1750,10 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 }
                 else
                 {
-                    pDataStart = &pLine[ strnlen( pDataStart, MAX_QIRD_STRING_PREFIX_STRING ) ];
+                    /* pDataStart is a NULL terminated string. Length is less than lineLength. */
+                    pDataStart = &pLine[ strlen( pDataStart ) ];
                     pDataStart[ 0 ] = '\0';
-                    pDataStart = &pDataStart[ 2 ];
+                    pDataStart = &pDataStart[ DATA_PREFIX_STRING_CHANGELINE_LENGTH ];
                     *pDataLength = ( uint32_t ) tempValue;
                 }
 
