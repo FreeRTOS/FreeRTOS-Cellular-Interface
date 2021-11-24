@@ -883,8 +883,7 @@ static bool _getNextLine( CellularContext_t * pContext,
     bool keepProcess = true;
 
     /* Find other responses or urcs which need to be processed in this read buffer.
-     * "\0" is always inserted at the end in _handleRxDataEvent. There may be multiple
-     * lines in PktioReadPtr. *pBytesRead is alwasy greater or equal to stringLength. */
+     * "\0" is always inserted at the end in _handleRxDataEvent. */
     stringLength = ( uint32_t ) strlen( *ppLine );
 
     /* Advanced 1 bytes to read next Line. */

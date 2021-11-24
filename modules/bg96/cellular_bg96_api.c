@@ -99,7 +99,7 @@
 
 #define DATA_PREFIX_STRING                       "+QIRD:"
 #define DATA_PREFIX_STRING_LENGTH                ( 6U )
-#define DATA_PREFIX_STRING_CHANGELINE_LENGTH     ( 2U )     /* The length of the changeline "\r\n". */
+#define DATA_PREFIX_STRING_CHANGELINE_LENGTH     ( 2U )     /* The length of the change line "\r\n". */
 
 #define MAX_QIRD_STRING_PREFIX_STRING            ( 14U )    /* The max data prefix string is "+QIRD: 1460\r\n" */
 
