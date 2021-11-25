@@ -74,12 +74,18 @@ static uint8_t _charToNibble( char c );
 static void validateString( const char * pString,
                             CellularATStringValidationResult_t * pStringValidationResult )
 {
-    size_t stringLength = 0U;
+    uint32_t stringLength = 0U;
 
     /* Validate the string length. If the string length is longer than expected, return
      * error to stop further processing.
      */
-    stringLength = strlen( pString );
+    for( stringLength = 0U; stringLength <= ( CELLULAR_AT_MAX_STRING_SIZE + 1U ); stringLength++ )
+    {
+        if( pString[ stringLength ] == '\0' )
+        {
+            break;
+        }
+    }
 
     if( stringLength == 0U )
     {
