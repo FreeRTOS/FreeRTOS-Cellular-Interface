@@ -54,7 +54,7 @@ void harness()
 {
     uint32_t stringLength;
 
-    __CPROVER_assume( stringLength <= CELLULAR_AT_MAX_STRING_SIZE + 2 );
+    __CPROVER_assume( stringLength < CELLULAR_AT_MAX_STRING_SIZE + 1 );
     char * pString = ( char * ) safeMalloc( stringLength );
     char ** ppString = nondet_bool() ? NULL : &pString;
 
