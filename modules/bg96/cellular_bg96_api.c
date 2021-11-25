@@ -1694,6 +1694,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                                                  uint32_t * pDataLength )
 {
     char * pDataStart = NULL;
+    uint32_t prefixLineLength = 0U;
     int32_t tempValue = 0;
     CellularATError_t atResult = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -1722,6 +1723,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 if( ( pDataStart[ i ] == '\r' ) || ( pDataStart[ i ] == '\n' ) )
                 {
                     pDataStart[ i ] = '\0';
+                    prefixLineLength = ( uint32_t ) i;
                     break;
                 }
             }
@@ -1740,8 +1742,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
             if( ( atResult == CELLULAR_AT_SUCCESS ) && ( tempValue >= 0 ) &&
                 ( tempValue <= ( int32_t ) CELLULAR_MAX_RECV_DATA_LEN ) )
             {
-                /* pDataStart is a NULL terminated string. Length is less than lineLength. */
-                if( ( uint32_t ) ( strlen( pDataStart ) + DATA_PREFIX_STRING_CHANGELINE_LENGTH ) > lineLength )
+                if( ( prefixLineLength + DATA_PREFIX_STRING_CHANGELINE_LENGTH ) > lineLength )
                 {
                     /* More data is required. */
                     *pDataLength = 0;
@@ -1750,8 +1751,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 }
                 else
                 {
-                    /* pDataStart is a NULL terminated string. Length is less than lineLength. */
-                    pDataStart = &pLine[ strlen( pDataStart ) ];
+                    pDataStart = &pLine[ prefixLineLength ];
                     pDataStart[ 0 ] = '\0';
                     pDataStart = &pDataStart[ DATA_PREFIX_STRING_CHANGELINE_LENGTH ];
                     *pDataLength = ( uint32_t ) tempValue;
