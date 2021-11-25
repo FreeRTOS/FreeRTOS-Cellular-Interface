@@ -78,7 +78,10 @@ static void validateString( const char * pString,
 
     /* Validate the string length. If the string length is longer than expected, return
      * error to stop further processing.
-     */
+     *
+     * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
+     * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
+     * character.*/
     pStringTerminated = memchr( pString, '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
 
     if( pStringTerminated == pString )

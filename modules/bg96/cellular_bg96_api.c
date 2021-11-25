@@ -1723,7 +1723,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 if( ( pDataStart[ i ] == '\r' ) || ( pDataStart[ i ] == '\n' ) )
                 {
                     pDataStart[ i ] = '\0';
-                    prefixLineLength = ( uint32_t ) i;
+                    prefixLineLength = i;
                     break;
                 }
             }
