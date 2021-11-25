@@ -28,14 +28,13 @@ DEFINES +=
 INCLUDES +=
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
-CBMC_MAX_BUFSIZE=259
+CBMC_MAX_BUFSIZE=256
 
 KEY_LIST_SIZE=16
 
 DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE) -DKEY_LIST_SIZE=$(KEY_LIST_SIZE)
 
 UNWINDSET += Cellular_ATcheckErrorCode.0:$(CBMC_MAX_BUFSIZE)
-UNWINDSET += strlen.0:$(CBMC_MAX_BUFSIZE)
 
 # This API has its own CBMC test case.
 REMOVE_FUNCTION_BODY += Cellular_ATStrStartWith
