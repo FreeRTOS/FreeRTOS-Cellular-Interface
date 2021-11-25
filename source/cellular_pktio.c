@@ -877,12 +877,11 @@ static bool _getNextLine( CellularContext_t * pContext,
                           uint32_t currentLineLength,
                           CellularPktStatus_t pktStatus )
 {
-    uint32_t stringLength = currentLineLength;
     bool keepProcess = true;
 
-    /* Advanced 1 bytes to read next Line. */
-    *ppLine = &( ( *ppLine )[ ( stringLength + 1U ) ] );
-    *pBytesRead = *pBytesRead - ( stringLength + 1U );
+    /* Advanced 1 byte to read next Line. */
+    *ppLine = &( ( *ppLine )[ ( currentLineLength + 1U ) ] );
+    *pBytesRead = *pBytesRead - ( currentLineLength + 1U );
     pContext->pPktioReadPtr = *ppLine;
     pContext->partialDataRcvdLen = *pBytesRead;
 
