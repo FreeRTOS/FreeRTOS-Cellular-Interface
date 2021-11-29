@@ -42,6 +42,10 @@ UNWINDSET += _Cellular_RemoveSocketData.0:$(CBMC_MAX_BUFSIZE)
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_platform.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_modules.c
+PROJECT_SOURCES += $(SRCDIR)/source/cellular_3gpp_api.c
+PROJECT_SOURCES += $(SRCDIR)/source/cellular_pkthandler.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common_api.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common.c
 

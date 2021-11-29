@@ -40,7 +40,7 @@
     char * __builtin___strchr_chk( const char * s,
                                    int c )
     {
-        if( ( __CPROVER_w_ok( s, 1 ), "write" ) && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
         {
             while( *s != '\0' )
             {
@@ -49,7 +49,7 @@
                     return s;
                 }
 
-                if( ( __CPROVER_w_ok( s + 1, 1 ), "write" ) && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
                 {
                     s++;
                 }
@@ -62,7 +62,7 @@
     char * strchr( const char * s,
                    int c )
     {
-        if( ( __CPROVER_w_ok( s, 1 ), "write" ) && ( __CPROVER_r_ok( s, 1 ), "read" ) )
+        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
         {
             while( *s != '\0' )
             {
@@ -71,7 +71,7 @@
                     return s;
                 }
 
-                if( ( __CPROVER_w_ok( s + 1, 1 ), "write" ) && ( __CPROVER_r_ok( s + 1, 1 ), "read" ) )
+                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
                 {
                     s++;
                 }

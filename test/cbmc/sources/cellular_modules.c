@@ -24,46 +24,44 @@
  */
 
 /**
- * @file strtok.c
- * @brief Creates a stub for strtok. This stub checks if, for the input copy
- * length, the destination and source are valid accessible memory.
+ * @file cellular_modules.h
+ * @brief cbmc wrapper functions in cellular_common_portable.h.
  */
 
-#include <string.h>
+/* Include paths for public enums, structures, and macros. */
+#include "cellular_common_portable.h"
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
+CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
+                                     void ** ppModuleContext )
+{
+    CellularError_t ret=nondet_int();
+    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    return ret;
+}
 
-#if __has_builtin( __builtin___strtok )
-    char * __builtin___strtok( char * s,
-                               const char * delim )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
+CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
+{
+    CellularError_t ret=nondet_int();
+    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    return ret;
+}
 
-            return NULL;
-        }
-    }
-#else /* if __has_builtin( __builtin___strtok ) */
-    char * strtok( char * s,
-                   const char * delim )
-    {
-        __CPROVER_assert( __CPROVER_w_ok( s, strlen( s ) ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( s, strlen( s ) ), "read" );
-        return s;
-    }
-#endif /* if __has_builtin( __builtin___strchr ) */
+
+CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
+{
+    CellularError_t ret=nondet_int();
+    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    return ret;
+}
+
+
+CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
+{
+    CellularError_t ret=nondet_int();
+    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    return ret;
+}
+
+
+/* ========================================================================== */

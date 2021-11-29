@@ -24,46 +24,19 @@
  */
 
 /**
- * @file strtok.c
- * @brief Creates a stub for strtok. This stub checks if, for the input copy
+ * @file strnlen.c
+ * @brief Creates a stub for strnlen. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
 #include <string.h>
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
-
-#if __has_builtin( __builtin___strtok )
-    char * __builtin___strtok( char * s,
-                               const char * delim )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
-
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
-    }
-#else /* if __has_builtin( __builtin___strtok ) */
-    char * strtok( char * s,
-                   const char * delim )
-    {
-        __CPROVER_assert( __CPROVER_w_ok( s, strlen( s ) ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( s, strlen( s ) ), "read" );
-        return s;
-    }
-#endif /* if __has_builtin( __builtin___strchr ) */
+size_t strnlen( const char *s, 
+	        size_t n )
+{
+    size_t ret=nondet_size_t();
+    __CPROVER_assume( ret <= n );
+    __CPROVER_assert( __CPROVER_w_ok( s, n ), "write" );
+    __CPROVER_assert( __CPROVER_r_ok( s, n ), "read" );
+    return ret;
+}

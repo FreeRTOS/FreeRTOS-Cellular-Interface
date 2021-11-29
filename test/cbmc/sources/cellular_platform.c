@@ -24,46 +24,34 @@
  */
 
 /**
- * @file strtok.c
- * @brief Creates a stub for strtok. This stub checks if, for the input copy
- * length, the destination and source are valid accessible memory.
+ * @file cellular_platform.c
+ * @brief cbmc wrapper functions in cellular_platform.h.
  */
 
-#include <string.h>
+/* Include paths for public enums, structures, and macros. */
+#include "cellular_platform.h"
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
+void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
+{
+    ( void ) pMutex;
+}
 
-#if __has_builtin( __builtin___strtok )
-    char * __builtin___strtok( char * s,
-                               const char * delim )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
+void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
+{
+    ( void ) pMutex;
+}
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
+void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
+{
+    pMutex->created = false;
+}
 
-            return NULL;
-        }
-    }
-#else /* if __has_builtin( __builtin___strtok ) */
-    char * strtok( char * s,
-                   const char * delim )
-    {
-        __CPROVER_assert( __CPROVER_w_ok( s, strlen( s ) ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( s, strlen( s ) ), "read" );
-        return s;
-    }
-#endif /* if __has_builtin( __builtin___strchr ) */
+bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
+                               bool recursive )
+{
+    ( void ) recursive;
+    pNewMutex->created = true;
+    return true;
+}
+
+/* ========================================================================== */
