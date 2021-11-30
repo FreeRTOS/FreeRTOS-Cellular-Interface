@@ -24,26 +24,25 @@
  */
 
 /**
- * @file strnlen.c
- * @brief Creates a stub for strnlen. This stub checks if, for the input copy
+ * @file strstr.c
+ * @brief Creates a stub for strstr. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
 #include <string.h>
 
-size_t strnlen( const char *s, 
-	        size_t n )
+char *strstr( const char *s1, 
+              const char *s2 )
 {
-    size_t ret=0;
-    char *pS=s;
+    size_t offset = nondet_size_t();
+    __CPROVER_assert( __CPROVER_w_ok( s1, strlen( s1 ) ), "s1 write" );
+    __CPROVER_assert( __CPROVER_r_ok( s1, strlen( s1 ) ), "s1 read" );
 
-    while( *pS && ret < n ){
-        pS++;
-        ret++;
-    
-        __CPROVER_assert( __CPROVER_w_ok( pS, 1 ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( pS, 1 ), "read" );
+    __CPROVER_assert( __CPROVER_w_ok( s2, strlen( s2 ) ), "s2 write" );
+    __CPROVER_assert( __CPROVER_r_ok( s2, strlen( s2 ) ), "s2 read" );
+
+    if( offset >= 0 && offset < strlen(s1) ){
+        return s1+offset;
     }
-
-    return ret;
+    return NULL;
 }

@@ -75,6 +75,8 @@ typedef void * PVOID;
 #define PlatformMutex_TryLock                MockPlatformMutex_TryLock
 #define PlatformMutex_Unlock                 MockPlatformMutex_Unlock
 
+#define Platform_CreateDetachedThread        MockPlatform_CreateDetachedThread
+
 #define taskENTER_CRITICAL()    PVOID
 #define taskEXIT_CRITICAL()     PVOID
 
@@ -97,6 +99,24 @@ typedef void * PVOID;
 #define CELLULAR_URC_TOKEN_WO_PREFIX_TABLE_SIZE        ( sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * ) )
 #define CELLULAR_SRC_EXTRA_TOKEN_SUCCESS_TABLE_SIZE    ( sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * ) )
 
+#if ( configUSE_16_BIT_TICKS == 1 )
+    typedef uint16_t TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffff
+#else
+    typedef uint64_t TickType_t;
+    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
+#endif
+
+/*
+ * The type that holds event bits always matches TickType_t - therefore the
+ * number of bits it holds is set by configUSE_16_BIT_TICKS (16 bits if set to 1,
+ * 32 bits if set to 0.
+ *
+ * \defgroup EventBits_t EventBits_t
+ * \ingroup EventGroup
+ */ 
+typedef TickType_t EventBits_t;
+
 /**
  * @brief Cellular library platform thread API and configuration.
  *
@@ -107,9 +127,9 @@ typedef void * PVOID;
  * the platform related stack size and priority.
  */
 
-bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
+bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument ),
                                     void * pArgument,
-                                    int32_t priority,
+                                    size_t priority,
                                     size_t stackSize );
 
 #define PLATFORM_THREAD_DEFAULT_STACK_SIZE    ( 2048U )
@@ -180,6 +200,9 @@ void PlatformMutex_Destroy( PlatformMutex_t * pMutex );
 void PlatformMutex_Lock( PlatformMutex_t * pMutex );
 bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
 void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
+int32_t PlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupEvent,
+                                           EventBits_t event,
+                                           BaseType_t * pHigherPriorityTaskWoken );
 void * safeMalloc( size_t xWantedSize );
 void allocateSocket( void * pCellularHandle );
 bool MockxQueueReceive( int32_t * queue,
@@ -187,6 +210,18 @@ bool MockxQueueReceive( int32_t * queue,
                         uint32_t time );
 uint16_t MockPlatformEventGroup_Create();
 uint16_t MockPlatformEventGroup_WaitBits();
+
+QueueHandle_t xQueueCreate( int32_t uxQueueLength,
+                            uint32_t uxItemSize );
+uint16_t vQueueDelete( QueueHandle_t queue );
+BaseType_t xQueueSend( QueueHandle_t queue,
+                           void * data,
+                           uint32_t time );
+
+uint16_t PlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup, 
+                                       TickType_t uxBitsToClear ); 
+uint16_t PlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent );
+uint16_t PlatformEventGroup_GetBits( PlatformEventGroupHandle_t groupEvent );
 
 /*-----------------------------------------------------------*/
 
@@ -201,13 +236,5 @@ uint16_t MockPlatformEventGroup_WaitBits();
 
 #define Platform_Malloc    safeMalloc
 #define Platform_Free      free
-
-#if ( configUSE_16_BIT_TICKS == 1 )
-    typedef uint16_t TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffff
-#else
-    typedef uint64_t TickType_t;
-    #define portMAX_DELAY    ( TickType_t ) 0xffffffffUL
-#endif
 
 #endif /* __CELLULAR_PLATFORM_H__ */

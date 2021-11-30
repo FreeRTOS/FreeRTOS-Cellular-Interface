@@ -29,6 +29,7 @@
  * length, the destination and source are valid accessible memory.
  */
 
+#include <stdio.h>
 #include <string.h>
 
 /* This is a clang macro not available on linux */
@@ -67,3 +68,24 @@
         return s;
     }
 #endif /* if __has_builtin( __builtin___strchr ) */
+
+char *strtok_r( char *restrict s, 
+                const char *restrict sep,
+                char **restrict lasts )
+{
+    size_t offset = nondet_size_t();
+
+    (void) s;
+    (void) sep;
+    (void) lasts;
+
+    __CPROVER_assert( __CPROVER_w_ok( s, strlen( s ) ), "write" );
+    __CPROVER_assert( __CPROVER_r_ok( s, strlen( s ) ), "read" );
+
+    if( offset>=0 && offset < strlen(s) )
+    {
+        return s+offset;
+    }
+
+    return NULL;
+}

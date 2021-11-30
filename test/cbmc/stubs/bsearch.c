@@ -24,26 +24,29 @@
  */
 
 /**
- * @file strnlen.c
- * @brief Creates a stub for strnlen. This stub checks if, for the input copy
+ * @file bsearch.c
+ * @brief Creates a stub for bsearch. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
-#include <string.h>
+#include <stdio.h>
 
-size_t strnlen( const char *s, 
-	        size_t n )
+void * bsearch ( const void *key, 
+                 const void *base, 
+                 size_t num, 
+                 size_t size,
+                 int (*compar)(const void*,const void*) )
 {
-    size_t ret=0;
-    char *pS=s;
+    int offset = nondet_size_t();
+    char *p = (char*) base;
 
-    while( *pS && ret < n ){
-        pS++;
-        ret++;
-    
-        __CPROVER_assert( __CPROVER_w_ok( pS, 1 ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( pS, 1 ), "read" );
+    (void) key;
+    (void) base;
+
+    if( offset >=0 && offset < num )
+    {
+        return (void*) (p+(offset*size));
     }
 
-    return ret;
+    return NULL;
 }

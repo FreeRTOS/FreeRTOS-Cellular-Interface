@@ -24,26 +24,19 @@
  */
 
 /**
- * @file strnlen.c
- * @brief Creates a stub for strnlen. This stub checks if, for the input copy
+ * @file snprintf.c
+ * @brief Creates a stub for snprintf. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
-#include <string.h>
+#include<stdio.h>
 
-size_t strnlen( const char *s, 
-	        size_t n )
+int snprintf ( char * s, 
+               size_t n, 
+               const char * format, 
+               ... )
 {
-    size_t ret=0;
-    char *pS=s;
-
-    while( *pS && ret < n ){
-        pS++;
-        ret++;
-    
-        __CPROVER_assert( __CPROVER_w_ok( pS, 1 ), "write" );
-        __CPROVER_assert( __CPROVER_r_ok( pS, 1 ), "read" );
-    }
-
-    return ret;
+    __CPROVER_assert( __CPROVER_w_ok( s, n ), "write" );
+    __CPROVER_assert( __CPROVER_r_ok( s, n ), "read" );
+    return n;
 }
