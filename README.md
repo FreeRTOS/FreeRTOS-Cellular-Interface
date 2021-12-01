@@ -58,9 +58,9 @@ At the root of this repository are these folders:
 
 ## Integrate FreeRTOS Cellular Interface with MCU platforms
 
-The FreeRTOS Cellular Interface runs on MCUs.  It uses an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/interface/cellular_comm_interface.h), to communicate with cellular modems. A Comm Interface must be implemented as well on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware, but it can be implemented over other physical interfaces such as SPI as well. The documentation of the Comm Interface is found within the [Cellular API References](https://www.freertos.org/Documentation/api-ref/cellular/comm_if.html). These are example implementations of the Comm Interface:
+The FreeRTOS Cellular Interface runs on MCUs.  It uses an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/interface/cellular_comm_interface.h), to communicate with cellular modems. A Comm Interface must be implemented as well on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware, but it can be implemented over other physical interfaces such as SPI as well. The documentation of the Comm Interface is found within the [Cellular API References](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting.html#cellular_porting_comm_if). These are example implementations of the Comm Interface:
 
-* FreeRTOS windows simulator comm interface
+* [FreeRTOS windows simulator comm interface](https://github.com/FreeRTOS/FreeRTOS/blob/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator/Common/comm_if_windows.c)
 * [FreeRTOS Common IO UART comm interface](https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_uart.c)
 * [STM32 L475 discovery board comm interface](https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c)
 * [Sierra Sensor Hub board comm interface](https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c)
@@ -117,7 +117,7 @@ git submodule update --checkout --init --recursive test/unit-test/CMock
 
 ## Reference examples
 
-Please refer to the [FreeRTOS Cellular Demos repository](https://github.com/FreeRTOS/Lab-Project-FreeRTOS-Cellular-Demo) for reference examples.
+Please refer to the demos of the Cellular Interface library [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator) using FreeRTOS on the Windows simulator platform. These can be used as reference examples for the library API.
 
 ## Generating documentation
 

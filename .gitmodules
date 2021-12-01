@@ -7,3 +7,6 @@
 [submodule "test/cbmc/litani"]
 	path = test/cbmc/litani
 	url = https://github.com/awslabs/aws-build-accumulator
+[submodule "modules/ThirdParty/Community-Supported-Ports"]
+	path = modules/ThirdParty/Community-Supported-Ports
+	url = https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Community-Supported-Ports
