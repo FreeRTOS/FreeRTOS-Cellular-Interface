@@ -485,10 +485,14 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        LogDebug( ( "\n TimeZoneInfo: Timezone %d Year %d Month %d day %d  Hour %d Minute %d Second %d ",
-                    pTimeInfo->timeZone, pTimeInfo->year,
-                    pTimeInfo->month, pTimeInfo->day,
-                    pTimeInfo->hour, pTimeInfo->minute,
+        LogDebug( ( "TimeZoneInfo: Timezone %d Year %d Month %d day %d,", pTimeInfo->timeZone,
+                    pTimeInfo->year,
+                    pTimeInfo->month,
+                    pTimeInfo->day ) );
+
+        LogDebug( ( "Hour %d Minute %d Second %d",
+                    pTimeInfo->hour,
+                    pTimeInfo->minute,
                     pTimeInfo->second ) );
     }
 
@@ -1792,13 +1796,19 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
         ( void ) strncpy( pServiceStatus->operatorName, operatorInfo.operatorName, CELLULAR_NETWORK_NAME_MAX_SIZE );
         pServiceStatus->operatorNameFormat = operatorInfo.operatorNameFormat;
 
-        LogDebug( ( "SrvStatus: rat %d cs %d, ps %d, mode %d, csRejType %d, csRej %d, psRejType %d, psRej %d, plmn %s%s",
+        LogDebug( ( "SrvStatus: rat %d cs %d, ps %d, mode %d, csRejType %d,",
                     pServiceStatus->rat,
-                    pServiceStatus->csRegistrationStatus, pServiceStatus->psRegistrationStatus,
+                    pServiceStatus->csRegistrationStatus,
+                    pServiceStatus->psRegistrationStatus,
                     pServiceStatus->networkRegistrationMode,
-                    pServiceStatus->csRejectionType, pServiceStatus->csRejectionCause,
-                    pServiceStatus->psRejectionType, pServiceStatus->psRejectionCause,
-                    pServiceStatus->plmnInfo.mcc, pServiceStatus->plmnInfo.mnc ) );
+                    pServiceStatus->csRejectionType ) );
+
+        LogDebug( ( "csRej %d, psRejType %d, psRej %d, plmn %s%s",
+                    pServiceStatus->csRejectionCause,
+                    pServiceStatus->psRejectionType,
+                    pServiceStatus->psRejectionCause,
+                    pServiceStatus->plmnInfo.mcc,
+                    pServiceStatus->plmnInfo.mnc ) );
     }
 
     return cellularStatus;
@@ -2711,7 +2721,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%c",
-                           ( uint32_t ) PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
+                           PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
     }
     else
     {

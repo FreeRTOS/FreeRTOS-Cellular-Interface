@@ -46,7 +46,9 @@
 
 /*-----------------------------------------------------------*/
 
-#define MIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+#ifndef MIN
+    #define MIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+#endif
 
 /* Windows simulator implementation. */
 #if defined( _WIN32 ) || defined( _WIN64 )
