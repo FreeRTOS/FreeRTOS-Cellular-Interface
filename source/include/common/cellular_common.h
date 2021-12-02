@@ -208,6 +208,19 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
                                                                               char * pLine,
                                                                               uint32_t * pBytesRead );
 
+/**
+ * @ingroup cellular_common_datatypes_functionpointers
+ * @brief Undefined response callback function.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] pLine The input line form cellular modem.
+ *
+ * @return ture if the response is handled in the callback function. Otherwise return
+ * false to clean up the AT response.
+ */
+typedef bool ( * CellularUndefinedRespCallback_t )( const CellularContext_t * pContext,
+                                                    const char * pLine );
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -566,6 +579,21 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
                                                                 uint32_t dataTimeoutMS,
                                                                 const char ** pCellularSrcTokenSuccessTable,
                                                                 uint32_t cellularSrcTokenSuccessTableSize );
+
+/**
+ * @brief Register unknown response callback.
+ *
+ * Cellular module can register the callback function to handle AT_UNDEFINED response
+ * through this function.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] pktDataPrefixCallback The callback function to handle the unknown response.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error code
+ * indicating the cause of the error.
+ */
+CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pContext,
+                                                         CellularUndefinedRespCallback_t undefinedRespCallback );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

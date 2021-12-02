@@ -137,6 +137,7 @@ struct CellularContext
     const char * pRespPrefix;
     CellularATCommandType_t PktioAtCmdType;
     _atRespType_t recvdMsgType;
+    CellularUndefinedRespCallback_t undefinedRespCallback;
 
     /* PktIo data handling. */
     uint32_t dataLength;

@@ -711,14 +711,21 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
     }
     else
     {
-        LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
-                    pLine,
-                    ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
-        ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
-        pContext->pPktioReadPtr = NULL;
-        pContext->partialDataRcvdLen = 0;
-        FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
-        pkStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        /* Pktio receives AT_UNDEFINED response from modem. This could be module specific
+         * response. Cellular module registers the callback function through _Cellular_RegisterUndefinedRespCallback
+         * to handle the response. */
+        if( ( pContext->undefinedRespCallback == NULL ) ||
+            ( pContext->undefinedRespCallback( pContext, pLine ) == false ) )
+        {
+            LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
+                        pLine,
+                        ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
+            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+            pContext->pPktioReadPtr = NULL;
+            pContext->partialDataRcvdLen = 0;
+            FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
+            pkStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        }
     }
 
     return pkStatus;
