@@ -74,7 +74,7 @@ static uint8_t _charToNibble( char c );
 static void validateString( const char * pString,
                             CellularATStringValidationResult_t * pStringValidationResult )
 {
-    const char * pStringTerminated = NULL;
+    const char * pNullCharacterLocation = NULL;
 
     /* Validate the string length. If the string length is longer than expected, return
      * error to stop further processing.
@@ -82,13 +82,13 @@ static void validateString( const char * pString,
      * stringLength == CELLULAR_AT_MAX_STRING_SIZE is valid because it means that
      * ( CELLULAR_AT_MAX_STRING_SIZE + 1 ) character is null terminating
      * character.*/
-    pStringTerminated = memchr( pString, '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
+    pNullCharacterLocation = memchr( pString, '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
 
-    if( pStringTerminated == pString )
+    if( pNullCharacterLocation == pString )
     {
         *pStringValidationResult = CELLULAR_AT_STRING_EMPTY;
     }
-    else if( pStringTerminated == NULL )
+    else if( pNullCharacterLocation == NULL )
     {
         *pStringValidationResult = CELLULAR_AT_STRING_TOO_LARGE;
     }
@@ -771,7 +771,8 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
     {
         atStatus = CELLULAR_AT_BAD_PARAMETER;
     }
-    else
+
+    if( atStatus == CELLULAR_AT_SUCCESS )
     {
         validateString( pTempSrc, &stringValidationResult );
 
