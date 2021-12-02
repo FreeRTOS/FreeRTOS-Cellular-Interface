@@ -31,6 +31,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strncpy.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/snprintf.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_platform.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_modules.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common_api.c

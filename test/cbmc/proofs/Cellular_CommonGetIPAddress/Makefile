@@ -32,6 +32,7 @@ PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_platform.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_modules.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/snprintf.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common_api.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_3gpp_api.c
