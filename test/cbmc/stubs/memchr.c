@@ -39,6 +39,8 @@ void *memchr( void * ptr,
     int n = CBMC_MAX_BUFSIZE;
     char *p = (char*)ptr;
 
+    ( void ) num;
+
     while( n-- && p!=NULL )
     {
         if( *p == (char)value )
