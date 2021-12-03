@@ -31,16 +31,17 @@
 
 #include <string.h>
 
-size_t strnlen( const char *s, 
-	        size_t n )
+size_t strnlen( const char * s,
+                size_t n )
 {
-    size_t ret=0;
-    char *pS=s;
+    size_t ret = 0;
+    char * pS = s;
 
-    while( *pS && ret < n ){
+    while( *pS && ret < n )
+    {
         pS++;
         ret++;
-    
+
         __CPROVER_assert( __CPROVER_w_ok( pS, 1 ), "write" );
         __CPROVER_assert( __CPROVER_r_ok( pS, 1 ), "read" );
     }

@@ -34,32 +34,36 @@
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
                                      void ** ppModuleContext )
 {
-    CellularError_t ret=nondet_int();
-    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    CellularError_t ret = nondet_int();
+
+    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
     return ret;
 }
 
 
 CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
 {
-    CellularError_t ret=nondet_int();
-    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    CellularError_t ret = nondet_int();
+
+    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
     return ret;
 }
 
 
 CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 {
-    CellularError_t ret=nondet_int();
-    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    CellularError_t ret = nondet_int();
+
+    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
     return ret;
 }
 
 
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
 {
-    CellularError_t ret=nondet_int();
-    __CPROVER_assume( ret>=CELLULAR_SUCCESS && ret<=CELLULAR_UNKNOWN );
+    CellularError_t ret = nondet_int();
+
+    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
     return ret;
 }
 

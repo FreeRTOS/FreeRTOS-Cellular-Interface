@@ -31,18 +31,21 @@
 
 #include <string.h>
 
-char *strstr( const char *s1, 
-              const char *s2 )
+char * strstr( const char * s1,
+               const char * s2 )
 {
     size_t offset = nondet_size_t();
+
     __CPROVER_assert( __CPROVER_w_ok( s1, strlen( s1 ) ), "s1 write" );
     __CPROVER_assert( __CPROVER_r_ok( s1, strlen( s1 ) ), "s1 read" );
 
     __CPROVER_assert( __CPROVER_w_ok( s2, strlen( s2 ) ), "s2 write" );
     __CPROVER_assert( __CPROVER_r_ok( s2, strlen( s2 ) ), "s2 read" );
 
-    if( offset >= 0 && offset < strlen(s1) ){
-        return s1+offset;
+    if( ( offset >= 0 ) && ( offset < strlen( s1 ) ) )
+    {
+        return s1 + offset;
     }
+
     return NULL;
 }

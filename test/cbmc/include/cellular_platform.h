@@ -114,8 +114,8 @@ typedef void * PVOID;
  *
  * \defgroup EventBits_t EventBits_t
  * \ingroup EventGroup
- */ 
-typedef TickType_t EventBits_t;
+ */
+typedef TickType_t   EventBits_t;
 
 /**
  * @brief Cellular library platform thread API and configuration.
@@ -215,11 +215,11 @@ QueueHandle_t xQueueCreate( int32_t uxQueueLength,
                             uint32_t uxItemSize );
 uint16_t vQueueDelete( QueueHandle_t queue );
 BaseType_t xQueueSend( QueueHandle_t queue,
-                           void * data,
-                           uint32_t time );
+                       void * data,
+                       uint32_t time );
 
-uint16_t PlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup, 
-                                       TickType_t uxBitsToClear ); 
+uint16_t PlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup,
+                                       TickType_t uxBitsToClear );
 uint16_t PlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent );
 uint16_t PlatformEventGroup_GetBits( PlatformEventGroupHandle_t groupEvent );
 

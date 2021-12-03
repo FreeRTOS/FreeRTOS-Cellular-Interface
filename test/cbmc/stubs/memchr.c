@@ -31,25 +31,25 @@
 
 #include <stdio.h>
 
-void *memchr( void * ptr, 
-              int value, 
-              size_t num )
+void * memchr( void * ptr,
+               int value,
+               size_t num )
 {
-    //to avoid unwind assertion on CBMC, use a constant loop time to enhance CBMC performance
+    /*to avoid unwind assertion on CBMC, use a constant loop time to enhance CBMC performance */
     int n = CBMC_MAX_BUFSIZE;
-    char *p = (char*)ptr;
+    char * p = ( char * ) ptr;
 
     ( void ) num;
 
-    while( n-- && p!=NULL )
+    while( n-- && p != NULL )
     {
-        if( *p == (char)value )
+        if( *p == ( char ) value )
         {
             return p;
         }
+
         p++;
     }
 
     return NULL;
 }
-

@@ -65,8 +65,8 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupE
     ( void ) event;
     ( void ) pHigherPriorityTaskWoken;
 
-    
-    if( flag ){
+    if( flag )
+    {
         if( nondet_bool() )
         {
             *pHigherPriorityTaskWoken = pdTRUE;
@@ -77,7 +77,7 @@ int32_t MockPlatformEventGroup_SetBitsFromISR( PlatformEventGroupHandle_t groupE
         }
 
         ret = pdPASS;
-    } 
+    }
     else
     {
         ret = pdFALSE;
@@ -99,7 +99,7 @@ QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
         QueueHandle_t test = malloc( sizeof( struct QueueDefinition ) );
         return test;
     }
-    
+
     return NULL;
 }
 
@@ -131,18 +131,18 @@ BaseType_t MockxQueueSend( QueueHandle_t queue,
 /* ========================================================================== */
 
 
-uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup, 
-                                       TickType_t uxBitsToClear )
+uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGroup,
+                                           TickType_t uxBitsToClear )
 {
     ( void ) xEventGroup;
     ( void ) uxBitsToClear;
     return 0;
 }
 
-bool MockPlatform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument ),
-                                    void * pArgument,
-                                    size_t priority,
-                                    size_t stackSize )
+bool MockPlatform_CreateDetachedThread( void ( *threadRoutine )( void * pArgument ),
+                                        void * pArgument,
+                                        size_t priority,
+                                        size_t stackSize )
 {
     ( void ) pArgument;
     ( void ) priority;
@@ -156,8 +156,8 @@ bool MockPlatform_CreateDetachedThread( void ( * threadRoutine )( void * pArgume
     }
 
     return threadReturn;
-} 
-    
+}
+
 uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent )
 {
     ( void ) groupEvent;

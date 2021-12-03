@@ -29,12 +29,12 @@
  * length, the destination and source are valid accessible memory.
  */
 
-#include<stdio.h>
+#include <stdio.h>
 
-int snprintf ( char * s, 
-               size_t n, 
-               const char * format, 
-               ... )
+int snprintf( char * s,
+              size_t n,
+              const char * format,
+              ... )
 {
     __CPROVER_assert( __CPROVER_w_ok( s, n ), "write" );
     __CPROVER_assert( __CPROVER_r_ok( s, n ), "read" );

@@ -31,21 +31,21 @@
 
 #include <stdio.h>
 
-void * bsearch ( const void *key, 
-                 const void *base, 
-                 size_t num, 
-                 size_t size,
-                 int (*compar)(const void*,const void*) )
+void * bsearch( const void * key,
+                const void * base,
+                size_t num,
+                size_t size,
+                int ( *compar )( const void *, const void * ) )
 {
     int offset = nondet_size_t();
-    char *p = (char*) base;
+    char * p = ( char * ) base;
 
-    (void) key;
-    (void) base;
+    ( void ) key;
+    ( void ) base;
 
-    if( offset >=0 && offset < num )
+    if( ( offset >= 0 ) && ( offset < num ) )
     {
-        return (void*) (p+(offset*size));
+        return ( void * ) ( p + ( offset * size ) );
     }
 
     return NULL;
