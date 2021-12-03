@@ -30,6 +30,8 @@ INCLUDES +=
 # without tripping unwinding assertions and without exhausting memory.
 CBMC_MAX_BUFSIZE=256
 
+DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
+
 UNWINDSET += strchr.0:$(CBMC_MAX_BUFSIZE)
 UNWINDSET += memchr.0:$(CBMC_MAX_BUFSIZE)
 
