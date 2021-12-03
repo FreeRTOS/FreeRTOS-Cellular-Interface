@@ -34,13 +34,13 @@ DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE)
 
 UNWINDSET += Cellular_ATStrDup.0:$(CBMC_MAX_BUFSIZE)
 UNWINDSET += strlen.0:$(CBMC_MAX_BUFSIZE)
-UNWINDSET += strnlen.0:$(CBMC_MAX_BUFSIZE)
+UNWINDSET += memchr.0:$(CBMC_MAX_BUFSIZE)
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strtok.c
-PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strnlen.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/memchr.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_at_core.c
 
 

@@ -35,7 +35,7 @@ KEY_LIST_SIZE=16
 DEFINES += -DCBMC_MAX_BUFSIZE=$(CBMC_MAX_BUFSIZE) -DKEY_LIST_SIZE=$(KEY_LIST_SIZE)
 
 UNWINDSET += Cellular_ATcheckErrorCode.0:$(CBMC_MAX_BUFSIZE)
-UNWINDSET += strnlen.0:$(CBMC_MAX_BUFSIZE)
+UNWINDSET += memchr.0:$(CBMC_MAX_BUFSIZE)
 
 # This API has its own CBMC test case.
 REMOVE_FUNCTION_BODY += Cellular_ATStrStartWith
@@ -44,7 +44,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_cbmc_state.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/global_state_cellular.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strchr.c
-PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/strnlen.c
+PROOF_SOURCES += $(SRCDIR)/test/cbmc/stubs/memchr.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_at_core.c
 
 include ../Makefile.common
