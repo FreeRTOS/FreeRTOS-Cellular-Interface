@@ -139,7 +139,7 @@ uint16_t MockPlatformEventGroup_ClearBits( PlatformEventGroupHandle_t xEventGrou
     return 0;
 }
 
-bool MockPlatform_CreateDetachedThread( void ( *threadRoutine )( void * pArgument ),
+bool MockPlatform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument ),
                                         void * pArgument,
                                         size_t priority,
                                         size_t stackSize )

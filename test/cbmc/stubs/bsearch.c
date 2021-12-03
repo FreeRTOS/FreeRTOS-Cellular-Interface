@@ -35,7 +35,7 @@ void * bsearch( const void * key,
                 const void * base,
                 size_t num,
                 size_t size,
-                int ( *compar )( const void *, const void * ) )
+                int ( * compar )( const void *, const void * ) )
 {
     int offset = nondet_size_t();
     char * p = ( char * ) base;
