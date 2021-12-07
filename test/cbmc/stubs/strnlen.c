@@ -24,60 +24,27 @@
  */
 
 /**
- * @file strchr.c
- * @brief Creates a stub for strchr. This stub checks if, for the input copy
+ * @file strnlen.c
+ * @brief Creates a stub for strnlen. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
 #include <string.h>
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
+size_t strnlen( const char * s,
+                size_t n )
+{
+    size_t ret = 0;
+    char * pS = s;
 
-#if __has_builtin( __builtin___strchr )
-    char * __builtin___strchr_chk( const char * s,
-                                   int c )
+    while( *pS && ret < n )
     {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
+        pS++;
+        ret++;
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
+        __CPROVER_assert( __CPROVER_w_ok( pS, 1 ), "write" );
+        __CPROVER_assert( __CPROVER_r_ok( pS, 1 ), "read" );
     }
-#else /* if __has_builtin( __builtin___strchr ) */
-    char * strchr( const char * s,
-                   int c )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
-    }
-#endif /* if __has_builtin( __builtin___strchr ) */
+    return ret;
+}
