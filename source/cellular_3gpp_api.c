@@ -1402,12 +1402,14 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
         _Cellular_UnlockAtDataMutex( pContext );
     #endif /* ifndef CELLULAR_MODEM_NO_GSM_NETWORK */
 
-    if( ( cellularStatus == CELLULAR_SUCCESS ) &&
-        ( psRegStatus != REGISTRATION_STATUS_REGISTERED_HOME ) &&
-        ( psRegStatus != REGISTRATION_STATUS_ROAMING_REGISTERED ) )
-    {
-        cellularStatus = queryNetworkStatus( pContext, "AT+CEREG?", "+CEREG", CELLULAR_REG_TYPE_CEREG );
-    }
+    #ifndef CELLULAR_MODEM_NO_EPS_NETWORK
+        if( ( cellularStatus == CELLULAR_SUCCESS ) &&
+            ( psRegStatus != REGISTRATION_STATUS_REGISTERED_HOME ) &&
+            ( psRegStatus != REGISTRATION_STATUS_ROAMING_REGISTERED ) )
+        {
+            cellularStatus = queryNetworkStatus( pContext, "AT+CEREG?", "+CEREG", CELLULAR_REG_TYPE_CEREG );
+        }
+    #endif
 
     /* Get the service status from lib AT data. */
     if( cellularStatus == CELLULAR_SUCCESS )
