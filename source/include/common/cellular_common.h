@@ -499,6 +499,31 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t
                                                                uint32_t timeoutMS );
 
 /**
+ * @brief Send the AT command to cellular modem with extra success token table
+ *
+ * Some cellular modem doesn't have fixed success token
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] atReq The AT command data structure with send command response callback.
+ * @param[in] atTimeoutMS The timeout value to wait for the AT command response from cellular modem.
+ * @param[in] pCellularSrcTokenSuccessTable The extra success token table to indicate the send AT command success.
+ * @param[in] cellularSrcTokenSuccessTableSize The size of extra success token table.
+ *
+ * @note AT command request makes use of cellularSrcTokenSuccessTableSize to obtain
+ * the response status. Some AT commands don't have fixed success token. This function
+ * make use of a temporary table, pCellularSrcTokenSuccessTable, to obtain the response
+ * status.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularPktStatus_t _Cellular_AtcmdRequestSuccessToken( CellularContext_t * pContext,
+                                                        CellularAtReq_t atReq,
+                                                        uint32_t atTimeoutMS,
+                                                        const char ** pCellularSrcTokenSuccessTable,
+                                                        uint32_t cellularSrcTokenSuccessTableSize );
+
+/**
  * @brief Send the AT command to cellular modem with data buffer response.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
