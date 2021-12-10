@@ -215,11 +215,11 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] pLine The input line form cellular modem.
  *
- * @return ture if the response is handled in the callback function. Otherwise return
- * false to clean up the AT response.
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
  */
-typedef bool ( * CellularUndefinedRespCallback_t )( const CellularContext_t * pContext,
-                                                    const char * pLine );
+typedef CellularPktStatus_t ( * CellularUndefinedRespCallback_t )( const CellularContext_t * pContext,
+                                                                   const char * pLine );
 
 /*-----------------------------------------------------------*/
 
@@ -499,9 +499,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t
                                                                uint32_t timeoutMS );
 
 /**
- * @brief Send the AT command to cellular modem with extra success token table
- *
- * Some cellular modem doesn't have fixed success token
+ * @brief Send the AT command to cellular modem with extra success token table.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] atReq The AT command data structure with send command response callback.
@@ -612,7 +610,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
  * through this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pktDataPrefixCallback The callback function to handle the unknown response.
+ * @param[in] undefinedRespCallback The callback function to handle the unknown response.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error code
  * indicating the cause of the error.
