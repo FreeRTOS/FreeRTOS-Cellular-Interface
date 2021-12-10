@@ -774,6 +774,7 @@ stringlength
 strlen
 strncpy
 strnlen
+strstr
 strtok
 strtol
 struct

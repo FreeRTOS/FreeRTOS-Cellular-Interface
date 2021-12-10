@@ -24,60 +24,32 @@
  */
 
 /**
- * @file strchr.c
- * @brief Creates a stub for strchr. This stub checks if, for the input copy
+ * @file strtok.c
+ * @brief Creates a stub for strtok. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
-#include <string.h>
+#include <stdio.h>
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
+void * memchr( void * ptr,
+               int value,
+               size_t num )
+{
+    /*to avoid unwind assertion on CBMC, use a constant loop time to enhance CBMC performance */
+    int n = CBMC_MAX_BUFSIZE;
+    char * p = ( char * ) ptr;
 
-#if __has_builtin( __builtin___strchr )
-    char * __builtin___strchr_chk( const char * s,
-                                   int c )
+    ( void ) num;
+
+    while( n-- && p != NULL )
     {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
+        if( *p == ( char ) value )
         {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
-
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
+            return p;
         }
-    }
-#else /* if __has_builtin( __builtin___strchr ) */
-    char * strchr( const char * s,
-                   int c )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
+        p++;
     }
-#endif /* if __has_builtin( __builtin___strchr ) */
+
+    return NULL;
+}
