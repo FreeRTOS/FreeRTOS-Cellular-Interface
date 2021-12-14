@@ -77,6 +77,8 @@ static int eventData = 0;
 
 static char * pData;
 
+static CellularPktStatus_t cellularUndefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+
 CellularHandle_t gCellularHandle = NULL;
 
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
@@ -348,6 +350,13 @@ void cellularModemEventCallback( CellularModemEvent_t modemEvent,
 {
     ( void ) pCallbackContext;
     eventData = modemEvent;
+}
+
+CellularPktStatus_t cellularUndefinedRespCallback( const CellularContext_t * pContext,
+                                                   const char * pLine )
+{
+    ( void ) pContext;
+    return cellularUndefineReturnStatus;
 }
 
 void * mock_malloc( size_t size )
@@ -1580,4 +1589,31 @@ void test__Cellular_LibInit_PktHandlerInit_Double_Allocate_Context( void )
     _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
     CellularHandle = NULL;
     _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
+}
+
+/**
+ * @brief Test that null parameter case for _Cellular_RegisterUndefinedRespCallback.
+ */
+void test__Cellular_RegisterUndefinedRespCallback_Null_Parameter( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    pktStatus = _Cellular_RegisterUndefinedRespCallback( NULL, cellularUndefinedRespCallback );
+    TEST_ASSERT_NOT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    pktStatus = _Cellular_RegisterUndefinedRespCallback( &context, NULL );
+    TEST_ASSERT_NOT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that happy path case for _Cellular_RegisterUndefinedRespCallback.
+ */
+void test__Cellular_RegisterUndefinedRespCallback_Happy_Path( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    pktStatus = _Cellular_RegisterUndefinedRespCallback( &context, cellularUndefinedRespCallback );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
