@@ -357,6 +357,7 @@ CellularPktStatus_t cellularUndefinedRespCallback( const CellularContext_t * pCo
                                                    const char * pLine )
 {
     ( void ) pContext;
+    ( void ) pLine;
     return cellularUndefineReturnStatus;
 }
 
