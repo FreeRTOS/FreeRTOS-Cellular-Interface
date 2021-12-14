@@ -167,7 +167,7 @@ Some configuration settings are C pre-processor constants, and some are function
 @copydoc LogDebug
 
 @section CELLULAR_MODEM_NO_EPS_NETWORK
-@brief Macro to disable querying envolved packet system (EPS) network registration status in Cellular_CommonGetServiceStatus.<br>
+@brief Macro to disable querying evolved packet system (EPS) network registration status in Cellular_CommonGetServiceStatus.<br>
 @note Cellular modem porting can define this macro in cellular_config.h to disable this function.<br>
 
 <b>Default value:</b> undefined
