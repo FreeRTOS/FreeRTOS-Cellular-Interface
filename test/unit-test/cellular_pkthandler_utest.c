@@ -1448,6 +1448,7 @@ void test_test__Cellular_AtcmdRequestSuccessToken__Cellular_PktioSendAtCmd_Retur
         sizeof( int32_t ),
     };
     CellularContext_t context = { 0 };
+    const char * successTokenTable[] = { "1, CONNECT CLOSE" };
 
     _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
