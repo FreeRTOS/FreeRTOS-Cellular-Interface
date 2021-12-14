@@ -272,6 +272,7 @@ endpatternlen
 enougth
 enum
 enums
+eps
 erange
 errno
 ethernet
