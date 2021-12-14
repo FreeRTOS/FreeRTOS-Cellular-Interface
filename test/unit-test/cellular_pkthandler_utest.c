@@ -1362,7 +1362,45 @@ void test__Cellular_AtParseInit_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
-const char * successTokenTable[] = { "1, CONNECT CLOSE" };
+
+/**
+ * @brief Test that sort fail case case for _Cellular_AtParseInit.
+ */
+void test__Cellular_AtParseInit_Check_Sort_Fail( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableSortFailCase, sizeof( CellularTokenTable_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief Test that token table fail case case for _Cellular_AtParseInit.
+ */
+void test__Cellular_AtParseInit_Check_TokenTable_Fail( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableWoMapSize, sizeof( CellularTokenTable_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    pktStatus = _Cellular_AtParseInit( &context );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
 
 /**
  * @brief Test that null Context case for _Cellular_AtcmdRequestSuccessToken.
@@ -1371,6 +1409,7 @@ void test__Cellular_AtcmdRequestSuccessToken_NULL_Context( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReq;
+    const char * successTokenTable[] = { "1, CONNECT CLOSE" };
 
     memset( &atReq, 0, sizeof( CellularAtReq_t ) );
 
