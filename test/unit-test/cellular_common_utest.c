@@ -1604,8 +1604,9 @@ void test__Cellular_RegisterUndefinedRespCallback_Null_Parameter( void )
     pktStatus = _Cellular_RegisterUndefinedRespCallback( NULL, cellularUndefinedRespCallback );
     TEST_ASSERT_NOT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
+    /* Unregister undefined response callback. */
     pktStatus = _Cellular_RegisterUndefinedRespCallback( &context, NULL );
-    TEST_ASSERT_NOT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
 /**
