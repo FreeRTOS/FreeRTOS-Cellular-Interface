@@ -1390,7 +1390,7 @@ void test__Cellular_AtcmdRequestSuccessToken_NULL_pCellularSrcTokenSuccessTable(
     memset( &context, 0, sizeof( CellularContext_t ) );
     memset( &atReq, 0, sizeof( CellularAtReq_t ) );
     pktStatus = _Cellular_AtcmdRequestSuccessToken( &context, atReq, PACKET_REQ_TIMEOUT_MS, NULL, 1 );
-    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
 
 /**
