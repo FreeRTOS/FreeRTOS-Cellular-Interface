@@ -709,9 +709,10 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
 }
 
 CellularPktStatus_t undefinedRespCallback( const CellularContext_t * pContext,
-                                                   const char * pLine )
+                                           const char * pLine )
 {
     ( void ) pContext;
+    ( void ) pLine;
     return undefineReturnStatus;
 }
 

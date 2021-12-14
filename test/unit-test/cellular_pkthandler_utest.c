@@ -1362,7 +1362,7 @@ void test__Cellular_AtParseInit_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
-const char *successTokenTable[] = { "1, CONNECT CLOSE" };
+const char * successTokenTable[] = { "1, CONNECT CLOSE" };
 
 /**
  * @brief Test that null Context case for _Cellular_AtcmdRequestSuccessToken.

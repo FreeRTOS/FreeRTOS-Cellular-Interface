@@ -251,6 +251,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceRecei
 
     ( void ) receiveCallback;
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
+
     ( void ) pCommInterfaceHandle;
 
     commIntRet = receiveCallback( pContext, NULL );
