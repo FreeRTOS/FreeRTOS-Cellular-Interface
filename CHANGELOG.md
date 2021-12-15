@@ -1,5 +1,18 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.2.0 (December 2021)
+### Updates
+ - [#62](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/62) Fix uintptr compile error.
+ - [#67](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/67) Fix too many arguments log.
+ - [#64](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/64) Remove strnlen usage.
+
+### Other
+ - [#63](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/63) Fix broken links.
+ - [#61](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/61) Fix typo in README.md.
+ - [#69](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/69) Loop invariant update.
+ - [#65](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/65) Submodule community ports repo to third party folder.
+ - [#70](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/70) fix CBMC potential issues.
+
 ## v1.1.0 (November 2021)
 ### Updates
  - [#40](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/40) Fix the module logging mechanism format.
