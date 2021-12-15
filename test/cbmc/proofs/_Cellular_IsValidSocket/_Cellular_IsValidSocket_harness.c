@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 /* Cellular APIs includes. */
+#include "cellular_platform.h"
 #include "cellular_config_defaults.h"
 #include "cellular_types.h"
 #include "cellular_common_internal.h"

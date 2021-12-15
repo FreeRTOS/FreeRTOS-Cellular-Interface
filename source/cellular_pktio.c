@@ -728,7 +728,8 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
 static bool _findLineInStream( CellularContext_t * pContext,
                                char * pLine,
-                               uint32_t bytesRead )
+                               uint32_t bytesRead,
+                               uint32_t * pLineLength )
 {
     bool keepProcess = true;
     char * pTempLine = pLine;
@@ -747,6 +748,7 @@ static bool _findLineInStream( CellularContext_t * pContext,
     if( i < bytesRead )
     {
         pTempLine[ i ] = '\0';
+        *pLineLength = i;
     }
     else
     {
@@ -833,11 +835,6 @@ static bool _preprocessLine( CellularContext_t * pContext,
             /* This is the case AT command don't need data send or data receive prefix. */
             /* MISRA empty else. */
         }
-
-        if( keepProcess == true )
-        {
-            keepProcess = _findLineInStream( pContext, pTempLine, *pBytesRead );
-        }
     }
 
     return keepProcess;
@@ -877,17 +874,14 @@ static bool _handleDataResult( CellularContext_t * pContext,
 static bool _getNextLine( CellularContext_t * pContext,
                           char ** ppLine,
                           uint32_t * pBytesRead,
+                          uint32_t currentLineLength,
                           CellularPktStatus_t pktStatus )
 {
-    uint32_t stringLength = 0;
     bool keepProcess = true;
 
-    /* Find other responses or urcs which need to be processed in this read buffer. */
-    stringLength = ( uint32_t ) strnlen( *ppLine, *pBytesRead );
-
-    /* Advanced 1 bytes to read next Line. */
-    *ppLine = &( ( *ppLine )[ ( stringLength + 1U ) ] );
-    *pBytesRead = *pBytesRead - ( stringLength + 1U );
+    /* Advanced 1 byte to read next Line. */
+    *ppLine = &( ( *ppLine )[ ( currentLineLength + 1U ) ] );
+    *pBytesRead = *pBytesRead - ( currentLineLength + 1U );
     pContext->pPktioReadPtr = *ppLine;
     pContext->partialDataRcvdLen = *pBytesRead;
 
@@ -915,6 +909,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char * pStartOfData = NULL, * pTempLine = pData;
     uint32_t bytesRead = bytesInBuffer;
+    uint32_t currentLineLength = 0U;
     bool keepProcess = true;
 
     while( keepProcess == true )
@@ -934,6 +929,11 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
         if( keepProcess == true )
         {
+            keepProcess = _findLineInStream( pContext, pTempLine, bytesRead, &currentLineLength );
+        }
+
+        if( keepProcess == true )
+        {
             /* A complete Line received. Get the message type. */
             pContext->recvdMsgType = _getMsgType( pContext, pTempLine, pContext->pRespPrefix );
 
@@ -949,13 +949,13 @@ static void _handleAllReceived( CellularContext_t * pContext,
                 }
                 else
                 {
-                    keepProcess = _getNextLine( pContext, &pTempLine, &bytesRead, pktStatus );
+                    keepProcess = _getNextLine( pContext, &pTempLine, &bytesRead, currentLineLength, pktStatus );
                 }
             }
             else if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) || ( pktStatus == CELLULAR_PKT_STATUS_PENDING_DATA ) )
             {
                 /* Process AT reponse success. Get the next Line. */
-                keepProcess = _getNextLine( pContext, &pTempLine, &bytesRead, pktStatus );
+                keepProcess = _getNextLine( pContext, &pTempLine, &bytesRead, currentLineLength, pktStatus );
             }
             else
             {

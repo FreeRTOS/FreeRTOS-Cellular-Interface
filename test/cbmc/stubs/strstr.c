@@ -24,60 +24,28 @@
  */
 
 /**
- * @file strchr.c
- * @brief Creates a stub for strchr. This stub checks if, for the input copy
+ * @file strstr.c
+ * @brief Creates a stub for strstr. This stub checks if, for the input copy
  * length, the destination and source are valid accessible memory.
  */
 
 #include <string.h>
 
-/* This is a clang macro not available on linux */
-#ifndef __has_builtin
-    #define __has_builtin( x )    0
-#endif
+char * strstr( const char * s1,
+               const char * s2 )
+{
+    size_t offset = nondet_size_t();
 
-#if __has_builtin( __builtin___strchr )
-    char * __builtin___strchr_chk( const char * s,
-                                   int c )
+    __CPROVER_assert( __CPROVER_w_ok( s1, strlen( s1 ) ), "s1 write" );
+    __CPROVER_assert( __CPROVER_r_ok( s1, strlen( s1 ) ), "s1 read" );
+
+    __CPROVER_assert( __CPROVER_w_ok( s2, strlen( s2 ) ), "s2 write" );
+    __CPROVER_assert( __CPROVER_r_ok( s2, strlen( s2 ) ), "s2 read" );
+
+    if( ( offset >= 0 ) && ( offset < strlen( s1 ) ) )
     {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
-
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
+        return s1 + offset;
     }
-#else /* if __has_builtin( __builtin___strchr ) */
-    char * strchr( const char * s,
-                   int c )
-    {
-        if( __CPROVER_w_ok( s, 1 ) && __CPROVER_r_ok( s, 1 ) )
-        {
-            while( *s != '\0' )
-            {
-                if( ( int ) *s == c )
-                {
-                    return s;
-                }
 
-                if( __CPROVER_w_ok( s + 1, 1 ) && __CPROVER_r_ok( s + 1, 1 ) )
-                {
-                    s++;
-                }
-            }
-
-            return NULL;
-        }
-    }
-#endif /* if __has_builtin( __builtin___strchr ) */
+    return NULL;
+}
