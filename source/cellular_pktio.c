@@ -715,7 +715,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
          * response. Cellular module registers the callback function through _Cellular_RegisterUndefinedRespCallback
          * to handle the response. */
         if( ( pContext->undefinedRespCallback == NULL ) ||
-            ( pContext->undefinedRespCallback( pContext, pLine ) != CELLULAR_PKT_STATUS_OK ) )
+            ( pContext->undefinedRespCallback( pContext->pUndefinedRespCBContext, pLine ) != CELLULAR_PKT_STATUS_OK ) )
         {
             LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
                         pLine,

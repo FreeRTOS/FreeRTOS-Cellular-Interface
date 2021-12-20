@@ -111,7 +111,7 @@ static int recvDataLenFail = 0;
 static int recvCommFail = 0;
 static int setpktDataPrefixCBReturn = 0;
 
-static CellularPktStatus_t undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+static int32_t customCallbackContext = 0;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -459,9 +459,19 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
         }
         else if( atCmdType == CELLULAR_AT_NO_COMMAND )
         {
+            /* Undefined response callback function. */
             if( recvCount % 3 == 0 )
             {
-                pString = CELLULAR_AT_UNDEFINED_STRING_RESP;
+                if( customCallbackContext == 0 )
+                {
+                    /* Return the expected response to callback function. */
+                    pString = CELLULAR_AT_UNDEFINED_STRING_RESP;
+                }
+                else
+                {
+                    /* Return the unexpected response to callback function. */
+                    pString = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
+                }
             }
             else if( recvCount % 2 == 0 )
             {
@@ -708,11 +718,26 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
     }
 }
 
-CellularPktStatus_t undefinedRespCallback( const CellularContext_t * pContext,
+CellularPktStatus_t undefinedRespCallback( void * pCallbackContext,
                                            const char * pLine )
 {
-    ( void ) pContext;
-    ( void ) pLine;
+    CellularPktStatus_t undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+
+    /* Verify pCallbackContext. */
+    TEST_ASSERT_EQUAL_PTR( &customCallbackContext, pCallbackContext );
+
+    /* Verify pLine. */
+    if( strcmp( CELLULAR_AT_UNDEFINED_STRING_RESP, pLine ) == 0 )
+    {
+        *( ( int32_t * ) pCallbackContext ) = 1;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+    }
+    else
+    {
+        *( ( int32_t * ) pCallbackContext ) = 0;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_FAILURE;
+    }
+
     return undefineReturnStatus;
 }
 
@@ -1226,17 +1251,21 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_okay( v
 
     /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    recvCount = 3;
+    recvCount = 1;
     atCmdType = CELLULAR_AT_NO_COMMAND;
-    undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
     context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 0;
+    context.pUndefinedRespCBContext = &customCallbackContext;
 
-    /* copy the token table. */
+    /* Copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 1, customCallbackContext );
 }
 
 /**
@@ -1257,17 +1286,21 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_fail( v
 
     /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    recvCount = 3;
+    recvCount = 1;
     atCmdType = CELLULAR_AT_NO_COMMAND;
-    undefineReturnStatus = CELLULAR_PKT_STATUS_FAILURE;
     context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 1;
+    context.pUndefinedRespCBContext = &customCallbackContext;
 
-    /* copy the token table. */
+    /* Copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is not received. */
+    TEST_ASSERT_EQUAL_INT32( 0, customCallbackContext );
 }
 
 /**

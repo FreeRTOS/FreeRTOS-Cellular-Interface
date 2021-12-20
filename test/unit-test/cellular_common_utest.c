@@ -77,8 +77,6 @@ static int eventData = 0;
 
 static char * pData;
 
-static CellularPktStatus_t cellularUndefineReturnStatus = CELLULAR_PKT_STATUS_OK;
-
 CellularHandle_t gCellularHandle = NULL;
 
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
@@ -353,12 +351,12 @@ void cellularModemEventCallback( CellularModemEvent_t modemEvent,
     eventData = modemEvent;
 }
 
-CellularPktStatus_t cellularUndefinedRespCallback( const CellularContext_t * pContext,
+CellularPktStatus_t cellularUndefinedRespCallback( void * pCallbackContext,
                                                    const char * pLine )
 {
-    ( void ) pContext;
     ( void ) pLine;
-    return cellularUndefineReturnStatus;
+    ( void ) pCallbackContext;
+    return CELLULAR_PKT_STATUS_OK;
 }
 
 void * mock_malloc( size_t size )
@@ -1599,14 +1597,11 @@ void test__Cellular_LibInit_PktHandlerInit_Double_Allocate_Context( void )
 void test__Cellular_RegisterUndefinedRespCallback_Null_Parameter( void )
 {
     CellularContext_t context;
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    int32_t customDefinedContext;
 
-    pktStatus = _Cellular_RegisterUndefinedRespCallback( NULL, cellularUndefinedRespCallback );
-    TEST_ASSERT_NOT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
-
-    /* Unregister undefined response callback. */
-    pktStatus = _Cellular_RegisterUndefinedRespCallback( &context, NULL );
-    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    cellularStatus = _Cellular_RegisterUndefinedRespCallback( NULL, cellularUndefinedRespCallback, &customDefinedContext );
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
 
 /**
@@ -1615,8 +1610,31 @@ void test__Cellular_RegisterUndefinedRespCallback_Null_Parameter( void )
 void test__Cellular_RegisterUndefinedRespCallback_Happy_Path( void )
 {
     CellularContext_t context;
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    int32_t customDefinedContext;
 
-    pktStatus = _Cellular_RegisterUndefinedRespCallback( &context, cellularUndefinedRespCallback );
-    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    /* Register the cellular undefined response callback. */
+    cellularStatus = _Cellular_RegisterUndefinedRespCallback( &context, cellularUndefinedRespCallback, &customDefinedContext );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL_PTR( cellularUndefinedRespCallback, context.undefinedRespCallback );
+    TEST_ASSERT_EQUAL_PTR( &customDefinedContext, context.pUndefinedRespCBContext );
+
+    /* unregister the cellular undefined response callback. */
+    cellularStatus = _Cellular_RegisterUndefinedRespCallback( &context, NULL, &customDefinedContext );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_NULL( context.undefinedRespCallback );
+    /* Undefined callback context is cleared if the undefined callback is NULL. */
+    TEST_ASSERT_NULL( context.pUndefinedRespCBContext );
+
+    /* Register the cellular undefined response callback without callback context. */
+    cellularStatus = _Cellular_RegisterUndefinedRespCallback( &context, cellularUndefinedRespCallback, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL_PTR( cellularUndefinedRespCallback, context.undefinedRespCallback );
+    TEST_ASSERT_NULL( context.pUndefinedRespCBContext );
+
+    /* unregister the cellular undefined response callback without callback context. */
+    cellularStatus = _Cellular_RegisterUndefinedRespCallback( &context, NULL, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_NULL( context.undefinedRespCallback );
+    TEST_ASSERT_NULL( context.pUndefinedRespCBContext );
 }

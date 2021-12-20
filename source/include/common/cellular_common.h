@@ -212,13 +212,13 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
  * @ingroup cellular_common_datatypes_functionpointers
  * @brief Undefined response callback function.
  *
- * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] pCallbackContext The pCallbackContext parameter in _Cellular_RegisterUndefinedRespCallback.
  * @param[in] pLine The input line form cellular modem.
  *
  * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
  * code indicating the cause of the error.
  */
-typedef CellularPktStatus_t ( * CellularUndefinedRespCallback_t )( const CellularContext_t * pContext,
+typedef CellularPktStatus_t ( * CellularUndefinedRespCallback_t )( void * pCallbackContext,
                                                                    const char * pLine );
 
 /*-----------------------------------------------------------*/
@@ -604,19 +604,22 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
                                                                 uint32_t cellularSrcTokenSuccessTableSize );
 
 /**
- * @brief Register unknown response callback.
+ * @brief Register undefined response callback.
  *
  * Cellular module can register the callback function to handle AT_UNDEFINED response
  * through this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] undefinedRespCallback The callback function to handle the unknown response.
+ * @param[in] undefinedRespCallback The callback function to handle the undefined response.
+ * @param[in] pCallbackContext The pCallbackContext passed to the undefinedRespCallback
+ * callback function if undefinedRespCallback is not NULL.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error code
  * indicating the cause of the error.
  */
 CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pContext,
-                                                         CellularUndefinedRespCallback_t undefinedRespCallback );
+                                                         CellularUndefinedRespCallback_t undefinedRespCallback,
+                                                         void * pCallbackContext );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
