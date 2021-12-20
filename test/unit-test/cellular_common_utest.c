@@ -1596,10 +1596,10 @@ void test__Cellular_LibInit_PktHandlerInit_Double_Allocate_Context( void )
  */
 void test__Cellular_RegisterUndefinedRespCallback_Null_Parameter( void )
 {
-    CellularContext_t context;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     int32_t customDefinedContext;
 
+    /* Pass NULL cellular context pointer to _Cellular_RegisterUndefinedRespCallback. */
     cellularStatus = _Cellular_RegisterUndefinedRespCallback( NULL, cellularUndefinedRespCallback, &customDefinedContext );
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
