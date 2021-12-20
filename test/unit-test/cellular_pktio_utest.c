@@ -1222,7 +1222,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_NO_COMMAND( void 
 
     /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    recvCount = 2;
+    recvCount = 3;
     atCmdType = CELLULAR_AT_NO_COMMAND;
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
