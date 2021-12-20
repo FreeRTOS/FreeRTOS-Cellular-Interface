@@ -1435,7 +1435,7 @@ void test__Cellular_AtcmdRequestSuccessToken_NULL_pCellularSrcTokenSuccessTable(
 /**
  * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
-void test_test__Cellular_AtcmdRequestSuccessToken__Cellular_PktioSendAtCmd_Return_OK( void )
+void test__Cellular_AtcmdRequestSuccessToken_Cellular_PktioSendAtCmd_Return_OK( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReqGetMccMnc =
