@@ -1108,7 +1108,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
 
     if( pContext == NULL )
     {
-        LogError( ( "_Cellular_RegisterUnknownCallback : invalid context" ) );
+        LogError( ( "_Cellular_RegisterUndefinedRespCallback: invalid context" ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
     else
