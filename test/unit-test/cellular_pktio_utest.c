@@ -66,6 +66,8 @@
 #define CELLULAR_AT_TOKEN_ERROR                              "NO CARRIER"
 #define CELLULAR_AT_TOKEN_EXTRA                              "EXTRA_TOKEN_1"
 
+#define CELLULAR_AT_UNDEFINED_STRING_RESP                    "1, CONNECT OK"
+
 #define CELLULAR_URC_TOKEN_PREFIX_STRING_RESP                "+QIURC: \"recv\",0"
 #define CELLULAR_URC_TOKEN_PREFIX_STRING                     "+QIURC"
 
@@ -108,6 +110,8 @@ static int pktDataPrefixCBReturn = 0;
 static int recvDataLenFail = 0;
 static int recvCommFail = 0;
 static int setpktDataPrefixCBReturn = 0;
+
+static int32_t customCallbackContext = 0;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -455,7 +459,21 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
         }
         else if( atCmdType == CELLULAR_AT_NO_COMMAND )
         {
-            if( recvCount % 2 == 0 )
+            /* Undefined response callback function. */
+            if( recvCount % 3 == 0 )
+            {
+                if( customCallbackContext == 0 )
+                {
+                    /* Return the expected response to callback function. */
+                    pString = CELLULAR_AT_UNDEFINED_STRING_RESP;
+                }
+                else
+                {
+                    /* Return the unexpected response to callback function. */
+                    pString = CELLULAR_AT_CMD_MULTI_WO_PREFIX;
+                }
+            }
+            else if( recvCount % 2 == 0 )
             {
                 pString = CELLULAR_AT_WITH_PREFIX_STRING_RESP;
             }
@@ -698,6 +716,29 @@ CellularPktStatus_t sendDataPrefix( void * pCallbackContext,
         isSendDataPrefixCbkSuccess = 1;
         return CELLULAR_PKT_STATUS_BAD_PARAM;
     }
+}
+
+CellularPktStatus_t undefinedRespCallback( void * pCallbackContext,
+                                           const char * pLine )
+{
+    CellularPktStatus_t undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+
+    /* Verify pCallbackContext. */
+    TEST_ASSERT_EQUAL_PTR( &customCallbackContext, pCallbackContext );
+
+    /* Verify pLine. */
+    if( strcmp( CELLULAR_AT_UNDEFINED_STRING_RESP, pLine ) == 0 )
+    {
+        *( ( int32_t * ) pCallbackContext ) = 1;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+    }
+    else
+    {
+        *( ( int32_t * ) pCallbackContext ) = 0;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_FAILURE;
+    }
+
+    return undefineReturnStatus;
 }
 
 /* ========================================================================== */
@@ -1181,7 +1222,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_NO_COMMAND( void 
 
     /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
-    recvCount = 2;
+    recvCount = 3;
     atCmdType = CELLULAR_AT_NO_COMMAND;
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
@@ -1190,6 +1231,76 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_NO_COMMAND( void 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test thread receiving rx data event with CELLULAR_AT_NO_COMMAND resp for _Cellular_PktioInit to return CELLULAR_PKT_STATUS_OK.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_okay( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_COMMAND;
+    context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 0;
+    context.pUndefinedRespCBContext = &customCallbackContext;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 1, customCallbackContext );
+}
+
+/**
+ * @brief Test thread receiving rx data event with CELLULAR_AT_NO_COMMAND resp for _Cellular_PktioInit to return CELLULAR_PKT_STATUS_OK.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_fail( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_COMMAND;
+    context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 1;
+    context.pUndefinedRespCBContext = &customCallbackContext;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is not received. */
+    TEST_ASSERT_EQUAL_INT32( 0, customCallbackContext );
 }
 
 /**

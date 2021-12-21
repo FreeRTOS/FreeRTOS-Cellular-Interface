@@ -1100,3 +1100,34 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t
 }
 
 /*-----------------------------------------------------------*/
+
+CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pContext,
+                                                         CellularUndefinedRespCallback_t undefinedRespCallback,
+                                                         void * pCallbackContext )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_RegisterUndefinedRespCallback: invalid context" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else
+    {
+        /* undefinedRespCallback can be set to NULL to unregister the callback. */
+        pContext->undefinedRespCallback = undefinedRespCallback;
+
+        if( pContext->undefinedRespCallback != NULL )
+        {
+            pContext->pUndefinedRespCBContext = pCallbackContext;
+        }
+        else
+        {
+            pContext->pUndefinedRespCBContext = NULL;
+        }
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/

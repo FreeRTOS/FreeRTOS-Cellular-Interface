@@ -272,6 +272,7 @@ endpatternlen
 enougth
 enum
 enums
+eps
 erange
 errno
 ethernet
@@ -814,6 +815,7 @@ ue
 uint
 uknown
 umnoprof
+undefinedrespcallback
 unneccessary
 urat
 urc
