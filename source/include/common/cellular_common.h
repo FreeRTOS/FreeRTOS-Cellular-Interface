@@ -208,6 +208,19 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
                                                                               char * pLine,
                                                                               uint32_t * pBytesRead );
 
+/**
+ * @ingroup cellular_common_datatypes_functionpointers
+ * @brief Undefined response callback function.
+ *
+ * @param[in] pCallbackContext The pCallbackContext parameter in _Cellular_RegisterUndefinedRespCallback.
+ * @param[in] pLine The input line form cellular modem.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+typedef CellularPktStatus_t ( * CellularUndefinedRespCallback_t )( void * pCallbackContext,
+                                                                   const char * pLine );
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -486,6 +499,29 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdRequestWithCallback( CellularContext_t
                                                                uint32_t timeoutMS );
 
 /**
+ * @brief Send the AT command to cellular modem with extra success token table.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] atReq The AT command data structure with send command response callback.
+ * @param[in] atTimeoutMS The timeout value to wait for the AT command response from cellular modem.
+ * @param[in] pCellularSrcTokenSuccessTable The extra success token table to indicate the send AT command success.
+ * @param[in] cellularSrcTokenSuccessTableSize The size of extra success token table.
+ *
+ * @note AT command request makes use of cellularSrcTokenSuccessTableSize to obtain
+ * the response status. Some AT commands don't have fixed success token. This function
+ * make use of a temporary table, pCellularSrcTokenSuccessTable, to obtain the response
+ * status.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularPktStatus_t _Cellular_AtcmdRequestSuccessToken( CellularContext_t * pContext,
+                                                        CellularAtReq_t atReq,
+                                                        uint32_t atTimeoutMS,
+                                                        const char ** pCellularSrcTokenSuccessTable,
+                                                        uint32_t cellularSrcTokenSuccessTableSize );
+
+/**
  * @brief Send the AT command to cellular modem with data buffer response.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
@@ -566,6 +602,24 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
                                                                 uint32_t dataTimeoutMS,
                                                                 const char ** pCellularSrcTokenSuccessTable,
                                                                 uint32_t cellularSrcTokenSuccessTableSize );
+
+/**
+ * @brief Register undefined response callback.
+ *
+ * Cellular module can register the callback function to handle AT_UNDEFINED response
+ * through this function.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] undefinedRespCallback The callback function to handle the undefined response.
+ * @param[in] pCallbackContext The pCallbackContext passed to the undefinedRespCallback
+ * callback function if undefinedRespCallback is not NULL.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error code
+ * indicating the cause of the error.
+ */
+CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pContext,
+                                                         CellularUndefinedRespCallback_t undefinedRespCallback,
+                                                         void * pCallbackContext );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

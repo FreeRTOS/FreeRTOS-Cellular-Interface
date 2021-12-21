@@ -569,6 +569,40 @@ CellularPktStatus_t _Cellular_PktHandler_AtcmdRequestWithCallback( CellularConte
 
 /*-----------------------------------------------------------*/
 
+CellularPktStatus_t _Cellular_AtcmdRequestSuccessToken( CellularContext_t * pContext,
+                                                        CellularAtReq_t atReq,
+                                                        uint32_t atTimeoutMS,
+                                                        const char ** pCellularSrcTokenSuccessTable,
+                                                        uint32_t cellularSrcTokenSuccessTableSize )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_AtcmdRequestSuccessToken : Invalid cellular context" ) );
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
+    else if( pCellularSrcTokenSuccessTable == NULL )
+    {
+        LogError( ( "_Cellular_AtcmdRequestSuccessToken : pCellularSrcTokenSuccessTable is NULL" ) );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else
+    {
+        _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
+        pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
+        pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
+        pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
+        pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
+        pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
+        _Cellular_PktHandlerReleasePktRequestMutex( pContext );
+    }
+
+    return pktStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularContext_t * pContext,
                                                                        CellularAtReq_t atReq,
                                                                        uint32_t timeoutMS,

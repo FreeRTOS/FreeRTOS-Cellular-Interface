@@ -1362,6 +1362,7 @@ void test__Cellular_AtParseInit_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
+
 /**
  * @brief Test that sort fail case case for _Cellular_AtParseInit.
  */
@@ -1399,4 +1400,60 @@ void test__Cellular_AtParseInit_Check_TokenTable_Fail( void )
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     pktStatus = _Cellular_AtParseInit( &context );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief Test that null Context case for _Cellular_AtcmdRequestSuccessToken.
+ */
+void test__Cellular_AtcmdRequestSuccessToken_NULL_Context( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReq;
+    const char * successTokenTable[] = { "1, CONNECT CLOSE" };
+
+    memset( &atReq, 0, sizeof( CellularAtReq_t ) );
+
+    pktStatus = _Cellular_AtcmdRequestSuccessToken( NULL, atReq, PACKET_REQ_TIMEOUT_MS, successTokenTable, 1 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_HANDLE, pktStatus );
+}
+
+/**
+ * @brief Test that null atReq case for _Cellular_AtcmdRequestSuccessToken.
+ */
+void test__Cellular_AtcmdRequestSuccessToken_NULL_pCellularSrcTokenSuccessTable( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReq;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    memset( &atReq, 0, sizeof( CellularAtReq_t ) );
+    pktStatus = _Cellular_AtcmdRequestSuccessToken( &context, atReq, PACKET_REQ_TIMEOUT_MS, NULL, 1 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief Test that _Cellular_PktioSendAtCmd return OK case for _Cellular_PktHandler_AtcmdRequestWithCallback.
+ */
+void test__Cellular_AtcmdRequestSuccessToken_Cellular_PktioSendAtCmd_Return_OK( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReqGetMccMnc =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context = { 0 };
+    const char * successTokenTable[] = { "1, CONNECT CLOSE" };
+
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
+    queueData = CELLULAR_PKT_STATUS_OK;
+    pktStatus = _Cellular_AtcmdRequestSuccessToken( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS, successTokenTable, 1 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
