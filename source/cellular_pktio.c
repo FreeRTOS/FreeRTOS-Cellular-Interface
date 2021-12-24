@@ -201,7 +201,8 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WO_PREFIX AT process ERROR: %s, status: %d ", pLine, pkStatus ) );
+                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
             break;
@@ -219,7 +220,8 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WITH_PREFIX AT process ERROR: %s, status: %d ", pLine, pkStatus ) );
+                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
             break;
