@@ -316,7 +316,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
         }
         else
         {
-            LogInfo( ( "rebootCellularModem: Modem is not ready. Retry sending ATE0." ) );
+            LogWarn( ( "rebootCellularModem: Modem is not ready. Retry sending ATE0." ) );
         }
 
         count = count + ENBABLE_MODULE_UE_REBOOT_POLL_TIME;

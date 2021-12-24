@@ -507,7 +507,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
         {
             if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogWarn( ( "_cellular_UrcProcessUusord : unknow session data received. "
+                LogWarn( ( "_cellular_UrcProcessUusord : unknown session data received. "
                            "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
@@ -527,7 +527,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
                     }
                     else
                     {
-                        LogDebug( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
+                        LogWarn( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
                     }
                 }
             }
@@ -577,7 +577,7 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
         {
             if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogWarn( ( "_cellular_UrcProcessUusocl : unknow session closed URC received. "
+                LogWarn( ( "_cellular_UrcProcessUusocl : unknown session closed URC received. "
                            "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
