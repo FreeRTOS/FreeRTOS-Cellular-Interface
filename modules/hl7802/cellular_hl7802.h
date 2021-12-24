@@ -41,6 +41,17 @@
 /* Delay after AT+CFUN=1,1 commands. */
 #define CELLULAR_HL7802_RESET_DELAY_MS    ( 3000U )
 
+/* Band configuration for HL7802. */
+#ifndef CELLULAR_CONFIG_HL7802_CATM1_BAND
+    /* Default enable all bands. */
+    #define CELLULAR_CONFIG_HL7802_CATM1_BAND    "0002000000000F0F1B9F"
+#endif
+
+#ifndef CELLULAR_CONFIG_HL7802_NBIOT_BAND
+    /* Default enable all bands. */
+    #define CELLULAR_CONFIG_HL7802_NBIOT_BAND    "0002000000000B0F189F"
+#endif
+
 /*-----------------------------------------------------------*/
 
 typedef struct cellularModuleContext

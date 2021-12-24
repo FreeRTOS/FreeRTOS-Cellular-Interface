@@ -27,7 +27,6 @@
 
 #include <stdint.h>
 
-#include "cellular_platform.h"
 #include "cellular_config.h"
 #include "cellular_config_defaults.h"
 #include "cellular_common.h"
@@ -38,11 +37,27 @@
 
 #define ENBABLE_MODULE_UE_RETRY_COUNT      ( 3U )
 #define ENBABLE_MODULE_UE_RETRY_TIMEOUT    ( 5000U )
+#define HL7802_MAX_BAND_CFG                ( 21U )
+
+/*-----------------------------------------------------------*/
+
+typedef struct Hl7802BandConfig
+{
+    char catm1BandCfg[ HL7802_MAX_BAND_CFG ];
+    char nbiotBandCfg[ HL7802_MAX_BAND_CFG ];
+    char gsmBandCfg[ HL7802_MAX_BAND_CFG ];
+} Hl7802BandConfig_t;
 
 /*-----------------------------------------------------------*/
 
 static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pContext,
                                                       const CellularAtReq_t * pAtReq );
+static CellularError_t Cellular_GetBandCfg( CellularContext_t * pContext,
+                                            Hl7802BandConfig_t * pBandCfg );
+static CellularPktStatus_t prvRecvFuncGetBandCfg( CellularContext_t * pContext,
+                                                  const CellularATCommandResponse_t * pAtResp,
+                                                  void * pData,
+                                                  uint16_t dataLen );
 
 /*-----------------------------------------------------------*/
 
@@ -97,6 +112,133 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
                 break;
             }
         }
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularPktStatus_t prvRecvFuncGetBandCfg( CellularContext_t * pContext,
+                                                  const CellularATCommandResponse_t * pAtResp,
+                                                  void * pData,
+                                                  uint16_t dataLen )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
+    Hl7802BandConfig_t * pBandCfg = NULL;
+    const CellularATCommandLine_t * pCommnadItem = NULL;
+    char * pInputLine = NULL;
+    char * pToken = NULL;
+    char * pRatBand = NULL;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "prvRecvFuncGetBandCfg: Invalid context." ) );
+        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
+    }
+    else if( pAtResp == NULL )
+    {
+        LogError( ( "prvRecvFuncGetBandCfg: Invalid pAtResp." ) );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else if( ( pData == NULL ) || ( dataLen != sizeof( Hl7802BandConfig_t ) ) )
+    {
+        LogError( ( "prvRecvFuncGetBandCfg: Invalid pData %p or dataLen %u.", pData, dataLen ) );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else
+    {
+        pBandCfg = ( Hl7802BandConfig_t * ) pData;
+        pCommnadItem = pAtResp->pItm;
+
+        while( pCommnadItem != NULL )
+        {
+            pInputLine = pCommnadItem->pLine;
+            LogDebug( ( "prvRecvFuncGetBandCfg: input line %s", pInputLine ) );
+
+            /* Remove the line prefix. */
+            atCoreStatus = Cellular_ATRemovePrefix( &pInputLine );
+
+            /* Parse the RAT field. */
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                atCoreStatus = Cellular_ATGetNextTok( &pInputLine, &pToken );
+            }
+
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                atCoreStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pToken );
+            }
+
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                switch( *pToken )
+                {
+                    case '0':
+                        pRatBand = pBandCfg->catm1BandCfg;
+                        break;
+
+                    case '1':
+                        pRatBand = pBandCfg->nbiotBandCfg;
+                        break;
+
+                    case '2':
+                        pRatBand = pBandCfg->gsmBandCfg;
+                        break;
+
+                    default:
+                        pRatBand = NULL;
+                        LogError( ( "prvRecvFuncGetBandCfg: unknown RAT %s", pToken ) );
+                        atCoreStatus = CELLULAR_AT_ERROR;
+                        break;
+                }
+            }
+
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                /* Copy the band configuration. */
+                strncpy( pRatBand, pInputLine, HL7802_MAX_BAND_CFG );
+            }
+            else
+            {
+                LogError( ( "prvRecvFuncGetBandCfg process response line error" ) );
+                pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+                break;
+            }
+
+            pCommnadItem = pCommnadItem->pNext;
+        }
+    }
+
+    return pktStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t Cellular_GetBandCfg( CellularContext_t * pContext,
+                                            Hl7802BandConfig_t * pBandCfg )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReqGetBndCfg =
+    {
+        "AT+KBNDCFG?",
+        CELLULAR_AT_MULTI_WITH_PREFIX,
+        "+KBNDCFG",
+        prvRecvFuncGetBandCfg,
+        pBandCfg,
+        sizeof( Hl7802BandConfig_t )
+    };
+
+    /* pContext and pBandCfg are checked in Cellular_ModuleEnableUe function. */
+    ( void ) memset( pBandCfg, 0, sizeof( Hl7802BandConfig_t ) );
+    pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetBndCfg );
+
+    if( pktStatus != CELLULAR_PKT_STATUS_OK )
+    {
+        LogError( ( "Cellular_GetBandCfg: couldn't retrieve band configurations." ) );
+        cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
     return cellularStatus;
@@ -177,6 +319,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         NULL,
         0
     };
+    Hl7802BandConfig_t bandCfg = { 0 };
 
     if( pContext != NULL )
     {
@@ -236,9 +379,29 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         /* Set Configured LTE Band. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Enable all bands. */
-            atReqGetNoResult.pAtCmd = "AT+KBNDCFG=0,0002000000000F0F1B9F";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+            cellularStatus = Cellular_GetBandCfg( pContext, &bandCfg );
+        }
+
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            if( strcmp( bandCfg.catm1BandCfg, CELLULAR_CONFIG_HL7802_CATM1_BAND ) != 0 )
+            {
+                LogInfo( ( "Cellular_ModuleEnableUE : CAT-M1 band desired %s actual %s",
+                           CELLULAR_CONFIG_HL7802_CATM1_BAND, bandCfg.catm1BandCfg ) );
+                atReqGetNoResult.pAtCmd = "AT+KBNDCFG=0,"CELLULAR_CONFIG_HL7802_CATM1_BAND;
+                cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+            }
+        }
+
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            if( strcmp( bandCfg.nbiotBandCfg, CELLULAR_CONFIG_HL7802_NBIOT_BAND ) != 0 )
+            {
+                LogInfo( ( "Cellular_ModuleEnableUE : NBIOT band desired %s actual %s",
+                           CELLULAR_CONFIG_HL7802_NBIOT_BAND, bandCfg.nbiotBandCfg ) );
+                atReqGetNoResult.pAtCmd = "AT+KBNDCFG=1,"CELLULAR_CONFIG_HL7802_NBIOT_BAND;
+                cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+            }
         }
 
         /* Disable standalone sleep mode. */
