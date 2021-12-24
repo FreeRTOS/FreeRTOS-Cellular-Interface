@@ -527,7 +527,7 @@ static void _cellular_UrcProcessUusord( CellularContext_t * pContext,
                     }
                     else
                     {
-                        LogWarn( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
+                        LogDebug( ( "_cellular_UrcProcessUusord: Data ready callback not set!!" ) );
                     }
                 }
             }
