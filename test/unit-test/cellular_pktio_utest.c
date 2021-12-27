@@ -48,7 +48,7 @@
 #define PKTIO_EVT_MASK_RX_DATA                               ( 0x0008UL )
 
 #define CELLULAR_URC_TOKEN_STRING_INPUT                      "RDY"
-#define CELLULAR_AT_CMD_MULTI_WO_PREFIX                      "\rTEST1\r\n_TEST2\n_TEST3"
+#define CELLULAR_AT_CMD_MULTI_WO_PREFIX                      "\rTEST1\r\n_TEST2\n_TEST3\r\n\0TEST4"
 
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP         "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING              "+QIRD:"
