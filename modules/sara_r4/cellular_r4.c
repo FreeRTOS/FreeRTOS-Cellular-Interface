@@ -281,7 +281,7 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
     /* wait for modem after reboot*/
     while( count < ENBABLE_MODULE_UE_REBOOT_MAX_TIME )
     {
-        LogInfo( ( "rebootCellularModem: ..." ) );
+        LogInfo( ( "rebootCellularModem: Use ATE0 command to test modem status." ) );
 
         atReqGetNoResult.pAtCmd = "ATE0";
 
@@ -313,6 +313,10 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
             }
 
             break;
+        }
+        else
+        {
+            LogWarn( ( "rebootCellularModem: Modem is not ready. Retry sending ATE0." ) );
         }
 
         count = count + ENBABLE_MODULE_UE_REBOOT_POLL_TIME;
@@ -400,6 +404,13 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                         cellularStatus = rebootCellularModem( pContext, true, true );
                     }
                 }
+
+                #ifdef CELLULAR_CONFIG_SARA_R4_REBOOT_ON_INIT
+                    else
+                    {
+                        cellularStatus = rebootCellularModem( pContext, true, true );
+                    }
+                #endif
             }
         }
 

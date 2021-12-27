@@ -201,7 +201,8 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WO_PREFIX AT process ERROR: %s, status: %d ", pLine, pkStatus ) );
+                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
             break;
@@ -219,7 +220,8 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WITH_PREFIX AT process ERROR: %s, status: %d ", pLine, pkStatus ) );
+                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
             break;
@@ -921,11 +923,11 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
     while( keepProcess == true )
     {
-        /* Pktio is reading command. Skip over the change line. And the reason
-         * we don't consider the variable bytesInBuffer is because that the
-         * input variable bytesInBuffer is bounded by the caller already.
+        /* Pktio is reading command. Skip over the change line and leading NULL character.
+         * And the reason we don't consider the variable bytesInBuffer is because
+         * that the input variable bytesInBuffer is bounded by the caller already.
          */
-        while( ( bytesRead > 0U ) && ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) ) )
+        while( ( bytesRead > 0U ) && ( ( *pTempLine == '\r' ) || ( *pTempLine == '\n' ) || ( *pTempLine == '\0' ) ) )
         {
             pTempLine++;
             bytesRead = bytesRead - 1U;
