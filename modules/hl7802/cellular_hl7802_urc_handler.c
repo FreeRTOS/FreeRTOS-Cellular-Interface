@@ -31,7 +31,6 @@
 #include <string.h>
 #include <limits.h>
 
-#include "cellular_platform.h"
 #include "cellular_types.h"
 #include "cellular_common.h"
 #include "cellular_common_api.h"
@@ -45,7 +44,8 @@
 static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
                                          char * pInputLine );
 static void handleTcpNotif( CellularSocketContext_t * pSocketData,
-                            uint8_t tcpNotif );
+                            uint8_t tcpNotif,
+                            uint32_t sessionId );
 static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                                            char * pInputLine );
 static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
@@ -110,27 +110,30 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
         /* Call the callback function of this session. */
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
-
-            if( pSocketData == NULL )
+            if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogError( ( "_cellular_UrcProcessKtcpInd : invalid socket index %d", socketIndex ) );
-            }
-            else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
-            {
-                LogError( ( "_cellular_UrcProcessKtcpInd : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
-            }
-            else if( pSocketData->openCallback == NULL )
-            {
-                LogDebug( ( "_cellular_UrcProcessKtcpInd : Open callback not set!!" ) );
+                LogWarn( ( "_cellular_UrcProcessKtcpInd : unknown session data received. "
+                           "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
             {
-                LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
-                pSocketData->socketState = SOCKETSTATE_CONNECTED;
-                pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
-                                           pSocketData, pSocketData->pOpenCallbackContext );
+                pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
+
+                if( pSocketData == NULL )
+                {
+                    LogError( ( "_cellular_UrcProcessKtcpInd : invalid socket index %u", socketIndex ) );
+                }
+                else if( pSocketData->openCallback == NULL )
+                {
+                    LogDebug( ( "_cellular_UrcProcessKtcpInd : Open callback not set!!" ) );
+                }
+                else
+                {
+                    LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
+                    pSocketData->socketState = SOCKETSTATE_CONNECTED;
+                    pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
+                                               pSocketData, pSocketData->pOpenCallbackContext );
+                }
             }
         }
     }
@@ -139,8 +142,12 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 static void handleTcpNotif( CellularSocketContext_t * pSocketData,
-                            uint8_t tcpNotif )
+                            uint8_t tcpNotif,
+                            uint32_t sessionId )
 {
+    /* Suppress warning message if log level is not debug. */
+    ( void ) sessionId;
+
     switch( tcpNotif )
     {
         case TCP_NOTIF_TCP_DISCONNECTION: /* TCP disconnection by the server or remote client. */
@@ -149,7 +156,7 @@ static void handleTcpNotif( CellularSocketContext_t * pSocketData,
 
             if( pSocketData->closedCallback != NULL )
             {
-                LogDebug( ( "Notify session %d with socket disconnected\r\n", pSocketData->pModemData ) );
+                LogDebug( ( "Notify session %d with socket disconnected\r\n", sessionId ) );
                 pSocketData->closedCallback( pSocketData, pSocketData->pClosedCallbackContext );
             }
 
@@ -161,7 +168,7 @@ static void handleTcpNotif( CellularSocketContext_t * pSocketData,
 
             if( pSocketData->openCallback != NULL )
             {
-                LogDebug( ( "Notify session %d with socket open failed\r\n", pSocketData->pModemData ) );
+                LogDebug( ( "Notify session %d with socket open failed\r\n", sessionId ) );
                 pSocketData->openCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
                                            pSocketData, pSocketData->pOpenCallbackContext );
             }
@@ -247,20 +254,23 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
         /* Call the callback function of this session. */
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
-
-            if( pSocketData == NULL )
+            if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogError( ( "_cellular_UrcProcessKtcpNotif : invalid socket index %d", socketIndex ) );
-            }
-            else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
-            {
-                LogError( ( "_cellular_UrcProcessKtcpNotif : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
+                LogWarn( ( "_cellular_UrcProcessKtcpNotif : unknown session data received. "
+                           "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
             {
-                handleTcpNotif( pSocketData, tcpNotif );
+                pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
+
+                if( pSocketData == NULL )
+                {
+                    LogError( ( "_cellular_UrcProcessKtcpNotif : invalid socket index %u", socketIndex ) );
+                }
+                else
+                {
+                    handleTcpNotif( pSocketData, tcpNotif, sessionId );
+                }
             }
         }
     }
@@ -310,24 +320,27 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
         /* Call the callback function of this session. */
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
-
-            if( pSocketData == NULL )
+            if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogError( ( "_cellular_UrcProcessKtcpData : invalid socket index %d", socketIndex ) );
-            }
-            else if( pSocketData->pModemData != ( void * ) ( ( uint32_t ) sessionId ) )
-            {
-                LogError( ( "_cellular_UrcProcessKtcpData : session not match %d socket index %d",
-                            ( uint32_t ) pSocketData->pModemData, socketIndex ) );
-            }
-            else if( pSocketData->dataReadyCallback == NULL )
-            {
-                LogDebug( ( "_cellular_UrcProcessKtcpData : Data ready callback not set!!" ) );
+                LogWarn( ( "_cellular_UrcProcessKtcpData : unknown session data received. "
+                           "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
             {
-                pSocketData->dataReadyCallback( pSocketData, pSocketData->pDataReadyCallbackContext );
+                pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
+
+                if( pSocketData == NULL )
+                {
+                    LogError( ( "_cellular_UrcProcessKtcpData : invalid socket index %u", socketIndex ) );
+                }
+                else if( pSocketData->dataReadyCallback == NULL )
+                {
+                    LogDebug( ( "_cellular_UrcProcessKtcpData : Data ready callback not set!!" ) );
+                }
+                else
+                {
+                    pSocketData->dataReadyCallback( pSocketData, pSocketData->pDataReadyCallbackContext );
+                }
             }
         }
     }

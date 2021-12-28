@@ -33,7 +33,6 @@
 #include <stdlib.h>
 
 /* Cellular includes. */
-#include "cellular_platform.h"
 #include "cellular_types.h"
 #include "cellular_api.h"
 #include "cellular_common_api.h"
@@ -346,7 +345,7 @@ static CellularError_t _Cellular_GetSocketStat( CellularHandle_t cellularHandle,
     };
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    uint32_t sessionId = ( uint32_t ) socketHandle->pModemData;
+    uint32_t sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
     /* Internal function. Caller checks parameters. */
     ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "AT+KTCPSTAT=%lu", sessionId );
@@ -543,7 +542,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+KTCPCFG=%d,0,\"%s\",%d",
+                           "AT+KTCPCFG=%u,0,\"%s\",%u",
                            socketHandle->contextId,
                            socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                            socketHandle->remoteSocketAddress.port );
@@ -1229,6 +1228,10 @@ CellularError_t Cellular_SetDns( CellularHandle_t cellularHandle,
                                  uint8_t contextId,
                                  const char * pDnsServerAddress )
 {
+    ( void ) cellularHandle;
+    ( void ) contextId;
+    ( void ) pDnsServerAddress;
+
     /* Modem use dynamic DNS addresses. Return unsupported. */
     return CELLULAR_UNSUPPORTED;
 }
@@ -1287,8 +1290,18 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = ( uint32_t ) socketHandle->pModemData;
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Calculate the read length. */
         cellularStatus = _Cellular_GetSocketStat( cellularHandle, socketHandle, &socketStat );
 
@@ -1328,7 +1341,7 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
              * The max length of the string is fixed and checked offline. */
             /* coverity[misra_c_2012_rule_21_6_violation]. */
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-                               "%s%ld,%ld", "AT+KTCPRCV=", sessionId, recvLen );
+                               "%s%u,%u", "AT+KTCPRCV=", sessionId, recvLen );
             pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,
                                                                            atReqSocketRecv, recvTimeout, socketRecvDataPrefix, &socktCmdDataLength );
 
@@ -1410,8 +1423,18 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = ( uint32_t ) socketHandle->pModemData;
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Send data length check. */
         if( dataLength > ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN )
         {
@@ -1429,7 +1452,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%lu,%ld",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u,%u",
                            "AT+KTCPSND=", sessionId, atDataReqSocketSend.dataLen );
 
         pktStatus = _Cellular_TimeoutAtcmdDataSendSuccessToken( pContext, atReqSocketSend, atDataReqSocketSend,
@@ -1440,7 +1463,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
         {
             if( socketHandle->socketState == SOCKETSTATE_DISCONNECTED )
             {
-                LogInfo( ( "Cellular_SocketSend: Data send fail, socket already closed" ) );
+                LogWarn( ( "Cellular_SocketSend: Data send fail. Socket is closed during the send operation." ) );
                 cellularStatus = CELLULAR_SOCKET_CLOSED;
             }
             else
@@ -1474,7 +1497,7 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         NULL,
         0,
     };
-    uint32_t sessionId = ( uint32_t ) socketHandle->pModemData;
+    uint32_t sessionId = 0U;
     cellularModuleContext_t * pModuleContext = NULL;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
@@ -1491,6 +1514,18 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     else
     {
         cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
+        if( sessionId == INVALID_SESSION_ID )
+        {
+            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
+                        socketHandle->socketId ) );
+            cellularStatus = CELLULAR_INVALID_HANDLE;
+        }
     }
 
     if( cellularStatus == CELLULAR_SUCCESS )
@@ -1547,7 +1582,6 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
     uint8_t sessionId = 0;
-    uint32_t modemData = 0;
     CellularAtReq_t atReqSocketConnect =
     {
         cmdBuf,
@@ -1593,10 +1627,6 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Store the session ID in the pointer directly instead allocate extra memory. */
-            modemData = sessionId;
-            socketHandle->pModemData = ( void * ) modemData;
-
             /* Create the reverse table to store the socketIndex to sessionId. */
             pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
         }
@@ -1609,7 +1639,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+KTCPCNX=%d", sessionId );
+                           "AT+KTCPCNX=%u", sessionId );
 
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
                                                                SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS );
@@ -1667,6 +1697,9 @@ CellularError_t Cellular_RegisterUrcSignalStrengthChangedCallback( CellularHandl
                                                                    CellularUrcSignalStrengthChangedCallback_t signalStrengthChangedCallback,
                                                                    void * pCallbackContext )
 {
+    ( void ) cellularHandle;
+    ( void ) signalStrengthChangedCallback;
+    ( void ) pCallbackContext;
     return CELLULAR_UNSUPPORTED;
 }
 
@@ -1679,6 +1712,10 @@ CellularError_t Cellular_GetHostByName( CellularHandle_t cellularHandle,
                                         const char * pcHostName,
                                         char * pResolvedAddress )
 {
+    ( void ) cellularHandle;
+    ( void ) contextId;
+    ( void ) pcHostName;
+    ( void ) pResolvedAddress;
     return CELLULAR_UNSUPPORTED;
 }
 
@@ -2306,7 +2343,7 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s%d,%d,%d,%d",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s%u,%u,%u,%u",
                            "AT+KEDRXCFG=",
                            pEidrxSettings->mode,
                            pEidrxSettings->rat,

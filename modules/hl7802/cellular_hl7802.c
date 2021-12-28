@@ -489,3 +489,51 @@ uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
 
     return socketIndex;
 }
+
+/*-----------------------------------------------------------*/
+
+uint32_t _Cellular_GetSessionId( CellularContext_t * pContext,
+                                 uint32_t socketIndex )
+{
+    cellularModuleContext_t * pModuleContext = NULL;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    uint32_t sessionId = INVALID_SESSION_ID;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_GetSessionId invalid cellular context" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketIndex == INVALID_SOCKET_INDEX )
+    {
+        LogError( ( "_Cellular_GetSessionId invalid socketIndex" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else
+    {
+        cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        for( sessionId = 0; sessionId < TCP_SESSION_TABLE_LEGNTH; sessionId++ )
+        {
+            if( pModuleContext->pSessionMap[ sessionId ] == socketIndex )
+            {
+                break;
+            }
+        }
+
+        /* Mapping is not found in the session mapping table. */
+        if( sessionId == TCP_SESSION_TABLE_LEGNTH )
+        {
+            sessionId = INVALID_SESSION_ID;
+        }
+    }
+    else
+    {
+        sessionId = INVALID_SESSION_ID;
+    }
+
+    return sessionId;
+}
