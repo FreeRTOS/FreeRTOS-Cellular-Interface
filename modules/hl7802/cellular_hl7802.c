@@ -52,7 +52,7 @@ typedef struct Hl7802BandConfig
 
 static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pContext,
                                                       const CellularAtReq_t * pAtReq );
-static CellularError_t Cellular_GetBandCfg( CellularContext_t * pContext,
+static CellularError_t prvHl7802GetBandCfg( CellularContext_t * pContext,
                                             Hl7802BandConfig_t * pBandCfg );
 static CellularPktStatus_t prvRecvFuncGetBandCfg( CellularContext_t * pContext,
                                                   const CellularATCommandResponse_t * pAtResp,
@@ -135,7 +135,7 @@ static CellularPktStatus_t prvRecvFuncGetBandCfg( CellularContext_t * pContext,
     if( pContext == NULL )
     {
         LogError( ( "prvRecvFuncGetBandCfg: Invalid context." ) );
-        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else if( pAtResp == NULL )
     {
@@ -216,7 +216,7 @@ static CellularPktStatus_t prvRecvFuncGetBandCfg( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static CellularError_t Cellular_GetBandCfg( CellularContext_t * pContext,
+static CellularError_t prvHl7802GetBandCfg( CellularContext_t * pContext,
                                             Hl7802BandConfig_t * pBandCfg )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
@@ -237,7 +237,7 @@ static CellularError_t Cellular_GetBandCfg( CellularContext_t * pContext,
 
     if( pktStatus != CELLULAR_PKT_STATUS_OK )
     {
-        LogError( ( "Cellular_GetBandCfg: couldn't retrieve band configurations." ) );
+        LogError( ( "prvHl7802GetBandCfg: couldn't retrieve band configurations." ) );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
@@ -379,7 +379,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         /* Set Configured LTE Band. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            cellularStatus = Cellular_GetBandCfg( pContext, &bandCfg );
+            cellularStatus = prvHl7802GetBandCfg( pContext, &bandCfg );
         }
 
         if( cellularStatus == CELLULAR_SUCCESS )
