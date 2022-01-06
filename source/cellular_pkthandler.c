@@ -97,7 +97,7 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
 
         if( pAtResp->status == false )
         {
-            LogError( ( "_convertAndQueueRespPacket: AT response contains error" ) );
+            /* The modem returns error code to indicate that the command failed. */
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
 
@@ -244,7 +244,8 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
                 if( pktStatus != CELLULAR_PKT_STATUS_OK )
                 {
-                    LogError( ( "pkt_recv status=%d, error in AT cmd %s resp", pktStatus, atReq.pAtCmd ) );
+                    LogWarn( ( "Modem returns error in sending AT command %s, pktStatus %d.",
+                               atReq.pAtCmd, pktStatus ) );
                 } /* Ignore errors from callbacks as they will be handled elsewhere. */
             }
             else
@@ -325,7 +326,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
             }
             else
             {
-                LogError( ( "pkt_recv status=%d, error in sending data", pktStatus ) );
+                LogWarn( ( "Modem returns error in sending data, pktStatus %d.", pktStatus ) );
             }
         }
         else

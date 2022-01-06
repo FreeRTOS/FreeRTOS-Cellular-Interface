@@ -470,6 +470,7 @@ patcommandpayloadin
 patcommandprefix
 patresp
 patrspprefix
+pbandcfg
 pbervalue
 pbuf
 pbuffer
