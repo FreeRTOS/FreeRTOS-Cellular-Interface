@@ -50,7 +50,7 @@
 #define CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS     ( 60000U )
 #define CELLULAR_HL7802_AT_TIMEOUT_120_SECONDS_MS    ( 120000U )
 
-/* Define the following timeout value since they are content dependent or no recommanded value. */
+/* Define the following timeout value since they are content dependent or no recommended value. */
 #ifndef CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS
     #define CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS    CELLULAR_HL7802_AT_TIMEOUT_5_SECONDS_MS
 #endif
