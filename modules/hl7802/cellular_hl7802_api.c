@@ -44,21 +44,10 @@
 
 /*-----------------------------------------------------------*/
 
-/* TODO : confirm the value. */
-#define PDN_ACT_PACKET_REQ_TIMEOUT_MS                 ( 10000UL )
-
-#define SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS          ( 27000U )
-
 #define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE              ( 32U )
-
-#define DATA_SEND_TIMEOUT_MS                          ( 10000U )
-
-#define PACKET_REQ_TIMEOUT_MS                         ( 10000U )
 
 #define SOCKET_END_PATTERN                            "--EOF--Pattern--"
 #define SOCKET_END_PATTERN_LEN                        ( 16U )
-
-#define DATA_READ_TIMEOUT_MS                          ( 50000UL )
 
 #define SOCKET_DATA_CONNECT_TOKEN                     "CONNECT"
 #define SOCKET_DATA_CONNECT_TOKEN_LEN                 ( 7U )
@@ -350,7 +339,8 @@ static CellularError_t _Cellular_GetSocketStat( CellularHandle_t cellularHandle,
     /* Internal function. Caller checks parameters. */
     ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "AT+KTCPSTAT=%lu", sessionId );
 
-    pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSocketStat );
+    pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketStat,
+                                                           CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
     cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
@@ -686,7 +676,8 @@ static CellularError_t _Cellular_getTcpCfgSessionId( CellularHandle_t cellularHa
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSocketConnect );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
+                                                               CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -1253,7 +1244,7 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    uint32_t recvTimeout = DATA_READ_TIMEOUT_MS;
+    uint32_t recvTimeout = CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS;
     uint32_t recvLen = bufferLength;
     _socketDataRecv_t dataRecv =
     {
@@ -1372,7 +1363,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    uint32_t sendTimeout = DATA_SEND_TIMEOUT_MS;
+    uint32_t sendTimeout = CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
     CellularAtReq_t atReqSocketSend =
     {
@@ -1456,7 +1447,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
                            "AT+KTCPSND=", sessionId, atDataReqSocketSend.dataLen );
 
         pktStatus = _Cellular_TimeoutAtcmdDataSendSuccessToken( pContext, atReqSocketSend, atDataReqSocketSend,
-                                                                PACKET_REQ_TIMEOUT_MS, sendTimeout,
+                                                                CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS, sendTimeout,
                                                                 _socketSendSuccesTokenTable, _socketSendSuccesTokenTableLength );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
@@ -1538,7 +1529,8 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         {
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%lu,1",
                                "AT+KTCPCLOSE=", sessionId );
-            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSocketClose );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketClose,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS );
 
             /* Delete the socket config. */
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
@@ -1553,7 +1545,8 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         {
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%lu",
                                "AT+KTCPDEL=", sessionId );
-            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSocketClose );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketClose,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
@@ -1642,7 +1635,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
                            "AT+KTCPCNX=%u", sessionId );
 
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
-                                                               SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS );
+                                                               CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -1752,7 +1745,8 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s=%u", "AT+KCNXDOWN", contextId );
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqDeactPdn, PDN_ACT_PACKET_REQ_TIMEOUT_MS );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqDeactPdn,
+                                                               CELLULAR_HL7802_AT_KCNXDOWN_TIMEOUT_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -1847,7 +1841,8 @@ static CellularError_t _Cellular_GetPacketSwitchStatus( CellularHandle_t cellula
     };
 
     /* Internal function. Callee check parameters. */
-    pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqPacketSwitchStatus, PDN_ACT_PACKET_REQ_TIMEOUT_MS );
+    pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqPacketSwitchStatus,
+                                                           CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS );
     cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
     return cellularStatus;
@@ -1893,7 +1888,8 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         {
             LogError( ( "Activate Packet switch" ) );
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s", "AT+CGATT=1" );
-            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqActPdn, PDN_ACT_PACKET_REQ_TIMEOUT_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqActPdn,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS );
         }
         else if( cellularStatus != CELLULAR_SUCCESS )
         {
@@ -1909,7 +1905,8 @@ CellularError_t Cellular_ActivatePdn( CellularHandle_t cellularHandle,
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s=%u", "AT+KCNXUP", contextId );
-            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqActPdn, PDN_ACT_PACKET_REQ_TIMEOUT_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqActPdn,
+                                                                   CELLULAR_HL7802_AT_KCNXUP_TIMEOUT_MS );
         }
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
@@ -2226,7 +2223,8 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
     }
     else
     {
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetPdnStatus );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetPdnStatus,
+                                                               CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
@@ -2292,7 +2290,8 @@ CellularError_t Cellular_GetEidrxSettings( CellularHandle_t cellularHandle,
     {
         ( void ) memset( pEidrxSettingsList, 0, sizeof( CellularEidrxSettingsList_t ) );
         /* Query the pEidrxSettings from the network. */
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetEidrx );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetEidrx,
+                                                               CELLULAR_HL7802_AT_KEDRXCFG_TIMEOUT_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -2350,7 +2349,8 @@ CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
                            pEidrxSettings->requestedEdrxVaue,
                            pEidrxSettings->pagingTimeWindow );
         LogDebug( ( "Eidrx setting: %s ", cmdBuf ) );
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetEidrx );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSetEidrx,
+                                                               CELLULAR_HL7802_AT_KEDRXCFG_TIMEOUT_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -2434,7 +2434,8 @@ CellularError_t Cellular_SetRatPriority( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetRatPriority );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSetRatPriority,
+                                                               CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
@@ -2480,7 +2481,8 @@ CellularError_t Cellular_GetRatPriority( CellularHandle_t cellularHandle,
     }
     else
     {
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetRatPriority );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSetRatPriority,
+                                                               CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS );
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
@@ -2547,7 +2549,8 @@ CellularError_t Cellular_GetSignalInfo( CellularHandle_t cellularHandle,
         pSignalInfo->ber = CELLULAR_INVALID_SIGNAL_VALUE;
         pSignalInfo->bars = CELLULAR_INVALID_SIGNAL_BAR_VALUE;
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqQuerySignalInfo );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqQuerySignalInfo,
+                                                               CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
@@ -2593,8 +2596,8 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
                            pPdnConfig->apnName );
         LogDebug( ( "cmd %s", cmdBuf ) );
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext,
-                                                        atGprsConnectionConfighReq );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atGprsConnectionConfighReq,
+                                                               CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
@@ -2643,8 +2646,8 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
             ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+KSLEEP=2" );
         }
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext,
-                                                        atKsleepReq );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atKsleepReq,
+                                                               CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
