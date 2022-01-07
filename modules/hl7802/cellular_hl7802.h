@@ -32,15 +32,40 @@
 #endif
 /* *INDENT-ON* */
 
-#define MIN_TCP_SESSION_ID                ( 1U )
-#define MAX_TCP_SESSION_ID                ( 6U )
-#define TCP_SESSION_TABLE_LEGNTH          ( MAX_TCP_SESSION_ID + 1 )
+#define MIN_TCP_SESSION_ID                           ( 1U )
+#define MAX_TCP_SESSION_ID                           ( 6U )
+#define TCP_SESSION_TABLE_LEGNTH                     ( MAX_TCP_SESSION_ID + 1 )
 
-#define INVALID_SOCKET_INDEX              ( UINT32_MAX )
-#define INVALID_SESSION_ID                ( UINT32_MAX )
+#define INVALID_SOCKET_INDEX                         ( UINT32_MAX )
+#define INVALID_SESSION_ID                           ( UINT32_MAX )
 
 /* Delay after AT+CFUN=1,1 commands. */
-#define CELLULAR_HL7802_RESET_DELAY_MS    ( 3000U )
+#define CELLULAR_HL7802_RESET_DELAY_MS               ( 3000U )
+
+/* AT command recommended timeout value for HL7802. Reference HL7802 AT Commands
+ * Interface Guide to setup the timeout value for each AT commands. */
+#define CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS      ( 2000U )
+#define CELLULAR_HL7802_AT_TIMEOUT_5_SECONDS_MS      ( 5000U )
+#define CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS     ( 30000U )
+#define CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS     ( 60000U )
+#define CELLULAR_HL7802_AT_TIMEOUT_120_SECONDS_MS    ( 120000U )
+
+/* Define the following timeout value since they are content dependent or no recommended value. */
+#ifndef CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS
+    #define CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS    CELLULAR_HL7802_AT_TIMEOUT_5_SECONDS_MS
+#endif
+
+#ifndef CELLULAR_HL7802_AT_KEDRXCFG_TIMEOUT_MS
+    #define CELLULAR_HL7802_AT_KEDRXCFG_TIMEOUT_MS    CELLULAR_HL7802_AT_TIMEOUT_5_SECONDS_MS
+#endif
+
+#ifndef CELLULAR_HL7802_AT_KCNXUP_TIMEOUT_MS
+    #define CELLULAR_HL7802_AT_KCNXUP_TIMEOUT_MS    CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS
+#endif
+
+#ifndef CELLULAR_HL7802_AT_KCNXDOWN_TIMEOUT_MS
+    #define CELLULAR_HL7802_AT_KCNXDOWN_TIMEOUT_MS    CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS
+#endif
 
 /* Band configuration for HL7802. */
 #ifndef CELLULAR_CONFIG_HL7802_CATM1_BAND
