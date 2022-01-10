@@ -1455,7 +1455,7 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    uint32_t i = 0;
+    uint8_t i = 0;
 
     CellularPdnContextActInfo_t pdpContextsActInfo = { 0 };
 
@@ -1473,6 +1473,8 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
+        *pNumStatus = 0U;
+
         /* Check the current <Act> status of contexts. */
         cellularStatus = _Cellular_GetContextActivationStatus( cellularHandle, &pdpContextsActInfo );
 
@@ -1482,15 +1484,19 @@ CellularError_t Cellular_GetPdnStatus( CellularHandle_t cellularHandle,
 
             for( i = 0U; i < ( MAX_PDP_CONTEXTS - 1 ); i++ )
             {
-                /* Print only those contexts that are present in +CGACT response */
+                /* Print only those contexts that are present in +CGACT response. */
                 if( pdpContextsActInfo.contextsPresent[ i ] )
                 {
                     LogDebug( ( "Context [%d], Act State [%d]\r\n", i + 1, pdpContextsActInfo.contextActState[ i ] ) );
+
+                    if( *pNumStatus < numStatusBuffers )
+                    {
+                        pPdnStatusBuffers[ *pNumStatus ].contextId = i + 1U;
+                        pPdnStatusBuffers[ *pNumStatus ].state = pdpContextsActInfo.contextActState[ i ];
+                        *pNumStatus = *pNumStatus + 1U;
+                    }
                 }
             }
-
-            /* TODO: Currently only one context state can be saved in PdnStatusBuffers. */
-            pPdnStatusBuffers->state = pdpContextsActInfo.contextActState[ 0 ];
         }
     }
 
