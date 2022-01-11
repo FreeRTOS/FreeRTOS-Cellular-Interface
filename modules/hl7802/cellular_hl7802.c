@@ -425,7 +425,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         {
             atReqGetNoResult.pAtCmd = "AT+CFUN=1,1";
             pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
-                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
