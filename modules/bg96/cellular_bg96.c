@@ -225,7 +225,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Setting URC output port. */
-            #ifdef BG96_URC_PORT_USBAT
+            #if defined( CELLULAR_BG96_URC_PORT_USBAT ) || defined( BG96_URC_PORT_USBAT )
                 atReqGetNoResult.pAtCmd = "AT+QURCCFG=\"urcport\",\"usbat\"";
             #else
                 atReqGetNoResult.pAtCmd = "AT+QURCCFG=\"urcport\",\"uart1\"";
