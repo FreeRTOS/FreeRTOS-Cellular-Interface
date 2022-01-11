@@ -35,7 +35,7 @@
 
 /*-----------------------------------------------------------*/
 
-#define ENBABLE_MODULE_UE_RETRY_COUNT    ( 3U )
+#define ENBABLE_MODULE_UE_RETRY_COUNT    ( 6U )
 #define HL7802_MAX_BAND_CFG              ( 21U )
 
 /*-----------------------------------------------------------*/
@@ -303,19 +303,11 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
 CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtReq_t atReqGetNoResult =
     {
         NULL,
         CELLULAR_AT_NO_RESULT,
-        NULL,
-        NULL,
-        NULL,
-        0
-    };
-    CellularAtReq_t atReqGetWithResult =
-    {
-        NULL,
-        CELLULAR_AT_MULTI_WO_PREFIX,
         NULL,
         NULL,
         NULL,
@@ -326,24 +318,26 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Disable echo. */
-        atReqGetWithResult.pAtCmd = "ATE0";
-        cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWithResult,
+        atReqGetNoResult.pAtCmd = "ATE0";
+        cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
                                                         CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Disable DTR function. */
             atReqGetNoResult.pAtCmd = "AT&D0";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Enable RTS/CTS hardware flow control. */
             atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
         /* Set Radio Access Technology. */
@@ -354,8 +348,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
              * in the PRL if cell coverage is lost. If the PRL is empty, switch to
              * CAT-M1. To set the PRL, see AT+KSELACQ. */
             atReqGetNoResult.pAtCmd = "AT+KSRAT=0";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
         /* Set Default Radio Access Technology. */
@@ -379,8 +374,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                     break;
             }
 
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
         /* Set Configured LTE Band. */
@@ -396,8 +392,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                 LogInfo( ( "Cellular_ModuleEnableUE : CAT-M1 band desired %s actual %s",
                            CELLULAR_CONFIG_HL7802_CATM1_BAND, bandCfg.catm1BandCfg ) );
                 atReqGetNoResult.pAtCmd = "AT+KBNDCFG=0,"CELLULAR_CONFIG_HL7802_CATM1_BAND;
-                cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                                CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                       CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
             }
         }
 
@@ -408,8 +405,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                 LogInfo( ( "Cellular_ModuleEnableUE : NBIOT band desired %s actual %s",
                            CELLULAR_CONFIG_HL7802_NBIOT_BAND, bandCfg.nbiotBandCfg ) );
                 atReqGetNoResult.pAtCmd = "AT+KBNDCFG=1,"CELLULAR_CONFIG_HL7802_NBIOT_BAND;
-                cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                                CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                       CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
             }
         }
 
@@ -417,25 +415,26 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             atReqGetNoResult.pAtCmd = "AT+KSLEEP=2";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
         /* Force initialization of radio to consider new configured bands. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             atReqGetNoResult.pAtCmd = "AT+CFUN=1,1";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
-                                                            CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS );
+            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                   CELLULAR_HL7802_AT_TIMEOUT_30_SECONDS_MS );
+            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
-
-        Platform_Delay( CELLULAR_HL7802_RESET_DELAY_MS );
 
         /* Disable echo after reboot device. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            atReqGetWithResult.pAtCmd = "ATE0";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWithResult,
+            Platform_Delay( CELLULAR_HL7802_RESET_DELAY_MS );
+            atReqGetNoResult.pAtCmd = "ATE0";
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
                                                             CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
         }
     }
