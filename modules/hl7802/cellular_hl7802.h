@@ -40,7 +40,9 @@
 #define INVALID_SESSION_ID                           ( UINT32_MAX )
 
 /* Delay after AT+CFUN=1,1 commands. */
-#define CELLULAR_HL7802_RESET_DELAY_MS               ( 3000U )
+#ifndef CELLULAR_HL7802_RESET_DELAY_MS
+    #define CELLULAR_HL7802_RESET_DELAY_MS               ( 3000U )
+#endif
 
 /* AT command recommended timeout value for HL7802. Reference HL7802 AT Commands
  * Interface Guide to setup the timeout value for each AT commands. */
