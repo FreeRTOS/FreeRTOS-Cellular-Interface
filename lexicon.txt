@@ -771,6 +771,7 @@ standalone
 staticqueue
 staticsemaphore
 stm
+strcat
 strchr
 strcmp
 stringlength
