@@ -37,6 +37,7 @@
 
 #define ENBABLE_MODULE_UE_RETRY_COUNT    ( 6U )
 #define HL7802_MAX_BAND_CFG              ( 21U )
+#define HL7802_KSELACQ_CMD_MAX_SIZE      ( 19U ) /* The length of AT+KSELACQ=0,1,2,3\0. */
 
 /*-----------------------------------------------------------*/
 
@@ -248,6 +249,36 @@ static CellularError_t getBandCfg( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
+static bool appendRatList( char * pRatList,
+                           CellularRat_t cellularRat )
+{
+    bool retValue = true;
+
+    switch( cellularRat )
+    {
+        case CELLULAR_RAT_CATM1:
+            strcat( pRatList, ",1" );
+            break;
+
+        case CELLULAR_RAT_NBIOT:
+            strcat( pRatList, ",2" );
+            break;
+
+        case CELLULAR_RAT_GSM:
+            strcat( pRatList, ",3" );
+            break;
+
+        default:
+            /* Unsupported RAT. */
+            retValue = false;
+            break;
+    }
+
+    return retValue;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
@@ -314,6 +345,8 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         0
     };
     Hl7802BandConfig_t bandCfg = { 0 };
+    char ratSelectCmd[ HL7802_KSELACQ_CMD_MAX_SIZE ] = "AT+KSELACQ=0";
+    bool retAppendRat = true;
 
     if( pContext != NULL )
     {
@@ -356,24 +389,20 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         /* Set Default Radio Access Technology. */
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            switch( CELLULAR_CONFIG_DEFAULT_RAT )
-            {
-                case CELLULAR_RAT_CATM1:
-                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,1";
-                    break;
+            retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT );
+            configASSERT( retAppendRat == true );
 
-                case CELLULAR_RAT_NBIOT:
-                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,2";
-                    break;
+            #ifdef CELLULAR_CONFIG_DEFAULT_RAT_2
+                retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT_2 );
+                configASSERT( retAppendRat == true );
+            #endif
 
-                case CELLULAR_RAT_GSM:
-                    atReqGetNoResult.pAtCmd = "AT+KSELACQ=0,3";
-                    break;
+            #ifdef CELLULAR_CONFIG_DEFAULT_RAT_3
+                retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT_3 );
+                configASSERT( retAppendRat == true );
+            #endif
 
-                default:
-                    break;
-            }
-
+            atReqGetNoResult.pAtCmd = ratSelectCmd;
             pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
                                                                    CELLULAR_HL7802_AT_KSELACQ_TIMEOUT_MS );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
