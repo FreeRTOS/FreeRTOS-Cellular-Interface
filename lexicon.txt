@@ -654,6 +654,7 @@ queuereturnfail
 rac
 ratindex
 ratprioritieslength
+ratselectcmd
 rau
 rcv
 rcvdata
@@ -770,6 +771,7 @@ standalone
 staticqueue
 staticsemaphore
 stm
+strcat
 strchr
 strcmp
 stringlength
