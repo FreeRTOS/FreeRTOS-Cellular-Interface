@@ -38,6 +38,7 @@
 
 #define ENBABLE_MODULE_UE_RETRY_COUNT      ( 3U )
 #define ENBABLE_MODULE_UE_RETRY_TIMEOUT    ( 5000U )
+#define BG96_NWSCANSEQ_CMD_MAX_SIZE        ( 29U ) /* The length of AT+QCFG="nwscanseq",020301,1\0. */
 
 /*-----------------------------------------------------------*/
 
@@ -100,6 +101,37 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static bool appendRatList( char * pRatList,
+                           CellularRat_t cellularRat )
+{
+    bool retValue = true;
+
+    /* Configure RAT Searching Sequence to default radio access technology. */
+    switch( cellularRat )
+    {
+        case CELLULAR_RAT_CATM1:
+            strcat( pRatList, "02" );
+            break;
+
+        case CELLULAR_RAT_NBIOT:
+            strcat( pRatList, "03" );
+            break;
+
+        case CELLULAR_RAT_GSM:
+            strcat( pRatList, "01" );
+            break;
+
+        default:
+            /* Configure RAT Searching Sequence to automatic. */
+            retValue = false;
+            break;
+    }
+
+    return retValue;
 }
 
 /*-----------------------------------------------------------*/
@@ -201,6 +233,8 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         NULL,
         0
     };
+    char ratSelectCmd[ BG96_NWSCANSEQ_CMD_MAX_SIZE ] = "AT+QCFG=\"nwscanseq\",";
+    bool retAppendRat = true;
 
     if( pContext != NULL )
     {
@@ -256,27 +290,21 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Configure RAT Searching Sequence to default radio access technology. */
-            switch( CELLULAR_CONFIG_DEFAULT_RAT )
-            {
-                case CELLULAR_RAT_CATM1:
-                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",02,1";
-                    break;
+            retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT );
+            configASSERT( retAppendRat == true );
 
-                case CELLULAR_RAT_NBIOT:
-                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",03,1";
-                    break;
+            #ifdef CELLULAR_CONFIG_DEFAULT_RAT_2
+                retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT_2 );
+                configASSERT( retAppendRat == true );
+            #endif
 
-                case CELLULAR_RAT_GSM:
-                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",01,1";
-                    break;
+            #ifdef CELLULAR_CONFIG_DEFAULT_RAT_3
+                retAppendRat = appendRatList( ratSelectCmd, CELLULAR_CONFIG_DEFAULT_RAT_3 );
+                configASSERT( retAppendRat == true );
+            #endif
 
-                default:
-                    /* Configure RAT Searching Sequence to automatic. */
-                    atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",00,1";
-                    break;
-            }
-
+            strcat( ratSelectCmd, ",1" ); /* Take effect immediately. */
+            atReqGetNoResult.pAtCmd = ratSelectCmd;
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
