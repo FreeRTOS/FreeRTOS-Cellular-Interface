@@ -1012,7 +1012,7 @@ static int16_t convertCesqSignalRxlev( int32_t rxlevValue )
 {
     int16_t rssidBm = 0;
 
-    if( ( rxlevValue > 0 ) && ( rxlevValue <= 63 ) )
+    if( ( rxlevValue >= 0 ) && ( rxlevValue <= 63 ) )
     {
         rssidBm = ( int16_t ) ( ( -111 ) + ( rxlevValue ) );
     }
