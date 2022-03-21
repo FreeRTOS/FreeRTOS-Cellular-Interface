@@ -162,6 +162,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetRatPriority( CellularContext_t *
                                                              const CellularATCommandResponse_t * pAtResp,
                                                              void * pData,
                                                              uint16_t dataLen );
+static int16_t convertCesqSignalRxlev( int32_t rxlevValue );
 static int16_t convertCesqSignalRsrq( int32_t rsrqValue );
 static int16_t convertCesqSignalRsrp( int32_t rsrpValue );
 static bool _parseSignalQuality( char * pQcsqPayload,
@@ -998,6 +999,33 @@ static CellularPktStatus_t _Cellular_RecvFuncGetRatPriority( CellularContext_t *
 
 /*-----------------------------------------------------------*/
 
+/* Received signal strength level (see 3GPP TS 45.008 [20] subclause 8.1.4)
+ * 0 rssi < -110 dBm : assume -111 dBm to indicate the signal is detectable but fairly week.
+ * 1 -110 dBm <= rssi < -109 dBm
+ * 2 -109 dBm <= rssi < -108 dBm
+ * ...
+ * 61 -50 dBm <= rssi < -49 dBm
+ * 62 -49 dBm <= rssi < -48 dBm
+ * 63 -48 dBm <= rssi
+ * 99 not known or not detectable */
+static int16_t convertCesqSignalRxlev( int32_t rxlevValue )
+{
+    int16_t rssidBm = 0;
+
+    if( ( rxlevValue >= 0 ) && ( rxlevValue <= 63 ) )
+    {
+        rssidBm = ( int16_t ) ( ( -111 ) + ( rxlevValue ) );
+    }
+    else
+    {
+        rssidBm = CELLULAR_INVALID_SIGNAL_VALUE;
+    }
+
+    return rssidBm;
+}
+
+/*-----------------------------------------------------------*/
+
 /* 0 rsrq < -19.5 dB
  * 1 -19.5 dB <= rsrq < -19 dB
  * 2 -19 dB <= rsrq < -18.5 dB
@@ -1062,8 +1090,23 @@ static bool _parseSignalQuality( char * pQcsqPayload,
 
     /* The cesq payload format is <rxlev>,<ber>,<rscp>,<ecno>,<rsrq>,<rsrp>. */
 
-    /* Skip rxlev. */
+    /* rxlev. */
     atCoreStatus = Cellular_ATGetNextTok( &pTmpQcsqPayload, &pToken );
+
+    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    {
+        atCoreStatus = Cellular_ATStrtoi( pToken, 10, &tempValue );
+
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        {
+            pSignalInfo->rssi = convertCesqSignalRxlev( tempValue );
+        }
+        else
+        {
+            LogError( ( "_parseSignalQuality: Error in processing RXLEV. Token %s", pToken ) );
+            parseStatus = false;
+        }
+    }
 
     /* ber. */
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
@@ -1077,7 +1120,9 @@ static bool _parseSignalQuality( char * pQcsqPayload,
 
         if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && ( tempValue <= INT16_MAX ) && ( tempValue >= INT16_MIN ) )
         {
-            cellularStatus = _Cellular_ConvertCsqSignalRssi( ( int16_t ) tempValue, &berValue );
+            /* As RXQUAL values in the table in 3GPP TS 45.008 [20] subclause 8.2.4.
+             * The CESQ ber signal value has the same scale with the AT+CSQ ber signal value. */
+            cellularStatus = _Cellular_ConvertCsqSignalBer( ( int16_t ) tempValue, &berValue );
 
             if( cellularStatus == CELLULAR_SUCCESS )
             {
@@ -1123,7 +1168,7 @@ static bool _parseSignalQuality( char * pQcsqPayload,
         }
         else
         {
-            LogError( ( "_parseSignalQuality: Error in processing RSRP. Token %s", pToken ) );
+            LogError( ( "_parseSignalQuality: Error in processing RSRQ. Token %s", pToken ) );
             parseStatus = false;
         }
     }
