@@ -314,8 +314,8 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         {
             if( pAtResp->pItm->pNext == NULL )
             {
-                /* Modem return +USORD: 0,"". No data response since there is no data
-                 * length field in modem repsonse. */
+                /* Modem return +USORD: 0,"". No data returned since there is no data
+                 * length field in modem response. */
                 *pDataRecv->pDataLen = 0;
             }
             else
