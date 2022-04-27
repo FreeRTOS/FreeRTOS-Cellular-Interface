@@ -621,6 +621,23 @@ void test__Cellular_HandlePacket_Wrong_RespType( void )
 }
 
 /**
+ * @brief Test that URC with colon for _Cellular_HandlePacket when token is not in the token table.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_With_Colon_Not_In_Urc_Token_Path( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTableWoParseFunc, sizeof( CellularTokenTable_t ) );
+    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
+    _Cellular_GenericCallback_Ignore();
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
  * @brief Test that null Context case for _Cellular_PktHandler_AtcmdRequestWithCallback.
  */
 void test__Cellular_PktHandler_AtcmdRequestWithCallback_NULL_Context( void )
@@ -1455,22 +1472,5 @@ void test__Cellular_AtcmdRequestSuccessToken_Cellular_PktioSendAtCmd_Return_OK( 
     /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
     queueData = CELLULAR_PKT_STATUS_OK;
     pktStatus = _Cellular_AtcmdRequestSuccessToken( &context, atReqGetMccMnc, PACKET_REQ_TIMEOUT_MS, successTokenTable, 1 );
-    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
-}
-
-/**
- * @brief Test that happy path case for _Cellular_HandlePacket if token is not in the tokenTable.
- */
-void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_With_Colon_Not_In_Urc_Token_Path( void )
-{
-    CellularContext_t context;
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-    /* copy the token table. */
-    ( void ) memcpy( &context.tokenTable, &tokenTableWoParseFunc, sizeof( CellularTokenTable_t ) );
-    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
-    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
