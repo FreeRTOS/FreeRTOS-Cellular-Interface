@@ -46,7 +46,7 @@
 #include "mock_cellular_common.h"
 #include "mock_cellular_pktio_internal.h"
 
-#define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32\r123243154354364576587utrhfgdghfg"
+#define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32r123243154354364576587utrhfgdghfg"
 #define CELLULAR_URC_TOKEN_STRING_INPUT                 "RDY"
 #define CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS      "+RDY"
 #define CELLULAR_URC_TOKEN_STRING_GREATER_INPUT         "RDYY"
@@ -59,6 +59,8 @@ static uint16_t queueData = CELLULAR_PKT_STATUS_BAD_PARAM;
 static int32_t queueReturnFail = 0;
 static int32_t queueCreateFail = 0;
 static int32_t pktRespCBReturn = 0;
+static char * pGenericCallbackCompareString = NULL;
+static bool retGenericCallback = false;
 
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );
@@ -356,6 +358,24 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
     return atStatus;
 }
 
+static void _CMOCK_Cellular_Generic_CALLBACK( const CellularContext_t * pContext,
+                                              const char * pRawData,
+                                              int cmock_num_calls )
+{
+    ( void ) pRawData;
+    ( void ) pContext;
+    ( void ) cmock_num_calls;
+
+    if( strcmp( pGenericCallbackCompareString, pRawData ) == 0 )
+    {
+        retGenericCallback = true;
+    }
+    else
+    {
+        retGenericCallback = false;
+    }
+}
+
 /* Empty callback function for test. */
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr )
@@ -632,9 +652,15 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_With_Colon_Not_In_U
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTableWoParseFunc, sizeof( CellularTokenTable_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
+    /* set for generic callback function */
+    retGenericCallback = false;
+    pGenericCallbackCompareString = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
+    _Cellular_GenericCallback_Stub( _CMOCK_Cellular_Generic_CALLBACK );
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( true, retGenericCallback );
 }
 
 /**

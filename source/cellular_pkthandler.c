@@ -498,7 +498,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
             *( pSavePtr - 1 ) = ':';
         }
 
-        _Cellular_ProcessGenericUrc( pContext, pSavePtr );
+        _Cellular_ProcessGenericUrc( pContext, pTokenPtr );
     }
 
     return pktStatus;
