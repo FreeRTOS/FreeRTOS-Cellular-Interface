@@ -46,7 +46,7 @@
 #include "mock_cellular_common.h"
 #include "mock_cellular_pktio_internal.h"
 
-#define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32r123243154354364576587utrhfgdghfg"
+#define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_URC_TOKEN_STRING_INPUT                 "RDY"
 #define CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS      "+RDY"
 #define CELLULAR_URC_TOKEN_STRING_GREATER_INPUT         "RDYY"
