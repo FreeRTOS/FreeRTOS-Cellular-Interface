@@ -28,6 +28,7 @@
  * @brief Unit tests for functions in cellular_pkthandler_internal.h.
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -59,8 +60,8 @@ static uint16_t queueData = CELLULAR_PKT_STATUS_BAD_PARAM;
 static int32_t queueReturnFail = 0;
 static int32_t queueCreateFail = 0;
 static int32_t pktRespCBReturn = 0;
-static char * pGenericCallbackCompareString = NULL;
-static bool retGenericCallback = false;
+static bool passCompareString = false;
+static char * pCompareString = NULL;
 
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );
@@ -366,13 +367,9 @@ static void _CMOCK_Cellular_Generic_CALLBACK( const CellularContext_t * pContext
     ( void ) pContext;
     ( void ) cmock_num_calls;
 
-    if( strcmp( pGenericCallbackCompareString, pRawData ) == 0 )
+    if( strcmp( pCompareString, pRawData ) == 0 )
     {
-        retGenericCallback = true;
-    }
-    else
-    {
-        retGenericCallback = false;
+        passCompareString = true;
     }
 }
 
@@ -382,6 +379,18 @@ void cellularAtParseTokenHandler( CellularContext_t * pContext,
 {
     ( void ) pContext;
     ( void ) pInputStr;
+
+    if( strcmp( pCompareString, pInputStr ) == 0 )
+    {
+        passCompareString = true;
+    }
+}
+
+static char * getStringAfterColon( char * pInputStr )
+{
+    char * ret = memchr( pInputStr, ':', strlen( pInputStr ) );
+
+    return ret ? ret + 1 : pInputStr + strlen( pInputStr );
 }
 
 /* ========================================================================== */
@@ -533,7 +542,7 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Start_Plus_No_Token_String( void
 
     memset( &context, 0, sizeof( CellularContext_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_PLUS_TOKEN_ONLY_STRING );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_REQUEST, pktStatus );
 }
@@ -547,9 +556,8 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Too_Large_String( void )
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
 }
@@ -566,7 +574,7 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Null_Parse_Function( void )
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTableWoParseFunc, sizeof( CellularTokenTable_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_FAILURE, pktStatus );
 }
@@ -583,9 +591,14 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
     /* copy the token table. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
+    /* set for cellularAtParseTokenHandler function */
+    passCompareString = false;
+    pCompareString = getStringAfterColon( CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( true, passCompareString );
 }
 
 /**
@@ -601,9 +614,15 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Greater_Than_Urc_To
     /* Test the greater string size in comparison function. */
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
+    /* set for generic callback function */
+    passCompareString = false;
+    pCompareString = CELLULAR_URC_TOKEN_STRING_GREATER_INPUT;
+    _Cellular_GenericCallback_Stub( _CMOCK_Cellular_Generic_CALLBACK );
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_GREATER_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( true, passCompareString );
 }
 
 /**
@@ -620,9 +639,15 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Less_Than_Urc_Token
 
     /* Test the smaller string size in comparison function. */
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
-    _Cellular_GenericCallback_Ignore();
+
+    /* set for generic callback function */
+    passCompareString = false;
+    pCompareString = CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT;
+    _Cellular_GenericCallback_Stub( _CMOCK_Cellular_Generic_CALLBACK );
+
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( true, passCompareString );
 }
 
 /**
@@ -654,13 +679,13 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_With_Colon_Not_In_U
     Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
 
     /* set for generic callback function */
-    retGenericCallback = false;
-    pGenericCallbackCompareString = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
+    passCompareString = false;
+    pCompareString = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP;
     _Cellular_GenericCallback_Stub( _CMOCK_Cellular_Generic_CALLBACK );
 
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
-    TEST_ASSERT_EQUAL( true, retGenericCallback );
+    TEST_ASSERT_EQUAL( true, passCompareString );
 }
 
 /**
