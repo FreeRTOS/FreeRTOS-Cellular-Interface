@@ -489,7 +489,16 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
     {
         /* No URC callback function available, check for generic call back. */
         LogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
-        _Cellular_ProcessGenericUrc( pContext, pSavePtr );
+
+        if( pSavePtr != pTokenPtr )
+        {
+            /* pSavePtr != pTokenPtr means the string starts with '+'.
+             * Restore string to "+pTokenPtr:pSavePtr" for callback function. */
+            pTokenPtr--;
+            *( pSavePtr - 1 ) = ':';
+        }
+
+        _Cellular_ProcessGenericUrc( pContext, pTokenPtr );
     }
 
     return pktStatus;
