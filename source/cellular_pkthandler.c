@@ -175,7 +175,8 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char payload[ CELLULAR_AT_URC_MAX_SIZE ];
+    /* The longest valid string has '\0' at ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) */
+    char payload[ ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) ];
     char * pNullCharacterLocation = NULL;
 
     if( pBuf == NULL )
@@ -184,18 +185,18 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
     }
     else
     {
-        pNullCharacterLocation = memchr( pBuf, '\0', CELLULAR_AT_URC_MAX_SIZE );
+        pNullCharacterLocation = memchr( pBuf, '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
 
         if( pNullCharacterLocation == NULL )
         {
-            /* URC string is longer than CELLULAR_AT_URC_MAX_SIZE. */
-            LogError( ( "URC string is longer than CELLULAR_AT_URC_MAX_SIZE. This URC message is dropped." ) );
+            /* URC string is longer than CELLULAR_AT_MAX_STRING_SIZE. */
+            LogError( ( "URC string is longer than CELLULAR_AT_MAX_STRING_SIZE. This URC message is dropped." ) );
             pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
         }
         else
         {
             /* The payload is null terminated. */
-            strncpy( payload, pBuf, CELLULAR_AT_URC_MAX_SIZE );
+            strncpy( payload, pBuf, ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
             pktStatus = urcParseToken( pContext, ( char * ) payload );
         }
     }
