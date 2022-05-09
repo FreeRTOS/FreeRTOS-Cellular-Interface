@@ -139,7 +139,6 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
      * if string not start with "+", then pTokenPtr = pSavePtr = pInputPtr. */
     char * pSavePtr = pInputLine, * pTokenPtr = pInputLine;
 
-
     LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
 
     /* First check for + at the beginning and advance to point to the next
@@ -176,28 +175,29 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
-    char * payload = NULL;
+    char payload[ CELLULAR_AT_URC_MAX_SIZE ];
+    char * pNullCharacterLocation = NULL;
 
-    if( pBuf != NULL )
+    if( pBuf == NULL )
     {
-        atStatus = Cellular_ATStrDup( &payload, pBuf );
-
-        if( atStatus == CELLULAR_AT_SUCCESS )
-        {
-            /* The payload is null terminated. */
-            pktStatus = urcParseToken( pContext, ( char * ) payload );
-            Platform_Free( payload );
-        }
-        else
-        {
-            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            LogWarn( ( "Couldn't allocate memory of %u for urc", ( uint32_t ) strlen( pBuf ) ) );
-        }
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
     {
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        pNullCharacterLocation = memchr( pBuf, '\0', CELLULAR_AT_URC_MAX_SIZE );
+
+        if( pNullCharacterLocation == NULL )
+        {
+            /* URC string is longer than CELLULAR_AT_URC_MAX_SIZE. */
+            LogError( ( "URC string is longer than CELLULAR_AT_URC_MAX_SIZE. This URC message is dropped." ) );
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        }
+        else
+        {
+            /* The payload is null terminated. */
+            strncpy( payload, pBuf, CELLULAR_AT_URC_MAX_SIZE );
+            pktStatus = urcParseToken( pContext, ( char * ) payload );
+        }
     }
 
     return pktStatus;

@@ -79,6 +79,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
                                                          const char * pRespPrefix );
 static CellularATCommandResponse_t * _Cellular_AtResponseNew( void );
 static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp );
+static CellularATCommandLine_t * _allocATCommandLine( void );
 static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pContext,
                                                   char * pLine,
                                                   CellularATCommandResponse_t * pResp,
@@ -115,6 +116,19 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
 
 /*-----------------------------------------------------------*/
 
+#if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 )
+    /* Static buffer for AT response structure. */
+    static CellularATCommandResponse_t cellularStaticResponse = { 0 };
+
+    /* Static table for AT response line structure. */
+    static CellularATCommandLine_t cellularStaticATCommandLineTable[ CELLULAR_NUM_AT_COMMAND_LINE ] = { 0 };
+
+    /* Static AT response line index. */
+    static uint32_t cellularStaticATCommandIndex = 0;
+#endif
+
+/*-----------------------------------------------------------*/
+
 static uint32_t _convertCharPtrDistance( const char * pEndPtr,
                                          const char * pStartPtr )
 {
@@ -135,7 +149,7 @@ static void _saveData( char * pLine,
 
     LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
 
-    pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
+    pNew = ( CellularATCommandLine_t * ) _allocATCommandLine();
     configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
@@ -255,8 +269,12 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
 {
     CellularATCommandResponse_t * pNew = NULL;
 
-    pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
-    configASSERT( ( pNew != NULL ) );
+    #if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 )
+        pNew = &cellularStaticResponse;
+    #else
+        pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
+        configASSERT( ( pNew != NULL ) );
+    #endif
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -273,24 +291,54 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
  */
 static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp )
 {
-    CellularATCommandLine_t * pCurrLine = NULL;
-    CellularATCommandLine_t * pToFree = NULL;
+    #if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 )
+        ( void ) pResp;
+        cellularStaticATCommandIndex = 0;
+    #else
+        CellularATCommandLine_t * pCurrLine = NULL;
+        CellularATCommandLine_t * pToFree = NULL;
 
-    if( pResp != NULL )
-    {
-        pCurrLine = pResp->pItm;
-
-        while( pCurrLine != NULL )
+        if( pResp != NULL )
         {
-            pToFree = pCurrLine;
-            pCurrLine = pCurrLine->pNext;
+            pCurrLine = pResp->pItm;
 
-            /* Ruese the pktiobuffer. No need to free pToFree->pLine here. */
-            Platform_Free( pToFree );
+            while( pCurrLine != NULL )
+            {
+                pToFree = pCurrLine;
+                pCurrLine = pCurrLine->pNext;
+
+                /* Ruese the pktiobuffer. No need to free pToFree->pLine here. */
+                Platform_Free( pToFree );
+            }
+
+            Platform_Free( pResp );
         }
+    #endif /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
+}
 
-        Platform_Free( pResp );
-    }
+/*-----------------------------------------------------------*/
+
+static CellularATCommandLine_t * _allocATCommandLine( void )
+{
+    CellularATCommandLine_t * pNew = NULL;
+
+    #if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 )
+        if( cellularStaticATCommandIndex < CELLULAR_NUM_AT_COMMAND_LINE )
+        {
+            pNew = &cellularStaticATCommandLineTable[ cellularStaticATCommandIndex ];
+            cellularStaticATCommandIndex++;
+        }
+        else
+        {
+            LogError( ( "Maximum number of CELLULAR_NUM_AT_COMMAND_LINE exceed." ) );
+        }
+    #else
+        pNew = Platform_Malloc( sizeof( CellularATCommandLine_t ) );
+    #endif /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
+
+    memset( pNew, 0, sizeof( CellularATCommandLine_t ) );
+
+    return pNew;
 }
 
 /*-----------------------------------------------------------*/

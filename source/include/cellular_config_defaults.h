@@ -362,6 +362,36 @@
 #endif
 
 /**
+ * @brief Default cellular AT command URC size.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 256
+ */
+#ifndef CELLULAR_AT_URC_MAX_SIZE
+    #define CELLULAR_AT_URC_MAX_SIZE    ( 256U )
+#endif
+
+/**
+ * @brief FreeRTOS Cellular Library use static AT response.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 0
+ */
+#ifndef CELLULAR_CONFIG_STATIC_AT_RESPONSE
+    #define CELLULAR_CONFIG_STATIC_AT_RESPONSE    ( 0 )
+#endif
+
+/**
+ * @brief Default static AT command line number.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 10
+ */
+#ifndef CELLULAR_NUM_AT_COMMAND_LINE
+    #define CELLULAR_NUM_AT_COMMAND_LINE    ( 10U )
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *
