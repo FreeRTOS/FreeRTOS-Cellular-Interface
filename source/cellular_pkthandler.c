@@ -191,7 +191,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         {
             /* URC string is longer than CELLULAR_AT_MAX_STRING_SIZE. */
             LogError( ( "URC string is longer than CELLULAR_AT_MAX_STRING_SIZE. This URC message is dropped." ) );
-            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
         else
         {
