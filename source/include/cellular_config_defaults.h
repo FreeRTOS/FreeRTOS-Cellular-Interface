@@ -362,16 +362,6 @@
 #endif
 
 /**
- * @brief Default cellular AT command URC size.<br>
- *
- * <b>Possible values:</b>`Any positive integer`<br>
- * <b>Default value (if undefined):</b> 256
- */
-#ifndef CELLULAR_AT_URC_MAX_SIZE
-    #define CELLULAR_AT_URC_MAX_SIZE    ( 256U )
-#endif
-
-/**
  * @brief FreeRTOS Cellular Library use static AT response.<br>
  *
  * <b>Possible values:</b>`0 or 1`<br>
