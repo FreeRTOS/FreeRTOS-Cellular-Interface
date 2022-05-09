@@ -120,10 +120,10 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
     /* Static buffer for AT response structure. */
     static CellularATCommandResponse_t cellularStaticResponse = { 0 };
 
-    /* Static table for AT response line structure. */
+/* Static table for AT response line structure. */
     static CellularATCommandLine_t cellularStaticATCommandLineTable[ CELLULAR_NUM_AT_COMMAND_LINE ] = { 0 };
 
-    /* Static AT response line index. */
+/* Static AT response line index. */
     static uint32_t cellularStaticATCommandIndex = 0;
 #endif
 

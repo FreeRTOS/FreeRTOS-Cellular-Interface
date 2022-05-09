@@ -1926,24 +1926,6 @@ void test_Cellular_CommonGetRegisteredNetwork_Bad_Parameter( void )
 }
 
 /**
- * @brief Test that bad parameter case Cellular_CommonGetRegisteredNetwork to return CELLULAR_NO_MEMORY.
- */
-void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularContext_t context;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-    CellularHandle_t cellularHandle = &context;
-    CellularPlmnInfo_t networkInfo;
-
-    mallocAllocFail = 1;
-    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
-    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
-}
-
-/**
  * @brief Test that invalid rat case Cellular_CommonGetRegisteredNetwork to return CELLULAR_UNKNOWN.
  */
 void test_Cellular_CommonGetRegisteredNetwork_Invalid_Rat( void )
