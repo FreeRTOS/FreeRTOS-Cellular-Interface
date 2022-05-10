@@ -153,23 +153,30 @@ static void _saveData( char * pLine,
     configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
-    pNew->pLine = pLine;
-    pNew->pNext = NULL;
-
-    if( pResp->pItm == NULL )
+    if( pNew == NULL )
     {
-        pResp->pItm = pNew;
+        LogError( ( "_saveData : Failed to _allocATCommandLine. This line %s is added to response.", pLine ) );
     }
     else
     {
-        pTemp = pResp->pItm;
+        pNew->pLine = pLine;
+        pNew->pNext = NULL;
 
-        while( pTemp->pNext != NULL )
+        if( pResp->pItm == NULL )
         {
-            pTemp = pTemp->pNext;
+            pResp->pItm = pNew;
         }
+        else
+        {
+            pTemp = pResp->pItm;
 
-        pTemp->pNext = pNew;
+            while( pTemp->pNext != NULL )
+            {
+                pTemp = pTemp->pNext;
+            }
+
+            pTemp->pNext = pNew;
+        }
     }
 }
 
@@ -271,12 +278,15 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
 
     #if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 )
         pNew = &cellularStaticResponse;
+        ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
     #else
         pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
         configASSERT( ( pNew != NULL ) );
+        if( pNew != NULL )
+        {
+            ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
+        }
     #endif
-
-    ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
 
     return pNew;
 }
@@ -327,6 +337,7 @@ static CellularATCommandLine_t * _allocATCommandLine( void )
         {
             pNew = &cellularStaticATCommandLineTable[ cellularStaticATCommandIndex ];
             cellularStaticATCommandIndex++;
+            LogError( ( "cellularStaticATCommandIndex %d.", cellularStaticATCommandIndex ) );
         }
         else
         {
@@ -336,7 +347,14 @@ static CellularATCommandLine_t * _allocATCommandLine( void )
         pNew = Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     #endif /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
 
-    memset( pNew, 0, sizeof( CellularATCommandLine_t ) );
+    if( pNew == NULL )
+    {
+        LogError( ( "Fail to allocate CellularATCommandLine_t." ) );
+    }
+    else
+    {
+        memset( pNew, 0, sizeof( CellularATCommandLine_t ) );
+    }
 
     return pNew;
 }
