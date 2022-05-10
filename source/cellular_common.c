@@ -529,7 +529,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                                             CellularSocketProtocol_t socketProtocol,
                                             CellularSocketHandle_t * pSocketHandle )
 {
-    CellularError_t cellularStatus = CELLULAR_NO_MEMORY;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularSocketContext_t * pSocketData = NULL;
     uint8_t socketId = 0;
 
@@ -541,7 +541,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
                 pSocketData = &cellularStaticSocketDataTable[ socketId ];
-                cellularStatus = CELLULAR_SUCCESS;
                 createSocketSetSocketData( contextId, socketId, socketDomain,
                                            socketType, socketProtocol, pSocketData );
                 pContext->pSocketData[ socketId ] = pSocketData;
@@ -552,10 +551,10 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 if( pSocketData == NULL )
                 {
                     LogError( ( "_Cellular_CreateSocketData, Out of memory." ) );
+                    cellularStatus = CELLULAR_NO_MEMORY;
                 }
                 else
                 {
-                    cellularStatus = CELLULAR_SUCCESS;
                     createSocketSetSocketData( contextId, socketId, socketDomain,
                                                socketType, socketProtocol, pSocketData );
                     pContext->pSocketData[ socketId ] = pSocketData;
@@ -568,6 +567,13 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     }
 
     taskEXIT_CRITICAL();
+
+    /* Free socket slot not found case. */
+    if( socketId >= CELLULAR_NUM_SOCKET_MAX )
+    {
+        LogError( ( "_Cellular_CreateSocketData, No free socket slots are available." ) );
+        cellularStatus = CELLULAR_NO_MEMORY;
+    }
 
     return cellularStatus;
 }
