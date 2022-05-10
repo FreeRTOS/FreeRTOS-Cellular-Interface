@@ -531,7 +531,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                                             CellularSocketProtocol_t socketProtocol,
                                             CellularSocketHandle_t * pSocketHandle )
 {
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularError_t cellularStatus = CELLULAR_NO_MEMORY;
     CellularSocketContext_t * pSocketData = NULL;
     uint8_t socketId = 0;
 
@@ -542,25 +542,27 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         if( pContext->pSocketData[ socketId ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-                {
-                    pSocketData = &cellularStaticSocketDataTable[ socketId ];
-                }
+                pSocketData = &cellularStaticSocketDataTable[ socketId ];
+                cellularStatus = CELLULAR_SUCCESS;
             #else
-                {
-                    pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
-                }
-            #endif
+                pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
 
-            if( pSocketData != NULL )
+                if( pSocketData == NULL )
+                {
+                    LogError( ( "_Cellular_CreateSocketData, Out of memory." ) );
+                }
+                else
+                {
+                    cellularStatus = CELLULAR_SUCCESS;
+                }
+            #endif /* if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 ) */
+
+            if( cellularStatus == CELLULAR_SUCCESS )
             {
                 createSocketSetSocketData( contextId, socketId, socketDomain,
                                            socketType, socketProtocol, pSocketData );
                 pContext->pSocketData[ socketId ] = pSocketData;
                 *pSocketHandle = ( CellularSocketHandle_t ) pSocketData;
-            }
-            else
-            {
-                cellularStatus = CELLULAR_NO_MEMORY;
             }
 
             break;
@@ -568,20 +570,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     }
 
     taskEXIT_CRITICAL();
-
-    if( cellularStatus == CELLULAR_NO_MEMORY )
-    {
-        LogError( ( "_Cellular_CreateSocket, Out of memory" ) );
-    }
-    else if( socketId >= CELLULAR_NUM_SOCKET_MAX )
-    {
-        LogError( ( "_Cellular_CreateSocket, No free socket slots are available" ) );
-        cellularStatus = CELLULAR_NO_MEMORY;
-    }
-    else
-    {
-        /* Empty Else MISRA 15.7 */
-    }
 
     return cellularStatus;
 }
