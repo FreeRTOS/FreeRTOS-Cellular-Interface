@@ -79,7 +79,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
                                                          const char * pRespPrefix );
 static CellularATCommandResponse_t * _Cellular_AtResponseNew( void );
 static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp );
-static CellularATCommandLine_t * _allocATCommandLine( void );
+static CellularATCommandLine_t * _Cellular_AtCommandLineNew( void );
 static CellularPktStatus_t _Cellular_ProcessLine( const CellularContext_t * pContext,
                                                   char * pLine,
                                                   CellularATCommandResponse_t * pResp,
@@ -149,13 +149,13 @@ static void _saveData( char * pLine,
 
     LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
 
-    pNew = _allocATCommandLine();
+    pNew = _Cellular_AtCommandLineNew();
     configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
     if( pNew == NULL )
     {
-        LogError( ( "_saveData : Failed to _allocATCommandLine. This line %s is added to response.", pLine ) );
+        LogError( ( "_saveData : Failed to allocate CellularATCommandLine_t. This line %s is not added to response.", pLine ) );
     }
     else
     {
@@ -329,7 +329,11 @@ static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp )
 
 /*-----------------------------------------------------------*/
 
-static CellularATCommandLine_t * _allocATCommandLine( void )
+/**
+ * Allocate CellularATCommandLine_t structure. The allocated memory is freed in
+ *  _Cellular_AtResponseFree.
+ */
+static CellularATCommandLine_t * _Cellular_AtCommandLineNew( void )
 {
     CellularATCommandLine_t * pNew = NULL;
 
