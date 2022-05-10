@@ -328,7 +328,7 @@
  * <b>Default value (if undefined):</b> 0
  */
 #ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
-    #define CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT    ( 0U )
+    #define CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT    ( 1U )
 #endif
 
 /**
@@ -348,7 +348,7 @@
  * <b>Default value (if undefined):</b> 0
  */
 #ifndef CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
-    #define CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION    ( 0 )
+    #define CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION    ( 1 )
 #endif
 
 /**
@@ -358,7 +358,7 @@
  * <b>Default value (if undefined):</b> 0
  */
 #ifndef CELLULAR_CONFIG_STATIC_AT_RESPONSE
-    #define CELLULAR_CONFIG_STATIC_AT_RESPONSE    ( 0 )
+    #define CELLULAR_CONFIG_STATIC_AT_RESPONSE    ( 1 )
 #endif
 
 /**
