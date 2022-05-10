@@ -113,6 +113,13 @@ static int setpktDataPrefixCBReturn = 0;
 
 static int32_t customCallbackContext = 0;
 
+/* The index to count malloc times. */
+static int mallocAllocIndex = 0;
+
+/* Malloc should fail when mallocAllocIndex is greater or equal to mallocAllocFail.
+ * Set to 0 to indicate malloc won't fail. */
+static int mallocAllocFail = 0;
+
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
@@ -208,6 +215,8 @@ void setUp()
     setpktDataPrefixCBReturn = 0;
     testInfiniteLoop = 0;
     evtGroupHandle = &evtGroup;
+    mallocAllocFail = 0;
+    mallocAllocIndex = 0;
 }
 
 /* Called after each test method. */
@@ -235,7 +244,15 @@ void dummyDelay( uint32_t milliseconds )
 
 void * mock_malloc( size_t size )
 {
-    return ( void * ) malloc( size );
+    if( ( mallocAllocFail > 0 ) && ( mallocAllocIndex >= mallocAllocFail ) )
+    {
+        return NULL;
+    }
+    else
+    {
+        mallocAllocIndex++;
+        return ( void * ) malloc( size );
+    }
 }
 
 uint16_t MockPlatformEventGroup_Delete( PlatformEventGroupHandle_t groupEvent )
@@ -1615,6 +1632,71 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_URC_TOKEN_STRING_RESP( void )
     context.pktDataSendPrefixCB = sendDataPrefix;
     isSendDataPrefixCbkSuccess = 0;
     context.pRespPrefix = CELLULAR_URC_TOKEN_PREFIX_STRING;
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test thread allocate AT response fail. Thus _Cellular_PktioInit
+ * will still return CELLULAR_PKT_STATUS_OK. But we could check the calling graph in coverage report.
+ */
+void test__Cellular_PktioInit_Thread_Allocate_AT_Response_fail( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING;
+
+    /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 4;
+    atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
+    mallocAllocIndex = 1;
+    mallocAllocFail = 1;
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test thread allocate AT commandline fail. Thus _Cellular_PktioInit
+ * will still return CELLULAR_PKT_STATUS_OK. But we could check the calling graph in coverage report.
+ */
+void test__Cellular_PktioInit_Thread_Allocate_AT_CommandLine_fail( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+    context.pktDataPrefixCB = cellularATCommandDataPrefixCallback;
+    context.pRespPrefix = CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING;
+
+    /* Test the rx_data event with CELLULAR_AT_MULTI_DATA_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 4;
+    atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX;
+    mallocAllocFail = 4;
+
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );

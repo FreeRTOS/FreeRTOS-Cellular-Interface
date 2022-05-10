@@ -81,6 +81,11 @@
  */
 #define CELLULAR_IP_ADDRESS_MAX_SIZE    ( 64U )
 
+/*
+ * Reduce the static AT command line number.
+ */
+#define CELLULAR_NUM_AT_COMMAND_LINE    ( 6U )
+
 /* Macro MOCK_LIB_TEST will be defined in test\unit-test\CMakeLists.txt for mock library.*/
 #ifdef MOCK_LIB_TEST
     typedef struct CellularContext
