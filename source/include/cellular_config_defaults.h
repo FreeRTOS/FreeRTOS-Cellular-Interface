@@ -322,7 +322,7 @@
 #endif
 
 /**
- * @brief FreeRTOS Cellular Library use static context.<br>
+ * @brief FreeRTOS Cellular Library uses static context.<br>
  *
  * <b>Possible values:</b>`0 or 1`<br>
  * <b>Default value (if undefined):</b> 0
@@ -332,7 +332,7 @@
 #endif
 
 /**
- * @brief Default radio access technoloyg.<br>
+ * @brief Default radio access technology.<br>
  *
  * <b>Possible values:</b>`Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t )<br>
  * <b>Default value (if undefined):</b> CELLULAR_RAT_CATM1
@@ -342,7 +342,7 @@
 #endif
 
 /**
- * @brief Cellular comm interface use static socket context.<br>
+ * @brief FreeRTOS Cellular Library uses static socket context.<br>
  *
  * <b>Possible values:</b>`0 or 1`<br>
  * <b>Default value (if undefined):</b> 0
@@ -352,7 +352,7 @@
 #endif
 
 /**
- * @brief FreeRTOS Cellular Library use static AT response.<br>
+ * @brief FreeRTOS Cellular Library uses static AT response.<br>
  *
  * <b>Possible values:</b>`0 or 1`<br>
  * <b>Default value (if undefined):</b> 0
