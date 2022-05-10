@@ -343,7 +343,7 @@ static CellularATCommandLine_t * _allocATCommandLine( void )
         {
             LogError( ( "Maximum number of CELLULAR_NUM_AT_COMMAND_LINE exceed." ) );
         }
-    #else  /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
+    #else /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
         pNew = Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     #endif /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
 
