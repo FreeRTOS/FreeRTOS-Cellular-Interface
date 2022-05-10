@@ -127,12 +127,13 @@ static CellularContext_t * _Cellular_AllocContext( void )
                 cellularContextTable[ i ] = pContext;
             #else
                 pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
+
                 if( pContext != NULL )
                 {
                     ( void ) memset( pContext, 0, sizeof( CellularContext_t ) );
                     cellularContextTable[ i ] = pContext;
                 }
-            #endif
+            #endif /* if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 ) */
 
             break;
         }
@@ -542,7 +543,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 pSocketData = &cellularStaticSocketDataTable[ socketId ];
                 cellularStatus = CELLULAR_SUCCESS;
                 createSocketSetSocketData( contextId, socketId, socketDomain,
-                       socketType, socketProtocol, pSocketData );
+                                           socketType, socketProtocol, pSocketData );
                 pContext->pSocketData[ socketId ] = pSocketData;
                 *pSocketHandle = ( CellularSocketHandle_t ) pSocketData;
             #else
@@ -556,7 +557,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 {
                     cellularStatus = CELLULAR_SUCCESS;
                     createSocketSetSocketData( contextId, socketId, socketDomain,
-                           socketType, socketProtocol, pSocketData );
+                                               socketType, socketProtocol, pSocketData );
                     pContext->pSocketData[ socketId ] = pSocketData;
                     *pSocketHandle = ( CellularSocketHandle_t ) pSocketData;
                 }

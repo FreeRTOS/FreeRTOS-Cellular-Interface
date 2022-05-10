@@ -282,6 +282,7 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
     #else
         pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
         configASSERT( ( pNew != NULL ) );
+
         if( pNew != NULL )
         {
             ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
@@ -343,7 +344,7 @@ static CellularATCommandLine_t * _allocATCommandLine( void )
         {
             LogError( ( "Maximum number of CELLULAR_NUM_AT_COMMAND_LINE exceed." ) );
         }
-    #else
+    #else  /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
         pNew = Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     #endif /* if ( CELLULAR_CONFIG_STATIC_AT_RESPONSE == 1 ) */
 
