@@ -149,7 +149,7 @@ static void _saveData( char * pLine,
 
     LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
 
-    pNew = ( CellularATCommandLine_t * ) _allocATCommandLine();
+    pNew = _allocATCommandLine();
     configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
