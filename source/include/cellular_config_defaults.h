@@ -332,16 +332,6 @@
 #endif
 
 /**
- * @brief Cellular comm interface use static context.<br>
- *
- * <b>Possible values:</b>`0 or 1`<br>
- * <b>Default value (if undefined):</b> 0
- */
-#ifndef CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION
-    #define CELLULAR_CONFIG_STATIC_COMM_CONTEXT_ALLOCATION    ( 0U )
-#endif
-
-/**
  * @brief Default radio access technoloyg.<br>
  *
  * <b>Possible values:</b>`Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t )<br>
