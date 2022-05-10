@@ -338,7 +338,6 @@ static CellularATCommandLine_t * _allocATCommandLine( void )
         {
             pNew = &cellularStaticATCommandLineTable[ cellularStaticATCommandIndex ];
             cellularStaticATCommandIndex++;
-            LogError( ( "cellularStaticATCommandIndex %d.", cellularStaticATCommandIndex ) );
         }
         else
         {
