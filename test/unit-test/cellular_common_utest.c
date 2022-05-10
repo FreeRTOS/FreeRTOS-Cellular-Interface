@@ -532,7 +532,11 @@ void test__Cellular_CreateSocketData_Mem_Alloc_Fail( void )
                                             CELLULAR_SOCKET_TYPE_DGRAM,
                                             CELLULAR_SOCKET_PROTOCOL_TCP,
                                             &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, pktStatus );
+    #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
+        TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, pktStatus );
+    #else
+        TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, pktStatus );
+    #endif
 }
 
 /**
@@ -1342,8 +1346,12 @@ void test__Cellular_LibInit_Memory_Allocation_Failure( void )
     mallocAllocFail = 1;
 
     cellularStatus = _Cellular_LibInit( &CellularHandle, &CellularCommInterface, &tokenTable );
-
-    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
+    #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
+        TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
+    #else
+        /* If static allocation context is enabled, the next error should be CELLULAR_RESOURCE_CREATION_FAIL. */
+        TEST_ASSERT_EQUAL( CELLULAR_RESOURCE_CREATION_FAIL, cellularStatus );
+    #endif
 }
 
 /**
