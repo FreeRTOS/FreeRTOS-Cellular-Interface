@@ -237,30 +237,17 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     }
 
     /* Data is stored in the next intermediate response. */
-    if( pAtResp->pItm->pNext != NULL )
-    {
-        pInputLine = pAtResp->pItm->pNext->pLine;
+    pInputLine = pAtResp->pItm->pNext->pLine;
 
-        if( ( pInputLine != NULL ) && ( dataLenToCopy > 0U ) )
-        {
-            /* Copy the data to the out buffer. */
-            ( void ) memcpy( ( void * ) pDataRecv->pData, ( const void * ) pInputLine, dataLenToCopy );
-        }
-        else
-        {
-            LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %u",
-                        pInputLine, dataLenToCopy ) );
-            atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
-        }
-    }
-    else if( *pDataRecv->pDataLen == 0U )
+    if( ( pInputLine != NULL ) && ( dataLenToCopy > 0U ) )
     {
-        /* Receive command success but no data. */
-        LogDebug( ( "Receive Data: no data" ) );
+        /* Copy the data to the out buffer. */
+        ( void ) memcpy( ( void * ) pDataRecv->pData, ( const void * ) pInputLine, dataLenToCopy );
     }
     else
     {
-        LogError( ( "Receive Data: Intermediate response empty" ) );
+        LogError( ( "Receive Data: paramerter error, data pointer %p, data to copy %u",
+                    pInputLine, dataLenToCopy ) );
         atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
     }
 
@@ -281,8 +268,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     char * pInputLine = NULL, * pToken = NULL;
     const _socketDataRecv_t * pDataRecv = ( _socketDataRecv_t * ) pData;
     int32_t tempValue = 0;
-
-    ( void ) dataLen;
 
     if( pContext == NULL )
     {
@@ -314,7 +299,8 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         {
             if( pAtResp->pItm->pNext == NULL )
             {
-                /* No data response. */
+                /* Modem return +USORD: 0,"". No data returned since there is no data
+                 * length field in modem response. */
                 *pDataRecv->pDataLen = 0;
             }
             else
@@ -341,10 +327,11 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
                     }
                 }
 
-                /* Process the data buffer. */
-                if( atCoreStatus == CELLULAR_AT_SUCCESS )
+                /* Process the data buffer. Modem may also return +USORD: 0,0,"" with 0 data length.
+                 * Process the data response only when data length is greater than 0. */
+                if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && ( *pDataRecv->pDataLen > 0U ) )
                 {
-                    atCoreStatus = getDataFromResp( pAtResp, pDataRecv, *pDataRecv->pDataLen );
+                    atCoreStatus = getDataFromResp( pAtResp, pDataRecv, dataLen );
                 }
             }
         }
