@@ -108,6 +108,19 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
     }
+    else if( option == CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT )
+    {
+        if( socketHandle->socketState == SOCKETSTATE_ALLOCATED )
+        {
+            socketHandle->localPort = *pOptionValue;
+        }
+        else
+        {
+            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the localPort in this state %d",
+                        socketHandle->socketState ) );
+            cellularStatus = CELLULAR_INTERNAL_FAILURE;
+        }
+    }
     else
     {
         LogError( ( "Cellular_SocketSetSockOpt: Option not supported" ) );
