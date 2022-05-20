@@ -513,6 +513,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                           char * pCmdBuf )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    int32_t writeLen = 0;
+    int32_t totalLen = 0;
 
     if( pCmdBuf == NULL )
     {
@@ -532,11 +534,37 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+KTCPCFG=%u,0,\"%s\",%u",
-                           socketHandle->contextId,
-                           socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-                           socketHandle->remoteSocketAddress.port );
+        writeLen = snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+                             "AT+KTCPCFG=%u,0,\"%s\",%u",
+                             socketHandle->contextId,
+                             socketHandle->remoteSocketAddress.ipAddress.ipAddress,
+                             socketHandle->remoteSocketAddress.port );
+
+        if( writeLen < 0 )
+        {
+            cellularStatus = CELLULAR_INTERNAL_FAILURE;
+        }
+        else
+        {
+            totalLen += writeLen;
+        }
+
+        /* Set the local port in the end of command buffer string if localPort is not 0. */
+        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketHandle->localPort > 0 ) )
+        {
+            writeLen = snprintf( pCmdBuf + totalLen, CELLULAR_AT_CMD_MAX_SIZE - totalLen,
+                                 ",%u",
+                                 socketHandle->localPort );
+
+            if( writeLen < 0 )
+            {
+                cellularStatus = CELLULAR_INTERNAL_FAILURE;
+            }
+            else
+            {
+                totalLen += writeLen;
+            }
+        }
     }
 
     return cellularStatus;
