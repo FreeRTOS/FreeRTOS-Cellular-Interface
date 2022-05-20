@@ -60,6 +60,9 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
                                      bool disablePsm,
                                      bool disableEidrx );
 
+CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
+                                            CellularSocketOption_t option );
+
 /*-----------------------------------------------------------*/
 
 /**

@@ -36,6 +36,7 @@
 #include "cellular_api.h"
 #include "cellular_common.h"
 #include "cellular_common_api.h"
+#include "cellular_r4.h"
 
 /*-----------------------------------------------------------*/
 
@@ -132,8 +133,17 @@ CellularError_t Cellular_SocketSetSockOpt( CellularHandle_t cellularHandle,
                                            const uint8_t * pOptionValue,
                                            uint32_t optionValueLength )
 {
-    return Cellular_CommonSocketSetSockOpt( cellularHandle, socketHandle, optionLevel, option,
-                                            pOptionValue, optionValueLength );
+    CellularError_t err = CELLULAR_SUCCESS;
+
+    err = _Cellular_isSockOptSupport( optionLevel, option );
+
+    if( err == CELLULAR_SUCCESS )
+    {
+        err = Cellular_CommonSocketSetSockOpt( cellularHandle, socketHandle, optionLevel, option,
+                                               pOptionValue, optionValueLength );
+    }
+
+    return err;
 }
 
 /*-----------------------------------------------------------*/

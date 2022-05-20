@@ -558,3 +558,27 @@ uint32_t _Cellular_GetSessionId( CellularContext_t * pContext,
 
     return sessionId;
 }
+
+/*-----------------------------------------------------------*/
+
+CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
+                                            CellularSocketOption_t option )
+{
+    CellularError_t err = CELLULAR_UNSUPPORTED;
+
+    if( ( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT ) &&
+        ( ( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_RECV_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID ) ) )
+    {
+        err = CELLULAR_SUCCESS;
+    }
+
+    if( err != CELLULAR_SUCCESS )
+    {
+        LogError( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
+                    optionLevel, option ) );
+    }
+
+    return err;
+}
