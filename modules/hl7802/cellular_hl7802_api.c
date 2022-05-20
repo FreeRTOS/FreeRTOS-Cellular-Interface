@@ -88,6 +88,8 @@
 #define KSELACQ_RAT_NBIOT_CHAR                        ( '2' )
 #define KSELACQ_RAT_GSM_CHAR                          ( '3' )
 
+#define CELLULAR_PORT_NUM_CHAR_LEN                    ( 6 )
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -171,6 +173,9 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
                                                             const CellularATCommandResponse_t * pAtResp,
                                                             void * pData,
                                                             uint16_t dataLen );
+static CellularError_t _Cellular_StrCat( char * pDest,
+                                         char * pSrc,
+                                         int32_t maxLength );
 
 /*-----------------------------------------------------------*/
 
@@ -513,8 +518,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                           char * pCmdBuf )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    int32_t writeLen = 0;
-    int32_t totalLen = 0;
+    /* +1 size in portBuf for ',' */
+    char portBuf[CELLULAR_PORT_NUM_CHAR_LEN + 1] = {0};
 
     if( pCmdBuf == NULL )
     {
@@ -534,36 +539,20 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        writeLen = snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                             "AT+KTCPCFG=%u,0,\"%s\",%u",
-                             socketHandle->contextId,
-                             socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-                             socketHandle->remoteSocketAddress.port );
-
-        if( writeLen < 0 )
-        {
-            cellularStatus = CELLULAR_INTERNAL_FAILURE;
-        }
-        else
-        {
-            totalLen += writeLen;
-        }
+        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+                           "AT+KTCPCFG=%u,0,\"%s\",%u",
+                           socketHandle->contextId,
+                           socketHandle->remoteSocketAddress.ipAddress.ipAddress,
+                           socketHandle->remoteSocketAddress.port );
 
         /* Set the local port in the end of command buffer string if localPort is not 0. */
-        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketHandle->localPort > 0 ) )
+        if( socketHandle->localPort > 0 )
         {
-            writeLen = snprintf( pCmdBuf + totalLen, CELLULAR_AT_CMD_MAX_SIZE - totalLen,
-                                 ",%u",
-                                 socketHandle->localPort );
+            ( void ) snprintf( portBuf, 7,
+                               ",%u",
+                               socketHandle->localPort );
 
-            if( writeLen < 0 )
-            {
-                cellularStatus = CELLULAR_INTERNAL_FAILURE;
-            }
-            else
-            {
-                totalLen += writeLen;
-            }
+            cellularStatus = _Cellular_StrCat( pCmdBuf, portBuf, CELLULAR_AT_CMD_MAX_SIZE );
         }
     }
 
@@ -1282,6 +1271,42 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
     }
 
     return pktStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t _Cellular_StrCat( char * pDest,
+                                         char * pSrc,
+                                         int32_t maxLength )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    int32_t lenDestBuf = 0;
+    int32_t lenSrcBuf = 0;
+
+    if( pDest == NULL || pSrc == NULL )
+    {
+        LogError( ( "Invalid input: String not available." ) );
+        cellularStatus = CELLULAR_INTERNAL_FAILURE;
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        lenDestBuf = strlen( pDest );
+        lenSrcBuf = strlen( pSrc );
+
+        if( lenDestBuf < maxLength - lenSrcBuf )
+        {
+            strcat( pDest, pSrc );
+        }
+        else
+        {
+            LogError( ( "String is too long to store in buffer, maxLength=%u, pDest=%s, pSrc=%s",
+                        maxLength, pDest, pSrc ) );
+            cellularStatus = CELLULAR_INTERNAL_FAILURE;
+        }
+    }
+
+    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/
