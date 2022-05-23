@@ -112,7 +112,7 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( socketHandle->socketState == SOCKETSTATE_ALLOCATED )
         {
-            socketHandle->localPort = *pOptionValue;
+            socketHandle->localPort = *( ( uint16_t * ) pOptionValue );
         }
         else
         {
