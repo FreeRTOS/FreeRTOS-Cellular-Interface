@@ -1026,7 +1026,7 @@ void test_Cellular_CommonSocketRegisterClosedCallback_Happy_Path( void )
 }
 
 /**
- * @brief Test that option set loocal port happy path case for Cellular_CommonSocketSetSockOpt.
+ * @brief Test that option set local port happy path case for Cellular_CommonSocketSetSockOpt.
  */
 void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Happy_Path( void )
 {
@@ -1051,7 +1051,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Happy_Path( void )
 }
 
 /**
- * @brief Test that option set loocal port failure path case for Cellular_CommonSocketSetSockOpt.
+ * @brief Test that option set local port failure path case for Cellular_CommonSocketSetSockOpt.
  */
 void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Failure_Path( void )
 {

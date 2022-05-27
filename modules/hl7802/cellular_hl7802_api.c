@@ -518,8 +518,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                           char * pCmdBuf )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    /* +1 size in portBuf for ',' */
-    char portBuf[CELLULAR_PORT_NUM_CHAR_LEN + 1] = {0};
+    /* +1 size in buffer for ',' */
+    char portBuf[ CELLULAR_PORT_NUM_CHAR_LEN + 1 ] = { 0 };
 
     if( pCmdBuf == NULL )
     {
@@ -1283,7 +1283,7 @@ static CellularError_t _Cellular_StrCat( char * pDest,
     int32_t lenDestBuf = 0;
     int32_t lenSrcBuf = 0;
 
-    if( pDest == NULL || pSrc == NULL )
+    if( ( pDest == NULL ) || ( pSrc == NULL ) )
     {
         LogError( ( "Invalid input: String not available." ) );
         cellularStatus = CELLULAR_INTERNAL_FAILURE;
