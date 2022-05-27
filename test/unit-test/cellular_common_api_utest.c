@@ -835,7 +835,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_WrongSize_Failure_
                                                       CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID,
                                                       ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
 
-    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
 /**
