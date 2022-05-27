@@ -785,7 +785,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_Happy_Path( void )
     cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
                                                       CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
                                                       CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID,
-                                                      ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint8_t ) );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
@@ -809,7 +809,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_Failure_Path( void
     cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
                                                       CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
                                                       CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID,
-                                                      ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint8_t ) );
 
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }

@@ -97,27 +97,27 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     }
     else if( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID )
     {
-        if( socketHandle->socketState == SOCKETSTATE_ALLOCATED )
+        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint8_t ) ) )
         {
             socketHandle->contextId = *pOptionValue;
         }
         else
         {
-            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the contextID in this state %d",
-                        socketHandle->socketState ) );
+            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the contextID in this state %d or length %d is invalid.",
+                        socketHandle->socketState, optionValueLength ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
     }
     else if( option == CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT )
     {
-        if( socketHandle->socketState == SOCKETSTATE_ALLOCATED )
+        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint16_t ) ) )
         {
             socketHandle->localPort = *( ( uint16_t * ) pOptionValue );
         }
         else
         {
-            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the localPort in this state %d",
-                        socketHandle->socketState ) );
+            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the localPort in this state %d or length %d is invalid.",
+                        socketHandle->socketState, optionValueLength ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
     }
