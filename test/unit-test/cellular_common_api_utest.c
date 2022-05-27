@@ -815,6 +815,30 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_Failure_Path( void
 }
 
 /**
+ * @brief Test that option pdn context id failure path case with wrong size for Cellular_CommonSocketSetSockOpt.
+ */
+void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_WrongSize_Failure_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    uint32_t optionValue = 0;
+
+    socketHandle.socketState = SOCKETSTATE_ALLOCATED;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
+                                                      CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
+                                                      CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID,
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
  * @brief Test that option pdn context id failure path case for Cellular_CommonSocketSetSockOpt.
  */
 void test_Cellular_CommonSocketSetSockOpt_Option_Unsupported_Failure_Path( void )
@@ -1070,6 +1094,30 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Failure_Path( void
                                                       CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
                                                       CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT,
                                                       ( const uint8_t * ) &optionValue, sizeof( uint16_t ) );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that option set local port failure path case with wrong size for Cellular_CommonSocketSetSockOpt.
+ */
+void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_WrongSize_Failure_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    uint16_t optionValue = 12345;
+
+    socketHandle.socketState = SOCKETSTATE_ALLOCATED;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
+                                                      CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
+                                                      CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT,
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
 
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
