@@ -2739,6 +2739,29 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
+                                                   CellularSocketOption_t option )
+{
+    CellularError_t err = CELLULAR_UNSUPPORTED;
+
+    if( ( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT ) &&
+        ( ( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_RECV_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID ) ) )
+    {
+        err = CELLULAR_SUCCESS;
+    }
+    else
+    {
+        LogError( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
+                    optionLevel, option ) );
+    }
+
+    return err;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SetEidrxSettings( CellularHandle_t cellularHandle,
@@ -2846,30 +2869,6 @@ CellularError_t Cellular_SocketSetSockOpt( CellularHandle_t cellularHandle,
     {
         err = Cellular_CommonSocketSetSockOpt( cellularHandle, socketHandle, optionLevel, option,
                                                pOptionValue, optionValueLength );
-    }
-
-    return err;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
-                                                   CellularSocketOption_t option )
-{
-    CellularError_t err = CELLULAR_UNSUPPORTED;
-
-    if( ( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT ) &&
-        ( ( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT ) ||
-          ( option == CELLULAR_SOCKET_OPTION_RECV_TIMEOUT ) ||
-          ( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID ) ) )
-    {
-        err = CELLULAR_SUCCESS;
-    }
-
-    if( err != CELLULAR_SUCCESS )
-    {
-        LogError( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
-                    optionLevel, option ) );
     }
 
     return err;

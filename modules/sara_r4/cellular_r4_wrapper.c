@@ -36,7 +36,6 @@
 #include "cellular_api.h"
 #include "cellular_common.h"
 #include "cellular_common_api.h"
-#include "cellular_r4.h"
 
 /*-----------------------------------------------------------*/
 
