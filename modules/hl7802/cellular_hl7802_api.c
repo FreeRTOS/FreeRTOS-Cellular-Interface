@@ -554,7 +554,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* Set the local port in the end of command buffer string if localPort is not 0. */
         if( socketHandle->localPort > 0 )
         {
-            ( void ) snprintf( portBuf, 7,
+            ( void ) snprintf( portBuf, sizeof( portBuf ),
                                ",%u",
                                socketHandle->localPort );
 
