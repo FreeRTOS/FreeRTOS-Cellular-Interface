@@ -90,6 +90,8 @@
 
 #define CELLULAR_PORT_NUM_CHAR_LEN                    ( 6 )
 
+#define CELLULAR_REMOTE_IP_ADDR_MAX_LENGTH            ( 127 )
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -173,9 +175,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
                                                             const CellularATCommandResponse_t * pAtResp,
                                                             void * pData,
                                                             uint16_t dataLen );
-static CellularError_t _Cellular_StrCat( char * pDest,
-                                         char * pSrc,
-                                         int32_t maxLength );
 
 /*-----------------------------------------------------------*/
 
@@ -532,6 +531,13 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                     socketHandle->socketProtocol ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
+    else if( strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) > CELLULAR_REMOTE_IP_ADDR_MAX_LENGTH )
+    {
+        /* The maximum length of domain name is 127 in HL7802. */
+        LogError( ( "buildSocketConfig: the remote server's address is too long, length=%u",
+                    strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
     else
     {
         /* Form the AT command. */
@@ -552,7 +558,9 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                ",%u",
                                socketHandle->localPort );
 
-            cellularStatus = _Cellular_StrCat( pCmdBuf, portBuf, CELLULAR_AT_CMD_MAX_SIZE );
+            /* Because the length of host's IP address is limited,
+             * the buffer size must be enough for port setting */
+            strcat( pCmdBuf, portBuf );
         }
     }
 
@@ -1271,42 +1279,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
     }
 
     return pktStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t _Cellular_StrCat( char * pDest,
-                                         char * pSrc,
-                                         int32_t maxLength )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    int32_t lenDestBuf = 0;
-    int32_t lenSrcBuf = 0;
-
-    if( ( pDest == NULL ) || ( pSrc == NULL ) )
-    {
-        LogError( ( "Invalid input: String not available." ) );
-        cellularStatus = CELLULAR_INTERNAL_FAILURE;
-    }
-
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        lenDestBuf = strlen( pDest );
-        lenSrcBuf = strlen( pSrc );
-
-        if( lenDestBuf < maxLength - lenSrcBuf )
-        {
-            strcat( pDest, pSrc );
-        }
-        else
-        {
-            LogError( ( "String is too long to store in buffer, maxLength=%u, pDest=%s, pSrc=%s",
-                        maxLength, pDest, pSrc ) );
-            cellularStatus = CELLULAR_INTERNAL_FAILURE;
-        }
-    }
-
-    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/
