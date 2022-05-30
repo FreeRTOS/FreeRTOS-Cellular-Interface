@@ -126,30 +126,6 @@ CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
 
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-CellularError_t Cellular_SocketSetSockOpt( CellularHandle_t cellularHandle,
-                                           CellularSocketHandle_t socketHandle,
-                                           CellularSocketOptionLevel_t optionLevel,
-                                           CellularSocketOption_t option,
-                                           const uint8_t * pOptionValue,
-                                           uint32_t optionValueLength )
-{
-    CellularError_t err = CELLULAR_SUCCESS;
-
-    err = _Cellular_isSockOptSupport( optionLevel, option );
-
-    if( err == CELLULAR_SUCCESS )
-    {
-        err = Cellular_CommonSocketSetSockOpt( cellularHandle, socketHandle, optionLevel, option,
-                                               pOptionValue, optionValueLength );
-    }
-
-    return err;
-}
-
-/*-----------------------------------------------------------*/
-
-/* FreeRTOS Cellular Library API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SocketRegisterDataReadyCallback( CellularHandle_t cellularHandle,
                                                           CellularSocketHandle_t socketHandle,
                                                           CellularSocketDataReadyCallback_t dataReadyCallback,
