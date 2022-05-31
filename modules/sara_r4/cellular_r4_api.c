@@ -2853,7 +2853,6 @@ CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
 /*-----------------------------------------------------------*/
 
 /* FreeRTOS Cellular Library API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SocketSetSockOpt( CellularHandle_t cellularHandle,
                                            CellularSocketHandle_t socketHandle,
                                            CellularSocketOptionLevel_t optionLevel,
