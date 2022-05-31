@@ -543,7 +543,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* Form the AT command. */
 
         /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
+         * The max length of the string is fixed and checked offline.
+         * Reserve buffer for port setting. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE - sizeof( portBuf ),
                            "AT+KTCPCFG=%u,0,\"%s\",%u",
