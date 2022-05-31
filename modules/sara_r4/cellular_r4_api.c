@@ -2753,8 +2753,8 @@ static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t o
     }
     else
     {
-        LogError( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
-                    optionLevel, option ) );
+        LogWarn( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
+                   optionLevel, option ) );
     }
 
     return err;
