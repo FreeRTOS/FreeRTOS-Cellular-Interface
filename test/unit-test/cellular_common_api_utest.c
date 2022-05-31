@@ -1058,7 +1058,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Happy_Path( void )
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext socketHandle = { 0 };
     uint16_t optionValue = 12345;
 
     socketHandle.socketState = SOCKETSTATE_ALLOCATED;
@@ -1083,7 +1083,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Failure_Path( void
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext socketHandle = { 0 };
     uint16_t optionValue = 12345;
 
     socketHandle.socketState = SOCKETSTATE_CONNECTING;
@@ -1096,6 +1096,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_Failure_Path( void
                                                       ( const uint8_t * ) &optionValue, sizeof( uint16_t ) );
 
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+    TEST_ASSERT_EQUAL( 0, socketHandle.localPort );
 }
 
 /**
@@ -1107,7 +1108,7 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_WrongSize_Failure_
     CellularContext_t context;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext socketHandle = { 0 };
     uint16_t optionValue = 12345;
 
     socketHandle.socketState = SOCKETSTATE_ALLOCATED;
@@ -1120,4 +1121,5 @@ void test_Cellular_CommonSocketSetSockOpt_Option_SetLocalPort_WrongSize_Failure_
                                                       ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
 
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+    TEST_ASSERT_EQUAL( 0, socketHandle.localPort );
 }
