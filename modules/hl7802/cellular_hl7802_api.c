@@ -545,7 +545,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE - sizeof( portBuf ),
                            "AT+KTCPCFG=%u,0,\"%s\",%u",
                            socketHandle->contextId,
                            socketHandle->remoteSocketAddress.ipAddress.ipAddress,
@@ -559,7 +559,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                socketHandle->localPort );
 
             /* Because the length of host's IP address is limited,
-             * the buffer size must be enough for port setting */
+             * the buffer size must be enough for port setting. */
             strcat( pCmdBuf, portBuf );
         }
     }
