@@ -24,7 +24,7 @@
     </tr>
     <tr>
         <td>cellular_common_api.c</td>
-        <td><center>0.5K</center></td>
+        <td><center>0.6K</center></td>
         <td><center>0.5K</center></td>
     </tr>
     <tr>
@@ -44,7 +44,7 @@
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
-        <td><b><center>14.0K</center></b></td>
+        <td><b><center>14.1K</center></b></td>
         <td><b><center>12.8K</center></b></td>
     </tr>
 </table>

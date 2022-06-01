@@ -88,6 +88,10 @@
 #define KSELACQ_RAT_NBIOT_CHAR                        ( '2' )
 #define KSELACQ_RAT_GSM_CHAR                          ( '3' )
 
+#define CELLULAR_PORT_NUM_CHAR_LEN                    ( 6 )
+
+#define CELLULAR_REMOTE_IP_ADDR_MAX_LENGTH            ( 127 )
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -513,6 +517,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                           char * pCmdBuf )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    /* +1 size in buffer for ',' */
+    char portBuf[ CELLULAR_PORT_NUM_CHAR_LEN + 1 ] = { 0 };
 
     if( pCmdBuf == NULL )
     {
@@ -525,18 +531,38 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                     socketHandle->socketProtocol ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
+    else if( strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) > CELLULAR_REMOTE_IP_ADDR_MAX_LENGTH )
+    {
+        /* The maximum length of domain name is 127 in HL7802. */
+        LogError( ( "buildSocketConfig: the remote server's address is too long, length=%u",
+                    strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
     else
     {
         /* Form the AT command. */
 
         /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
+         * The max length of the string is fixed and checked offline.
+         * Reserve buffer for port setting. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE - sizeof( portBuf ),
                            "AT+KTCPCFG=%u,0,\"%s\",%u",
                            socketHandle->contextId,
                            socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                            socketHandle->remoteSocketAddress.port );
+
+        /* Set the local port in the end of command buffer string if localPort is not 0. */
+        if( socketHandle->localPort > 0 )
+        {
+            ( void ) snprintf( portBuf, sizeof( portBuf ),
+                               ",%u",
+                               socketHandle->localPort );
+
+            /* Because the length of host's IP address is limited,
+             * the buffer size must be enough for port setting. */
+            strcat( pCmdBuf, portBuf );
+        }
     }
 
     return cellularStatus;
