@@ -1192,6 +1192,10 @@ static CellularError_t buildSocketConnect( CellularSocketHandle_t socketHandle,
         {
             ( void ) strcpy( protocol, "TCP" );
         }
+        else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+        {
+            ( void ) strcpy( protocol, "UDP" );
+        }
         else
         {
             ( void ) strcpy( protocol, "UDP SERVICE" );

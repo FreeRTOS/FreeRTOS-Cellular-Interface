@@ -616,6 +616,82 @@ void test_Cellular_CommonCreateSocket_Invalid_ContextId( void )
 }
 
 /**
+ * @brief Test that wrong socket type case for Cellular_CommonCreateSocket.
+ */
+void test_Cellular_CommonCreateSocket_Invalid_SocketType( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonCreateSocket( &context, 0, 0, CELLULAR_SOCKET_TYPE_STREAM + 1, 0, ( CellularSocketHandle_t * ) &socketHandle );
+
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that wrong socket protocol case for Cellular_CommonCreateSocket.
+ */
+void test_Cellular_CommonCreateSocket_Invalid_SocketProtocol( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonCreateSocket( &context, 0, 0, 0, CELLULAR_SOCKET_PROTOCOL_TCP + 1, ( CellularSocketHandle_t * ) &socketHandle );
+
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that asynchronous socket type & socket protocol (TCP) case for Cellular_CommonCreateSocket.
+ */
+void test_Cellular_CommonCreateSocket_Async_TCP_SocketType( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonCreateSocket( &context, 0, 0, CELLULAR_SOCKET_TYPE_DGRAM, CELLULAR_SOCKET_PROTOCOL_TCP, ( CellularSocketHandle_t * ) &socketHandle );
+
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Test that asynchronous socket type & socket protocol (UDP) case for Cellular_CommonCreateSocket.
+ */
+void test_Cellular_CommonCreateSocket_Async_UDP_SocketType( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonCreateSocket( &context, 0, 0, CELLULAR_SOCKET_TYPE_STREAM, CELLULAR_SOCKET_PROTOCOL_UDP, ( CellularSocketHandle_t * ) &socketHandle );
+
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
  * @brief Test that happy path case for Cellular_CommonCreateSocket.
  */
 void test_Cellular_CommonCreateSocket_Happy_Path( void )
