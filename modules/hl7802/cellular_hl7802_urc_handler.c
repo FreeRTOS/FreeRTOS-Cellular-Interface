@@ -41,14 +41,14 @@
 
 /*-----------------------------------------------------------*/
 
-static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
+static void _cellular_UrcProcessKtcpUdpInd( CellularContext_t * pContext,
                                          char * pInputLine );
 static void handleTcpNotif( CellularSocketContext_t * pSocketData,
                             uint8_t tcpNotif,
                             uint32_t sessionId );
 static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                                            char * pInputLine );
-static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
+static void _cellular_UrcProcessKtcpUdpData( CellularContext_t * pContext,
                                           char * pInputLine );
 
 /*-----------------------------------------------------------*/
@@ -60,9 +60,11 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
     { "CEREG",      Cellular_CommonUrcProcessCereg },
     { "CREG",       Cellular_CommonUrcProcessCreg  },
-    { "KTCP_DATA",  _cellular_UrcProcessKtcpData   },         /* TCP data URC. */
-    { "KTCP_IND",   _cellular_UrcProcessKtcpInd    },         /* TCP status URC. */
-    { "KTCP_NOTIF", _cellular_UrcProcessKtcpNotif  }          /* TCP connection failure. */
+    { "KTCP_DATA",  _cellular_UrcProcessKtcpUdpData   },      /* TCP data URC. */
+    { "KTCP_IND",   _cellular_UrcProcessKtcpUdpInd    },      /* TCP status URC. */
+    { "KTCP_NOTIF", _cellular_UrcProcessKtcpNotif  },         /* TCP connection failure. */
+    { "KUDP_DATA",  _cellular_UrcProcessKtcpUdpData   },      /* UDP data URC. */
+    { "KUDP_IND",   _cellular_UrcProcessKtcpUdpInd    }       /* UDP status URC. */
 };
 
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -71,7 +73,7 @@ uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeo
 
 /*-----------------------------------------------------------*/
 
-static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
+static void _cellular_UrcProcessKtcpUdpInd( CellularContext_t * pContext,
                                          char * pInputLine )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
@@ -101,7 +103,7 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
                 }
                 else
                 {
-                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpUdpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -112,7 +114,7 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
         {
             if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogWarn( ( "_cellular_UrcProcessKtcpInd : unknown session data received. "
+                LogWarn( ( "_cellular_UrcProcessKtcpUdpInd : unknown session data received. "
                            "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
@@ -121,11 +123,11 @@ static void _cellular_UrcProcessKtcpInd( CellularContext_t * pContext,
 
                 if( pSocketData == NULL )
                 {
-                    LogError( ( "_cellular_UrcProcessKtcpInd : invalid socket index %u", socketIndex ) );
+                    LogError( ( "_cellular_UrcProcessKtcpUdpInd : invalid socket index %u", socketIndex ) );
                 }
                 else if( pSocketData->openCallback == NULL )
                 {
-                    LogDebug( ( "_cellular_UrcProcessKtcpInd : Open callback not set!!" ) );
+                    LogDebug( ( "_cellular_UrcProcessKtcpUdpInd : Open callback not set!!" ) );
                 }
                 else
                 {
@@ -221,7 +223,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                 }
                 else
                 {
-                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpUdpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -245,7 +247,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                 }
                 else
                 {
-                    LogError( ( "error parsing _cellular_UrcProcessKtcpInd session ID" ) );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpUdpInd session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -278,7 +280,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
+static void _cellular_UrcProcessKtcpUdpData( CellularContext_t * pContext,
                                           char * pInputLine )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
@@ -310,7 +312,7 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
                 }
                 else
                 {
-                    LogError( ( "error parsing _cellular_UrcProcessKtcpData session ID" ) );
+                    LogError( ( "error parsing _cellular_UrcProcessKtcpUdpData session ID" ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -322,7 +324,7 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
         {
             if( socketIndex == INVALID_SOCKET_INDEX )
             {
-                LogWarn( ( "_cellular_UrcProcessKtcpData : unknown session data received. "
+                LogWarn( ( "_cellular_UrcProcessKtcpUdpData : unknown session data received. "
                            "The session %u may not be closed properly in previous execution.", sessionId ) );
             }
             else
@@ -331,11 +333,11 @@ static void _cellular_UrcProcessKtcpData( CellularContext_t * pContext,
 
                 if( pSocketData == NULL )
                 {
-                    LogError( ( "_cellular_UrcProcessKtcpData : invalid socket index %u", socketIndex ) );
+                    LogError( ( "_cellular_UrcProcessKtcpUdpData : invalid socket index %u", socketIndex ) );
                 }
                 else if( pSocketData->dataReadyCallback == NULL )
                 {
-                    LogDebug( ( "_cellular_UrcProcessKtcpData : Data ready callback not set!!" ) );
+                    LogDebug( ( "_cellular_UrcProcessKtcpUdpData : Data ready callback not set!!" ) );
                 }
                 else
                 {
