@@ -439,8 +439,8 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
 
             if( pch == NULL )
             {
-                /*pattern not found */
-                *pDataLength = 0;
+                /* End pattern not found, it means we need more data to judge. */
+                pktStatus = CELLULAR_PKT_STATUS_SIZE_MISMATCH;
             }
             else
             {
@@ -574,7 +574,7 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         /* Check the data end pattern. */
         if( strncmp( pEndPatternLine, SOCKET_END_PATTERN, SOCKET_END_PATTERN_LEN ) != 0 )
         {
-            LogWarn( ( "response item error in end pattern"SOCKET_END_PATTERN ) );
+            LogWarn( ( "response item error in end pattern "SOCKET_END_PATTERN ) );
 
             /* Sometimes HL7802 return only part of end pattern.
              * Drop the packet but keep cellular status OK */
@@ -662,7 +662,7 @@ static CellularError_t buildUdpSocketConfig( CellularSocketHandle_t socketHandle
         LogDebug( ( "buildUdpSocketConfig: Invalid command buffer" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
     {
         LogError( ( "buildUdpSocketConfig: socket protocol unsupported %d",
                     socketHandle->socketProtocol ) );
