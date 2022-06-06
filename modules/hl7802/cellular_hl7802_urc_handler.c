@@ -42,14 +42,14 @@
 /*-----------------------------------------------------------*/
 
 static void _cellular_UrcProcessKtcpUdpInd( CellularContext_t * pContext,
-                                         char * pInputLine );
+                                            char * pInputLine );
 static void handleTcpNotif( CellularSocketContext_t * pSocketData,
                             uint8_t tcpNotif,
                             uint32_t sessionId );
 static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
                                            char * pInputLine );
 static void _cellular_UrcProcessKtcpUdpData( CellularContext_t * pContext,
-                                          char * pInputLine );
+                                             char * pInputLine );
 
 /*-----------------------------------------------------------*/
 
@@ -58,13 +58,13 @@ static void _cellular_UrcProcessKtcpUdpData( CellularContext_t * pContext,
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
-    { "CEREG",      Cellular_CommonUrcProcessCereg },
-    { "CREG",       Cellular_CommonUrcProcessCreg  },
-    { "KTCP_DATA",  _cellular_UrcProcessKtcpUdpData   },      /* TCP data URC. */
-    { "KTCP_IND",   _cellular_UrcProcessKtcpUdpInd    },      /* TCP status URC. */
-    { "KTCP_NOTIF", _cellular_UrcProcessKtcpNotif  },         /* TCP connection failure. */
-    { "KUDP_DATA",  _cellular_UrcProcessKtcpUdpData   },      /* UDP data URC. */
-    { "KUDP_IND",   _cellular_UrcProcessKtcpUdpInd    }       /* UDP status URC. */
+    { "CEREG",      Cellular_CommonUrcProcessCereg  },
+    { "CREG",       Cellular_CommonUrcProcessCreg   },
+    { "KTCP_DATA",  _cellular_UrcProcessKtcpUdpData },        /* TCP data URC. */
+    { "KTCP_IND",   _cellular_UrcProcessKtcpUdpInd  },        /* TCP status URC. */
+    { "KTCP_NOTIF", _cellular_UrcProcessKtcpNotif   },        /* TCP connection failure. */
+    { "KUDP_DATA",  _cellular_UrcProcessKtcpUdpData },        /* UDP data URC. */
+    { "KUDP_IND",   _cellular_UrcProcessKtcpUdpInd  }         /* UDP status URC. */
 };
 
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -74,7 +74,7 @@ uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeo
 /*-----------------------------------------------------------*/
 
 static void _cellular_UrcProcessKtcpUdpInd( CellularContext_t * pContext,
-                                         char * pInputLine )
+                                            char * pInputLine )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char * pLocalInputLine = pInputLine;
@@ -281,7 +281,7 @@ static void _cellular_UrcProcessKtcpNotif( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 static void _cellular_UrcProcessKtcpUdpData( CellularContext_t * pContext,
-                                          char * pInputLine )
+                                             char * pInputLine )
 {
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     char * pLocalInputLine = pInputLine;
