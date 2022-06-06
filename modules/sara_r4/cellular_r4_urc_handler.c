@@ -95,7 +95,8 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "UUPSMR", _cellular_UrcProcessUupsmr }, /* Power saving mode indication URC. */
     { "UUSOCL", _cellular_UrcProcessUusocl }, /* Socket close URC. */
     { "UUSOCO", _cellular_UrcProcessUusoco }, /* Socket connect URC. */
-    { "UUSORD", _cellular_UrcProcessUusord } /* Socket receive URC. */
+    { "UUSORD", _cellular_UrcProcessUusord }, /* Socket receive URC for TCP. */
+    { "UUSORF", _cellular_UrcProcessUusord } /* Socket receive URC for UDP. */
 };
 
 /* FreeRTOS Cellular Common Library porting interface. */

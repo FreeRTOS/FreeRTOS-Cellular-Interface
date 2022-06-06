@@ -405,7 +405,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( ( "Data is turncated, received data length %d, out buffer size %d",
+        LogError( ( "Data is truncated, received data length %d, out buffer size %d",
                     *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;

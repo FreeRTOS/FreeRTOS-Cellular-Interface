@@ -1198,9 +1198,13 @@ static CellularError_t buildSocketConnect( CellularSocketHandle_t socketHandle,
         }
         else
         {
-            ( void ) strcpy( protocol, "UDP SERVICE" );
+            LogError( ( "buildSocketConnect: Invalid protocol %d", socketHandle->socketProtocol ) );
+            cellularStatus = CELLULAR_BAD_PARAMETER;
         }
+    }
 
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
         /* Form the AT command. */
 
         /* The return value of snprintf is not used.
@@ -1234,7 +1238,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( ( "Data is turncated, received data length %d, out buffer size %d",
+        LogError( ( "Data is truncated, received data length %d, out buffer size %d",
                     *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;

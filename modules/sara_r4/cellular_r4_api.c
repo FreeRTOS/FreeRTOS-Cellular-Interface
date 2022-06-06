@@ -44,30 +44,32 @@
 /*-----------------------------------------------------------*/
 
 /* TODO : confirm the value. */
-#define PDN_ACT_PACKET_REQ_TIMEOUT_MS           ( 150000UL )
+#define PDN_ACT_PACKET_REQ_TIMEOUT_MS            ( 150000UL )
 
-#define PDN_DEACT_PACKET_REQ_TIMEOUT_MS         ( 40000UL )
+#define PDN_DEACT_PACKET_REQ_TIMEOUT_MS          ( 40000UL )
 
-#define GPRS_ATTACH_REQ_TIMEOUT_MS              ( 180000UL )
+#define GPRS_ATTACH_REQ_TIMEOUT_MS               ( 180000UL )
 
-#define DNS_QUERY_REQ_TIMEOUT_MS                ( 120000UL )
+#define DNS_QUERY_REQ_TIMEOUT_MS                 ( 120000UL )
 
-#define SOCKET_CLOSE_PACKET_REQ_TIMEOUT_MS      ( 120000U )
+#define SOCKET_CLOSE_PACKET_REQ_TIMEOUT_MS       ( 120000U )
 
-#define SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS    ( 120000U )
+#define SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS     ( 120000U )
 
-#define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE        ( 32U )
+#define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE         ( 32U )
 
-#define DATA_SEND_TIMEOUT_MS                    ( 10000U )
+#define DATA_SEND_TIMEOUT_MS                     ( 10000U )
 
-#define PACKET_REQ_TIMEOUT_MS                   ( 10000U )
+#define PACKET_REQ_TIMEOUT_MS                    ( 10000U )
 
-#define DATA_READ_TIMEOUT_MS                    ( 50000UL )
+#define DATA_READ_TIMEOUT_MS                     ( 50000UL )
 
-#define SOCKET_DATA_PREFIX_TOKEN                "+USORD: "
-#define SOCKET_DATA_PREFIX_TOKEN_LEN            ( 8U )
-#define SOCKET_DATA_PREFIX_STRING_LENGTH        ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )
-#define RAT_PRIOIRTY_LIST_LENGTH                ( 3U )
+#define SOCKET_DATA_PREFIX_TOKEN                 "+USORD: "
+#define SOCKET_DATA_PREFIX_TOKEN_LEN             ( 8U )
+#define SOCKET_DATA_PREFIX_STRING_LENGTH         ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )
+#define RAT_PRIOIRTY_LIST_LENGTH                 ( 3U )
+
+#define CELLULAR_USOCO_ASYNC_CONN_BUFFER_SIZE    ( 1U )
 
 /**
  * @brief Parameters involved in receiving data through sockets
@@ -229,7 +231,7 @@ static CellularATError_t getDataFromResp( const CellularATCommandResponse_t * pA
     /* Check if the received data size is greater than the output buffer size. */
     if( *pDataRecv->pDataLen > outBufSize )
     {
-        LogError( ( "Data is turncated, received data length %u, out buffer size %u",
+        LogError( ( "Data is truncated, received data length %u, out buffer size %u",
                     *pDataRecv->pDataLen, outBufSize ) );
         dataLenToCopy = outBufSize;
         *pDataRecv->pDataLen = outBufSize;
@@ -464,9 +466,11 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char cmdBufTcp[] = "AT+USOCR=6,0";
+    char cmdBufUdp[] = "AT+USOCR=17,0";
     CellularAtReq_t atReqSocketConnect =
     {
-        "AT+USOCR=6,0",
+        NULL,
         CELLULAR_AT_WITH_PREFIX,
         "+USOCR",
         _Cellular_RecvFuncGetSocketId,
@@ -477,6 +481,20 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
     ( void ) socketHandle;
 
     atReqSocketConnect.pData = pSessionId;
+
+    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
+    {
+        atReqSocketConnect.pAtCmd = cmdBufTcp;
+    }
+    else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        atReqSocketConnect.pAtCmd = cmdBufUdp;
+    }
+    else
+    {
+        LogError( ( "_Cellular_GetSocketNumber: Invalid protocol %d", socketHandle->socketProtocol ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
 
     /* Internal function. Caller checks parameters. */
 
@@ -772,6 +790,7 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    char asyncFlagBuf[ 2 ] = { 0 };
     CellularAtReq_t atReqSocketClose =
     {
         NULL,
@@ -827,8 +846,15 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         /* Close the socket. */
         if( socketHandle->socketState == SOCKETSTATE_CONNECTED )
         {
-            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u,%d",
-                               "AT+USOCL=", sessionId, CELLULAR_CONFIG_SET_SOCKET_CLOSE_ASYNC_MODE );
+            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - sizeof( asyncFlagBuf ), "%s%u",
+                               "AT+USOCL=", sessionId );
+
+            if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
+            {
+                ( void ) snprintf( asyncFlagBuf, sizeof( asyncFlagBuf ), ",%d", CELLULAR_CONFIG_SET_SOCKET_CLOSE_ASYNC_MODE );
+                strcat( cmdBuf, asyncFlagBuf );
+            }
+
             pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketClose, SOCKET_CLOSE_PACKET_REQ_TIMEOUT_MS );
 
             /* Delete the socket config. */
@@ -889,7 +915,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         LogError( ( "Cellular_SocketConnect: Invalid socket handle." ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP )
+    else if( ( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_TCP ) && ( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP ) )
     {
         LogError( ( "Cellular_SocketConnect: Invalid socket protocol." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
@@ -922,17 +948,23 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         }
     }
 
-    /* Start the tcp connection. */
+    /* Start the tcp/udp connection. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
+         * The max length of the string is fixed and checked offline.
+         * Reserve 2 bytes for async_connect flag for TCP. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                           "AT+USOCO=%u,\"%s\",%d,1",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE - ( CELLULAR_USOCO_ASYNC_CONN_BUFFER_SIZE + 1 ),
+                           "AT+USOCO=%u,\"%s\",%d",
                            sessionId,
                            socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                            socketHandle->remoteSocketAddress.port );
+
+        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
+        {
+            strcat( cmdBuf, ",1" );
+        }
 
         /* Set the socket state to connecting state. If cellular modem returns error,
          * revert the state to allocated state. */
@@ -948,6 +980,15 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
             /* Revert the state to allocated state. */
             socketHandle->socketState = SOCKETSTATE_ALLOCATED;
+        }
+        else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+        {
+            /* No need to wait for other URC response for UDP. */
+            socketHandle->socketState = SOCKETSTATE_CONNECTED;
+        }
+        else
+        {
+            /* Do nothing. */
         }
     }
 
