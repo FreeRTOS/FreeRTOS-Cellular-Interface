@@ -618,8 +618,10 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
         else if( cbCondition == 6 )
         {
             char pLine[] = CELLULAR_SAMPLE_NETWORK_REGISTRATION_RESPONSE;
+            char pLine2[] = CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_REGISTERED;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            _saveData( pLine2, &atResp, strlen( pLine2 ) + 1 );
             pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
@@ -3129,9 +3131,6 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Par
     cbCondition = 6;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
-
-    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
 
     /* Return error in _Cellular_ParseRegStatus. */
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );

@@ -757,7 +757,7 @@ static bool regResponseIsUrc( char * pRegLine )
      * Read response : +CREG: 2,2
      * URC : +CREG: 2
      *
-     * Registered, home network resonse
+     * Registered, home network response
      * Read response : +CREG: 2,1,"FFFE","341B50D",8
      * URC : +CREG: 1,"FFFE","341B50D", 8
      */

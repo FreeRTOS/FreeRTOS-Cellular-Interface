@@ -44,7 +44,7 @@
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
-        <td><b><center>14.1K</center></b></td>
-        <td><b><center>12.8K</center></b></td>
+        <td><b><center>14.2K</center></b></td>
+        <td><b><center>12.9K</center></b></td>
     </tr>
 </table>
