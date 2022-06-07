@@ -49,27 +49,27 @@
 /**
  * @brief Cellular sample prefix string input.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT     "+CPIN:READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_INPUT                        "+CPIN:READY"
 
 /**
  * @brief Cellular sample network registration URC not registered.
  */
-#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_RESPONSE     "+CREG: 2,2"
+#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_RESPONSE              "+CREG: 2,2"
 
 /**
  * @brief Cellular sample network registration URC not registered.
  */
-#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_NOT_REGISTERED     "+CREG: 2"
+#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_NOT_REGISTERED    "+CREG: 2"
 
 /**
  * @brief Cellular sample network registration URC registered.
  */
-#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_REGISTERED     "+CREG: 1,\"FFFE\",\"341B50D\", 8"
+#define CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_REGISTERED        "+CREG: 1,\"FFFE\",\"341B50D\", 8"
 
 /**
  * @brief Cellular sample prefix string output.
  */
-#define CELLULAR_SAMPLE_PREFIX_STRING_OUTPUT    "READY"
+#define CELLULAR_SAMPLE_PREFIX_STRING_OUTPUT                       "READY"
 
 /**
  * @brief operator information.
@@ -596,7 +596,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
         }
         else if( cbCondition == 3 )
         {
-            char pLine[] = CELLULAR_SAMPLE_NETWORK_REGISTRATION_RESPONSE;
+            char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
             pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
@@ -617,11 +617,9 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkRe
         }
         else if( cbCondition == 6 )
         {
-            char pLine[] = CELLULAR_SAMPLE_NETWORK_REGISTRATION_URC_REGISTERED;
-            char pLine2[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+            char pLine[] = CELLULAR_SAMPLE_NETWORK_REGISTRATION_RESPONSE;
 
             _saveData( pLine, &atResp, strlen( pLine ) + 1 );
-            _saveData( pLine2, &atResp, strlen( pLine2 ) + 1 );
             pktStatus = atReq.respCallback( pContext, &atResp, pData, sizeof( pData ) );
         }
     }
@@ -3128,7 +3126,7 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Par
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* called by atcmdQueryRegStatus -> queryNetworkStatus for CREG. */
-    cbCondition = 3;
+    cbCondition = 6;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
 
@@ -3137,15 +3135,15 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_Par
 
     /* Return error in _Cellular_ParseRegStatus. */
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE );
     _Cellular_NetworkRegistrationCallback_Ignore();
 
     /* called by atcmdUpdateMccMnc. */
-    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+    _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* The serviceStatus is updated and verified in cellular_3gpp_urc_handler.c test cases. */
     cellularStatus = Cellular_CommonGetServiceStatus( cellularHandle, &serviceStatus );
-    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
 /**
@@ -3164,16 +3162,16 @@ void test_Cellular_CommonGetServiceStatus_Cb__Cellular_RecvFuncGetNetworkReg_URC
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     /* called by atcmdQueryRegStatus -> queryNetworkStatus for +CREG:2. */
-    cbCondition = 6;
+    cbCondition = 4;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkReg );
     _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE, CELLULAR_INTERNAL_FAILURE );
 
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE );
 
     /* _Cellular_ParseRegStatus */
     Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_BAD_PARAMETER );
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_INVALID_HANDLE );
     _Cellular_NetworkRegistrationCallback_Ignore();
 
     /* called by atcmdUpdateMccMnc. */

@@ -9,8 +9,8 @@
     </tr>
     <tr>
         <td>cellular_3gpp_api.c</td>
-        <td><center>6.3K</center></td>
-        <td><center>5.8K</center></td>
+        <td><center>6.4K</center></td>
+        <td><center>5.9K</center></td>
     </tr>
     <tr>
         <td>cellular_3gpp_urc_handler.c</td>
