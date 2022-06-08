@@ -811,10 +811,10 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
     else
     {
         pCommandLine = pAtResp->pItm;
+        regType = *( ( CellularNetworkRegType_t * ) pData );
 
         while( ( pCommandLine != NULL ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
         {
-            regType = *( ( CellularNetworkRegType_t * ) pData );
             pPregLine = pCommandLine->pLine;
 
             /* Assumption is that the data is null terminated so we don't need the dataLen. */
@@ -834,6 +834,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
             else
             {
                 pktStatus = _Cellular_ParseRegStatus( pContext, pPregLine, false, regType );
+
             }
 
             _Cellular_UnlockAtDataMutex( pContext );
