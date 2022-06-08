@@ -834,7 +834,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
             else
             {
                 pktStatus = _Cellular_ParseRegStatus( pContext, pPregLine, false, regType );
-
             }
 
             _Cellular_UnlockAtDataMutex( pContext );
