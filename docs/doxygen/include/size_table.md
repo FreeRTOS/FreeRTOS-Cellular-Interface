@@ -9,8 +9,8 @@
     </tr>
     <tr>
         <td>cellular_3gpp_api.c</td>
-        <td><center>6.3K</center></td>
-        <td><center>5.8K</center></td>
+        <td><center>6.4K</center></td>
+        <td><center>5.9K</center></td>
     </tr>
     <tr>
         <td>cellular_3gpp_urc_handler.c</td>
@@ -44,7 +44,7 @@
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
-        <td><b><center>14.1K</center></b></td>
-        <td><b><center>12.8K</center></b></td>
+        <td><b><center>14.2K</center></b></td>
+        <td><b><center>12.9K</center></b></td>
     </tr>
 </table>
