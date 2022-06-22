@@ -1,6 +1,7 @@
 accessmode
 activatepdn
 activetimevalue
+actstatus
 af
 aka
 api
@@ -142,6 +143,7 @@ checkcrsmmemorystatus
 checkcrsmreadstatus
 checklibrarystatus
 chk
+ci
 ciev
 clearbits
 closedcallback
@@ -283,6 +285,7 @@ eventgrouphandle
 evt
 fasle
 ff
+fffe
 ffffff
 findlineinstream
 firmwareversion
@@ -726,6 +729,7 @@ sendtimeoutms
 sensorhub
 seperator
 serialnumber
+servicestatus
 sessionid
 setbits
 setbitsfromisr
@@ -768,6 +772,7 @@ src
 stacksize
 stanard
 standalone
+stat
 staticqueue
 staticsemaphore
 stm

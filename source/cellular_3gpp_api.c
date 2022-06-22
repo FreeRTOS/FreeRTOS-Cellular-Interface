@@ -150,6 +150,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetManufactureId( CellularContext_t
                                                                const CellularATCommandResponse_t * pAtResp,
                                                                void * pData,
                                                                uint16_t dataLen );
+static bool regResponseIsUrc( char * pRegLine );
 static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * pContext,
                                                             const CellularATCommandResponse_t * pAtResp,
                                                             void * pData,
@@ -738,6 +739,50 @@ static CellularPktStatus_t _Cellular_RecvFuncGetManufactureId( CellularContext_t
 
 /*-----------------------------------------------------------*/
 
+
+static bool regResponseIsUrc( char * pRegLine )
+{
+    bool isUrcResponse = false;
+    char * pSeparator = NULL;
+
+    /* CREG, CEREG, CGREG has the same prefix for AT command response and URC.
+     * There will be cases that the URC code is regarded as AT command response.
+     * The response content can be used to distinguish them.
+     *
+     * Take AT+CREG for example, CREG has the following response format.
+     * Read response : +CREG: <n>,<stat>[,<lac>,<ci>[,<AcTStatus>]]
+     * URC : +CREG: <stat>[,[<lac>],[<ci>][,[<AcTStatus>][,<cause_type>, <reject_cause>]]]
+     *
+     * Not registered searching response:
+     * Read response : +CREG: 2,2
+     * URC : +CREG: 2
+     *
+     * Registered, home network response
+     * Read response : +CREG: 2,1,"FFFE","341B50D",8
+     * URC : +CREG: 1,"FFFE","341B50D", 8
+     */
+    pSeparator = strstr( pRegLine, "," );
+
+    if( pSeparator == NULL )
+    {
+        /* Not registered searching response case. */
+        isUrcResponse = true;
+    }
+    else if( pSeparator[ 1 ] == '"' )
+    {
+        /* Registered case, the second token start with '"' */
+        isUrcResponse = true;
+    }
+    else
+    {
+        isUrcResponse = false;
+    }
+
+    return isUrcResponse;
+}
+
+/*-----------------------------------------------------------*/
+
 static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * pContext,
                                                             const CellularATCommandResponse_t * pAtResp,
                                                             void * pData,
@@ -747,6 +792,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularNetworkRegType_t regType = CELLULAR_REG_TYPE_UNKNOWN;
+    CellularATCommandLine_t * pCommandLine = NULL;
 
     if( pContext == NULL )
     {
@@ -764,17 +810,34 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
     }
     else
     {
+        pCommandLine = pAtResp->pItm;
         regType = *( ( CellularNetworkRegType_t * ) pData );
-        pPregLine = pAtResp->pItm->pLine;
-        atCoreStatus = Cellular_ATRemoveLeadingWhiteSpaces( &pPregLine );
-        pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
 
-        if( pktStatus == CELLULAR_PKT_STATUS_OK )
+        while( ( pCommandLine != NULL ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
         {
+            pPregLine = pCommandLine->pLine;
+
             /* Assumption is that the data is null terminated so we don't need the dataLen. */
             _Cellular_LockAtDataMutex( pContext );
-            pktStatus = _Cellular_ParseRegStatus( pContext, pPregLine, false, regType );
+
+            if( regResponseIsUrc( pPregLine ) == true )
+            {
+                /* Remove the prefix for URC handler. */
+                atCoreStatus = Cellular_ATRemovePrefix( &pPregLine );
+                pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+
+                if( pktStatus == CELLULAR_PKT_STATUS_OK )
+                {
+                    pktStatus = _Cellular_ParseRegStatus( pContext, pPregLine, true, regType );
+                }
+            }
+            else
+            {
+                pktStatus = _Cellular_ParseRegStatus( pContext, pPregLine, false, regType );
+            }
+
             _Cellular_UnlockAtDataMutex( pContext );
+            pCommandLine = pCommandLine->pNext;
         }
 
         LogDebug( ( "atcmd network register status %d pktStatus:%d", regType, pktStatus ) );
