@@ -218,6 +218,10 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
 static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
                                                  char * pLine,
                                                  uint32_t * pBytesRead );
+static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
+                                        CellularSocketHandle_t socketHandle,
+                                        CellularSocketAccessMode_t dataAccessMode,
+                                        const CellularSocketAddress_t * pRemoteSocketAddress );
 
 /*-----------------------------------------------------------*/
 
@@ -1909,6 +1913,69 @@ static void _dnsResultCallback( cellularModuleContext_t * pModuleContext,
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
+                                        CellularSocketHandle_t socketHandle,
+                                        CellularSocketAccessMode_t dataAccessMode,
+                                        const CellularSocketAddress_t * pRemoteSocketAddress )
+{
+    bool needSetRemoteAddress = false;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    PlatformMutex_Lock( &socketHandle->udpSocketConnectMutex );
+
+    /* Check input. */
+    if( socketHandle == NULL )
+    {
+        LogError( ( "checkAndConnect: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "checkAndConnect, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    /* Check if it's necessary to call Cellular_SocketConnect. */
+    else if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
+    {
+        LogError( ( "checkAndConnect, Remote address is not set correctly." ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketHandle->remoteSocketAddress.port == 0 )
+    {
+        /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
+        needSetRemoteAddress = true;
+    }
+    else if( pRemoteSocketAddress == NULL )
+    {
+        /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
+        needSetRemoteAddress = false;
+    }
+    else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
+    {
+        /* Remote info is set before. And input remote address is changed. */
+        LogError( ( "Cellular_SocketSendTo, Can't change the remote information in one socket handler" ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Remote info is same as previous setting, reuse it directly. */
+        needSetRemoteAddress = false;
+    }
+
+    /* Create a socket for this socket handler. */
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
+    {
+        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+    }
+
+    PlatformMutex_Unlock( &socketHandle->udpSocketConnectMutex );
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SetRatPriority( CellularHandle_t cellularHandle,
@@ -2721,7 +2788,6 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    bool needSetRemoteAddress = false;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -2735,6 +2801,11 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
     {
         LogError( ( "Cellular_SocketSendTo: Invalid socket address" ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        LogError( ( "Cellular_SocketSendTo: Can be called by UDP socket only" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( ( pData == NULL ) || ( pSentDataLength == NULL ) || ( dataLength == 0U ) )
     {
@@ -2750,39 +2821,7 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
     else
     {
         /* Check if need to connect the socket. */
-        if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
-        {
-            LogError( ( "Cellular_SocketSendTo, Remote address is not set correctly." ) );
-            cellularStatus = CELLULAR_BAD_PARAMETER;
-        }
-        else if( socketHandle->remoteSocketAddress.port == 0 )
-        {
-            /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
-            needSetRemoteAddress = true;
-        }
-        else if( pRemoteSocketAddress == NULL )
-        {
-            /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
-            needSetRemoteAddress = false;
-        }
-        else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
-        {
-            /* Remote info is set before. And input remote address is changed. */
-            /* TODO: change the remote address if possible. */
-            LogError( ( "Cellular_SocketSendTo, Can't change the remote information in one socket handler" ) );
-            cellularStatus = CELLULAR_UNSUPPORTED;
-        }
-        else
-        {
-            /* Remote info is same as previous setting, reuse it directly. */
-            needSetRemoteAddress = false;
-        }
-    }
-
-    /* Create a socket for this socket handler. */
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
-    {
-        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
     }
 
     /* Send the data to the socket. */
@@ -2836,39 +2875,7 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
     else
     {
         /* Check if need to connect the socket. */
-        if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
-        {
-            LogError( ( "Cellular_SocketRecvFrom, Remote address is not set correctly." ) );
-            cellularStatus = CELLULAR_BAD_PARAMETER;
-        }
-        else if( socketHandle->remoteSocketAddress.port == 0 )
-        {
-            /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
-            needSetRemoteAddress = true;
-        }
-        else if( pRemoteSocketAddress == NULL )
-        {
-            /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
-            needSetRemoteAddress = false;
-        }
-        else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
-        {
-            /* Remote info is set before. And input remote address is changed. */
-            /* TODO: change the remote address if possible. */
-            LogError( ( "Cellular_SocketRecvFrom, Can't change the remote information in one socket handler" ) );
-            cellularStatus = CELLULAR_UNSUPPORTED;
-        }
-        else
-        {
-            /* Remote info is same as previous setting, reuse it directly. */
-            needSetRemoteAddress = false;
-        }
-    }
-
-    /* Create a socket for this socket handler. */
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
-    {
-        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
     }
 
     /* Send the data to the socket. */

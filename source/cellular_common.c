@@ -291,6 +291,24 @@ static void _Cellular_DestroyLibStatusMutex( CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
+static bool _Cellular_CreateUdpSocketConnectMutex( CellularSocketContext_t * pSocketData )
+{
+    bool status = false;
+
+    status = PlatformMutex_Create( &pSocketData->udpSocketConnectMutex, false );
+
+    return status;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_DestroyUdpSocketConnectMutex( CellularSocketContext_t * pSocketData )
+{
+    PlatformMutex_Destroy( &pContext->udpSocketConnectMutex );
+}
+
+/*-----------------------------------------------------------*/
+
 /* Internal function of _Cellular_CreateSocket to reduce complexity. */
 static void createSocketSetSocketData( uint8_t contextId,
                                        uint8_t socketId,
@@ -563,6 +581,20 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 cellularStatus = CELLULAR_NO_MEMORY;
             }
 
+            if( ( socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) && ( _Cellular_CreateUdpSocketConnectMutex( pSocketData ) == false ) )
+            {
+                cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
+
+                /* Free the allocated resources. */
+                #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
+                    Platform_Free( pSocketData );
+                #endif
+
+                /* Clear the context and pSocketHandle. */
+                pContext->pSocketData[ socketId ] = NULL;
+                *pSocketHandle = NULL;
+            }
+
             break;
         }
     }
@@ -577,6 +609,10 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     {
         LogError( ( "_Cellular_CreateSocket, No free socket slots are available" ) );
         cellularStatus = CELLULAR_NO_MEMORY;
+    }
+    else if( cellularStatus == CELLULAR_RESOURCE_CREATION_FAIL )
+    {
+        LogError( ( "_Cellular_CreateSocket, Could not create UDP socket connect mutex" ) );
     }
     else
     {
@@ -620,6 +656,11 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
         #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
             else
             {
+                if( socketHandle->udpSocketConnectMutex == CELLULAR_SOCKET_PROTOCOL_UDP )
+                {
+                    _Cellular_DestroyUdpSocketConnectMutex( pSocketData );
+                }
+
                 Platform_Free( socketHandle );
             }
         #endif
