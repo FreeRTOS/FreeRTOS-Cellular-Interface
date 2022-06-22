@@ -531,6 +531,56 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
                                      uint32_t * pReceivedDataLength );
 
 /**
+ * @brief Send data to the remote socket with specified IP address & port.
+ *
+ * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] socketHandle Socket handle returned from the Cellular_CreateSocket call.
+ * @param[in] pData The buffer containing that data to be sent.
+ * @param[in] dataLength Length of the data in the pData buffer.
+ * @param[out] pSentDataLength Out parameter to provide the length of the actual
+ * data sent. Note that it may be less than the dataLength in case complete data
+ * could not be sent.
+ * @param[in] dataAccessMode Data access mode of the socket. Buffer, Direct Push or Transparent.
+ * Set when pRemoteSocketAddress is changed.
+ * @param[in] pRemoteSocketAddress Address (IP and Port) of the remote socket to send to.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
+                                       CellularSocketHandle_t socketHandle,
+                                       const uint8_t * pData,
+                                       uint32_t dataLength,
+                                       uint32_t * pSentDataLength,
+                                       CellularSocketAccessMode_t dataAccessMode,
+                                       const CellularSocketAddress_t * pRemoteSocketAddress );
+
+/**
+ * @brief Receive data on a socket.
+ *
+ * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] socketHandle Socket handle returned from the Cellular_CreateSocket call.
+ * @param[out] pBuffer The buffer to receive the data into.
+ * @param[in] bufferLength Length of the buffer pBuffer.
+ * @param[out] pReceivedDataLength Out parameter to provide the of the actual
+ * data received in the buffer pBuffer. Note that it may be less than
+ * bufferLength.
+ * @param[in] dataAccessMode Data access mode of the socket. Buffer, Direct Push or Transparent.
+ * Set when pRemoteSocketAddress is changed.
+ * @param[in] pRemoteSocketAddress Address (IP and Port) of the remote socket to receive from.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
+                                         CellularSocketHandle_t socketHandle,
+                                         uint8_t * pBuffer,
+                                         uint32_t bufferLength,
+                                         uint32_t * pReceivedDataLength,
+                                         CellularSocketAccessMode_t dataAccessMode,
+                                         const CellularSocketAddress_t * pRemoteSocketAddress );
+
+/**
  * @brief Close the socket.
  *
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
