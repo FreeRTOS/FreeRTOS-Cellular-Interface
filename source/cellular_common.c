@@ -304,7 +304,7 @@ static bool _Cellular_CreateUdpSocketConnectMutex( CellularSocketContext_t * pSo
 
 static void _Cellular_DestroyUdpSocketConnectMutex( CellularSocketContext_t * pSocketData )
 {
-    PlatformMutex_Destroy( &pContext->udpSocketConnectMutex );
+    PlatformMutex_Destroy( &pSocketData->udpSocketConnectMutex );
 }
 
 /*-----------------------------------------------------------*/
