@@ -678,9 +678,9 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
         #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
             else
             {
-                if( socketHandle->udpSocketConnectMutex == CELLULAR_SOCKET_PROTOCOL_UDP )
+                if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
                 {
-                    _Cellular_DestroyUdpSocketConnectMutex( pSocketData );
+                    _Cellular_DestroyUdpSocketConnectMutex( socketHandle );
                 }
 
                 Platform_Free( socketHandle );
