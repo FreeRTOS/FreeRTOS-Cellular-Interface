@@ -145,10 +145,13 @@ typedef struct CellularSocketContext
     void * pClosedCallbackContext;                       /**< socket closed callback context. */
 
     /* Modem data. */
-    void * pModemData;                     /**< Modem specific data. */
+    void * pModemData;                                  /**< Modem specific data. */
 
-    PlatformMutex_t udpSocketConnectMutex; /**< Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
-                                            * Cellular_SocketConnect at the same time. */
+    PlatformMutex_t udpSocketConnectMutex;              /**< Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
+                                                         * Cellular_SocketConnect at the same time. */
+    CellularSocketOpenCallback_t udpSocketOpenCallback; /**< Informs the socket open status for UDP APIs. */
+    void * pUdpSocketOpenCallbackContext;               /**< socket open callback context. */
+    QueueHandle_t udpSocketOpenQueue;                   /**< To receive UDP socket open status. */
 } CellularSocketContext_t;
 
 /**

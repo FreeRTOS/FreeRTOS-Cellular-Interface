@@ -104,6 +104,21 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
             LogDebug( ( "_parseSocketOpen: Socket open success, conn %d", sockIndex ) );
         }
 
+        /* Notify internal module that UDP socket connection is created. */
+        if( pSocketData->udpSocketOpenCallback != NULL )
+        {
+            if( sockStatus != 0 )
+            {
+                pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
+                                                    pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+            }
+            else
+            {
+                pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
+                                                    pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+            }
+        }
+
         /* Indicate the upper layer about the socket open status. */
         if( pSocketData->openCallback != NULL )
         {

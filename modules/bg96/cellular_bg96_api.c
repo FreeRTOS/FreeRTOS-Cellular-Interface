@@ -221,7 +221,14 @@ static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
 static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
                                         CellularSocketHandle_t socketHandle,
                                         CellularSocketAccessMode_t dataAccessMode,
-                                        const CellularSocketAddress_t * pRemoteSocketAddress );
+                                        const CellularSocketAddress_t * pRemoteSocketAddress,
+                                        uint32_t timeout );
+static CellularError_t registerUdpSocketOpenCallback( CellularSocketHandle_t socketHandle,
+                                                      CellularSocketOpenCallback_t udpSocketOpenCallback,
+                                                      void * pCallbackContext );
+static void _udpSocketOpenResultCallback( CellularUrcEvent_t urcEvent,
+                                          CellularSocketHandle_t socketHandle,
+                                          void * pCallbackContext );
 
 /*-----------------------------------------------------------*/
 
@@ -1913,13 +1920,50 @@ static void _dnsResultCallback( cellularModuleContext_t * pModuleContext,
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t registerUdpSocketOpenCallback( CellularSocketHandle_t socketHandle,
+                                                      CellularSocketOpenCallback_t udpSocketOpenCallback,
+                                                      void * pCallbackContext )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    if( socketHandle == NULL )
+    {
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else
+    {
+        socketHandle->udpSocketOpenCallback = udpSocketOpenCallback;
+        socketHandle->pUdpSocketOpenCallbackContext = pCallbackContext;
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _udpSocketOpenResultCallback( CellularUrcEvent_t urcEvent,
+                                          CellularSocketHandle_t socketHandle,
+                                          void * pCallbackContext )
+{
+    ( void ) pCallbackContext;
+
+    if( xQueueSend( socketHandle->udpSocketOpenQueue, &urcEvent, ( TickType_t ) 0 ) != pdPASS )
+    {
+        LogDebug( ( "_udpSocketOpenResultCallback sends udpSocketOpenQueue fail" ) );
+    }
+}
+
+/*-----------------------------------------------------------*/
+
 static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
                                         CellularSocketHandle_t socketHandle,
                                         CellularSocketAccessMode_t dataAccessMode,
-                                        const CellularSocketAddress_t * pRemoteSocketAddress )
+                                        const CellularSocketAddress_t * pRemoteSocketAddress,
+                                        uint32_t timeout )
 {
     bool needSetRemoteAddress = false;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularUrcEvent_t urcEvent = CELLULAR_URC_EVENT_OTHER;
 
     PlatformMutex_Lock( &socketHandle->udpSocketConnectMutex );
 
@@ -1966,7 +2010,27 @@ static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
     /* Create a socket for this socket handler. */
     if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
     {
+        ( void ) registerUdpSocketOpenCallback( socketHandle, _udpSocketOpenResultCallback, NULL );
+
         cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+    }
+
+    /* Wait for connect result. */
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        if( xQueueReceive( socketHandle->udpSocketOpenQueue, &urcEvent,
+                           pdMS_TO_TICKS( timeout ) ) == pdTRUE )
+        {
+            if( urcEvent != CELLULAR_URC_SOCKET_OPENED )
+            {
+                cellularStatus = CELLULAR_SOCKET_NOT_CONNECTED;
+            }
+        }
+        else
+        {
+            ( void ) registerUdpSocketOpenCallback( socketHandle, NULL, NULL );
+            cellularStatus = CELLULAR_TIMEOUT;
+        }
     }
 
     PlatformMutex_Unlock( &socketHandle->udpSocketConnectMutex );
@@ -2821,7 +2885,7 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
     else
     {
         /* Check if need to connect the socket. */
-        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->sendTimeoutMs );
     }
 
     /* Send the data to the socket. */
@@ -2861,7 +2925,7 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
         LogError( ( "Cellular_SocketRecvFrom: Invalid socket address" ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
-    else if( ( pData == NULL ) || ( pSentDataLength == NULL ) || ( dataLength == 0U ) )
+    else if( ( pBuffer == NULL ) || ( pReceivedDataLength == NULL ) || ( bufferLength == 0U ) )
     {
         LogError( ( "Cellular_SocketRecvFrom: Invalid parameter" ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
@@ -2875,7 +2939,7 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
     else
     {
         /* Check if need to connect the socket. */
-        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->recvTimeoutMs );
     }
 
     /* Send the data to the socket. */

@@ -581,7 +581,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 cellularStatus = CELLULAR_NO_MEMORY;
             }
 
-            if( ( socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) && ( _Cellular_CreateUdpSocketConnectMutex( pSocketData ) == false ) )
+            if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) && ( _Cellular_CreateUdpSocketConnectMutex( pSocketData ) == false ) )
             {
                 cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
 
@@ -593,6 +593,28 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
                 /* Clear the context and pSocketHandle. */
                 pContext->pSocketData[ socketId ] = NULL;
                 *pSocketHandle = NULL;
+            }
+
+            if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) )
+            {
+                /* Create the queue for UDP socket connect. */
+                pSocketData->udpSocketOpenQueue = xQueueCreate( 1, sizeof( CellularUrcEvent_t ) );
+
+                if( pSocketData->udpSocketOpenQueue == NULL )
+                {
+                    cellularStatus = CELLULAR_NO_MEMORY;
+
+                    /* Free the allocated resources. */
+                    _Cellular_DestroyUdpSocketConnectMutex( pSocketData );
+
+                    #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
+                        Platform_Free( pSocketData );
+                    #endif
+
+                    /* Clear the context and pSocketHandle. */
+                    pContext->pSocketData[ socketId ] = NULL;
+                    *pSocketHandle = NULL;
+                }
             }
 
             break;
