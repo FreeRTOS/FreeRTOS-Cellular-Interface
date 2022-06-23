@@ -429,7 +429,6 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
             }
         }
 
-        /* Call the callback function of this session. */
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
             pSocketData = _Cellular_GetSocketData( pContext, socketIndex );
@@ -445,6 +444,14 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                     pSocketData->socketState = SOCKETSTATE_CONNECTED;
                     LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
 
+                    /* Notify internal module that UDP socket connection is created. */
+                    if( pSocketData->udpSocketOpenCallback != NULL )
+                    {
+                        pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
+                                                            pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+                    }
+
+                    /* Call the callback function of this session. */
                     if( pSocketData->openCallback != NULL )
                     {
                         pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
@@ -453,6 +460,14 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 }
                 else
                 {
+                    /* Notify internal module that UDP fail to creat socket connection. */
+                    if( pSocketData->udpSocketOpenCallback != NULL )
+                    {
+                        pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
+                                                            pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+                    }
+
+                    /* Call the callback function of this session. */
                     if( pSocketData->openCallback != NULL )
                     {
                         pSocketData->openCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
