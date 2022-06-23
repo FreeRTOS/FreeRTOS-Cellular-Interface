@@ -2016,7 +2016,7 @@ static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
     }
 
     /* Wait for connect result. */
-    if( cellularStatus == CELLULAR_SUCCESS )
+    if( cellularStatus == CELLULAR_SUCCESS && needSetRemoteAddress )
     {
         if( xQueueReceive( socketHandle->udpSocketOpenQueue, &urcEvent,
                            pdMS_TO_TICKS( timeout ) ) == pdTRUE )
@@ -2910,7 +2910,6 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    bool needSetRemoteAddress = false;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
