@@ -907,6 +907,10 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
                            socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                            socketHandle->remoteSocketAddress.port );
 
+        /* Set the socket state to connecting state. If cellular modem returns error,
+         * revert the state to allocated state. */
+        socketHandle->socketState = SOCKETSTATE_CONNECTING;
+
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
                                                                SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS );
 
@@ -914,10 +918,9 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         {
             LogError( ( "Cellular_SocketConnect: Socket connect failed, cmdBuf:%s, PktRet: %d", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        }
-        else
-        {
-            socketHandle->socketState = SOCKETSTATE_CONNECTING;
+
+            /* Revert the state to allocated state. */
+            socketHandle->socketState = SOCKETSTATE_ALLOCATED;
         }
     }
 
