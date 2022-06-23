@@ -2016,7 +2016,7 @@ static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
     }
 
     /* Wait for connect result. */
-    if( cellularStatus == CELLULAR_SUCCESS && needSetRemoteAddress )
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
     {
         if( xQueueReceive( socketHandle->udpSocketOpenQueue, &urcEvent,
                            pdMS_TO_TICKS( timeout ) ) == pdTRUE )
@@ -2024,12 +2024,21 @@ static CellularError_t checkAndConnect( CellularHandle_t cellularHandle,
             if( urcEvent != CELLULAR_URC_SOCKET_OPENED )
             {
                 cellularStatus = CELLULAR_SOCKET_NOT_CONNECTED;
+
+                /* Reset resources. */
+                ( void ) registerUdpSocketOpenCallback( socketHandle, NULL, NULL );
+                socketHandle->dataMode = CELLULAR_ACCESSMODE_NOT_SET;
+                memset( &socketHandle->remoteSocketAddress, 0, sizeof( socketHandle->remoteSocketAddress ) );
             }
         }
         else
         {
-            ( void ) registerUdpSocketOpenCallback( socketHandle, NULL, NULL );
             cellularStatus = CELLULAR_TIMEOUT;
+
+            /* Reset resources. */
+            ( void ) registerUdpSocketOpenCallback( socketHandle, NULL, NULL );
+            socketHandle->dataMode = CELLULAR_ACCESSMODE_NOT_SET;
+            memset( &socketHandle->remoteSocketAddress, 0, sizeof( socketHandle->remoteSocketAddress ) );
         }
     }
 
@@ -2842,6 +2851,59 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
 /*-----------------------------------------------------------*/
 
 /* FreeRTOS Cellular Library API. */
+CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
+                                         CellularSocketHandle_t socketHandle,
+                                         uint8_t * pBuffer,
+                                         uint32_t bufferLength,
+                                         uint32_t * pReceivedDataLength,
+                                         CellularSocketAccessMode_t dataAccessMode,
+                                         const CellularSocketAddress_t * pRemoteSocketAddress )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* pContext is checked in _Cellular_CheckLibraryStatus function. */
+    cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+
+    /* Check input. */
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
+    }
+    else if( socketHandle == NULL )
+    {
+        LogError( ( "Cellular_SocketRecvFrom: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( ( pBuffer == NULL ) || ( pReceivedDataLength == NULL ) || ( bufferLength == 0U ) )
+    {
+        LogError( ( "Cellular_SocketRecvFrom: Invalid parameter" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "Cellular_SocketRecvFrom, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Check if need to connect the socket. */
+        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->recvTimeoutMs );
+    }
+
+    /* Send the data to the socket. */
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        cellularStatus = Cellular_SocketRecv( cellularHandle, socketHandle, pBuffer, bufferLength, pReceivedDataLength );
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+/* FreeRTOS Cellular Library API. */
 CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
                                        CellularSocketHandle_t socketHandle,
                                        const uint8_t * pData,
@@ -2892,59 +2954,6 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         cellularStatus = Cellular_SocketSend( cellularHandle, socketHandle, pData, dataLength, pSentDataLength );
-    }
-
-    return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-/* FreeRTOS Cellular Library API. */
-CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
-                                         CellularSocketHandle_t socketHandle,
-                                         uint8_t * pBuffer,
-                                         uint32_t bufferLength,
-                                         uint32_t * pReceivedDataLength,
-                                         CellularSocketAccessMode_t dataAccessMode,
-                                         const CellularSocketAddress_t * pRemoteSocketAddress )
-{
-    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-
-    /* pContext is checked in _Cellular_CheckLibraryStatus function. */
-    cellularStatus = _Cellular_CheckLibraryStatus( pContext );
-
-    /* Check input. */
-    if( cellularStatus != CELLULAR_SUCCESS )
-    {
-        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
-    }
-    else if( socketHandle == NULL )
-    {
-        LogError( ( "Cellular_SocketRecvFrom: Invalid socket address" ) );
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else if( ( pBuffer == NULL ) || ( pReceivedDataLength == NULL ) || ( bufferLength == 0U ) )
-    {
-        LogError( ( "Cellular_SocketRecvFrom: Invalid parameter" ) );
-        cellularStatus = CELLULAR_BAD_PARAMETER;
-    }
-    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
-    {
-        LogError( ( "Cellular_SocketRecvFrom, Access mode not supported %d",
-                    dataAccessMode ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else
-    {
-        /* Check if need to connect the socket. */
-        cellularStatus = checkAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->recvTimeoutMs );
-    }
-
-    /* Send the data to the socket. */
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        cellularStatus = Cellular_SocketRecv( cellularHandle, socketHandle, pBuffer, bufferLength, pReceivedDataLength );
     }
 
     return cellularStatus;
