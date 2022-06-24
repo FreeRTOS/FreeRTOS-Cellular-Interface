@@ -2965,8 +2965,9 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
 {
     bool needSetRemoteAddress = false;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularUrcEvent_t urcEvent = CELLULAR_URC_EVENT_OTHER;
     cellularModuleSocketContext_t * pR4SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+
+    ( void ) timeout;
 
     PlatformMutex_Lock( &pR4SocketContext->udpSocketConnectMutex );
 

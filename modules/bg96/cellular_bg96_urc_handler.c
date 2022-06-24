@@ -88,6 +88,7 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
     int32_t sockStatus = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) pSocketData->pModemData;
 
     atCoreStatus = Cellular_ATStrtoi( pToken, 10, &sockStatus );
 
@@ -105,17 +106,17 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
         }
 
         /* Notify internal module that UDP socket connection is created. */
-        if( pSocketData->udpSocketOpenCallback != NULL )
+        if( pBg96SocketContext->udpSocketOpenCallback != NULL )
         {
             if( sockStatus != 0 )
             {
-                pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
-                                                    pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+                pBg96SocketContext->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
+                                                           pSocketData, pBg96SocketContext->pUdpSocketOpenCallbackContext );
             }
             else
             {
-                pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
-                                                    pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
+                pBg96SocketContext->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
+                                                           pSocketData, pBg96SocketContext->pUdpSocketOpenCallbackContext );
             }
         }
 

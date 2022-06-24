@@ -446,13 +446,6 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 }
                 else
                 {
-                    /* Notify internal module that UDP fail to creat socket connection. */
-                    if( pSocketData->udpSocketOpenCallback != NULL )
-                    {
-                        pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
-                                                            pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
-                    }
-
                     /* Call the callback function of this session. */
                     if( pSocketData->openCallback != NULL )
                     {
