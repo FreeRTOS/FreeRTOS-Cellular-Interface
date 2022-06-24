@@ -567,9 +567,9 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         }
     }
 
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( moduleSocketOpenCallback != NULL ) )
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketOpenCallback != NULL ) )
     {
-        cellularStatus = moduleSocketOpenCallback( *pSocketHandle );
+        cellularStatus = pContext->moduleSocketOpenCallback( *pSocketHandle );
     }
 
     taskEXIT_CRITICAL();
@@ -622,9 +622,9 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
 
-        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( moduleSocketCloseCallback != NULL ) )
+        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketCloseCallback != NULL ) )
         {
-            cellularStatus = moduleSocketCloseCallback( socketHandle );
+            cellularStatus = pContext->moduleSocketCloseCallback( socketHandle );
         }
 
         #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )

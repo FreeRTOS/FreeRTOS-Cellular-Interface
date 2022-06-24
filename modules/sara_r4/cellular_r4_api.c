@@ -2966,8 +2966,9 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
     bool needSetRemoteAddress = false;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularUrcEvent_t urcEvent = CELLULAR_URC_EVENT_OTHER;
+    cellularModuleSocketContext_t * pR4SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
 
-    PlatformMutex_Lock( &socketHandle->udpSocketConnectMutex );
+    PlatformMutex_Lock( &pR4SocketContext->udpSocketConnectMutex );
 
     /* Check input. */
     if( socketHandle == NULL )
@@ -3022,7 +3023,7 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
         cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
     }
 
-    PlatformMutex_Unlock( &socketHandle->udpSocketConnectMutex );
+    PlatformMutex_Unlock( &pR4SocketContext->udpSocketConnectMutex );
 
     return cellularStatus;
 }

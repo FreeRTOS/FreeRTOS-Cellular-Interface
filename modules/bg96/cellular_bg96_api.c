@@ -1968,7 +1968,7 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
     CellularUrcEvent_t urcEvent = CELLULAR_URC_EVENT_OTHER;
     cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
 
-    PlatformMutex_Lock( &socketHandle->udpSocketConnectMutex );
+    PlatformMutex_Lock( &pBg96SocketContext->udpSocketConnectMutex );
 
     /* Check input. */
     if( socketHandle == NULL )
@@ -2049,7 +2049,7 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
         }
     }
 
-    PlatformMutex_Unlock( &socketHandle->udpSocketConnectMutex );
+    PlatformMutex_Unlock( &pBg96SocketContext->udpSocketConnectMutex );
 
     return cellularStatus;
 }
