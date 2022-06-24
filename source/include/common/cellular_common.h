@@ -629,7 +629,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] pModuleSocketOpenCallback The callback function to allocate resources.
  */
-void _Cellular_RegisterModuleSocketOpenCallback( const CellularContext_t * pContext,
+void _Cellular_RegisterModuleSocketOpenCallback( CellularContext_t * pContext,
                                                  CellularModuleSocketOpenCallback_t pModuleSocketOpenCallback );
 
 /**
@@ -640,7 +640,7 @@ void _Cellular_RegisterModuleSocketOpenCallback( const CellularContext_t * pCont
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] pModuleSocketOpenCallback The callback function to release resources.
  */
-void _Cellular_RegisterModuleSocketCloseCallback( const CellularContext_t * pContext,
+void _Cellular_RegisterModuleSocketCloseCallback( CellularContext_t * pContext,
                                                   CellularModuleSocketCloseCallback_t pModuleSocketCloseCallback );
 
 /* *INDENT-OFF* */

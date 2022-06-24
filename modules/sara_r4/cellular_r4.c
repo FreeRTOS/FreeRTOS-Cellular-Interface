@@ -209,8 +209,8 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
         *ppModuleContext = ( void * ) &cellularHl7802Context;
 
         /* Set module callback function for socket open/close. */
-        _Cellular_RegisterModuleSocketOpenCallback( pContext, r4SocketOpenCallback );
-        _Cellular_RegisterModuleSocketCloseCallback( pContext, r4SocketCloseCallback );
+        _Cellular_RegisterModuleSocketOpenCallback( ( void * ) pContext, r4SocketOpenCallback );
+        _Cellular_RegisterModuleSocketCloseCallback( ( void * ) pContext, r4SocketCloseCallback );
     }
 
     return cellularStatus;

@@ -863,7 +863,7 @@ void _Cellular_NetworkRegistrationCallback( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-void _Cellular_RegisterModuleSocketOpenCallback( const CellularContext_t * pContext,
+void _Cellular_RegisterModuleSocketOpenCallback( CellularContext_t * pContext,
                                                  CellularModuleSocketOpenCallback_t pModuleSocketOpenCallback )
 {
     if( pContext != NULL )
@@ -874,7 +874,7 @@ void _Cellular_RegisterModuleSocketOpenCallback( const CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
-void _Cellular_RegisterModuleSocketCloseCallback( const CellularContext_t * pContext,
+void _Cellular_RegisterModuleSocketCloseCallback( CellularContext_t * pContext,
                                                   CellularModuleSocketCloseCallback_t pModuleSocketCloseCallback )
 {
     if( pContext != NULL )
