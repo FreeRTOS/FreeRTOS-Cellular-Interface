@@ -149,6 +149,8 @@ struct CellularContext
 
     /* Module Context. */
     void * pModueContext;
+    CellularModuleSocketOpenCallback_t moduleSocketOpenCallback;   /* Callback function to notify module when socket opened. */
+    CellularModuleSocketCloseCallback_t moduleSocketCloseCallback; /* Callback function to notify module when socket closed. */
 };
 
 /*-----------------------------------------------------------*/

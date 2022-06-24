@@ -443,20 +443,6 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 {
                     pSocketData->socketState = SOCKETSTATE_CONNECTED;
                     LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
-
-                    /* Notify internal module that UDP socket connection is created. */
-                    if( pSocketData->udpSocketOpenCallback != NULL )
-                    {
-                        pSocketData->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
-                                                            pSocketData, pSocketData->pUdpSocketOpenCallbackContext );
-                    }
-
-                    /* Call the callback function of this session. */
-                    if( pSocketData->openCallback != NULL )
-                    {
-                        pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
-                                                   pSocketData, pSocketData->pOpenCallbackContext );
-                    }
                 }
                 else
                 {

@@ -822,6 +822,22 @@ typedef void ( * CellularSocketDataReadyCallback_t )( CellularSocketHandle_t soc
 typedef void ( * CellularSocketClosedCallback_t )( CellularSocketHandle_t socketHandle,
                                                    void * pCallbackContext );
 
+/**
+ * @ingroup cellular_datatypes_functionpointers
+ * @brief Callback used to let module create socket context and stored pModemData in socketHandle.
+ *
+ * @param[in] socketHandle Socket handle just opened.
+ */
+typedef CellularError_t ( * CellularModuleSocketOpenCallback_t )( CellularSocketHandle_t socketHandle );
+
+/**
+ * @ingroup cellular_datatypes_functionpointers
+ * @brief Callback used to let module release resources in pModemData.
+ *
+ * @param[in] socketHandle Socket handle user is closing.
+ */
+typedef CellularError_t ( * CellularModuleSocketCloseCallback_t )( CellularSocketHandle_t socketHandle );
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

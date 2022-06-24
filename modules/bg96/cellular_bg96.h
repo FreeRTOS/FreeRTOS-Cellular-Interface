@@ -82,6 +82,15 @@ typedef struct cellularModuleContext
     /* coverity[misra_c_2012_rule_1_1_violation]. */
 } cellularModuleContext_t;
 
+typedef struct cellularModuleSocketContext
+{
+    PlatformMutex_t udpSocketConnectMutex;              /* Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
+                                                         * Cellular_SocketConnect at the same time. */
+    CellularSocketOpenCallback_t udpSocketOpenCallback; /* Informs the socket open status for UDP APIs. */
+    void * pUdpSocketOpenCallbackContext;               /* Socket open callback context. */
+    QueueHandle_t udpSocketOpenQueue;                   /* To receive UDP socket open status. */
+} cellularModuleSocketContext_t;
+
 CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
                                             CellularSimCardState_t * pSimState );
 

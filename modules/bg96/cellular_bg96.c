@@ -73,6 +73,8 @@ const char * CellularUrcTokenWoPrefixTable[] =
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
 
+cellularModuleSocketContext_t cellularBg96SocketContext[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
+
 /*-----------------------------------------------------------*/
 
 static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pContext,
@@ -136,6 +138,95 @@ static bool appendRatList( char * pRatList,
 
 /*-----------------------------------------------------------*/
 
+static bool _Cellular_CreateUdpSocketConnectMutex( cellularModuleSocketContext_t * pModuleSocketContext )
+{
+    bool status = false;
+
+    status = PlatformMutex_Create( &pModuleSocketContext->udpSocketConnectMutex, false );
+
+    return status;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_DestroyUdpSocketConnectMutex( cellularModuleSocketContext_t * pModuleSocketContext )
+{
+    PlatformMutex_Destroy( &pModuleSocketContext->udpSocketConnectMutex );
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t bg96SocketOpenCallback( CellularSocketHandle_t socketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    uint32_t socketId = socketHandle->socketId;
+    cellularModuleSocketContext_t * pModuleSocketContext = &cellularBg96SocketContext[ socketId ];
+    bool needUdpResources = false;
+
+    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        needUdpResources = true;
+    }
+
+    if( needUdpResources )
+    {
+        /* Allocate resources for UDP sockets. */
+        if( _Cellular_CreateUdpSocketConnectMutex( pModuleSocketContext ) == false )
+        {
+            LogError( ( "bg96SocketOpenCallback: Create UDP socket mutex failed." ) );
+            cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
+        }
+
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            /* Create the queue for UDP socket connect. */
+            pModuleSocketContext->udpSocketOpenQueue = xQueueCreate( 1, sizeof( CellularUrcEvent_t ) );
+
+            if( pModuleSocketContext->udpSocketOpenQueue == NULL )
+            {
+                LogError( ( "bg96SocketOpenCallback: Create UDP socket queue failed." ) );
+                cellularStatus = CELLULAR_NO_MEMORY;
+
+                /* Free the allocated resources. */
+                _Cellular_DestroyUdpSocketConnectMutex( pModuleSocketContext );
+            }
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        socketHandle->pModemData = &cellularBg96SocketContext[ socketId ];
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t bg96SocketCloseCallback( CellularSocketHandle_t socketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    cellularModuleSocketContext_t * pModuleSocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+    bool hasUdpResources = false;
+
+    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        hasUdpResources = true;
+    }
+
+    if( hasUdpResources )
+    {
+        /* Release UDP resources. */
+        _Cellular_DestroyUdpSocketConnectMutex( pModuleSocketContext );
+        xQueueDelete( pModuleSocketContext->udpSocketOpenQueue );
+        socketHandle->pModemData = NULL;
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
@@ -179,6 +270,10 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
                 *ppModuleContext = ( void * ) &cellularBg96Context;
             }
         }
+
+        /* Set module callback function for socket open/close. */
+        pContext->moduleSocketOpenCallback = bg96SocketOpenCallback;
+        pContext->moduleSocketCloseCallback = bg96SocketCloseCallback;
     }
 
     return cellularStatus;
