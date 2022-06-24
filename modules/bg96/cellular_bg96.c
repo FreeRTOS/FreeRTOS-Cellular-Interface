@@ -218,7 +218,7 @@ static CellularError_t bg96SocketCloseCallback( CellularSocketHandle_t socketHan
     {
         /* Release UDP resources. */
         _Cellular_DestroyUdpSocketConnectMutex( pBg96SocketContext );
-        xQueueDelete( pBg96SocketContext->udpSocketOpenQueue );
+        vQueueDelete( pBg96SocketContext->udpSocketOpenQueue );
         socketHandle->pModemData = NULL;
     }
 
