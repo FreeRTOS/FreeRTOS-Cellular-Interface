@@ -272,8 +272,8 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
         }
 
         /* Set module callback function for socket open/close. */
-        pContext->moduleSocketOpenCallback = bg96SocketOpenCallback;
-        pContext->moduleSocketCloseCallback = bg96SocketCloseCallback;
+        _Cellular_RegisterModuleSocketOpenCallback( pContext, bg96SocketOpenCallback );
+        _Cellular_RegisterModuleSocketCloseCallback( pContext, bg96SocketCloseCallback );
     }
 
     return cellularStatus;
