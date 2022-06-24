@@ -126,10 +126,6 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
                                                             uint16_t dataLen );
 static CellularError_t controlSignalStrengthIndication( CellularContext_t * pContext,
                                                         bool enable );
-
-CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
-                                         const CellularPsmSettings_t * pPsmSettings );
-
 static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
                                                    CellularSocketOption_t option );
 
@@ -138,6 +134,9 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
                                            CellularSocketAccessMode_t dataAccessMode,
                                            const CellularSocketAddress_t * pRemoteSocketAddress,
                                            uint32_t timeout );
+
+CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
+                                         const CellularPsmSettings_t * pPsmSettings );
 
 /*-----------------------------------------------------------*/
 
@@ -2709,6 +2708,103 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPdpContextSettings( CellularCont
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
+                                                   CellularSocketOption_t option )
+{
+    CellularError_t err = CELLULAR_UNSUPPORTED;
+
+    if( ( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT ) &&
+        ( ( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_RECV_TIMEOUT ) ||
+          ( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID ) ) )
+    {
+        err = CELLULAR_SUCCESS;
+    }
+    else
+    {
+        LogWarn( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
+                   optionLevel, option ) );
+    }
+
+    return err;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
+                                           CellularSocketHandle_t socketHandle,
+                                           CellularSocketAccessMode_t dataAccessMode,
+                                           const CellularSocketAddress_t * pRemoteSocketAddress,
+                                           uint32_t timeout )
+{
+    bool needSetRemoteAddress = false;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    cellularModuleSocketContext_t * pR4SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+
+    ( void ) timeout;
+
+    PlatformMutex_Lock( &pR4SocketContext->udpSocketConnectMutex );
+
+    /* Check input. */
+    if( socketHandle == NULL )
+    {
+        LogError( ( "udpCheckAndConnect: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        LogError( ( "udpCheckAndConnect, Socket protocol not supported %d",
+                    socketHandle->socketProtocol ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "udpCheckAndConnect, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    /* Check if it's necessary to call Cellular_SocketConnect. */
+    else if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
+    {
+        LogError( ( "udpCheckAndConnect, Remote address is not set correctly." ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketHandle->remoteSocketAddress.port == 0 )
+    {
+        /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
+        needSetRemoteAddress = true;
+    }
+    else if( pRemoteSocketAddress == NULL )
+    {
+        /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
+        needSetRemoteAddress = false;
+    }
+    else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
+    {
+        /* Remote info is set before. And input remote address is changed. */
+        LogError( ( "Cellular_SocketSendTo, Can't change the remote information in one socket handler" ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Remote info is same as previous setting, reuse it directly. */
+        needSetRemoteAddress = false;
+    }
+
+    /* Create a socket for this socket handler. */
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
+    {
+        /* In SARA_R4, we get the result when Cellular_SocketConnect returned. */
+        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+    }
+
+    PlatformMutex_Unlock( &pR4SocketContext->udpSocketConnectMutex );
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* Set PDN APN name and Authentication setting */
 
 CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
@@ -2928,103 +3024,6 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
             cellularStatus = Cellular_CommonSetPsmSettings( cellularHandle, pPsmSettings );
         }
     }
-
-    return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
-                                                   CellularSocketOption_t option )
-{
-    CellularError_t err = CELLULAR_UNSUPPORTED;
-
-    if( ( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT ) &&
-        ( ( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT ) ||
-          ( option == CELLULAR_SOCKET_OPTION_RECV_TIMEOUT ) ||
-          ( option == CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID ) ) )
-    {
-        err = CELLULAR_SUCCESS;
-    }
-    else
-    {
-        LogWarn( ( "Cellular_SocketSetSockOpt: Option [Level:option=%d:%d] not supported in SARA R4",
-                   optionLevel, option ) );
-    }
-
-    return err;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
-                                           CellularSocketHandle_t socketHandle,
-                                           CellularSocketAccessMode_t dataAccessMode,
-                                           const CellularSocketAddress_t * pRemoteSocketAddress,
-                                           uint32_t timeout )
-{
-    bool needSetRemoteAddress = false;
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    cellularModuleSocketContext_t * pR4SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
-
-    ( void ) timeout;
-
-    PlatformMutex_Lock( &pR4SocketContext->udpSocketConnectMutex );
-
-    /* Check input. */
-    if( socketHandle == NULL )
-    {
-        LogError( ( "udpCheckAndConnect: Invalid socket address" ) );
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
-    {
-        LogError( ( "udpCheckAndConnect, Socket protocol not supported %d",
-                    socketHandle->socketProtocol ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
-    {
-        LogError( ( "udpCheckAndConnect, Access mode not supported %d",
-                    dataAccessMode ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    /* Check if it's necessary to call Cellular_SocketConnect. */
-    else if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
-    {
-        LogError( ( "udpCheckAndConnect, Remote address is not set correctly." ) );
-        cellularStatus = CELLULAR_BAD_PARAMETER;
-    }
-    else if( socketHandle->remoteSocketAddress.port == 0 )
-    {
-        /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
-        needSetRemoteAddress = true;
-    }
-    else if( pRemoteSocketAddress == NULL )
-    {
-        /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
-        needSetRemoteAddress = false;
-    }
-    else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
-    {
-        /* Remote info is set before. And input remote address is changed. */
-        LogError( ( "Cellular_SocketSendTo, Can't change the remote information in one socket handler" ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else
-    {
-        /* Remote info is same as previous setting, reuse it directly. */
-        needSetRemoteAddress = false;
-    }
-
-    /* Create a socket for this socket handler. */
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
-    {
-        /* In SARA_R4, we get the result when Cellular_SocketConnect returned. */
-        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
-    }
-
-    PlatformMutex_Unlock( &pR4SocketContext->udpSocketConnectMutex );
 
     return cellularStatus;
 }

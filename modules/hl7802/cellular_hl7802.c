@@ -88,6 +88,8 @@ const char * CellularUrcTokenWoPrefixTable[] = { 0 };
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcTokenWoPrefixTableSize = 0;
 
+cellularModuleSocketContext_t cellularHl7802SocketContext[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
+
 /*-----------------------------------------------------------*/
 
 static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pContext,
@@ -279,6 +281,79 @@ static bool appendRatList( char * pRatList,
 
 /*-----------------------------------------------------------*/
 
+static bool _Cellular_CreateUdpSocketConnectMutex( cellularModuleSocketContext_t * pHl7802SocketContext )
+{
+    bool status = false;
+
+    status = PlatformMutex_Create( &pHl7802SocketContext->udpSocketConnectMutex, false );
+
+    return status;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_DestroyUdpSocketConnectMutex( cellularModuleSocketContext_t * pHl7802SocketContext )
+{
+    PlatformMutex_Destroy( &pHl7802SocketContext->udpSocketConnectMutex );
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t hl7802SocketOpenCallback( CellularSocketHandle_t socketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    uint32_t socketId = socketHandle->socketId;
+    cellularModuleSocketContext_t * pHl7802SocketContext = &cellularHl7802SocketContext[ socketId ];
+    bool needUdpResources = false;
+
+    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        needUdpResources = true;
+    }
+
+    if( needUdpResources )
+    {
+        /* Allocate resources for UDP sockets. */
+        if( _Cellular_CreateUdpSocketConnectMutex( pHl7802SocketContext ) == false )
+        {
+            LogError( ( "hl7802SocketOpenCallback: Create UDP socket mutex failed." ) );
+            cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
+        }
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        socketHandle->pModemData = pHl7802SocketContext;
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t hl7802SocketCloseCallback( CellularSocketHandle_t socketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    cellularModuleSocketContext_t * pHl7802SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+    bool hasUdpResources = false;
+
+    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        hasUdpResources = true;
+    }
+
+    if( hasUdpResources )
+    {
+        /* Release UDP resources. */
+        _Cellular_DestroyUdpSocketConnectMutex( pHl7802SocketContext );
+        socketHandle->pModemData = NULL;
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
@@ -306,6 +381,10 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
         }
 
         *ppModuleContext = ( void * ) &cellularHl7802Context;
+
+        /* Set module callback function for socket open/close. */
+        _Cellular_RegisterModuleSocketOpenCallback( ( void * ) pContext, hl7802SocketOpenCallback );
+        _Cellular_RegisterModuleSocketCloseCallback( ( void * ) pContext, hl7802SocketCloseCallback );
     }
 
     return cellularStatus;

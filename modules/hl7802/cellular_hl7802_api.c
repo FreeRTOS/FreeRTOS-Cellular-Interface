@@ -186,6 +186,11 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
                                                             uint16_t dataLen );
 static char * searchEndPatternPos( char * pString,
                                    uint32_t stringLen );
+static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
+                                           CellularSocketHandle_t socketHandle,
+                                           CellularSocketAccessMode_t dataAccessMode,
+                                           const CellularSocketAddress_t * pRemoteSocketAddress,
+                                           uint32_t timeout );
 
 /*-----------------------------------------------------------*/
 
@@ -524,7 +529,6 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char * pInputLine = NULL, * pEndPatternLine = NULL;
     const _socketDataRecv_t * pDataRecv = ( _socketDataRecv_t * ) pData;
-    bool dropPacket = false;
 
     if( pContext == NULL )
     {
@@ -575,14 +579,10 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         if( strncmp( pEndPatternLine, SOCKET_END_PATTERN, SOCKET_END_PATTERN_LEN ) != 0 )
         {
             LogWarn( ( "response item error in end pattern "SOCKET_END_PATTERN ) );
-
-            /* Sometimes HL7802 return only part of end pattern.
-             * Drop the packet but keep cellular status OK */
-            dropPacket = true;
         }
 
         /* Process the data buffer. */
-        if( ( atCoreStatus == CELLULAR_AT_SUCCESS ) && !dropPacket )
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
             atCoreStatus = getDataFromResp( pAtResp, pDataRecv, dataLen );
         }
@@ -1560,6 +1560,80 @@ static CellularError_t _Cellular_CreateUdpConnection( CellularHandle_t cellularH
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
+                                           CellularSocketHandle_t socketHandle,
+                                           CellularSocketAccessMode_t dataAccessMode,
+                                           const CellularSocketAddress_t * pRemoteSocketAddress,
+                                           uint32_t timeout )
+{
+    bool needSetRemoteAddress = false;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    cellularModuleSocketContext_t * pHl7802SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+
+    ( void ) timeout;
+
+    PlatformMutex_Lock( &pHl7802SocketContext->udpSocketConnectMutex );
+
+    /* Check input. */
+    if( socketHandle == NULL )
+    {
+        LogError( ( "udpCheckAndConnect: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        LogError( ( "udpCheckAndConnect, Socket protocol not supported %d",
+                    socketHandle->socketProtocol ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "udpCheckAndConnect, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    /* Check if it's necessary to call Cellular_SocketConnect. */
+    else if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
+    {
+        LogError( ( "udpCheckAndConnect, Remote address is not set correctly." ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketHandle->remoteSocketAddress.port == 0 )
+    {
+        /* Remote info is not set before. Set pRemoteSocketAddress as remote address. */
+        needSetRemoteAddress = true;
+    }
+    else if( pRemoteSocketAddress == NULL )
+    {
+        /* Remote info is set before. Input remote address is set to NULL, so we can reuse address. */
+        needSetRemoteAddress = false;
+    }
+    else if( memcmp( pRemoteSocketAddress, &socketHandle->remoteSocketAddress, sizeof( CellularSocketAddress_t ) ) != 0 )
+    {
+        /* Remote info is set before. And input remote address is changed. */
+        LogError( ( "Cellular_SocketSendTo, Can't change the remote information in one socket handler" ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Remote info is same as previous setting, reuse it directly. */
+        needSetRemoteAddress = false;
+    }
+
+    /* Create a socket for this socket handler. */
+    if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
+    {
+        /* In HL7802, we get the result when Cellular_SocketConnect returned. */
+        cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
+    }
+
+    PlatformMutex_Unlock( &pHl7802SocketContext->udpSocketConnectMutex );
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SetDns( CellularHandle_t cellularHandle,
@@ -1878,6 +1952,124 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
                 cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
             }
         }
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+/* FreeRTOS Cellular Library API. */
+CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
+                                         CellularSocketHandle_t socketHandle,
+                                         uint8_t * pBuffer,
+                                         uint32_t bufferLength,
+                                         uint32_t * pReceivedDataLength,
+                                         CellularSocketAccessMode_t dataAccessMode,
+                                         const CellularSocketAddress_t * pRemoteSocketAddress )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* pContext is checked in _Cellular_CheckLibraryStatus function. */
+    cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+
+    /* Check input. */
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
+    }
+    else if( socketHandle == NULL )
+    {
+        LogError( ( "Cellular_SocketRecvFrom: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        LogError( ( "Cellular_SocketRecvFrom, Socket protocol not supported %d",
+                    socketHandle->socketProtocol ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else if( ( pBuffer == NULL ) || ( pReceivedDataLength == NULL ) || ( bufferLength == 0U ) )
+    {
+        LogError( ( "Cellular_SocketRecvFrom: Invalid parameter" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "Cellular_SocketRecvFrom, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Check if need to connect the socket. */
+        cellularStatus = udpCheckAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->recvTimeoutMs );
+    }
+
+    /* Send the data to the socket. */
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        cellularStatus = Cellular_SocketRecv( cellularHandle, socketHandle, pBuffer, bufferLength, pReceivedDataLength );
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+/* FreeRTOS Cellular Library API. */
+CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
+                                       CellularSocketHandle_t socketHandle,
+                                       const uint8_t * pData,
+                                       uint32_t dataLength,
+                                       uint32_t * pSentDataLength,
+                                       CellularSocketAccessMode_t dataAccessMode,
+                                       const CellularSocketAddress_t * pRemoteSocketAddress )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* pContext is checked in _Cellular_CheckLibraryStatus function. */
+    cellularStatus = _Cellular_CheckLibraryStatus( pContext );
+
+    /* Check input. */
+    if( cellularStatus != CELLULAR_SUCCESS )
+    {
+        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
+    }
+    else if( socketHandle == NULL )
+    {
+        LogError( ( "Cellular_SocketSendTo: Invalid socket address" ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
+    {
+        LogError( ( "Cellular_SocketSendTo, Socket protocol not supported %d",
+                    socketHandle->socketProtocol ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else if( ( pData == NULL ) || ( pSentDataLength == NULL ) || ( dataLength == 0U ) )
+    {
+        LogError( ( "Cellular_SocketSendTo: Invalid parameter" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
+    {
+        LogError( ( "Cellular_SocketSendTo, Access mode not supported %d",
+                    dataAccessMode ) );
+        cellularStatus = CELLULAR_UNSUPPORTED;
+    }
+    else
+    {
+        /* Check if need to connect the socket. */
+        cellularStatus = udpCheckAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->sendTimeoutMs );
+    }
+
+    /* Send the data to the socket. */
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        cellularStatus = Cellular_SocketSend( cellularHandle, socketHandle, pData, dataLength, pSentDataLength );
     }
 
     return cellularStatus;
