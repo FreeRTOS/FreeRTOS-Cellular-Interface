@@ -2695,8 +2695,8 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
     /* Set the GPRS connection configuration. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+KCNXCFG=1,\"GPRS\",\"%s\"",
-                           pPdnConfig->apnName );
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+KCNXCFG=%u,\"GPRS\",\"%s\"",
+                           contextId, pPdnConfig->apnName );
         LogDebug( ( "cmd %s", cmdBuf ) );
 
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atGprsConnectionConfighReq,
