@@ -2537,16 +2537,31 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
+        LogError( ( "_Cellular_CheckLibraryStatus failed." ) );
     }
     else if( socketHandle == NULL )
     {
+        LogError( ( "Cellular_SocketRecv: Invalid socket handle." ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
     else if( ( pBuffer == NULL ) || ( pReceivedDataLength == NULL ) || ( bufferLength == 0U ) )
     {
-        LogError( ( "_Cellular_RecvData: Bad input Param" ) );
+        LogError( ( "Cellular_SocketRecv: Bad input Param." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketHandle->socketState != SOCKETSTATE_CONNECTED )
+    {
+        /* Check the socket connection state. */
+        LogInfo( ( "Cellular_SocketRecv: socket state %d is not connected.", socketHandle->socketState ) );
+
+        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) || ( socketHandle->socketState == SOCKETSTATE_CONNECTING ) )
+        {
+            cellularStatus = CELLULAR_SOCKET_NOT_CONNECTED;
+        }
+        else
+        {
+            cellularStatus = CELLULAR_SOCKET_CLOSED;
+        }
     }
     else
     {
@@ -2623,16 +2638,31 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
-        LogDebug( ( "_Cellular_CheckLibraryStatus failed" ) );
+        LogError( ( "_Cellular_CheckLibraryStatus failed." ) );
     }
     else if( socketHandle == NULL )
     {
+        LogError( ( "Cellular_SocketSend: Invalid socket handle." ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
     }
     else if( ( pData == NULL ) || ( pSentDataLength == NULL ) || ( dataLength == 0U ) )
     {
-        LogError( ( "Cellular_SocketSend: Invalid parameter" ) );
+        LogError( ( "Cellular_SocketSend: Invalid parameter." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else if( socketHandle->socketState != SOCKETSTATE_CONNECTED )
+    {
+        /* Check the socket connection state. */
+        LogInfo( ( "Cellular_SocketSend: socket state %d is not connected.", socketHandle->socketState ) );
+
+        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) || ( socketHandle->socketState == SOCKETSTATE_CONNECTING ) )
+        {
+            cellularStatus = CELLULAR_SOCKET_NOT_CONNECTED;
+        }
+        else
+        {
+            cellularStatus = CELLULAR_SOCKET_CLOSED;
+        }
     }
     else
     {
@@ -2704,6 +2734,11 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     }
     else
     {
+        if( socketHandle->socketState == SOCKETSTATE_CONNECTING )
+        {
+            LogWarn( ( "Cellular_SocketClose: Socket state is SOCKETSTATE_CONNECTING." ) );
+        }
+
         if( ( socketHandle->socketState == SOCKETSTATE_CONNECTING ) ||
             ( socketHandle->socketState == SOCKETSTATE_CONNECTED ) ||
             ( socketHandle->socketState == SOCKETSTATE_DISCONNECTED ) )
@@ -2758,15 +2793,22 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
     if( cellularStatus != CELLULAR_SUCCESS )
     {
+        LogError( ( "Cellular_SocketConnect: _Cellular_CheckLibraryStatus failed." ) );
     }
     else if( pRemoteSocketAddress == NULL )
     {
-        LogError( ( "Cellular_SocketConnect: Invalid socket address" ) );
+        LogError( ( "Cellular_SocketConnect: Invalid socket address." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
     else if( socketHandle == NULL )
     {
+        LogError( ( "Cellular_SocketConnect: Invalid socket handle." ) );
         cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else if( ( socketHandle->socketState == SOCKETSTATE_CONNECTED ) || ( socketHandle->socketState == SOCKETSTATE_CONNECTING ) )
+    {
+        LogError( ( "Cellular_SocketConnect: Not allowed in state %d.", socketHandle->socketState ) );
+        cellularStatus = CELLULAR_NOT_ALLOWED;
     }
     else
     {
@@ -2781,6 +2823,10 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
+        /* Set the socket state to connecting state. If cellular modem returns error,
+         * revert the state to allocated state. */
+        socketHandle->socketState = SOCKETSTATE_CONNECTING;
+
         pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketConnect,
                                                                SOCKET_CONNECT_PACKET_REQ_TIMEOUT_MS );
 
@@ -2788,10 +2834,9 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
         {
             LogError( ( "Cellular_SocketConnect: Socket connect failed, cmdBuf:%s, PktRet: %d", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        }
-        else
-        {
-            socketHandle->socketState = SOCKETSTATE_CONNECTING;
+
+            /* Revert the state to allocated state. */
+            socketHandle->socketState = SOCKETSTATE_ALLOCATED;
         }
     }
 

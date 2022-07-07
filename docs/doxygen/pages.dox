@@ -39,8 +39,9 @@ Please reference cellular common library document for detail information about p
  */
 
 /**
-@page cellular_design Design
-@brief FreeRTOS Cellular Library Design
+@page Design
+
+@section FreeRTOS_Cellular_Library_Design Cellular Interface Design
 
 FreeRTOS Cellular Library uses communication interface to communicate with cellular modules.<br>
 Users of FreeRTOS Cellular Library should create a instance of CellularCommInterface and pass it
@@ -53,6 +54,25 @@ The following communication interface implementation can be used as reference.
 - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c"> STM32 L475 discovery board comm interface </a>
 - <a href="https://github.com/aws/amazon-freertos/blob/feature/cellular/vendors/sierra/boards/sensorhub/ports/comm_if/comm_if_sierra.c"> Sierra sensorhub board comm interface </a>
 <b></b>
+
+@section cellular_socket_api_desing Cellular Socket API Design
+
+FreeRTOS Cellular Interface offloads the TCP/IP stacks to cellular module. The implementation
+of the socket APIs use module specific AT commands. Cellular socket APIs abstract the differences
+between different cellular module. The following are cellular socket APIs:
+- @function_name{Cellular_CreateSocket}
+- @function_name{Cellular_SocketSetSockOpt}
+- @function_name{Cellular_SocketSend}
+- @function_name{Cellular_SocketRecv}
+- @function_name{Cellular_SocketClose}
+- @function_name{Cellular_GetHostByName}
+- @function_name{Cellular_SocketRegisterDataReadyCallback}
+- @function_name{Cellular_SocketRegisterClosedCallback}
+- @function_name{Cellular_SocketRegisterSocketOpenCallback}
+
+Cellular socket APIs and cellular modem events change cellular socket state.
+See the below graph for the socket state transitions:
+@image html cellular_socket_state.png width=70%
 */
 
 /**
