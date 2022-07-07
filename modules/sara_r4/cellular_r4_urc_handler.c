@@ -590,6 +590,9 @@ static void _cellular_UrcProcessUusocl( CellularContext_t * pContext,
                 }
                 else
                 {
+                    /* Change the socket state to disconnected. */
+                    pSocketData->socketState = SOCKETSTATE_DISCONNECTED;
+
                     /* Indicate the upper layer about the data reception. */
                     if( pSocketData->closedCallback != NULL )
                     {
