@@ -372,7 +372,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
                 atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
                 cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
             }
-        #encif
+        #endif
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
