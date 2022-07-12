@@ -249,7 +249,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
-        #ifndef CELLULAR_BG96_DISABLE_FLOW_CONTROL
+        #ifndef CELLULAR_CONFIG_DISABLE_FLOW_CONTROL
             if( cellularStatus == CELLULAR_SUCCESS )
             {
                 /* Enable RTS/CTS hardware flow control. */
