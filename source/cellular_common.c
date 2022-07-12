@@ -622,17 +622,17 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
 
-        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketCloseCallback != NULL ) )
-        {
-            cellularStatus = pContext->moduleSocketCloseCallback( socketHandle );
-        }
-
         #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
             else
             {
                 Platform_Free( socketHandle );
             }
         #endif
+
+        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketCloseCallback != NULL ) )
+        {
+            cellularStatus = pContext->moduleSocketCloseCallback( socketHandle );
+        }
     }
     else
     {
