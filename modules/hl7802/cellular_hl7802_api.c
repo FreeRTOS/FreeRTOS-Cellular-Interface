@@ -1546,6 +1546,8 @@ static CellularError_t _Cellular_CreateUdpConnection( CellularHandle_t cellularH
         {
             /* Create the reverse table to store the socketIndex to sessionId. */
             pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
+
+            /* No need to wait for other URC response for UDP. */
             socketHandle->socketState = SOCKETSTATE_CONNECTED;
         }
         else
