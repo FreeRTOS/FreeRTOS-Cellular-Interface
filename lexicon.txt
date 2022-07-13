@@ -368,7 +368,7 @@ ipv
 isalpha
 isdigit
 ismodulesocketclosecallscenario
-ismodulesocketopencallscenario 
+ismodulesocketopencallscenario
 iso
 isr
 isspace
@@ -566,8 +566,8 @@ plmn
 plmninfo
 pmodemdata
 pmodeminfo
-pmodulesocketclosecallback 
-pmodulesocketopencallback 
+pmodulesocketclosecallback
+pmodulesocketopencallback
 pmutex
 pnetworkinfo
 pnetworktime
