@@ -63,7 +63,9 @@ between different cellular module. The following are cellular socket APIs:
 - @function_name{Cellular_CreateSocket}
 - @function_name{Cellular_SocketSetSockOpt}
 - @function_name{Cellular_SocketSend}
+- @function_name{Cellular_SocketSendTo}
 - @function_name{Cellular_SocketRecv}
+- @function_name{Cellular_SocketRecvFrom}
 - @function_name{Cellular_SocketClose}
 - @function_name{Cellular_GetHostByName}
 - @function_name{Cellular_SocketRegisterDataReadyCallback}
@@ -285,8 +287,12 @@ Some configuration settings are C pre-processor constants, and some are function
 @function_brief{Cellular_SocketConnect}
 - @function_name{Cellular_SocketSend}
 @function_brief{Cellular_SocketSend}
+- @function_name{Cellular_SocketSendTo}
+@function_brief{Cellular_SocketSendTo}
 - @function_name{Cellular_SocketRecv}
 @function_brief{Cellular_SocketRecv}
+- @function_name{Cellular_SocketRecvFrom}
+@function_brief{Cellular_SocketRecvFrom}
 - @function_name{Cellular_SocketClose}
 @function_brief{Cellular_SocketClose}
 - @function_name{Cellular_GetHostByName}

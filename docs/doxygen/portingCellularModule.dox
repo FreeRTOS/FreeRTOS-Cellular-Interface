@@ -88,7 +88,9 @@ They can be used to minimize porting efforts when implement FreeRTOS Cellular Li
 | Cellular_CreateSocket                                   | O                         |
 | Cellular_SocketConnect                                  |                           |
 | Cellular_SocketSend                                     |                           |
+| Cellular_SocketSendTo                                   |                           |
 | Cellular_SocketRecv                                     |                           |
+| Cellular_SocketRecvFrom                                 |                           |
 | Cellular_SocketClose                                    |                           |
 | Cellular_GetHostByName                                  |                           |
 | Cellular_SocketSetSockOpt                               | O                         |
