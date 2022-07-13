@@ -115,6 +115,14 @@ git submodule update --checkout --init --recursive test/unit-test/CMock
 
 1. Run `cd build && ctest` to execute all tests and view the test run summary.
 
+## CBMC
+
+To learn more about CBMC and proofs specifically, review the training material [here](https://model-checking.github.io/cbmc-training).
+
+The `test/cbmc/proofs` directory contains CBMC proofs.
+
+In order to run these proofs you will need to install CBMC and other tools by following the instructions [here](https://model-checking.github.io/cbmc-training/installation.html).
+
 ## Reference examples
 
 Please refer to the demos of the Cellular Interface library [here](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator) using FreeRTOS on the Windows simulator platform. These can be used as reference examples for the library API.
