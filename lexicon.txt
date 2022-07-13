@@ -367,6 +367,8 @@ iptype
 ipv
 isalpha
 isdigit
+ismodulesocketclosecallscenario
+ismodulesocketopencallscenario 
 iso
 isr
 isspace
@@ -376,6 +378,7 @@ isvalidsocket
 jan
 keylist
 keylistlen
+kmp
 kselacq
 ktcp
 ktcprcv
@@ -416,6 +419,8 @@ modulecleanup
 moduleenableue
 moduleenableurc
 moduleinit
+modulesocketclosecallback
+modulesocketopencallback
 mqtt
 mutex
 mutexes
@@ -486,6 +491,7 @@ pcellularsrctokenerrortable
 pcellularsrctokensuccesstable
 pcellularurchandlertable
 pcellularurctokenwoprefixtable
+pch
 pchead
 pchostname
 pclosedcallbackcontext
@@ -560,6 +566,8 @@ plmn
 plmninfo
 pmodemdata
 pmodeminfo
+pmodulesocketclosecallback 
+pmodulesocketopencallback 
 pmutex
 pnetworkinfo
 pnetworktime
@@ -639,6 +647,7 @@ ptoken
 ptokenptr
 ptokentable
 ptr
+pudpsocketopencallbackcontext
 puk
 puserdata
 pvportmalloc
@@ -819,6 +828,9 @@ uauthreq
 ubandmask
 ublox
 udp
+udpsocketconnectmutex
+udpsocketopencallback
+udpsocketopenqueue
 ue
 uint
 uknown
@@ -850,6 +862,7 @@ uupsmr
 uusocl
 uusoco
 uusord
+uusorf
 var
 veventgroupdelete
 vportfree

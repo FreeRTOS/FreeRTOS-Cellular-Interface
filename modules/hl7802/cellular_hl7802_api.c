@@ -439,7 +439,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
             *ppDataStart = ( char * ) &pLine[ SOCKET_DATA_CONNECT_TOKEN_LEN + 2 ]; /* Indicate the data start in pLine. */
             *pRecvDataLength = 0;
 
-            /* Cound received payload length and find end pattern. */
+            /* Look for end pattern by KMS search. */
             pch = searchEndPatternPos( *ppDataStart, lineLength - ( SOCKET_DATA_CONNECT_TOKEN_LEN + 2 ) );
 
             if( pch == NULL )

@@ -638,7 +638,7 @@ void _Cellular_RegisterModuleSocketOpenCallback( CellularContext_t * pContext,
  * Cellular module can register the callback function to release resources on closing socket.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pModuleSocketOpenCallback The callback function to release resources.
+ * @param[in] pModuleSocketCloseCallback The callback function to release resources.
  */
 void _Cellular_RegisterModuleSocketCloseCallback( CellularContext_t * pContext,
                                                   CellularModuleSocketCloseCallback_t pModuleSocketCloseCallback );

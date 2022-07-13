@@ -79,9 +79,9 @@ static char * pData;
 
 CellularHandle_t gCellularHandle = NULL;
 
-static int isModuleSocketOpenCallScenario = 0;  /*0: return success, 1: return fail, 0xFF: callbacked (modified by callback function itself) */
+static int isModuleSocketOpenCallScenario = 0;  /*0: return success, 1: return fail, 0xFF: callback called (modified by callback function itself) */
 
-static int isModuleSocketCloseCallScenario = 0; /*0: return success, 1: return fail, 0xFF: callbacked (modified by callback function itself) */
+static int isModuleSocketCloseCallScenario = 0; /*0: return success, 1: return fail, 0xFF: callback called (modified by callback function itself) */
 
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
