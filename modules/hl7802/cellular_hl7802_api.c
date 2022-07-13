@@ -1351,9 +1351,10 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
         LogError( ( "_Cellular_RecvData: Bad input Param." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
-    else if( socketHandle->socketState != SOCKETSTATE_CONNECTED )
+    else if( ( socketHandle->socketState != SOCKETSTATE_CONNECTED ) && ( socketHandle->socketState != SOCKETSTATE_DISCONNECTED ) )
     {
         /* Check the socket connection state. */
+        /* For SOCKETSTATE_DISCONNECTED, there may be packets that can be read even though socket is disconnected by remote. */
         LogInfo( ( "Cellular_SocketRecv: socket state %d is not connected.", socketHandle->socketState ) );
 
         if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) || ( socketHandle->socketState == SOCKETSTATE_CONNECTING ) )
@@ -1382,7 +1383,7 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
         /* Calculate the read length. */
         cellularStatus = _Cellular_GetSocketStat( cellularHandle, socketHandle, &socketStat );
 
-        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketStat.status == TCP_SOCKET_STATE_CONNECTION_UP ) )
+        if( cellularStatus == CELLULAR_SUCCESS )
         {
             socktCmdDataLength = socketStat.rcvData;
         }
