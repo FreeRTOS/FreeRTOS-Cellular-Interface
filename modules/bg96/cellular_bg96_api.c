@@ -223,12 +223,6 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
                                            CellularSocketAccessMode_t dataAccessMode,
                                            const CellularSocketAddress_t * pRemoteSocketAddress,
                                            uint32_t timeout );
-static CellularError_t registerUdpSocketOpenCallback( CellularSocketHandle_t socketHandle,
-                                                      CellularSocketOpenCallback_t udpSocketOpenCallback,
-                                                      void * pCallbackContext );
-static void _udpSocketOpenResultCallback( CellularUrcEvent_t urcEvent,
-                                          CellularSocketHandle_t socketHandle,
-                                          void * pCallbackContext );
 
 /*-----------------------------------------------------------*/
 
@@ -1920,43 +1914,6 @@ static void _dnsResultCallback( cellularModuleContext_t * pModuleContext,
 
 /*-----------------------------------------------------------*/
 
-static CellularError_t registerUdpSocketOpenCallback( CellularSocketHandle_t socketHandle,
-                                                      CellularSocketOpenCallback_t udpSocketOpenCallback,
-                                                      void * pCallbackContext )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
-
-    if( socketHandle == NULL )
-    {
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else
-    {
-        pBg96SocketContext->udpSocketOpenCallback = udpSocketOpenCallback;
-        pBg96SocketContext->pUdpSocketOpenCallbackContext = pCallbackContext;
-    }
-
-    return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static void _udpSocketOpenResultCallback( CellularUrcEvent_t urcEvent,
-                                          CellularSocketHandle_t socketHandle,
-                                          void * pCallbackContext )
-{
-    ( void ) pCallbackContext;
-    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
-
-    if( xQueueSend( pBg96SocketContext->udpSocketOpenQueue, &urcEvent, ( TickType_t ) 0 ) != pdPASS )
-    {
-        LogDebug( ( "_udpSocketOpenResultCallback sends udpSocketOpenQueue fail" ) );
-    }
-}
-
-/*-----------------------------------------------------------*/
-
 static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
                                            CellularSocketHandle_t socketHandle,
                                            CellularSocketAccessMode_t dataAccessMode,
@@ -2019,8 +1976,6 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
     /* Create a socket for this socket handler. */
     if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
     {
-        ( void ) registerUdpSocketOpenCallback( socketHandle, _udpSocketOpenResultCallback, NULL );
-
         cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
     }
 
@@ -2043,7 +1998,6 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
         if( cellularStatus != CELLULAR_SUCCESS )
         {
             /* Reset resources. */
-            ( void ) registerUdpSocketOpenCallback( socketHandle, NULL, NULL );
             socketHandle->dataMode = CELLULAR_ACCESSMODE_NOT_SET;
             memset( &socketHandle->remoteSocketAddress, 0, sizeof( socketHandle->remoteSocketAddress ) );
         }
@@ -3033,6 +2987,11 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
 
         /* Ignore the result from the info, and force to remove the socket. */
         cellularStatus = _Cellular_RemoveSocketData( pContext, socketHandle );
+
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            cellularStatus = _Cellular_DestroySocketContext( socketHandle );
+        }
     }
 
     return cellularStatus;
@@ -3474,6 +3433,31 @@ CellularError_t Cellular_Init( CellularHandle_t * pCellularHandle,
     };
 
     return Cellular_CommonInit( pCellularHandle, pCommInterface, &cellularTokenTable );
+}
+
+/*-----------------------------------------------------------*/
+
+/* FreeRTOS Cellular Library API. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
+CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
+                                       uint8_t pdnContextId,
+                                       CellularSocketDomain_t socketDomain,
+                                       CellularSocketType_t socketType,
+                                       CellularSocketProtocol_t socketProtocol,
+                                       CellularSocketHandle_t * pSocketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    cellularStatus = Cellular_CommonCreateSocket( cellularHandle, pdnContextId, socketDomain, socketType,
+                                                  socketProtocol, pSocketHandle );
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* Create module socket context for UDP connection. */
+        cellularStatus = _Cellular_CreateSocketContext( *pSocketHandle );
+    }
+
+    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/

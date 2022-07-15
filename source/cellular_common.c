@@ -567,11 +567,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         }
     }
 
-    if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketOpenCallback != NULL ) )
-    {
-        cellularStatus = pContext->moduleSocketOpenCallback( *pSocketHandle );
-    }
-
     taskEXIT_CRITICAL();
 
     if( cellularStatus == CELLULAR_NO_MEMORY )
@@ -628,11 +623,6 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
                 Platform_Free( socketHandle );
             }
         #endif
-
-        if( ( cellularStatus == CELLULAR_SUCCESS ) && ( pContext->moduleSocketCloseCallback != NULL ) )
-        {
-            cellularStatus = pContext->moduleSocketCloseCallback( socketHandle );
-        }
     }
     else
     {
@@ -858,28 +848,6 @@ void _Cellular_NetworkRegistrationCallback( const CellularContext_t * pContext,
     {
         pContext->cbEvents.networkRegistrationCallback( urcEvent, pServiceStatus,
                                                         pContext->cbEvents.pNetworkRegistrationCallbackContext );
-    }
-}
-
-/*-----------------------------------------------------------*/
-
-void _Cellular_RegisterModuleSocketOpenCallback( CellularContext_t * pContext,
-                                                 CellularModuleSocketOpenCallback_t pModuleSocketOpenCallback )
-{
-    if( pContext != NULL )
-    {
-        pContext->moduleSocketOpenCallback = pModuleSocketOpenCallback;
-    }
-}
-
-/*-----------------------------------------------------------*/
-
-void _Cellular_RegisterModuleSocketCloseCallback( CellularContext_t * pContext,
-                                                  CellularModuleSocketCloseCallback_t pModuleSocketCloseCallback )
-{
-    if( pContext != NULL )
-    {
-        pContext->moduleSocketCloseCallback = pModuleSocketCloseCallback;
     }
 }
 

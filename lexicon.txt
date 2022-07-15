@@ -367,8 +367,6 @@ iptype
 ipv
 isalpha
 isdigit
-ismodulesocketclosecallscenario
-ismodulesocketopencallscenario
 iso
 isr
 isspace
@@ -419,8 +417,6 @@ modulecleanup
 moduleenableue
 moduleenableurc
 moduleinit
-modulesocketclosecallback
-modulesocketopencallback
 mqtt
 mutex
 mutexes
@@ -566,8 +562,6 @@ plmn
 plmninfo
 pmodemdata
 pmodeminfo
-pmodulesocketclosecallback
-pmodulesocketopencallback
 pmutex
 pnetworkinfo
 pnetworktime
@@ -647,7 +641,6 @@ ptoken
 ptokenptr
 ptokentable
 ptr
-pudpsocketopencallbackcontext
 puk
 puserdata
 pvportmalloc
@@ -829,7 +822,6 @@ ubandmask
 ublox
 udp
 udpsocketconnectmutex
-udpsocketopencallback
 udpsocketopenqueue
 ue
 uint

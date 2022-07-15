@@ -84,15 +84,20 @@ typedef struct cellularModuleContext
 
 typedef struct cellularModuleSocketContext
 {
-    PlatformMutex_t udpSocketConnectMutex;              /* Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
-                                                         * Cellular_SocketConnect at the same time. */
-    CellularSocketOpenCallback_t udpSocketOpenCallback; /* Informs the socket open status for UDP APIs. */
-    void * pUdpSocketOpenCallbackContext;               /* Socket open callback context. */
-    QueueHandle_t udpSocketOpenQueue;                   /* To receive UDP socket open status. */
+    PlatformMutex_t udpSocketConnectMutex; /* Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
+                                            * Cellular_SocketConnect at the same time. */
+    QueueHandle_t udpSocketOpenQueue;      /* To receive UDP socket open status. */
 } cellularModuleSocketContext_t;
 
 CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
                                             CellularSimCardState_t * pSimState );
+
+CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHandle );
+
+CellularError_t _Cellular_DestroySocketContext( CellularSocketHandle_t socketHandle );
+
+void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
+                                          CellularSocketHandle_t socketHandle );
 
 extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
 extern uint32_t CellularUrcHandlerTableSize;

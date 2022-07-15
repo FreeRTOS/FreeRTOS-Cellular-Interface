@@ -621,28 +621,6 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
                                                          CellularUndefinedRespCallback_t undefinedRespCallback,
                                                          void * pCallbackContext );
 
-/**
- * @brief Register module socket open callback.
- *
- * Cellular module can register the callback function to allocate resources on creating socket.
- *
- * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pModuleSocketOpenCallback The callback function to allocate resources.
- */
-void _Cellular_RegisterModuleSocketOpenCallback( CellularContext_t * pContext,
-                                                 CellularModuleSocketOpenCallback_t pModuleSocketOpenCallback );
-
-/**
- * @brief Register module socket close callback.
- *
- * Cellular module can register the callback function to release resources on closing socket.
- *
- * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pModuleSocketCloseCallback The callback function to release resources.
- */
-void _Cellular_RegisterModuleSocketCloseCallback( CellularContext_t * pContext,
-                                                  CellularModuleSocketCloseCallback_t pModuleSocketCloseCallback );
-
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

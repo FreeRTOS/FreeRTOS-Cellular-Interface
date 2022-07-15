@@ -106,17 +106,15 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
         }
 
         /* Notify internal module that UDP socket connection is created. */
-        if( pBg96SocketContext->udpSocketOpenCallback != NULL )
+        if( pSocketData->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
         {
             if( sockStatus != 0 )
             {
-                pBg96SocketContext->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPEN_FAILED,
-                                                           pSocketData, pBg96SocketContext->pUdpSocketOpenCallbackContext );
+                _Cellular_NotifyUdpSocketOpenResult( CELLULAR_URC_SOCKET_OPEN_FAILED, pSocketData );
             }
             else
             {
-                pBg96SocketContext->udpSocketOpenCallback( CELLULAR_URC_SOCKET_OPENED,
-                                                           pSocketData, pBg96SocketContext->pUdpSocketOpenCallbackContext );
+                _Cellular_NotifyUdpSocketOpenResult( CELLULAR_URC_SOCKET_OPENED, pSocketData );
             }
         }
 

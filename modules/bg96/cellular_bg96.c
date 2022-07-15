@@ -156,7 +156,7 @@ static void _Cellular_DestroyUdpSocketConnectMutex( cellularModuleSocketContext_
 
 /*-----------------------------------------------------------*/
 
-static CellularError_t bg96SocketOpenCallback( CellularSocketHandle_t socketHandle )
+CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHandle )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     uint32_t socketId = socketHandle->socketId;
@@ -173,7 +173,7 @@ static CellularError_t bg96SocketOpenCallback( CellularSocketHandle_t socketHand
         /* Allocate resources for UDP sockets. */
         if( _Cellular_CreateUdpSocketConnectMutex( pBg96SocketContext ) == false )
         {
-            LogError( ( "bg96SocketOpenCallback: Create UDP socket mutex failed." ) );
+            LogError( ( "_Cellular_CreateSocketContext: Create UDP socket mutex failed." ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
         }
 
@@ -184,7 +184,7 @@ static CellularError_t bg96SocketOpenCallback( CellularSocketHandle_t socketHand
 
             if( pBg96SocketContext->udpSocketOpenQueue == NULL )
             {
-                LogError( ( "bg96SocketOpenCallback: Create UDP socket queue failed." ) );
+                LogError( ( "_Cellular_CreateSocketContext: Create UDP socket queue failed." ) );
                 cellularStatus = CELLULAR_NO_MEMORY;
 
                 /* Free the allocated resources. */
@@ -203,7 +203,7 @@ static CellularError_t bg96SocketOpenCallback( CellularSocketHandle_t socketHand
 
 /*-----------------------------------------------------------*/
 
-static CellularError_t bg96SocketCloseCallback( CellularSocketHandle_t socketHandle )
+CellularError_t _Cellular_DestroySocketContext( CellularSocketHandle_t socketHandle )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
@@ -270,10 +270,6 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
                 *ppModuleContext = ( void * ) &cellularBg96Context;
             }
         }
-
-        /* Set module callback function for socket open/close. */
-        _Cellular_RegisterModuleSocketOpenCallback( ( void * ) pContext, bg96SocketOpenCallback );
-        _Cellular_RegisterModuleSocketCloseCallback( ( void * ) pContext, bg96SocketCloseCallback );
     }
 
     return cellularStatus;
@@ -446,6 +442,19 @@ CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
     ( void ) _Cellular_AtcmdRequestWithCallback( pContext, atReqGetNoResult );
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
+                                          CellularSocketHandle_t socketHandle )
+{
+    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+
+    if( xQueueSend( pBg96SocketContext->udpSocketOpenQueue, &urcEvent, ( TickType_t ) 0 ) != pdPASS )
+    {
+        LogDebug( ( "_Cellular_NotifyUdpSocketOpenResult sends udpSocketOpenQueue fail" ) );
+    }
 }
 
 /*-----------------------------------------------------------*/

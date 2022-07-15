@@ -79,10 +79,6 @@ static char * pData;
 
 CellularHandle_t gCellularHandle = NULL;
 
-static int isModuleSocketOpenCallScenario = 0;  /*0: return success, 1: return fail, 0xFF: callback called (modified by callback function itself) */
-
-static int isModuleSocketCloseCallScenario = 0; /*0: return success, 1: return fail, 0xFF: callback called (modified by callback function itself) */
-
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
     { "CEREG",             NULL },
@@ -412,38 +408,6 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
     pMutex->created = false;
 }
 
-CellularError_t cellularModuleSocketOpenCallback( CellularSocketHandle_t socketHandle )
-{
-    CellularError_t ret = CELLULAR_SUCCESS;
-
-    ( void ) socketHandle;
-
-    if( isModuleSocketOpenCallScenario == 1 )
-    {
-        ret = CELLULAR_INTERNAL_FAILURE;
-    }
-
-    isModuleSocketOpenCallScenario = 0xFF;
-
-    return ret;
-}
-
-CellularError_t cellularModuleSocketCloseCallback( CellularSocketHandle_t socketHandle )
-{
-    CellularError_t ret = CELLULAR_SUCCESS;
-
-    ( void ) socketHandle;
-
-    if( isModuleSocketCloseCallScenario == 1 )
-    {
-        ret = CELLULAR_INTERNAL_FAILURE;
-    }
-
-    isModuleSocketCloseCallScenario = 0xFF;
-
-    return ret;
-}
-
 /* ========================================================================== */
 
 /**
@@ -596,32 +560,6 @@ void test__Cellular_CreateSocketData_No_Socket_Data_Entry_Fail( void )
 }
 
 /**
- * @brief Test that module open socket callback failure for _Cellular_CreateSocketData.
- */
-void test__Cellular_CreateSocketData_Module_Failure( void )
-{
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
-    CellularContext_t context;
-    CellularSocketHandle_t socketHandle;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-
-    /* Register module socket open callback. */
-    _Cellular_RegisterModuleSocketOpenCallback( &context, cellularModuleSocketOpenCallback );
-
-    isModuleSocketOpenCallScenario = 1;
-
-    pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
-                                            CELLULAR_SOCKET_TYPE_DGRAM,
-                                            CELLULAR_SOCKET_PROTOCOL_TCP,
-                                            &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, pktStatus );
-    TEST_ASSERT_EQUAL( 0xFF, isModuleSocketOpenCallScenario );
-
-    isModuleSocketOpenCallScenario = 0;
-}
-
-/**
  * @brief Test that happy path case for _Cellular_CreateSocketData.
  */
 void test__Cellular_CreateSocketData_Happy_Path( void )
@@ -636,32 +574,6 @@ void test__Cellular_CreateSocketData_Happy_Path( void )
                                             CELLULAR_SOCKET_PROTOCOL_TCP,
                                             &socketHandle );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, pktStatus );
-}
-
-/**
- * @brief Test that happy path case with module socket open callback for _Cellular_CreateSocketData.
- */
-void test__Cellular_CreateSocketData_Happy_Path_With_Callback( void )
-{
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
-    CellularContext_t context;
-    CellularSocketHandle_t socketHandle;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-
-    /* Register module socket open callback. */
-    _Cellular_RegisterModuleSocketOpenCallback( &context, cellularModuleSocketOpenCallback );
-
-    isModuleSocketOpenCallScenario = 0;
-
-    pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
-                                            CELLULAR_SOCKET_TYPE_DGRAM,
-                                            CELLULAR_SOCKET_PROTOCOL_TCP,
-                                            &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, pktStatus );
-    TEST_ASSERT_EQUAL( 0xFF, isModuleSocketOpenCallScenario );
-
-    isModuleSocketOpenCallScenario = 0;
 }
 
 /**
@@ -704,34 +616,6 @@ void test__Cellular_RemoveSocketData_No_Match_SocketHandle( void )
 }
 
 /**
- * @brief Test that module close socket callback failure for _Cellular_RemoveSocketData.
- */
-void test__Cellular_RemoveSocketData_Module_Failure( void )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularContext_t context;
-    CellularSocketHandle_t socketHandle;
-    int i = rand() % CELLULAR_NUM_SOCKET_MAX;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-    socketHandle = malloc( sizeof( CellularSocketContext_t ) );
-    context.pSocketData[ i ] = socketHandle;
-
-    /* Register module socket close callback. */
-    _Cellular_RegisterModuleSocketCloseCallback( &context, cellularModuleSocketCloseCallback );
-
-    isModuleSocketCloseCallScenario = 1;
-
-    cellularStatus = _Cellular_RemoveSocketData( &context,
-                                                 socketHandle );
-
-    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
-    TEST_ASSERT_EQUAL( 0xFF, isModuleSocketCloseCallScenario );
-
-    isModuleSocketCloseCallScenario = 0;
-}
-
-/**
  * @brief Test that happy path case for _Cellular_RemoveSocketData.
  */
 void test__Cellular_RemoveSocketData_Happy_Path( void )
@@ -749,34 +633,6 @@ void test__Cellular_RemoveSocketData_Happy_Path( void )
                                                  socketHandle );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-}
-
-/**
- * @brief Test that happy path case with module socket close callback for _Cellular_RemoveSocketData.
- */
-void test__Cellular_RemoveSocketData_Happy_Path_With_Callback( void )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularContext_t context;
-    CellularSocketHandle_t socketHandle;
-    int i = rand() % CELLULAR_NUM_SOCKET_MAX;
-
-    memset( &context, 0, sizeof( CellularContext_t ) );
-    socketHandle = malloc( sizeof( CellularSocketContext_t ) );
-    context.pSocketData[ i ] = socketHandle;
-
-    /* Register module socket close callback. */
-    _Cellular_RegisterModuleSocketCloseCallback( &context, cellularModuleSocketCloseCallback );
-
-    isModuleSocketCloseCallScenario = 0;
-
-    cellularStatus = _Cellular_RemoveSocketData( &context,
-                                                 socketHandle );
-
-    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-    TEST_ASSERT_EQUAL( 0xFF, isModuleSocketCloseCallScenario );
-
-    isModuleSocketCloseCallScenario = 0;
 }
 
 /**
@@ -1781,22 +1637,4 @@ void test__Cellular_RegisterUndefinedRespCallback_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_NULL( context.undefinedRespCallback );
     TEST_ASSERT_NULL( context.pUndefinedRespCBContext );
-}
-
-/**
- * @brief Test that null parameter case for _Cellular_RegisterModuleSocketOpenCallback.
- */
-void test__Cellular_RegisterModuleSocketOpenCallback_Null_Parameter( void )
-{
-    /* Pass NULL cellular context pointer to _Cellular_RegisterUndefinedRespCallback. */
-    _Cellular_RegisterModuleSocketOpenCallback( NULL, cellularModuleSocketOpenCallback );
-}
-
-/**
- * @brief Test that null parameter case for _Cellular_RegisterModuleSocketCloseCallback.
- */
-void test__Cellular_RegisterModuleSocketCloseCallback_Null_Parameter( void )
-{
-    /* Pass NULL cellular context pointer to _Cellular_RegisterUndefinedRespCallback. */
-    _Cellular_RegisterModuleSocketCloseCallback( NULL, cellularModuleSocketCloseCallback );
 }
