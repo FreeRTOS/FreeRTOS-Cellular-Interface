@@ -110,21 +110,6 @@ CellularError_t Cellular_ATCommandRaw( CellularHandle_t cellularHandle,
 
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
-CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
-                                       uint8_t pdnContextId,
-                                       CellularSocketDomain_t socketDomain,
-                                       CellularSocketType_t socketType,
-                                       CellularSocketProtocol_t socketProtocol,
-                                       CellularSocketHandle_t * pSocketHandle )
-{
-    return Cellular_CommonCreateSocket( cellularHandle, pdnContextId, socketDomain, socketType,
-                                        socketProtocol, pSocketHandle );
-}
-
-/*-----------------------------------------------------------*/
-
-/* FreeRTOS Cellular Library API. */
-/* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_SocketRegisterDataReadyCallback( CellularHandle_t cellularHandle,
                                                           CellularSocketHandle_t socketHandle,
                                                           CellularSocketDataReadyCallback_t dataReadyCallback,

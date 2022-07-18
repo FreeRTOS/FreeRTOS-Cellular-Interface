@@ -87,12 +87,6 @@ typedef struct cellularModuleContext
     uint32_t pSessionMap[ TCP_SESSION_TABLE_LEGNTH ];
 } cellularModuleContext_t;
 
-typedef struct cellularModuleSocketContext
-{
-    PlatformMutex_t udpSocketConnectMutex; /* Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
-                                            * Cellular_SocketConnect at the same time. */
-} cellularModuleSocketContext_t;
-
 typedef enum tcpSocketState
 {
     TCP_SOCKET_STATE_NOT_DEFINED = 0,

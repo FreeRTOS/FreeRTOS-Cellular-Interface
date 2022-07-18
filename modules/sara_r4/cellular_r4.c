@@ -47,7 +47,7 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
 
 /*-----------------------------------------------------------*/
 
-static cellularModuleContext_t cellularHl7802Context = { 0 };
+static cellularModuleContext_t cellularR4Context = { 0 };
 
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
@@ -107,79 +107,6 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
 
 /*-----------------------------------------------------------*/
 
-static bool _Cellular_CreateUdpSocketConnectMutex( cellularModuleSocketContext_t * pR4SocketContext )
-{
-    bool status = false;
-
-    status = PlatformMutex_Create( &pR4SocketContext->udpSocketConnectMutex, false );
-
-    return status;
-}
-
-/*-----------------------------------------------------------*/
-
-static void _Cellular_DestroyUdpSocketConnectMutex( cellularModuleSocketContext_t * pR4SocketContext )
-{
-    PlatformMutex_Destroy( &pR4SocketContext->udpSocketConnectMutex );
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t r4SocketOpenCallback( CellularSocketHandle_t socketHandle )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    uint32_t socketId = socketHandle->socketId;
-    cellularModuleSocketContext_t * pR4SocketContext = &cellularR4SocketContext[ socketId ];
-    bool needUdpResources = false;
-
-    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
-    {
-        needUdpResources = true;
-    }
-
-    if( needUdpResources )
-    {
-        /* Allocate resources for UDP sockets. */
-        if( _Cellular_CreateUdpSocketConnectMutex( pR4SocketContext ) == false )
-        {
-            LogError( ( "r4SocketOpenCallback: Create UDP socket mutex failed." ) );
-            cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
-        }
-    }
-
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        socketHandle->pModemData = pR4SocketContext;
-    }
-
-    return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-static CellularError_t r4SocketCloseCallback( CellularSocketHandle_t socketHandle )
-{
-    CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    cellularModuleSocketContext_t * pR4SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
-    bool hasUdpResources = false;
-
-    if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
-    {
-        hasUdpResources = true;
-    }
-
-    if( hasUdpResources )
-    {
-        /* Release UDP resources. */
-        _Cellular_DestroyUdpSocketConnectMutex( pR4SocketContext );
-        socketHandle->pModemData = NULL;
-    }
-
-    return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
@@ -199,18 +126,14 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
     else
     {
         /* Initialize the module context. */
-        ( void ) memset( &cellularHl7802Context, 0, sizeof( cellularModuleContext_t ) );
+        ( void ) memset( &cellularR4Context, 0, sizeof( cellularModuleContext_t ) );
 
         for( i = 0; i < TCP_SESSION_TABLE_LEGNTH; i++ )
         {
-            cellularHl7802Context.pSessionMap[ i ] = INVALID_SOCKET_INDEX;
+            cellularR4Context.pSessionMap[ i ] = INVALID_SOCKET_INDEX;
         }
 
-        *ppModuleContext = ( void * ) &cellularHl7802Context;
-
-        /* Set module callback function for socket open/close. */
-        _Cellular_RegisterModuleSocketOpenCallback( ( void * ) pContext, r4SocketOpenCallback );
-        _Cellular_RegisterModuleSocketCloseCallback( ( void * ) pContext, r4SocketCloseCallback );
+        *ppModuleContext = ( void * ) &cellularR4Context;
     }
 
     return cellularStatus;
@@ -637,3 +560,5 @@ uint32_t _Cellular_GetSessionId( CellularContext_t * pContext,
 
     return sessionId;
 }
+
+/*-----------------------------------------------------------*/

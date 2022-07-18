@@ -64,12 +64,16 @@
 
 #define DATA_READ_TIMEOUT_MS                     ( 50000UL )
 
+#define SOCKET_DATA_USORF_PREFIX_TOKEN           "+USORF: "
+
 #define SOCKET_DATA_PREFIX_TOKEN                 "+USORD: "
 #define SOCKET_DATA_PREFIX_TOKEN_LEN             ( 8U )
 #define SOCKET_DATA_PREFIX_STRING_LENGTH         ( SOCKET_DATA_PREFIX_TOKEN_LEN + 9U )
 #define RAT_PRIOIRTY_LIST_LENGTH                 ( 3U )
 
 #define CELLULAR_USOCO_ASYNC_CONN_BUFFER_SIZE    ( 1U )
+
+#define CELLULAR_PORT_NUM_CHAR_LEN               ( 6 )
 
 /**
  * @brief Parameters involved in receiving data through sockets
@@ -128,12 +132,20 @@ static CellularError_t controlSignalStrengthIndication( CellularContext_t * pCon
                                                         bool enable );
 static CellularError_t _Cellular_isSockOptSupport( CellularSocketOptionLevel_t optionLevel,
                                                    CellularSocketOption_t option );
-
-static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
-                                           CellularSocketHandle_t socketHandle,
-                                           CellularSocketAccessMode_t dataAccessMode,
-                                           const CellularSocketAddress_t * pRemoteSocketAddress,
-                                           uint32_t timeout );
+static CellularError_t _Cellular_SocketRecv( CellularHandle_t cellularHandle,
+                                             CellularSocketHandle_t socketHandle,
+                                             uint8_t * pBuffer,
+                                             uint32_t bufferLength,
+                                             uint32_t * pReceivedDataLength,
+                                             const CellularSocketAddress_t * pRemoteSocketAddress,
+                                             bool isRecvFrom );
+static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
+                                             CellularSocketHandle_t socketHandle,
+                                             uint8_t * pData,
+                                             uint32_t dataLength,
+                                             uint32_t * pSentDataLength,
+                                             const CellularSocketAddress_t * pRemoteSocketAddress,
+                                             bool isSendTo );
 
 CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
                                          const CellularPsmSettings_t * pPsmSettings );
@@ -161,7 +173,8 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
         LogError( ( "socketRecvData: Bad parameters" ) );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
-    else if( strncmp( pLine, SOCKET_DATA_PREFIX_TOKEN, SOCKET_DATA_PREFIX_TOKEN_LEN ) != 0 )
+    else if( ( strncmp( pLine, SOCKET_DATA_PREFIX_TOKEN, SOCKET_DATA_PREFIX_TOKEN_LEN ) != 0 ) ||
+             ( strncmp( pLine, SOCKET_DATA_USORF_PREFIX_TOKEN, SOCKET_DATA_PREFIX_TOKEN_LEN ) != 0 ) )
     {
         /* Prefix string which is not SOCKET_DATA_PREFIX_TOKEN does't indicate data start.
          * Set data length to 0.*/
@@ -532,28 +545,6 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    uint32_t recvTimeout = DATA_READ_TIMEOUT_MS;
-    uint32_t recvLen = bufferLength;
-    _socketDataRecv_t dataRecv = { 0 };
-    CellularAtReq_t atReqSocketRecv =
-    {
-        NULL,
-        CELLULAR_AT_MULTI_DATA_WO_PREFIX,
-        "+USORD",
-        _Cellular_RecvFuncData,
-        NULL,
-        0,
-    };
-    uint32_t sessionId = 0;
-
-    dataRecv.pDataLen = pReceivedDataLength;
-    dataRecv.pData = pBuffer;
-
-    atReqSocketRecv.pAtCmd = cmdBuf;
-    atReqSocketRecv.pData = ( void * ) &dataRecv;
-    atReqSocketRecv.dataLen = bufferLength;
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -587,50 +578,13 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
-
-        if( sessionId == INVALID_SESSION_ID )
-        {
-            LogError( ( "Cellular_SocketRecv : invalid session ID for socket index %u",
-                        socketHandle->socketId ) );
-            cellularStatus = CELLULAR_INVALID_HANDLE;
-        }
-    }
-
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        /* Update recvLen to maximum module length. */
-        if( CELLULAR_MAX_RECV_DATA_LEN <= bufferLength )
-        {
-            recvLen = ( uint32_t ) CELLULAR_MAX_RECV_DATA_LEN;
-        }
-
-        /* Update receive timeout to default timeout if not set with setsocketopt. */
-        if( recvLen > 0 )
-        {
-            if( socketHandle->recvTimeoutMs != 0U )
-            {
-                recvTimeout = socketHandle->recvTimeoutMs;
-            }
-
-            /* The return value of snprintf is not used.
-             * The max length of the string is fixed and checked offline. */
-            /* coverity[misra_c_2012_rule_21_6_violation]. */
-            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-                               "%s%u,%u", "AT+USORD=", sessionId, recvLen );
-            pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,
-                                                                           atReqSocketRecv,
-                                                                           recvTimeout,
-                                                                           socketRecvDataPrefix,
-                                                                           NULL );
-
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                /* Reset data handling parameters. */
-                LogError( ( "Cellular_SocketRecv: Data Receive fail, pktStatus: %d", pktStatus ) );
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
-        }
+        cellularStatus = _Cellular_SocketRecv( cellularHandle,
+                                               socketHandle,
+                                               pBuffer,
+                                               bufferLength,
+                                               pReceivedDataLength,
+                                               NULL,
+                                               false );
     }
 
     return cellularStatus;
@@ -674,6 +628,211 @@ static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
 
 /*-----------------------------------------------------------*/
 
+static CellularError_t _Cellular_SocketRecv( CellularHandle_t cellularHandle,
+                                             CellularSocketHandle_t socketHandle,
+                                             uint8_t * pBuffer,
+                                             uint32_t bufferLength,
+                                             uint32_t * pReceivedDataLength,
+                                             const CellularSocketAddress_t * pRemoteSocketAddress,
+                                             bool isRecvFrom )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t recvTimeout = DATA_READ_TIMEOUT_MS;
+    uint32_t recvLen = bufferLength;
+    _socketDataRecv_t dataRecv = { 0 };
+    CellularAtReq_t atReqSocketRecv =
+    {
+        NULL,
+        CELLULAR_AT_MULTI_DATA_WO_PREFIX,
+        NULL,
+        _Cellular_RecvFuncData,
+        NULL,
+        0,
+    };
+    uint32_t sessionId = 0;
+    char * pAtCmd = NULL;
+    char recvCmd[] = "AT+USORD=";
+    char recvFromCmd[] = "AT+USORF=";
+    char atRspPrefixRecv[] = "+USORD";
+    char atRspPrefixRecvFrom[] = "+USORF";
+
+    dataRecv.pDataLen = pReceivedDataLength;
+    dataRecv.pData = pBuffer;
+
+    atReqSocketRecv.pAtCmd = cmdBuf;
+    atReqSocketRecv.pData = ( void * ) &dataRecv;
+    atReqSocketRecv.dataLen = bufferLength;
+
+    /* Cellular status/input is checked before entering this function. */
+    sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
+    if( sessionId == INVALID_SESSION_ID )
+    {
+        LogError( ( "Cellular_SocketRecv : invalid session ID for socket index %u",
+                    socketHandle->socketId ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* Update recvLen to maximum module length. */
+        if( CELLULAR_MAX_RECV_DATA_LEN <= bufferLength )
+        {
+            recvLen = ( uint32_t ) CELLULAR_MAX_RECV_DATA_LEN;
+        }
+
+        /* Update receive timeout to default timeout if not set with setsocketopt. */
+        if( recvLen > 0 )
+        {
+            if( socketHandle->recvTimeoutMs != 0U )
+            {
+                recvTimeout = socketHandle->recvTimeoutMs;
+            }
+
+            if( isRecvFrom == true )
+            {
+                pAtCmd = &recvFromCmd;
+                atReqSocketRecv.pAtRspPrefix = atRspPrefixRecvFrom;
+            }
+            else
+            {
+                pAtCmd = &recvCmd;
+                atReqSocketRecv.pAtRspPrefix = atRspPrefixRecv;
+            }
+
+            /* The return value of snprintf is not used.
+             * The max length of the string is fixed and checked offline. */
+            /* coverity[misra_c_2012_rule_21_6_violation]. */
+            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+                               "%s%u,%u", pAtCmd, sessionId, recvLen );
+            pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,
+                                                                           atReqSocketRecv,
+                                                                           recvTimeout,
+                                                                           socketRecvDataPrefix,
+                                                                           NULL );
+
+            if( pktStatus != CELLULAR_PKT_STATUS_OK )
+            {
+                /* Reset data handling parameters. */
+                LogError( ( "_Cellular_SocketRecv: Data Receive fail, pktStatus: %d", pktStatus ) );
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
+        }
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
+                                             CellularSocketHandle_t socketHandle,
+                                             uint8_t * pData,
+                                             uint32_t dataLength,
+                                             uint32_t * pSentDataLength,
+                                             const CellularSocketAddress_t * pRemoteSocketAddress,
+                                             bool isSendTo )
+{
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    uint32_t sendTimeout = DATA_SEND_TIMEOUT_MS;
+    char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    CellularAtReq_t atReqSocketSend = { 0 };
+    CellularAtDataReq_t atDataReqSocketSend = { 0 };
+    uint32_t sessionId = 0;
+    char * pAtCmd = NULL;
+    char sendCmd[] = "AT+USOWR=";
+    char sendToCmd[] = "AT+USOST=";
+    /* Buffer to store ",${IP/domain name},${port}", +3 for two ',' and one NULL terminate. */
+    char remoteInfoBuf[ CELLULAR_IP_ADDRESS_MAX_SIZE + CELLULAR_PORT_NUM_CHAR_LEN + 3 ] = { 0 };
+
+    atReqSocketSend.atCmdType = CELLULAR_AT_NO_RESULT;
+    atReqSocketSend.pAtCmd = cmdBuf;
+
+    atDataReqSocketSend.pData = pData;
+    atDataReqSocketSend.dataLen = dataLength;
+    atDataReqSocketSend.pSentDataLength = pSentDataLength;
+
+    /* Cellular status/input is checked before entering this function. */
+    sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
+
+    if( sessionId == INVALID_SESSION_ID )
+    {
+        LogError( ( "_Cellular_SocketSend : invalid session ID for socket index %u",
+                    socketHandle->socketId ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* Send data length check. */
+        if( dataLength > ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN )
+        {
+            atDataReqSocketSend.dataLen = ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN;
+        }
+
+        /* Check send timeout. If not set by setsockopt, use default value. */
+        if( socketHandle->sendTimeoutMs != 0U )
+        {
+            sendTimeout = socketHandle->sendTimeoutMs;
+        }
+
+        if( isSendTo == true )
+        {
+            pAtCmd = &sendToCmd;
+        }
+        else
+        {
+            pAtCmd = &sendCmd;
+        }
+
+        /* The return value of snprintf is not used.
+         * The max length of the string is fixed and checked offline. */
+        /* coverity[misra_c_2012_rule_21_6_violation]. */
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - sizeof( remoteInfoBuf ), "%s%u,%u",
+                           pAtCmd, sessionId, atDataReqSocketSend.dataLen );
+
+        /* Append remote info to the AT command if it's send to. */
+        if( isSendTo == true )
+        {
+            ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
+                               ",%s,%d",
+                               pRemoteSocketAddress->ipAddress.ipAddress,
+                               pRemoteSocketAddress->port );
+
+            /* Because the length of host's IP address/port are limited,
+             * the buffer size must be enough for remote setting. */
+            strcat( pCmdBuf, remoteInfoBuf );
+        }
+
+        pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
+                                             socketSendDataPrefix, NULL,
+                                             PACKET_REQ_TIMEOUT_MS, sendTimeout, 200U );
+
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        {
+            if( socketHandle->socketState == SOCKETSTATE_DISCONNECTED )
+            {
+                LogInfo( ( "_Cellular_SocketSend: Data send fail, socket already closed" ) );
+                cellularStatus = CELLULAR_SOCKET_CLOSED;
+            }
+            else
+            {
+                LogError( ( "_Cellular_SocketSend: Data send fail, PktRet: %d", pktStatus ) );
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
+        }
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 /* FreeRTOS Cellular Library API. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 /* coverity[misra_c_2012_rule_8_13_violation] */
@@ -686,19 +845,6 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    uint32_t sendTimeout = DATA_SEND_TIMEOUT_MS;
-    char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    CellularAtReq_t atReqSocketSend = { 0 };
-    CellularAtDataReq_t atDataReqSocketSend = { 0 };
-    uint32_t sessionId = 0;
-
-    atReqSocketSend.atCmdType = CELLULAR_AT_NO_RESULT;
-    atReqSocketSend.pAtCmd = cmdBuf;
-
-    atDataReqSocketSend.pData = pData;
-    atDataReqSocketSend.dataLen = dataLength;
-    atDataReqSocketSend.pSentDataLength = pSentDataLength;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -732,53 +878,7 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
     }
     else
     {
-        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
-
-        if( sessionId == INVALID_SESSION_ID )
-        {
-            LogError( ( "Cellular_SocketSend : invalid session ID for socket index %u",
-                        socketHandle->socketId ) );
-            cellularStatus = CELLULAR_INVALID_HANDLE;
-        }
-    }
-
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        /* Send data length check. */
-        if( dataLength > ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN )
-        {
-            atDataReqSocketSend.dataLen = ( uint32_t ) CELLULAR_MAX_SEND_DATA_LEN;
-        }
-
-        /* Check send timeout. If not set by setsockopt, use default value. */
-        if( socketHandle->sendTimeoutMs != 0U )
-        {
-            sendTimeout = socketHandle->sendTimeoutMs;
-        }
-
-        /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
-        /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u,%u",
-                           "AT+USOWR=", sessionId, atDataReqSocketSend.dataLen );
-
-        pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
-                                             socketSendDataPrefix, NULL,
-                                             PACKET_REQ_TIMEOUT_MS, sendTimeout, 200U );
-
-        if( pktStatus != CELLULAR_PKT_STATUS_OK )
-        {
-            if( socketHandle->socketState == SOCKETSTATE_DISCONNECTED )
-            {
-                LogInfo( ( "Cellular_SocketSend: Data send fail, socket already closed" ) );
-                cellularStatus = CELLULAR_SOCKET_CLOSED;
-            }
-            else
-            {
-                LogError( ( "Cellular_SocketSend: Data send fail, PktRet: %d", pktStatus ) );
-                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-            }
-        }
+        cellularStatus = _Cellular_SocketSend( cellularHandle, socketHandle, pData, dataLength, pSentDataLength, NULL, false );
     }
 
     return cellularStatus;
@@ -828,16 +928,21 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
                     dataAccessMode ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
+    else if( pRemoteSocketAddress == NULL )
+    {
+        LogError( ( "Cellular_SocketRecvFrom, pRemoteSocketAddress is NULL" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
     else
     {
-        /* Check if need to connect the socket. */
-        cellularStatus = udpCheckAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->recvTimeoutMs );
-    }
-
-    /* Send the data to the socket. */
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        cellularStatus = Cellular_SocketRecv( cellularHandle, socketHandle, pBuffer, bufferLength, pReceivedDataLength );
+        /* Receive the data to the socket by AT command. */
+        cellularStatus = _Cellular_SocketRecv( cellularHandle,
+                                               socketHandle,
+                                               pBuffer,
+                                               bufferLength,
+                                               pReceivedDataLength,
+                                               pRemoteSocketAddress,
+                                               true );
     }
 
     return cellularStatus;
@@ -887,16 +992,15 @@ CellularError_t Cellular_SocketSendTo( CellularHandle_t cellularHandle,
                     dataAccessMode ) );
         cellularStatus = CELLULAR_UNSUPPORTED;
     }
+    else if( pRemoteSocketAddress == NULL )
+    {
+        LogError( ( "Cellular_SocketSendTo, pRemoteSocketAddress is NULL" ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
     else
     {
-        /* Check if need to connect the socket. */
-        cellularStatus = udpCheckAndConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress, socketHandle->sendTimeoutMs );
-    }
-
-    /* Send the data to the socket. */
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        cellularStatus = Cellular_SocketSend( cellularHandle, socketHandle, pData, dataLength, pSentDataLength );
+        /* Send the data to the socket by AT command. */
+        cellularStatus = _Cellular_SocketSend( cellularHandle, socketHandle, pData, dataLength, pSentDataLength, pRemoteSocketAddress, true );
     }
 
     return cellularStatus;
@@ -1007,7 +1111,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
-    uint8_t sessionId = 0;
+    uint32_t sessionId = 0;
     CellularAtReq_t atReqSocketConnect =
     {
         NULL,
@@ -1055,19 +1159,13 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
-    }
+        /* Find session ID. */
+        sessionId = _Cellular_GetSessionId( pContext, socketHandle->socketId );
 
-    /* Set socket config and get session id. The session id is defined by the modem. */
-    if( cellularStatus == CELLULAR_SUCCESS )
-    {
-        /* Builds the Socket connect command. */
-        cellularStatus = _Cellular_GetSocketNumber( pContext, socketHandle, &sessionId );
-
-        if( cellularStatus == CELLULAR_SUCCESS )
+        if( sessionId == INVALID_SESSION_ID )
         {
-            /* Create the reverse table to store the socketIndex to sessionId. */
-            pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
+            LogError( ( "Cellular_SocketConnect: Invalid session ID in socketHandle." ) );
+            cellularStatus = CELLULAR_BAD_PARAMETER;
         }
     }
 
@@ -3139,6 +3237,45 @@ CellularError_t Cellular_SocketSetSockOpt( CellularHandle_t cellularHandle,
     }
 
     return err;
+}
+
+/*-----------------------------------------------------------*/
+
+/* FreeRTOS Cellular Library API. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
+CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
+                                       uint8_t pdnContextId,
+                                       CellularSocketDomain_t socketDomain,
+                                       CellularSocketType_t socketType,
+                                       CellularSocketProtocol_t socketProtocol,
+                                       CellularSocketHandle_t * pSocketHandle )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    cellularModuleContext_t * pModuleContext = NULL;
+
+    cellularStatus = Cellular_CommonCreateSocket( cellularHandle, pdnContextId, socketDomain, socketType,
+                                                  socketProtocol, pSocketHandle );
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        /* Create session ID by sending AT+USOCR. */
+        cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
+
+        /* Set socket config and get session id. The session id is defined by the modem. */
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            /* Builds the Socket connect command. */
+            cellularStatus = _Cellular_GetSocketNumber( pContext, socketHandle, &sessionId );
+
+            if( cellularStatus == CELLULAR_SUCCESS )
+            {
+                /* Create the reverse table to store the socketIndex to sessionId. */
+                pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
+            }
+        }
+    }
+
+    return cellularStatus;
 }
 
 /*-----------------------------------------------------------*/

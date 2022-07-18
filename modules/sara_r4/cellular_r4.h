@@ -48,12 +48,6 @@ typedef struct cellularModuleContext
     uint32_t pSessionMap[ TCP_SESSION_TABLE_LEGNTH ];
 } cellularModuleContext_t;
 
-typedef struct cellularModuleSocketContext
-{
-    PlatformMutex_t udpSocketConnectMutex; /* Mutex to avoid Cellular_SocketSendTo/Cellular_SocketRecvFrom to call
-                                            * Cellular_SocketConnect at the same time. */
-} cellularModuleSocketContext_t;
-
 /*-----------------------------------------------------------*/
 
 uint32_t _Cellular_GetSocketId( CellularContext_t * pContext,
