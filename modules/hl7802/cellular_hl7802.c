@@ -364,14 +364,16 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
 
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            /* Enable RTS/CTS hardware flow control. */
-            atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
-            pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
-                                                                   CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
-            cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        }
+        #ifndef CELLULAR_CONFIG_DISABLE_FLOW_CONTROL
+            if( cellularStatus == CELLULAR_SUCCESS )
+            {
+                /* Enable RTS/CTS hardware flow control. */
+                atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
+                pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult,
+                                                                       CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
+                cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
+            }
+        #endif
 
         /* Set Radio Access Technology. */
         if( cellularStatus == CELLULAR_SUCCESS )

@@ -249,12 +249,14 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
 
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            /* Enable RTS/CTS hardware flow control. */
-            atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-        }
+        #ifndef CELLULAR_CONFIG_DISABLE_FLOW_CONTROL
+            if( cellularStatus == CELLULAR_SUCCESS )
+            {
+                /* Enable RTS/CTS hardware flow control. */
+                atReqGetNoResult.pAtCmd = "AT+IFC=2,2";
+                cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
+            }
+        #endif
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {

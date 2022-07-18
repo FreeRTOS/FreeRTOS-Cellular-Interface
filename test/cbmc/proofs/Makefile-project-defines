@@ -14,7 +14,7 @@
 COMPILE_FLAGS += -fPIC
 COMPILE_FLAGS += -std=gnu90
 
-LITANI = $(SRCDIR)/test/cbmc/litani/litani
+LITANI ?= litani
 PROJECT_NAME = "FreeRTOS cellular"
 
 # Flags to pass to goto-cc for linking (typically those passed to gcc)
