@@ -537,13 +537,14 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         LogError( ( "Receive Data: response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
-    else if( ( pAtResp->pItm->pNext == NULL ) || ( pAtResp->pItm->pNext->pNext == NULL ) )
+    else if( pAtResp->pItm->pNext == NULL )
     {
-        LogError( ( "Receive Data: response data or end pattern is invalid" ) );
+        LogError( ( "Receive Data: response data is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pAtResp->pItm->pNext->pNext == NULL ) )
     {
+        /* pAtResp->pItm->pNext might have "--EOF--Pattern--" only when there is no data to receive. */
         if( strncmp( pAtResp->pItm->pNext->pLine, SOCKET_END_PATTERN, SOCKET_END_PATTERN_LEN ) == 0 )
         {
             LogDebug( ( "Receive Data: no data to receive" ) );
