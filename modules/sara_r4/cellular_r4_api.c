@@ -204,13 +204,13 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
             /* Skip remote_ip_addr and remote_port for +USORF. */
             if( atResult == CELLULAR_AT_SUCCESS )
             {
-                /* Parse the length. */
+                /* Skip remote_ip_addr. */
                 atResult = Cellular_ATGetNextTok( &pDataStart, &pToken );
             }
 
             if( atResult == CELLULAR_AT_SUCCESS )
             {
-                /* Parse the length. */
+                /* Skip remote_port. */
                 atResult = Cellular_ATGetNextTok( &pDataStart, &pToken );
             }
         }

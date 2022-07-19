@@ -88,7 +88,6 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
     int32_t sockStatus = 0;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) pSocketData->pModemData;
 
     atCoreStatus = Cellular_ATStrtoi( pToken, 10, &sockStatus );
 

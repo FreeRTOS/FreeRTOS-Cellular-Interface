@@ -537,9 +537,9 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         LogError( ( "Receive Data: response is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
-    else if( pAtResp->pItm->pNext == NULL )
+    else if( ( pAtResp->pItm->pNext == NULL ) || ( pAtResp->pItm->pNext->pNext == NULL ) )
     {
-        LogError( ( "Receive Data: response data is invalid" ) );
+        LogError( ( "Receive Data: response data or end pattern is invalid" ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pAtResp->pItm->pNext->pNext == NULL ) )
@@ -576,6 +576,7 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         if( strncmp( pEndPatternLine, SOCKET_END_PATTERN, SOCKET_END_PATTERN_LEN ) != 0 )
         {
             LogWarn( ( "response item error in end pattern "SOCKET_END_PATTERN ) );
+            atCoreStatus = CELLULAR_AT_ERROR;
         }
 
         /* Process the data buffer. */
