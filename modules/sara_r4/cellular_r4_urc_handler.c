@@ -443,6 +443,12 @@ static void _cellular_UrcProcessUusoco( CellularContext_t * pContext,
                 {
                     pSocketData->socketState = SOCKETSTATE_CONNECTED;
                     LogDebug( ( "Notify session %d with socket opened\r\n", sessionId ) );
+
+                    if( pSocketData->openCallback != NULL )
+                    {
+                        pSocketData->openCallback( CELLULAR_URC_SOCKET_OPENED,
+                                                   pSocketData, pSocketData->pOpenCallbackContext );
+                    }
                 }
                 else
                 {

@@ -184,7 +184,7 @@ static char * searchEndPatternPos( char * pString,
                                    uint32_t stringLen );
 static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
                                              CellularSocketHandle_t socketHandle,
-                                             uint8_t * pData,
+                                             const uint8_t * pData,
                                              uint32_t dataLength,
                                              uint32_t * pSentDataLength,
                                              const CellularSocketAddress_t * pRemoteSocketAddress );
@@ -628,11 +628,11 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         /* Form the AT command. */
         if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
         {
-            pAtCmd = &atCmdTcp;
+            pAtCmd = atCmdTcp;
         }
         else
         {
-            pAtCmd = &atCmdUdp;
+            pAtCmd = atCmdUdp;
         }
 
         /* The return value of snprintf is not used.
@@ -674,8 +674,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         {
             ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
                                ",\"%s\",%u",
-                               pRemoteSocketAddress->ipAddress.ipAddress,
-                               pRemoteSocketAddress->port );
+                               socketHandle->remoteSocketAddress.ipAddress.ipAddress,
+                               socketHandle->remoteSocketAddress.port );
 
             /* Because the length of host's IP address/port are limited,
              * the buffer size must be enough for remote setting. */
@@ -1474,7 +1474,7 @@ static CellularError_t _Cellular_StartTcpConnection( CellularHandle_t cellularHa
 
 static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
                                              CellularSocketHandle_t socketHandle,
-                                             uint8_t * pData,
+                                             const uint8_t * pData,
                                              uint32_t dataLength,
                                              uint32_t * pSentDataLength,
                                              const CellularSocketAddress_t * pRemoteSocketAddress )
@@ -1547,12 +1547,12 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
             if( pRemoteSocketAddress == NULL )
             {
                 remotePort = socketHandle->remoteSocketAddress.port;
-                pRemoteIpAddress = &socketHandle->remoteSocketAddress.ipAddress.ipAddress;
+                pRemoteIpAddress = socketHandle->remoteSocketAddress.ipAddress.ipAddress;
             }
             else
             {
                 remotePort = pRemoteSocketAddress->port;
-                pRemoteIpAddress = &pRemoteSocketAddress->ipAddress.ipAddress;
+                pRemoteIpAddress = ( char * ) ( pRemoteSocketAddress->ipAddress.ipAddress );
             }
 
             /* The return value of snprintf is not used.
@@ -1848,6 +1848,8 @@ CellularError_t Cellular_SocketRecvFrom( CellularHandle_t cellularHandle,
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
+    ( void ) pRemoteSocketAddress;
+
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -2083,6 +2085,7 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     uint8_t sessionId = 0;
+    cellularModuleContext_t * pModuleContext = NULL;
 
     /* Make sure the library is open. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -2115,6 +2118,11 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     else
     {
         cellularStatus = storeAccessModeAndAddress( pContext, socketHandle, dataAccessMode, pRemoteSocketAddress );
+    }
+
+    if( cellularStatus == CELLULAR_SUCCESS )
+    {
+        cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
     }
 
     /* Remove the socket created at Cellular_CreateSocket and then re-create again with remote info at next step. */
@@ -3185,6 +3193,7 @@ CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
                                        CellularSocketProtocol_t socketProtocol,
                                        CellularSocketHandle_t * pSocketHandle )
 {
+    CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     cellularModuleContext_t * pModuleContext = NULL;
     uint8_t sessionId = 0;
@@ -3200,12 +3209,12 @@ CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             /* Builds the Socket connect command. */
-            cellularStatus = _Cellular_getCfgSessionId( pContext, socketHandle, &sessionId );
+            cellularStatus = _Cellular_getCfgSessionId( pContext, *pSocketHandle, &sessionId );
 
             if( cellularStatus == CELLULAR_SUCCESS )
             {
                 /* Create the reverse table to store the socketIndex to sessionId. */
-                pModuleContext->pSessionMap[ sessionId ] = socketHandle->socketId;
+                pModuleContext->pSessionMap[ sessionId ] = ( *pSocketHandle )->socketId;
             }
         }
     }
