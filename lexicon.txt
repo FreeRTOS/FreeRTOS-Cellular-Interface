@@ -275,6 +275,7 @@ endpatternlen
 enougth
 enum
 enums
+eof
 eps
 erange
 errno
