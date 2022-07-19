@@ -10,6 +10,7 @@ apn
 apnname
 app
 args
+ascii
 async
 atcheckerrorcode
 atcmddatasend
@@ -846,6 +847,7 @@ userdata
 usocl
 usocr
 usord
+usorf
 usrod
 utc
 utest
