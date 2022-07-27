@@ -145,12 +145,15 @@ checkcrsmreadstatus
 checklibrarystatus
 chk
 ci
+cid
 ciev
 clearbits
 closedcallback
 cmakelists
 cmd
 cmdbuf
+cnf
+cnx
 com
 comm
 commad
@@ -272,6 +275,7 @@ emerg
 endcond
 endif
 endpatternlen
+endtcp
 enougth
 enum
 enums
@@ -381,8 +385,10 @@ keylistlen
 kmp
 kselacq
 ktcp
+ktcpcfg
 ktcprcv
 ktcpstat
+kudpcfg
 lac
 len
 libatdata
@@ -761,6 +767,7 @@ socketindex
 socketopencallback
 socketprotocol
 socketrecv
+socketrecvdataprefix
 socketregisterclosedcallback
 socketregisterdatareadycallback
 socketregistersocketopencallback
@@ -849,6 +856,8 @@ usocl
 usocr
 usord
 usorf
+usost
+usowr
 usrod
 utc
 utest
