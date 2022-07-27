@@ -395,7 +395,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
             if( cellularStatus == CELLULAR_SUCCESS )
             {
                 /* Set MNO profile if not set already */
-                if( ( currentMNOProfile != CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE ) && ( currentMNOProfile != MNO_PROFILE_NOT_SET ) )
+                if( ( currentMNOProfile != CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE ) && ( CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE != MNO_PROFILE_NOT_SET ) )
                 {
                     atReqGetNoResult.pAtCmd = pAtCmdBuf;
                     ( void ) snprintf( ( char * ) atReqGetNoResult.pAtCmd, CELLULAR_AT_CMD_MAX_SIZE, "%s%d", "AT+COPS=2;+UMNOPROF=", CELLULAR_CONFIG_SARA_R4_SET_MNO_PROFILE );

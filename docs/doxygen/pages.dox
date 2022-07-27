@@ -73,8 +73,10 @@ between different cellular module. The following are cellular socket APIs:
 - @function_name{Cellular_SocketRegisterSocketOpenCallback}
 
 Cellular socket APIs and cellular modem events change cellular socket state.
-See the below graph for the socket state transitions:
-@image html cellular_socket_state.png width=70%
+See the below graph for the TCP socket state transitions:
+@image html cellular_tcp_socket_state.png width=70%
+See the below graph for the UDP socket state transitions:
+@image html cellular_udp_socket_state.png width=70%
 */
 
 /**

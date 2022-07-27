@@ -598,9 +598,6 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                           char * pCmdBuf )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    char atCmdTcp[] = "AT+KTCPCFG";
-    char atCmdUdp[] = "AT+KUDPCFG";
-    char * pAtCmd = NULL;
     /* +1 size in buffer for ',' */
     char portBuf[ CELLULAR_PORT_NUM_CHAR_LEN + 1 ] = { 0 };
     /* Buffer to store ",\"${IP/domain name}\",${port}", +5 for two ',', two '"' and one NULL terminate. */
@@ -628,60 +625,59 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
     else
     {
         /* Form the AT command. */
-        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
-        {
-            pAtCmd = atCmdTcp;
-        }
-        else
-        {
-            pAtCmd = atCmdUdp;
-        }
-
-        /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline.
-         * Reserve buffer for port setting. */
-        /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE - sizeof( remoteInfoBuf ) - sizeof( portBuf ),
-                           "%s=%u,0",
-                           pAtCmd,
-                           socketHandle->contextId );
-
-        /* Append remote info here for TCP connection. */
-        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
-        {
-            ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
-                               ",\"%s\",%u",
-                               socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-                               socketHandle->remoteSocketAddress.port );
-
-            /* Because the length of host's IP address/port are limited,
-             * the buffer size must be enough for remote setting. */
-            strcat( pCmdBuf, remoteInfoBuf );
-        }
-
         /* Set the local port in the end of command buffer string if localPort is not 0. */
         if( socketHandle->localPort > 0 )
         {
             ( void ) snprintf( portBuf, sizeof( portBuf ),
                                ",%u",
                                socketHandle->localPort );
-
-            /* Because the length of host's IP address is limited,
-             * the buffer size must be enough for port setting. */
-            strcat( pCmdBuf, portBuf );
         }
 
-        /* Append remote info here for UDP connection if remote info is provided in Cellular_SocketConnect(). */
-        if( ( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) && ( strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) > 0 ) )
+        /* Format: AT+KTCPCFG=[<cnx cnf>],<mode>,[<tcp remote address>],<tcp_port>[,[<source_port>]
+         * [,[<data_mode>][,[<URC-ENDTCP-enable>][,[<af>][,[<cipher_suite>][,[<restore_on_boot>]]]]]]]] */
+        /* To set TCP connection, remote address & port should be put before local port. */
+        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
         {
             ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
                                ",\"%s\",%u",
                                socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                                socketHandle->remoteSocketAddress.port );
 
-            /* Because the length of host's IP address/port are limited,
-             * the buffer size must be enough for remote setting. */
-            strcat( pCmdBuf, remoteInfoBuf );
+            /* The return value of snprintf is not used.
+             * The max length of the string is fixed and checked offline.
+             * Reserve buffer for port setting. */
+            /* coverity[misra_c_2012_rule_21_6_violation]. */
+            ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+                               "%s=%u,0%s%s",
+                               "AT+KTCPCFG",
+                               socketHandle->contextId,
+                               remoteInfoBuf,
+                               portBuf );
+        }
+
+        /* Format: AT+KUDPCFG=[<cnx cnf>],<mode>[,[<port>][,[<data_mode>][,[<udp remote address>]
+         * [,[<udp_port>][,[<af>][,[<restore_on_boot>]]]]]]] */
+        /* To set UDP connection, remote address & port should be put after local port. */
+        else
+        {
+            if( strlen( socketHandle->remoteSocketAddress.ipAddress.ipAddress ) > 0 )
+            {
+                ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
+                                   ",\"%s\",%u",
+                                   socketHandle->remoteSocketAddress.ipAddress.ipAddress,
+                                   socketHandle->remoteSocketAddress.port );
+            }
+
+            /* The return value of snprintf is not used.
+             * The max length of the string is fixed and checked offline.
+             * Reserve buffer for port setting. */
+            /* coverity[misra_c_2012_rule_21_6_violation]. */
+            ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
+                               "%s=%u,0%s%s",
+                               "AT+KUDPCFG",
+                               socketHandle->contextId,
+                               portBuf,
+                               remoteInfoBuf );
         }
     }
 
@@ -817,17 +813,15 @@ static CellularError_t _Cellular_getCfgSessionId( CellularHandle_t cellularHandl
         pSessionId,
         sizeof( uint8_t ),
     };
-    char atRspPrefixTcp[] = "+KTCPCFG";
-    char atRspPrefixUdp[] = "+KUDPCFG";
 
     /* Internal function. Caller checks parameters. */
     if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
     {
-        atReqSocketConnect.pAtRspPrefix = atRspPrefixTcp;
+        atReqSocketConnect.pAtRspPrefix = "+KTCPCFG";
     }
     else
     {
-        atReqSocketConnect.pAtRspPrefix = atRspPrefixUdp;
+        atReqSocketConnect.pAtRspPrefix = "+KUDPCFG";
     }
 
     cellularStatus = buildSocketConfig( socketHandle, cmdBuf );
@@ -1633,8 +1627,6 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
     uint32_t recvTimeout = CELLULAR_HL7802_AT_TIMEOUT_60_SECONDS_MS;
     uint32_t recvLen = bufferLength;
-    char tcpRecvAtCmd[] = "AT+KTCPRCV=";
-    char udpRecvAtCmd[] = "AT+KUDPRCV=";
     char * pRecvAtCmd = NULL;
     _socketDataRecv_t dataRecv =
     {
@@ -1699,14 +1691,14 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        /* Check socket protocol. */
+        /* Check socket protocol to choose AT commands. */
         if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
         {
-            pRecvAtCmd = tcpRecvAtCmd;
+            pRecvAtCmd = "AT+KTCPRCV=";
         }
         else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
         {
-            pRecvAtCmd = udpRecvAtCmd;
+            pRecvAtCmd = "AT+KUDPRCV=";
         }
         else
         {

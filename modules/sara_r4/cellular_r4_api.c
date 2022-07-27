@@ -153,6 +153,8 @@ CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
 
 /*-----------------------------------------------------------*/
 
+/* socketRecvDataPrefix not only handles +USORD but also +USORF.
+ * Make sure it has the prefix matches one of them. */
 static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                                                  char * pLine,
                                                  uint32_t lineLength,
@@ -535,8 +537,6 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char cmdBufTcp[] = "AT+USOCR=6,0";
-    char cmdBufUdp[] = "AT+USOCR=17,0";
     CellularAtReq_t atReqSocketConnect =
     {
         NULL,
@@ -551,13 +551,18 @@ static CellularError_t _Cellular_GetSocketNumber( CellularHandle_t cellularHandl
 
     atReqSocketConnect.pData = pSessionId;
 
+    /* Format: AT+USOCR=<protocol>[,<local_port>[,<preferred_protocol_type>[,<cid>]]]
+     * <protocol>: 6 for TCP, 17 for UDP. */
+
+    /* Creates a socket and associates it with the specified protocol (TCP or UDP),
+     * returns a number identifying the socket. */
     if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
     {
-        atReqSocketConnect.pAtCmd = cmdBufTcp;
+        atReqSocketConnect.pAtCmd = "AT+USOCR=6,0";
     }
     else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
     {
-        atReqSocketConnect.pAtCmd = cmdBufUdp;
+        atReqSocketConnect.pAtCmd = "AT+USOCR=17,0";
     }
     else
     {
@@ -643,42 +648,6 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
 
 /*-----------------------------------------------------------*/
 
-static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
-                                                 char * pLine,
-                                                 uint32_t * pBytesRead )
-{
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-
-    if( ( pLine == NULL ) || ( pBytesRead == NULL ) )
-    {
-        LogError( ( "socketSendDataPrefix: pLine is invalid or pBytesRead is invalid" ) );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else if( pCallbackContext != NULL )
-    {
-        LogError( ( "socketSendDataPrefix: pCallbackContext is not NULL" ) );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else if( *pBytesRead != 1U )
-    {
-        LogDebug( ( "socketSendDataPrefix: pBytesRead %u %s is not 1", *pBytesRead, pLine ) );
-    }
-    else
-    {
-        /* After the data prefix, there should not be any data in stream.
-         * Cellular commmon processes AT command in lines. Add a '\0' after '@'. */
-        if( strcmp( pLine, "@" ) == 0 )
-        {
-            pLine[ 1 ] = '\n';
-            *pBytesRead = 2;
-        }
-    }
-
-    return pktStatus;
-}
-
-/*-----------------------------------------------------------*/
-
 static CellularError_t _Cellular_SocketRecv( CellularHandle_t cellularHandle,
                                              CellularSocketHandle_t socketHandle,
                                              uint8_t * pBuffer,
@@ -705,10 +674,6 @@ static CellularError_t _Cellular_SocketRecv( CellularHandle_t cellularHandle,
     };
     uint32_t sessionId = 0;
     char * pAtCmd = NULL;
-    char recvCmd[] = "AT+USORD=";
-    char recvFromCmd[] = "AT+USORF=";
-    char atRspPrefixRecv[] = "+USORD";
-    char atRspPrefixRecvFrom[] = "+USORF";
 
     ( void ) pRemoteSocketAddress;
 
@@ -747,13 +712,16 @@ static CellularError_t _Cellular_SocketRecv( CellularHandle_t cellularHandle,
 
             if( isRecvFrom == true )
             {
-                pAtCmd = recvFromCmd;
-                atReqSocketRecv.pAtRspPrefix = atRspPrefixRecvFrom;
+                /* AT+USORF is UDP dedicated command to receive packets. */
+                pAtCmd = "AT+USORF=";
+                atReqSocketRecv.pAtRspPrefix = "+USORF";
             }
             else
             {
-                pAtCmd = recvCmd;
-                atReqSocketRecv.pAtRspPrefix = atRspPrefixRecv;
+                /* AT+USORD is used to receive packets for both TCP/UDP sockets binded
+                 * (by Cellular_SocketConnect) before receiving. */
+                pAtCmd = "AT+USORD=";
+                atReqSocketRecv.pAtRspPrefix = "+USORD";
             }
 
             /* The return value of snprintf is not used.
@@ -798,8 +766,6 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
     CellularAtDataReq_t atDataReqSocketSend = { 0 };
     uint32_t sessionId = 0;
     char * pAtCmd = NULL;
-    char sendCmd[] = "AT+USOWR=";
-    char sendToCmd[] = "AT+USOST=";
     /* Buffer to store ",\"${IP/domain name}\",${port}", +5 for two ',', two '"' and one NULL terminate. */
     char remoteInfoBuf[ CELLULAR_IP_ADDRESS_MAX_SIZE + CELLULAR_PORT_NUM_CHAR_LEN + 5 ] = { 0 };
     /* Buffer to store ",${length}", +1 for NULL terminate. */
@@ -838,38 +804,29 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
 
         if( isSendTo == true )
         {
-            pAtCmd = sendToCmd;
-        }
-        else
-        {
-            pAtCmd = sendCmd;
-        }
+            /* AT+USOST is UDP dedicated command to send packets. */
+            pAtCmd = "AT+USOST=";
 
-        /* The return value of snprintf is not used.
-         * The max length of the string is fixed and checked offline. */
-        /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - sizeof( remoteInfoBuf ) - CELLULAR_SEND_LEN_CHAR_LEN,
-                           "%s%u", pAtCmd, sessionId );
-
-        /* Append remote info to the AT command if it's send to. */
-        if( isSendTo == true )
-        {
             ( void ) snprintf( remoteInfoBuf, sizeof( remoteInfoBuf ),
                                ",\"%s\",%d",
                                pRemoteSocketAddress->ipAddress.ipAddress,
                                pRemoteSocketAddress->port );
-
-            /* Because the length of host's IP address/port are limited,
-             * the buffer size must be enough for remote setting. */
-            strcat( cmdBuf, remoteInfoBuf );
+        }
+        else
+        {
+            /* AT+USOWR is used to send packets for both TCP/UDP sockets binded
+             * (by Cellular_SocketConnect) before sending. */
+            pAtCmd = "AT+USOWR=";
         }
 
         ( void ) snprintf( sendLenBuf, sizeof( sendLenBuf ),
                            ",%u", atDataReqSocketSend.dataLen );
 
-        /* Because the length of host's IP address/port are limited,
-         * the buffer size must be enough. */
-        strcat( cmdBuf, sendLenBuf );
+        /* The return value of snprintf is not used.
+         * The max length of the string is fixed and checked offline. */
+        /* coverity[misra_c_2012_rule_21_6_violation]. */
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+                           "%s%u%s%s", pAtCmd, sessionId, remoteInfoBuf, sendLenBuf );
 
         pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
                                              socketSendDataPrefix, NULL,
@@ -891,6 +848,42 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
     }
 
     return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
+                                                 char * pLine,
+                                                 uint32_t * pBytesRead )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    if( ( pLine == NULL ) || ( pBytesRead == NULL ) )
+    {
+        LogError( ( "socketSendDataPrefix: pLine is invalid or pBytesRead is invalid" ) );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else if( pCallbackContext != NULL )
+    {
+        LogError( ( "socketSendDataPrefix: pCallbackContext is not NULL" ) );
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else if( *pBytesRead != 1U )
+    {
+        LogDebug( ( "socketSendDataPrefix: pBytesRead %u %s is not 1", *pBytesRead, pLine ) );
+    }
+    else
+    {
+        /* After the data prefix, there should not be any data in stream.
+         * Cellular commmon processes AT command in lines. Add a '\0' after '@'. */
+        if( strcmp( pLine, "@" ) == 0 )
+        {
+            pLine[ 1 ] = '\n';
+            *pBytesRead = 2;
+        }
+    }
+
+    return pktStatus;
 }
 
 /*-----------------------------------------------------------*/
@@ -1079,7 +1072,7 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    char asyncFlagBuf[ 2 ] = { 0 };
+    char asyncFlagBuf[ 3 ] = { 0 };
     CellularAtReq_t atReqSocketClose =
     {
         NULL,
@@ -1135,14 +1128,13 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
         /* Close the socket. */
         if( socketHandle->socketState == SOCKETSTATE_CONNECTED )
         {
-            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE - sizeof( asyncFlagBuf ), "%s%u",
-                               "AT+USOCL=", sessionId );
-
             if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
             {
                 ( void ) snprintf( asyncFlagBuf, sizeof( asyncFlagBuf ), ",%d", CELLULAR_CONFIG_SET_SOCKET_CLOSE_ASYNC_MODE );
-                strcat( cmdBuf, asyncFlagBuf );
             }
+
+            ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%u%s",
+                               "AT+USOCL=", sessionId, asyncFlagBuf );
 
             pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSocketClose, SOCKET_CLOSE_PACKET_REQ_TIMEOUT_MS );
 
