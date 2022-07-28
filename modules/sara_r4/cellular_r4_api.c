@@ -828,7 +828,7 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
         /* The return value of snprintf is not used.
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
                            "%s%u%s%s", pAtCmd, sessionId, remoteInfoBuf, sendLenBuf );
 
         pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
