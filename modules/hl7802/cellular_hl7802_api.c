@@ -117,7 +117,7 @@ static const char * _socketSendSuccesTokenTable[] = { SOCKET_DATA_CONNECT_TOKEN 
 static const uint32_t _socketSendSuccesTokenTableLength = 1;
 
 /* KMP failure function. */
-static const uint8_t _endPatternFailureFunction[ SOCKET_END_PATTERN_LEN ] = { 0 };
+static uint8_t _endPatternFailureFunction[ SOCKET_END_PATTERN_LEN ] = { 0 };
 static bool isEndPatternFailureFunctionInited = false;
 
 /*-----------------------------------------------------------*/
