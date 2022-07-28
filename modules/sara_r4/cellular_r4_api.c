@@ -147,6 +147,9 @@ static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
                                              uint32_t * pSentDataLength,
                                              const CellularSocketAddress_t * pRemoteSocketAddress,
                                              bool isSendTo );
+static CellularPktStatus_t socketSendDataPrefix( void * pCallbackContext,
+                                                 char * pLine,
+                                                 uint32_t * pBytesRead );
 
 CellularError_t Cellular_SetPsmSettings( CellularHandle_t cellularHandle,
                                          const CellularPsmSettings_t * pPsmSettings );
