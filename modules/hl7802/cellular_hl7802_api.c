@@ -116,8 +116,9 @@ typedef struct socketStat
 static const char * _socketSendSuccesTokenTable[] = { SOCKET_DATA_CONNECT_TOKEN };
 static const uint32_t _socketSendSuccesTokenTableLength = 1;
 
-/* KMP failure function calculated offline. */
-static const uint8_t _endPatternFailureFunction[ SOCKET_END_PATTERN_LEN ] = { 0, 1, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 1, 2 };
+/* KMP failure function. */
+static const uint8_t _endPatternFailureFunction[ SOCKET_END_PATTERN_LEN ] = { 0 };
+static bool isEndPatternFailureFunctionInited = false;
 
 /*-----------------------------------------------------------*/
 
@@ -181,7 +182,8 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSignalInfo( CellularContext_t * 
                                                             void * pData,
                                                             uint16_t dataLen );
 static char * searchEndPatternPos( char * pString,
-                                   uint32_t stringLen );
+                                   uint32_t stringLen,
+                                   const char * pPattern );
 static CellularError_t _Cellular_SocketSend( CellularHandle_t cellularHandle,
                                              CellularSocketHandle_t socketHandle,
                                              const uint8_t * pData,
@@ -368,15 +370,48 @@ static CellularError_t _Cellular_GetSocketStat( CellularHandle_t cellularHandle,
 /*-----------------------------------------------------------*/
 
 static char * searchEndPatternPos( char * pString,
-                                   uint32_t stringLen )
+                                   uint32_t stringLen,
+                                   const char * pPattern )
 {
-    char * pPattern = SOCKET_END_PATTERN;
-    uint32_t patternLen = SOCKET_END_PATTERN_LEN;
+    uint32_t patternLen = strlen( pPattern );
     char * pch = NULL;
     uint32_t i = 0;
     uint32_t j = 0;
 
-    /* KMP search */
+    if( !isEndPatternFailureFunctionInited )
+    {
+        isEndPatternFailureFunctionInited = true;
+
+        /* Build failure function. */
+        for( i = 1; i < patternLen; i++ )
+        {
+            j = _endPatternFailureFunction[ i - 1 ];
+
+            while( pPattern[ j ] != pPattern[ i ] )
+            {
+                if( j == 0 )
+                {
+                    break;
+                }
+
+                j = _endPatternFailureFunction[ j - 1 ];
+            }
+
+            if( pPattern[ j ] == pPattern[ i ] )
+            {
+                _endPatternFailureFunction[ i ] = j + 1;
+            }
+            else
+            {
+                _endPatternFailureFunction[ i ] = 0;
+            }
+        }
+    }
+
+    i = 0;
+    j = 0;
+
+    /* KMP search. */
     while( i < stringLen )
     {
         if( pString[ i ] != pPattern[ j ] )
@@ -397,7 +432,7 @@ static char * searchEndPatternPos( char * pString,
 
         if( j == patternLen )
         {
-            /*pattern found, update the return value */
+            /* Pattern found, update the return value. */
             pch = pString + i - patternLen;
             break;
         }
@@ -437,7 +472,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
             *pRecvDataLength = 0;
 
             /* Look for end pattern by KMP search. */
-            pch = searchEndPatternPos( *ppDataStart, lineLength - ( SOCKET_DATA_CONNECT_TOKEN_LEN + 2 ) );
+            pch = searchEndPatternPos( *ppDataStart, lineLength - ( SOCKET_DATA_CONNECT_TOKEN_LEN + 2 ), SOCKET_END_PATTERN );
 
             if( pch == NULL )
             {
@@ -539,7 +574,7 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
     }
     else if( pAtResp->pItm->pNext == NULL )
     {
-        LogError( ( "Receive Data: response data is invalid" ) );
+        LogError( ( "Receive Data: response data is invalid." ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( ( pAtResp->pItm->pNext->pNext == NULL ) )
@@ -547,12 +582,12 @@ static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,
         /* pAtResp->pItm->pNext might have "--EOF--Pattern--" only when there is no data to receive. */
         if( strncmp( pAtResp->pItm->pNext->pLine, SOCKET_END_PATTERN, SOCKET_END_PATTERN_LEN ) == 0 )
         {
-            LogDebug( ( "Receive Data: no data to receive" ) );
+            LogDebug( ( "Receive Data: no data to receive." ) );
             *pDataRecv->pDataLen = 0;
         }
         else
         {
-            LogError( ( "Receive Data: end pattern is invalid" ) );
+            LogError( ( "Receive Data: end pattern is invalid." ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
     }
@@ -634,7 +669,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
         }
 
         /* Format: AT+KTCPCFG=[<cnx cnf>],<mode>,[<tcp remote address>],<tcp_port>[,[<source_port>]
-         * [,[<data_mode>][,[<URC-ENDTCP-enable>][,[<af>][,[<cipher_suite>][,[<restore_on_boot>]]]]]]]] */
+         *                    [,[<data_mode>][,[<URC-ENDTCP-enable>][,[<af>][,[<cipher_suite>]
+         *                    [,[<restore_on_boot>]]]]]]]] */
         /* To set TCP connection, remote address & port should be put before local port. */
         if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
         {
@@ -655,8 +691,8 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
                                portBuf );
         }
 
-        /* Format: AT+KUDPCFG=[<cnx cnf>],<mode>[,[<port>][,[<data_mode>][,[<udp remote address>]
-         * [,[<udp_port>][,[<af>][,[<restore_on_boot>]]]]]]] */
+        /* Format: AT+KUDPCFG=[<cnx cnf>],<mode>[,[<source_port>][,[<data_mode>][,
+         *                    [<udp remote address>][,[<udp_port>][,[<af>][,[<restore_on_boot>]]]]]]] */
         /* To set UDP connection, remote address & port should be put after local port. */
         else
         {
@@ -673,7 +709,7 @@ static CellularError_t buildSocketConfig( CellularSocketHandle_t socketHandle,
              * Reserve buffer for port setting. */
             /* coverity[misra_c_2012_rule_21_6_violation]. */
             ( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-                               "%s=%u,0%s%s",
+                               "%s=%u,0%s,0,%s",
                                "AT+KUDPCFG",
                                socketHandle->contextId,
                                portBuf,
@@ -1955,11 +1991,7 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
-    char tcpCloseAtCmd[] = "AT+KTCPCLOSE=";
-    char udpCloseAtCmd[] = "AT+KUDPCLOSE=";
     char * pCloseAtCmd = NULL;
-    char tcpDeleteAtCmd[] = "AT+KTCPDEL=";
-    char udpDeleteAtCmd[] = "AT+KUDPDEL=";
     char * pDeleteAtCmd = NULL;
     CellularAtReq_t atReqSocketClose =
     {
@@ -2008,16 +2040,16 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        /* Check socket protocol. */
+        /* Check socket protocol and choose the AT commands based on it. */
         if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP )
         {
-            pCloseAtCmd = tcpCloseAtCmd;
-            pDeleteAtCmd = tcpDeleteAtCmd;
+            pCloseAtCmd = "AT+KTCPCLOSE=";
+            pDeleteAtCmd = "AT+KTCPDEL=";
         }
         else if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP )
         {
-            pCloseAtCmd = udpCloseAtCmd;
-            pDeleteAtCmd = udpDeleteAtCmd;
+            pCloseAtCmd = "AT+KUDPCLOSE=";
+            pDeleteAtCmd = "AT+KUDPDEL=";
         }
         else
         {
@@ -2121,6 +2153,10 @@ CellularError_t Cellular_SocketConnect( CellularHandle_t cellularHandle,
     }
 
     /* Remove the socket created at Cellular_CreateSocket and then re-create again with remote info at next step. */
+
+    /* For example, users created an UDP socket by calling Cellular_CreateSocket, then they want to bind socket with
+     * remote address/port but the socket was created in Cellular_CreateSocket (same AT command). So we need to
+     * re-create it. */
     if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) )
     {
         cellularStatus = Cellular_SocketClose( cellularHandle, socketHandle );
@@ -3198,7 +3234,7 @@ CellularError_t Cellular_CreateSocket( CellularHandle_t cellularHandle,
 
     if( ( cellularStatus == CELLULAR_SUCCESS ) && ( socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP ) )
     {
-        /* Create socket handler for UDP client because we don't need to have */
+        /* Create socket handler for UDP client because we don't need to have. */
         cellularStatus = _Cellular_GetModuleContext( pContext, ( void ** ) &pModuleContext );
 
         if( cellularStatus == CELLULAR_SUCCESS )
