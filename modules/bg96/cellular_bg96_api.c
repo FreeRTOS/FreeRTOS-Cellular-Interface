@@ -1927,26 +1927,8 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
 
     PlatformMutex_Lock( &pBg96SocketContext->udpSocketConnectMutex );
 
-    /* Check input. */
-    if( socketHandle == NULL )
-    {
-        LogError( ( "udpCheckAndConnect: Invalid socket address" ) );
-        cellularStatus = CELLULAR_INVALID_HANDLE;
-    }
-    else if( socketHandle->socketProtocol != CELLULAR_SOCKET_PROTOCOL_UDP )
-    {
-        LogError( ( "udpCheckAndConnect, Socket protocol not supported %d",
-                    socketHandle->socketProtocol ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
-    else if( dataAccessMode != CELLULAR_ACCESSMODE_BUFFER )
-    {
-        LogError( ( "udpCheckAndConnect, Access mode not supported %d",
-                    dataAccessMode ) );
-        cellularStatus = CELLULAR_UNSUPPORTED;
-    }
     /* Check if it's necessary to call Cellular_SocketConnect. */
-    else if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
+    if( ( socketHandle->remoteSocketAddress.port == 0 ) && ( pRemoteSocketAddress == NULL ) )
     {
         LogError( ( "udpCheckAndConnect, Remote address is not set correctly." ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
@@ -1973,13 +1955,14 @@ static CellularError_t udpCheckAndConnect( CellularHandle_t cellularHandle,
         needSetRemoteAddress = false;
     }
 
-    /* Create a socket for this socket handler. */
+    /* Bind the socket with remote info by sending AT+QIOPEN. */
     if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
     {
         cellularStatus = Cellular_SocketConnect( cellularHandle, socketHandle, dataAccessMode, pRemoteSocketAddress );
     }
 
-    /* Wait for connect result. */
+    /* Even though UDP isn't required to connect before sending,
+     * BG96 needs to wait QIOPEN URC to know if socket is created successfully. */
     if( ( cellularStatus == CELLULAR_SUCCESS ) && needSetRemoteAddress )
     {
         if( xQueueReceive( pBg96SocketContext->udpSocketOpenQueue, &urcEvent,

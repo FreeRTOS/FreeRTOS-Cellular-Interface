@@ -54,6 +54,8 @@ static void _Cellular_ProcessSimstat( CellularContext_t * pContext,
                                       char * pInputLine );
 static void _Cellular_ProcessIndication( CellularContext_t * pContext,
                                          char * pInputLine );
+static void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
+                                                 CellularSocketHandle_t socketHandle );
 
 /*-----------------------------------------------------------*/
 
@@ -815,6 +817,19 @@ CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
     }
 
     return pktStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
+                                                 CellularSocketHandle_t socketHandle )
+{
+    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
+
+    if( xQueueSend( pBg96SocketContext->udpSocketOpenQueue, &urcEvent, ( TickType_t ) 0 ) != pdPASS )
+    {
+        LogDebug( ( "_Cellular_NotifyUdpSocketOpenResult sends udpSocketOpenQueue fail" ) );
+    }
 }
 
 /*-----------------------------------------------------------*/

@@ -138,24 +138,6 @@ static bool appendRatList( char * pRatList,
 
 /*-----------------------------------------------------------*/
 
-static bool _Cellular_CreateUdpSocketConnectMutex( cellularModuleSocketContext_t * pBg96SocketContext )
-{
-    bool status = false;
-
-    status = PlatformMutex_Create( &pBg96SocketContext->udpSocketConnectMutex, false );
-
-    return status;
-}
-
-/*-----------------------------------------------------------*/
-
-static void _Cellular_DestroyUdpSocketConnectMutex( cellularModuleSocketContext_t * pBg96SocketContext )
-{
-    PlatformMutex_Destroy( &pBg96SocketContext->udpSocketConnectMutex );
-}
-
-/*-----------------------------------------------------------*/
-
 CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHandle )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
@@ -171,7 +153,7 @@ CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHand
     if( needUdpResources )
     {
         /* Allocate resources for UDP sockets. */
-        if( _Cellular_CreateUdpSocketConnectMutex( pBg96SocketContext ) == false )
+        if( PlatformMutex_Create( &pBg96SocketContext->udpSocketConnectMutex, false ) == false )
         {
             LogError( ( "_Cellular_CreateSocketContext: Create UDP socket mutex failed." ) );
             cellularStatus = CELLULAR_RESOURCE_CREATION_FAIL;
@@ -188,7 +170,7 @@ CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHand
                 cellularStatus = CELLULAR_NO_MEMORY;
 
                 /* Free the allocated resources. */
-                _Cellular_DestroyUdpSocketConnectMutex( pBg96SocketContext );
+                PlatformMutex_Destroy( &pBg96SocketContext->udpSocketConnectMutex );
             }
         }
     }
@@ -444,19 +426,6 @@ CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
     ( void ) _Cellular_AtcmdRequestWithCallback( pContext, atReqGetNoResult );
 
     return cellularStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
-                                          CellularSocketHandle_t socketHandle )
-{
-    cellularModuleSocketContext_t * pBg96SocketContext = ( cellularModuleSocketContext_t * ) socketHandle->pModemData;
-
-    if( xQueueSend( pBg96SocketContext->udpSocketOpenQueue, &urcEvent, ( TickType_t ) 0 ) != pdPASS )
-    {
-        LogDebug( ( "_Cellular_NotifyUdpSocketOpenResult sends udpSocketOpenQueue fail" ) );
-    }
 }
 
 /*-----------------------------------------------------------*/

@@ -96,9 +96,6 @@ CellularError_t _Cellular_CreateSocketContext( CellularSocketHandle_t socketHand
 
 CellularError_t _Cellular_DestroySocketContext( CellularSocketHandle_t socketHandle );
 
-void _Cellular_NotifyUdpSocketOpenResult( CellularUrcEvent_t urcEvent,
-                                          CellularSocketHandle_t socketHandle );
-
 extern CellularAtParseTokenMap_t CellularUrcHandlerTable[];
 extern uint32_t CellularUrcHandlerTableSize;
 
