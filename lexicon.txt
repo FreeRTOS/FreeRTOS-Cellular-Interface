@@ -373,6 +373,7 @@ iptype
 ipv
 isalpha
 isdigit
+isn
 iso
 isr
 isspace
@@ -656,6 +657,7 @@ pwr
 px
 qccid
 qcfg
+qiopen
 qird
 qsort
 qual

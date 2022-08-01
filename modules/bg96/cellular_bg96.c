@@ -199,7 +199,7 @@ CellularError_t _Cellular_DestroySocketContext( CellularSocketHandle_t socketHan
     if( hasUdpResources )
     {
         /* Release UDP resources. */
-        _Cellular_DestroyUdpSocketConnectMutex( pBg96SocketContext );
+        PlatformMutex_Destroy( &pBg96SocketContext->udpSocketConnectMutex );
         vQueueDelete( pBg96SocketContext->udpSocketOpenQueue );
         socketHandle->pModemData = NULL;
     }
