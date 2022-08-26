@@ -44,7 +44,7 @@
 /*-----------------------------------------------------------*/
 
 /*  AT Command timeout for general AT commands. */
-#define PACKET_REQ_TIMEOUT_MS    ( 5000UL )
+#define PACKET_REQ_TIMEOUT_MS    CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS
 
 /*-----------------------------------------------------------*/
 
