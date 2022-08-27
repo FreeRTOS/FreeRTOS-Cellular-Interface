@@ -70,7 +70,7 @@ _Ref 21.6.1_
     behaviour. The max length of the strings are fixed and checked offline.
 
 #### Rule 21.9
-_Ref 21.9.1_ 
+_Ref 21.9.1_
 
 - MISRA C-2012 Rule 21.9 does not allow the use of bsearch. This is becasue of
     unspecified behavior, which relates to the treatment of elements that compare as
