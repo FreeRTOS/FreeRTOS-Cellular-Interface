@@ -71,7 +71,8 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( optionValueLength == sizeof( uint32_t ) )
         {
-            /* The variable length is checked. */
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
             /* coverity[misra_c_2012_rule_11_3_violation] */
             pTimeoutMs = ( const uint32_t * ) pOptionValue;
             socketHandle->sendTimeoutMs = *pTimeoutMs;
@@ -85,7 +86,8 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( optionValueLength == sizeof( uint32_t ) )
         {
-            /* The variable length is checked. */
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
             /* coverity[misra_c_2012_rule_11_3_violation] */
             pTimeoutMs = ( const uint32_t * ) pOptionValue;
             socketHandle->recvTimeoutMs = *pTimeoutMs;
@@ -112,6 +114,9 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint16_t ) ) )
         {
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
             socketHandle->localPort = *( ( uint16_t * ) pOptionValue );
         }
         else
