@@ -362,6 +362,32 @@
 #endif
 
 /**
+ * @brief Cellular common AT command timeout.<br>
+ *
+ * The timeout value for Cellular_Common prefix APIs. The timeout value should be
+ * set according to spec. It should be long enough for AT command used in cellular
+ * common APIs.
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 5000
+ */
+#ifndef CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS
+    #define CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS    ( 5000U )
+#endif
+
+/**
+ * @brief Cellular AT command raw timeout.<br>
+ *
+ * The timeout value for Cellular_ATCommandRaw API.
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 5000
+ */
+#ifndef CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS
+    #define CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS    ( 5000U )
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *

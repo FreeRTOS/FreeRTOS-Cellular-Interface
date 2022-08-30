@@ -536,7 +536,7 @@ void test_Cellular_CommonATCommandRaw_AtCmd_Bad_Request( void )
     char pData[] = "Test Data";
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_REQUEST );
+    _Cellular_TimeoutAtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_BAD_REQUEST );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
 
     cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0 );
@@ -557,7 +557,7 @@ void test_Cellular_CommonATCommandRaw_Happy_Path( void )
     char pData[] = "Test Data";
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TimeoutAtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonATCommandRaw( &context, pPrefix, pData, 0, NULL, NULL, 0 );

@@ -344,7 +344,9 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
         atReqGetResult.dataLen = dataLen;
         atReqGetResult.respCallback = responseReceivedCallback;
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetResult );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext,
+                                                               atReqGetResult,
+                                                               CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 
