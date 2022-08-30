@@ -137,7 +137,10 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
         else
         {
             /* There should be only '+', '_', characters or digit before seperator. */
-            for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
+            /* MISRA Ref 4.6.1  [Basic numerical type] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
+            for( ptrChar = ( unsigned char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
                 /* It's caused by stanard api isalpha and isdigit. */
                 /* MISRA Ref 4.6.1  [Basic numerical type] */
@@ -288,8 +291,11 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
         /* isspace is a standard library function and we cannot control it. */
         /* MISRA Ref 4.6.1  [Basic numerical type] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+        /* MISRA Ref 21.13.1  [Character representation] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
+        /* coverity[misra_c_2012_rule_21_13_violation] */
         /* coverity[misra_c_2012_directive_4_6_violation] */
-        while( ( **ppString != '\0' ) && ( isspace( ( ( unsigned char ) ( **ppString ) ) ) != 0U ) )
+        while( ( **ppString != '\0' ) && ( isspace( ( ( int ) ( **ppString ) ) ) != 0U ) )
         {
             ( *ppString )++;
         }
@@ -338,8 +344,11 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
                 /* isspace is a standard library function and we cannot control it. */
                 /* MISRA Ref 4.6.1  [Basic numerical type] */
                 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+                /* MISRA Ref 21.13.1  [Character representation] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
-            } while( ( p > pString ) && ( isspace( ( unsigned char ) ( *p ) ) != 0U ) );
+                /* coverity[misra_c_2012_rule_21_13_violation] */
+            } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0U ) );
 
             p[ 1 ] = '\0';
         }
