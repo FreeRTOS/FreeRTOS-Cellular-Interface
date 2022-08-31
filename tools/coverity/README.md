@@ -1,7 +1,7 @@
 # Static code analysis for FreeRTOS-Cellular-Interface library
 This directory is made for the purpose of statically testing the MISRA C:2012 compliance of FreeRTOS-Cellular-Interface using
 [Synopsys Coverity](https://www.synopsys.com/software-integrity/security-testing/static-analysis-sast.html) static analysis tool.
-To that end, this directory provides a [configuration files](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/tools/coverity/misra.config) required to use when
+To that end, this directory provides a [configuration file](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/tools/coverity/misra.config) to use when
 building a binary for the tool to analyze.
 
 > **Note**
@@ -24,7 +24,7 @@ To compile and run the Coverity target successfully, you must have the following
     - `git submodule update --checkout --init --recursive`
 
 ### To build and run coverity:
-Go to the root directory of the FreeRTOS-Plus-TCP repo and run the following commands in terminal:
+Go to the root directory of the library and run the following commands in terminal:
 1. Update the compiler configuration in Coverity
   ~~~
   cov-configure --force --compiler cc --comptype gcc
@@ -50,10 +50,13 @@ Go to the root directory of the FreeRTOS-Plus-TCP repo and run the following com
   ~~~
   cov-format-errors --dir . --file "*/source" --exclude-files '(/build/|/test/)' --html-output html-out;
   ~~~
-7. Format the errors in JSON format to perform a jq query to get a simplified list of any exceptions
+7. Format the errors in JSON format to perform a jq query to get a simplified list of any exceptions.
+  NOTE: A blank output means there are no defects that aren't being suppressed by the config or inline comments.
   ~~~
   cov-format-errors --dir . --file "*/source" --exclude-files '(/build/|/test/)' --json-output-v2 defects.json;
-  jq '.issues[] | .events[] | .eventTag '  ${library}_defects.json | sort | uniq -c | sort -nr;
+  echo -e "\n-------------------------Non-Suppresed Deviations, if any, Listed Below-------------------------\n";
+  jq '.issues[] | .events[] | .eventTag ' defects.json | sort | uniq -c | sort -nr;
+   echo -e "\n-------------------------Non-Suppresed Deviations, if any, Listed Above-------------------------\n";
   ~~~
 
 For your convenience the commands above are below to be copy/pasted into a UNIX command friendly terminal.
