@@ -77,3 +77,4 @@ For your convenience the commands above are below to be copy/pasted into a UNIX 
 
 You should now have the HTML formatted violations list in a directory named `build/cov-out/html-output`.
 With the current configuration and the provided project, you should not see any deviations.
+
