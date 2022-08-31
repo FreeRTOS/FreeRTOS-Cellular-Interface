@@ -712,8 +712,7 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
             /* MISRA Ref 4.6.1  [Basic numerical type] */
             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
             /* coverity[misra_c_2012_directive_4_6_violation] */
-
-            if( isdigit( ( ( unsigned char ) ( *pTempString ) ) ) == 0U )
+            if( isdigit( ( ( int ) ( *pTempString ) ) ) == 0U )
             {
                 *pResult = false;
             }
