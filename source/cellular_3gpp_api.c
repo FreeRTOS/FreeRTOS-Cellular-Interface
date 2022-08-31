@@ -1695,7 +1695,7 @@ CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle
         /* Form the AT command. */
 
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s%d,%d,\"" PRINTF_BINARY_PATTERN_INT4 "\"",
                            "AT+CEDRXS=",
@@ -2049,7 +2049,7 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
 
 
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%d", "AT+CGPADDR=", contextId );
 
@@ -2196,7 +2196,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
         /* Form the AT command. */
 
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%s%d,\"%s\",\"%s\"",
                            "AT+CGDCONT=",
@@ -2782,7 +2782,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
     if( value != 0U )
     {
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%c",
                            PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
@@ -2790,7 +2790,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
     else
     {
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, cmdLen, "%c", endOfString ? '\0' : ',' );
     }
@@ -2835,7 +2835,7 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
         /* Form the AT command. */
 
         /* MISRA Ref 21.6.1 [Use of snprintf] */
-        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule- */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+CPSMS=%d,", pPsmSettings->mode );
         cmdBufLen = ( uint32_t ) strlen( cmdBuf );

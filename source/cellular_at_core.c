@@ -152,7 +152,7 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
                 /* coverity[misra_c_2012_directive_4_6_violation] */
                 /* coverity[misra_c_2012_rule_10_4_violation] */
                 /* coverity[misra_c_2012_rule_10_8_violation] */
-                if( CELLULAR_CHECK_IS_PREFIX_CHAR( ( unsigned char ) ( *ptrChar ) ) )
+                if( CELLULAR_CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
                 {
                     *pResult = false;
                     break;
@@ -391,8 +391,11 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
             /* isspace is a standard library function and we cannot control it. */
             /* MISRA Ref 4.6.1  [Basic numerical type] */
             /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+            /* MISRA Ref 21.13.1  [Character representation] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
+            /* coverity[misra_c_2012_rule_21_13_violation] */
             /* coverity[misra_c_2012_directive_4_6_violation] */
-            if( isspace( ( ( unsigned char ) ( *pTempString ) ) ) == 0U )
+            if( isspace( ( ( int ) ( *pTempString ) ) ) == 0U )
             {
                 p[ ind ] = *pTempString;
                 ind++;
