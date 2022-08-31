@@ -66,7 +66,7 @@ For your convenience the commands above are below to be copy/pasted into a UNIX 
  cd build/;
  cov-build --emit-complementary-info --dir cov-out make coverity_analysis;
  cd cov-out/
- cov-analyze --dir . --coding-standard-config ../../tools/coverity/misra.config;
+ cov-analyze --dir . --coding-standard-config ../../tools/coverity/misra.config --tu-pattern "file('.*/source/.*')";
  cov-format-errors --dir . --file "*/source" --exclude-files '(/build/|/test/)' --html-output html-out;
  cov-format-errors --dir . --file "*/source" --exclude-files '(/build/|/test/)' --json-output-v2 defects.json;
  echo -e "\n-------------------------Non-Suppresed Deviations, if any, Listed Below-------------------------\n";
