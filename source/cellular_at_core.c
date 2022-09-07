@@ -137,9 +137,6 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
         else
         {
             /* There should be only '+', '_', characters or digit before seperator. */
-            /* MISRA Ref 4.6.1  [Basic numerical type] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
             for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
                 /* It's caused by stanard api isalpha and isdigit. */
