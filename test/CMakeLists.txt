@@ -58,6 +58,9 @@ target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_D
 # Cellular private include path.
 target_include_directories( coverity_analysis PRIVATE ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS} )
 
+# Build without debug enabled when performing static analysis
+target_compile_options(coverity_analysis PUBLIC -DNDEBUG )
+
 #  ====================================  Test Configuration ========================================
 
 # Define a CMock resource path.

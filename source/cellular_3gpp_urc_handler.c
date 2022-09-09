@@ -112,7 +112,8 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
         {
             if( ( tempValue >= 0 ) && ( tempValue < ( int32_t ) REGISTRATION_STATUS_MAX ) )
             {
-                /* tempValue range is checked before casting. */
+                /* MISRA Ref 10.5.1 [Essential type casting] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-105 */
                 /* coverity[misra_c_2012_rule_10_5_violation] */
                 regStatus = ( CellularNetworkRegistrationStatus_t ) tempValue;
             }
@@ -257,9 +258,8 @@ static CellularPktStatus_t _parseRatInfoInRegStatus( const char * pToken,
         else if( ( var == ( int32_t ) CELLULAR_RAT_GSM ) || ( var == ( int32_t ) CELLULAR_RAT_EDGE ) ||
                  ( var == ( int32_t ) CELLULAR_RAT_CATM1 ) || ( var == ( int32_t ) CELLULAR_RAT_NBIOT ) )
         {
-            /* Variable "var" is ensured that it is valid and within
-             * a valid range. Hence, assigning the value of the variable to
-             * rat with a enum cast. */
+            /* MISRA Ref 10.5.1 [Essential type casting] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-105 */
             /* coverity[misra_c_2012_rule_10_5_violation] */
             pLibAtData->rat = ( CellularRat_t ) var;
         }
