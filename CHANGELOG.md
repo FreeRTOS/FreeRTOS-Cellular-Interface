@@ -1,5 +1,26 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.3.0 (September 2022)
+### Updates
+ - [#102](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/102) MISRA C:2012 Compliance update.
+ - [#101](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/101) Add Cellular common AT command timeout.
+ - [#99](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/99) CBMC Starter kit update.
+ - [#98](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/98) HL7802 Finish processing packets after remote disconnect.
+ - [#96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/96) Add config to disable hardware flow control.
+ - [#94](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/94) Cellular Socket State design update.
+ - [#92](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/92) Socket CONNECTING state change.
+ - [#90](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/90) Handle network registration URC in AT Command response callback.
+ - [#88](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/88) Set TCP Local Port.
+ - [#86](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/86) Restore URC String when using generic URC callback.
+ - [#85](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/85) SARA-R4 socket receive response handling.
+ - [#84](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/84) HL7802 Signal processing function update.
+ - [#82](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/82) Add default RAT selection list.
+ - [#80](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/80) Hl7802 Delay after reboot.
+ - [#79](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/79) SARA-R4 Get PDN Status.
+ - [#77](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/77) HL7802 AT command timeout update.
+ - [#76](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/76) HL7802 band config detection and changes to log messages.
+ - [#75](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/75) SARA-R4 Reboot on init and changes to log messages.
+
 ## v1.2.0 (December 2021)
 ### Updates
  - [#62](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/62) Fix uintptr compile error.
