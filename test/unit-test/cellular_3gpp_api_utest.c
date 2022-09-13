@@ -24,7 +24,7 @@
  */
 
 /**
- * @file Test change cellular_3gpp_api_utest.c
+ * @file Test change again cellular_3gpp_api_utest.c
  * @brief Unit tests for functions in cellular_common_api.h.
  */
 
