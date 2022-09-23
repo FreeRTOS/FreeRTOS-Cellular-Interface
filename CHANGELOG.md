@@ -1,6 +1,6 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
-## v1.3.0 (September 2022)
+## v1.3.0 (October 2022)
 ### Updates
  - [#102](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/102) MISRA C:2012 Compliance update.
  - [#101](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/101) Add Cellular common AT command timeout.
