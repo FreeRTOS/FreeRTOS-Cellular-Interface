@@ -4,3 +4,6 @@
 [submodule "modules/ThirdParty/Community-Supported-Ports"]
 	path = modules/ThirdParty/Community-Supported-Ports
 	url = https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Community-Supported-Ports
+[submodule "modules/Partner-Supported-Ports"]
+	path = modules/Partner-Supported-Ports
+	url = https://github.com/chinglee-iot/Labs-FreeRTOS-Cellular-Interface-Partner-Supported-Ports
