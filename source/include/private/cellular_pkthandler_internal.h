@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface v1.2.0
+ * FreeRTOS-Cellular-Interface v1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -44,7 +44,7 @@
 /*-----------------------------------------------------------*/
 
 /*  AT Command timeout for general AT commands. */
-#define PACKET_REQ_TIMEOUT_MS    ( 5000UL )
+#define PACKET_REQ_TIMEOUT_MS    CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS
 
 /*-----------------------------------------------------------*/
 

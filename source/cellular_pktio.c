@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface v1.2.0
+ * FreeRTOS-Cellular-Interface v1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -474,8 +474,6 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
     }
     else
     {
-        /* It's platform-dependent declaration. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
         xResult = ( BaseType_t ) PlatformEventGroup_SetBitsFromISR( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
                                                                     ( EventBits_t ) PKTIO_EVT_MASK_RX_DATA,
                                                                     &xHigherPriorityTaskWoken );
@@ -1026,15 +1024,11 @@ static void _pktioReadThread( void * pUserData )
                                      &pContext->hPktioCommIntf ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
         /* Send thread started event. */
-        /* It's platform-dependent declaration. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
         ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_STARTED );
 
         do
         {
             /* Wait events for abort thread or rx data available. */
-            /* It's platform-dependent declaration. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
             uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
                                                                                    ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ),
                                                                                    pdTRUE,
@@ -1113,8 +1107,6 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
     {
         pContext->bPktioUp = false;
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
-        /* It's platform-dependent declaration. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
         pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) PlatformEventGroup_Create();
 
         if( pContext->pPktioCommEvent == NULL )
@@ -1127,8 +1119,6 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
         pContext->pPktioHandlepktCB = handlePacketCb;
-        /* It's platform-dependent declaration. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
         ( void ) PlatformEventGroup_ClearBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
                                                ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ALL_EVENTS ) );
 
@@ -1168,8 +1158,6 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
 
             if( pContext->pPktioCommEvent != NULL )
             {
-                /* It's platform-dependent declaration. */
-                /* coverity[misra_c_2012_directive_4_6_violation] */
                 ( void ) PlatformEventGroup_Delete( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
                 pContext->pPktioCommEvent = ( PlatformEventGroupHandle_t ) ( uintptr_t ) ( uintptr_t * ) NULL;
             }
@@ -1276,8 +1264,6 @@ void _Cellular_PktioShutdown( CellularContext_t * pContext )
         if( pContext->pPktioCommEvent != NULL )
         {
             ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORT );
-            /* It's platform-dependent declaration. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
             uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
 
             while( ( PlatformEventGroup_EventBits ) ( uxBits & PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventGroup_EventBits ) ( PKTIO_EVT_MASK_ABORTED ) )

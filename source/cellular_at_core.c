@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface v1.2.0
+ * FreeRTOS-Cellular-Interface v1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -82,7 +82,7 @@ static void validateString( const char * pString,
      * CELLULAR_AT_MAX_STRING_SIZE defines the valid string length excluding NULL terminating
      * character. The longest valid string has '\0' at ( CELLULAR_AT_MAX_STRING_SIZE + 1U )
      */
-    pNullCharacterLocation = memchr( pString, '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
+    pNullCharacterLocation = memchr( pString, ( int32_t ) '\0', ( CELLULAR_AT_MAX_STRING_SIZE + 1U ) );
 
     if( pNullCharacterLocation == pString )
     {
@@ -140,7 +140,14 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
             for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
                 /* It's caused by stanard api isalpha and isdigit. */
+                /* MISRA Ref 4.6.1  [Basic numerical type] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+                /* MISRA Ref 10.4.1 [Same essential type] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-104 */
+                /* MISRA Ref 10.8.1 [Essential type casting] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-108 */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
+                /* coverity[misra_c_2012_rule_10_4_violation] */
                 /* coverity[misra_c_2012_rule_10_8_violation] */
                 if( CELLULAR_CHECK_IS_PREFIX_CHAR( ( char ) ( *ptrChar ) ) )
                 {
@@ -279,12 +286,13 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString )
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
         /* isspace is a standard library function and we cannot control it. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
-        /* coverity[misra_c_2012_rule_10_1_violation] */
-        /* coverity[misra_c_2012_rule_10_4_violation] */
-        /* coverity[misra_c_2012_rule_18_4_violation] */
+        /* MISRA Ref 4.6.1  [Basic numerical type] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+        /* MISRA Ref 21.13.1  [Character representation] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
         /* coverity[misra_c_2012_rule_21_13_violation] */
-        while( ( **ppString != '\0' ) && ( isspace( ( ( int ) ( **ppString ) ) ) != 0 ) )
+        /* coverity[misra_c_2012_directive_4_6_violation] */
+        while( ( **ppString != '\0' ) && ( isspace( ( ( int ) ( **ppString ) ) ) != 0U ) )
         {
             ( *ppString )++;
         }
@@ -331,12 +339,13 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
             {
                 --p;
                 /* isspace is a standard library function and we cannot control it. */
+                /* MISRA Ref 4.6.1  [Basic numerical type] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+                /* MISRA Ref 21.13.1  [Character representation] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
                 /* coverity[misra_c_2012_directive_4_6_violation] */
-                /* coverity[misra_c_2012_rule_10_1_violation] */
-                /* coverity[misra_c_2012_rule_10_4_violation] */
-                /* coverity[misra_c_2012_rule_18_4_violation] */
                 /* coverity[misra_c_2012_rule_21_13_violation] */
-            } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0 ) );
+            } while( ( p > pString ) && ( isspace( ( int ) ( *p ) ) != 0U ) );
 
             p[ 1 ] = '\0';
         }
@@ -377,12 +386,13 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString )
         while( ( *pTempString ) != '\0' )
         {
             /* isspace is a standard library function and we cannot control it. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
-            /* coverity[misra_c_2012_rule_10_1_violation] */
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_18_4_violation] */
+            /* MISRA Ref 4.6.1  [Basic numerical type] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+            /* MISRA Ref 21.13.1  [Character representation] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-2113 */
             /* coverity[misra_c_2012_rule_21_13_violation] */
-            if( isspace( ( ( int ) ( *pTempString ) ) ) == 0 )
+            /* coverity[misra_c_2012_directive_4_6_violation] */
+            if( isspace( ( ( int ) ( *pTempString ) ) ) == 0U )
             {
                 p[ ind ] = *pTempString;
                 ind++;
@@ -696,12 +706,10 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
         while( ( *pTempString != '\0' ) )
         {
             /* isdigit is a standard library function and we cannot control it. */
+            /* MISRA Ref 4.6.1  [Basic numerical type] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
             /* coverity[misra_c_2012_directive_4_6_violation] */
-            /* coverity[misra_c_2012_rule_10_1_violation] */
-            /* coverity[misra_c_2012_rule_10_4_violation] */
-            /* coverity[misra_c_2012_rule_18_4_violation] */
-            /* coverity[misra_c_2012_rule_21_13_violation] */
-            if( isdigit( ( ( int ) ( *pTempString ) ) ) == 0 )
+            if( isdigit( ( ( int ) ( *pTempString ) ) ) == 0U )
             {
                 *pResult = false;
             }
@@ -824,34 +832,9 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
     }
     else
     {
-        /* MISRA C 2012 Directive 4.7 � If a function returns error information, then
-         * that error information shall be tested.
-         * MISRA C 2012 Rule 22.8 � The errno variable must be "zero" before calling
-         * strtol function.
-         * MISRA C 2012 Rule 22.9 � The errno must be tested after strtol function is
-         * called.
-         *
-         * The following line violates MISRA rule 4.7 because return value of strtol()
-         * is not checked for error. Also, it violates MISRA rule 22.8 because variable
-         * "errno" is neither used nor initialized to zero before strtol() is called.
-         * It violates MISRA Rule 22.9 because Variable "errno" is not checked for error
-         * after strtol() is called.
-         *
-         * The above three violations are justified because error checking by "errno"
-         * for any POSIX API is not thread safe in FreeRTOS unless "configUSE_POSIX_ERRNO"
-         * is enabled. In order to avoid the dependency on this feature, errno variable
-         * is not used. The function strtol returns LONG_MIN and LONG_MAX in case of
-         * underflow and overflow respectively and sets the errno to ERANGE. It is not
-         * possible to distinguish between valid LONG_MIN and LONG_MAX return values
-         * and underflow and overflow scenarios without checking errno. Therefore, we
-         * cannot check return value of strtol for errors. We ensure that strtol performed
-         * a valid conversion by checking that *pEndPtr is '\0'. strtol stores the address
-         * of the first invalid character in *pEndPtr and therefore, '\0' value of *pEndPtr
-         * means that the complete pToken string passed for conversion was valid and a valid
-         * conversion was performed. */
-        /* coverity[misra_c_2012_directive_4_7_violation] */
+        /* MISRA Ref 22.8.1 [Initialize errno] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-228 */
         /* coverity[misra_c_2012_rule_22_8_violation] */
-        /* coverity[misra_c_2012_rule_22_9_violation] */
         retStrtol = ( int32_t ) strtol( pStr, &pEndStr, base );
 
         /* The return value zero may stand for the failure of strtol. So if the return value
@@ -868,6 +851,12 @@ CellularATError_t Cellular_ATStrtoi( const char * pStr,
         }
     }
 
+    /* MISRA Ref 4.7.1 [Testing errno] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-47 */
+    /* MISRA Ref 22.9.1 [Testing errno] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-229 */
+    /* coverity[need_errno_test] */
+    /* coverity[return_without_test] */
     return atStatus;
 }
 

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface v1.2.0
+ * FreeRTOS-Cellular-Interface v1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -71,7 +71,8 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( optionValueLength == sizeof( uint32_t ) )
         {
-            /* The variable length is checked. */
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
             /* coverity[misra_c_2012_rule_11_3_violation] */
             pTimeoutMs = ( const uint32_t * ) pOptionValue;
             socketHandle->sendTimeoutMs = *pTimeoutMs;
@@ -85,7 +86,8 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( optionValueLength == sizeof( uint32_t ) )
         {
-            /* The variable length is checked. */
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
             /* coverity[misra_c_2012_rule_11_3_violation] */
             pTimeoutMs = ( const uint32_t * ) pOptionValue;
             socketHandle->recvTimeoutMs = *pTimeoutMs;
@@ -112,6 +114,9 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
     {
         if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint16_t ) ) )
         {
+            /* MISRA Ref 11.3 [Misaligned access] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-113 */
+            /* coverity[misra_c_2012_rule_11_3_violation] */
             socketHandle->localPort = *( ( uint16_t * ) pOptionValue );
         }
         else
@@ -344,7 +349,9 @@ CellularError_t Cellular_CommonATCommandRaw( CellularHandle_t cellularHandle,
         atReqGetResult.dataLen = dataLen;
         atReqGetResult.respCallback = responseReceivedCallback;
 
-        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetResult );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext,
+                                                               atReqGetResult,
+                                                               CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
     }
 

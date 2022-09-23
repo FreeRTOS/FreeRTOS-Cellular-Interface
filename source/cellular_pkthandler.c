@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface v1.2.0
+ * FreeRTOS-Cellular-Interface v1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -72,10 +72,10 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
                                                                   uint32_t interDelayMS );
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
-static int _searchCompareFunc( const void * pInputToken,
-                               const void * pBase );
-static int _sortCompareFunc( const void * pElem1Ptr,
-                             const void * pElem2Ptr );
+static int32_t _searchCompareFunc( const void * pInputToken,
+                                   const void * pBase );
+static int32_t _sortCompareFunc( const void * pElem1Ptr,
+                                 const void * pElem2Ptr );
 static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
                                          const char * pInputLine );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
@@ -110,8 +110,6 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
         }
 
         /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
-        /* This is platform dependent api. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
@@ -234,8 +232,6 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         else
         {
             /* Wait for a response. */
-            /* This is platform dependent api. */
-            /* coverity[misra_c_2012_directive_4_6_violation] */
             qRet = xQueueReceive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMS ) );
 
             if( qRet == pdTRUE )
@@ -358,20 +354,10 @@ static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pCon
 
 /*-----------------------------------------------------------*/
 
-/* _searchCompareFunc is returning a variable with "int" data type because
- * this is the Compare function used in bsearch() function.
- * bsearch function syntax mandates the compare function should be of type int.
- * Hence int data type is used instead of typedef datatype. */
-/* coverity[misra_c_2012_directive_4_6_violation] */
-static int _searchCompareFunc( const void * pInputToken,
-                               const void * pBase )
+static int32_t _searchCompareFunc( const void * pInputToken,
+                                   const void * pBase )
 {
-    /* _searchCompareFunc is returning a variable with "int" data type because
-     * this is the Compare function used in bsearch() function.
-     * bsearch function syntax mandates the compare function should be of type int.
-     * Hence int data type is used instead of typedef datatype. */
-    /* coverity[misra_c_2012_directive_4_6_violation] */
-    int compareValue = 0;
+    int32_t compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
     uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
@@ -400,20 +386,10 @@ static int _searchCompareFunc( const void * pInputToken,
 
 /*-----------------------------------------------------------*/
 
-/* _sortCompareFunc is returning a variable with "int" data type because
- * this is the Compare function used in qsort() function.
- * qsort function syntax mandates the compare function should be of type int.
- * Hence int data type is used instead of typedef datatype. */
-/* coverity[misra_c_2012_directive_4_6_violation] */
-static int _sortCompareFunc( const void * pElem1Ptr,
-                             const void * pElem2Ptr )
+static int32_t _sortCompareFunc( const void * pElem1Ptr,
+                                 const void * pElem2Ptr )
 {
-    /* _sortCompareFunc is returning a variable with "int" data type because
-     * this is the Compare function used in qsort() function.
-     * qsort function syntax mandates the compare function should be of type int.
-     * Hence int data type is used instead of typedef datatype. */
-    /* coverity[misra_c_2012_directive_4_6_violation] */
-    int compareValue = 0;
+    int32_t compareValue = 0;
     const CellularAtParseTokenMap_t * pElement1Ptr = ( const CellularAtParseTokenMap_t * ) pElem1Ptr;
     const CellularAtParseTokenMap_t * pElement2Ptr = ( const CellularAtParseTokenMap_t * ) pElem2Ptr;
     uint32_t element1PtrLen = ( uint32_t ) strlen( pElement1Ptr->pStrValue );
@@ -459,13 +435,10 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularAtParseTokenMap_t * pTokenMap = pContext->tokenTable.pCellularUrcHandlerTable;
     uint32_t tokenMapSize = pContext->tokenTable.cellularPrefixToParserMapSize;
+    uint8_t decrementPointer = 0U;
 
-    /* the unspecified behavior, which relates to the treatment of elements that compare as equal,
-     * can be avoided by ensuring that the comparison function never returns 0.
-     * When two elements are otherwise equal, the comparison function could
-     * return a value that indicates their relative order in the initial array.
-     * This the token table must be checked without duplicated string. The return value
-     * is 0 only if the string is exactly the same. */
+    /* MISRA Ref 21.9.1 [Use of bsearch] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-219 */
     /* coverity[misra_c_2012_rule_21_9_violation] */
     pElementPtr = ( CellularAtParseTokenMap_t * ) bsearch( ( const void * ) pTokenPtr,
                                                            ( const void * ) pTokenMap,
@@ -494,11 +467,11 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
         {
             /* pSavePtr != pTokenPtr means the string starts with '+'.
              * Restore string to "+pTokenPtr:pSavePtr" for callback function. */
-            pTokenPtr--;
+            decrementPointer = 1U;
             *( pSavePtr - 1 ) = ':';
         }
 
-        _Cellular_ProcessGenericUrc( pContext, pTokenPtr );
+        _Cellular_ProcessGenericUrc( pContext, pTokenPtr - decrementPointer );
     }
 
     return pktStatus;
@@ -513,7 +486,7 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
         /* Wait for response to finish. */
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         /* This is platform dependent api. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
+
         ( void ) vQueueDelete( pContext->pktRespQueue );
         pContext->pktRespQueue = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
@@ -735,9 +708,6 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Create the response queue which is used to post reponses to the sender. */
-        /* This is platform dependent api. */
-        /* coverity[misra_c_2012_directive_4_6_violation] */
-        /* coverity[misra_c_2012_rule_11_4_violation] */
         pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
 
         if( pContext->pktRespQueue == NULL )
