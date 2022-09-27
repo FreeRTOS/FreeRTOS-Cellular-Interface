@@ -72,8 +72,8 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
                                                                   uint32_t interDelayMS );
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
-static int32_t _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase );
+static int _searchCompareFunc( const void * pInputToken,
+                               const void * pBase );
 static int32_t _sortCompareFunc( const void * pElem1Ptr,
                                  const void * pElem2Ptr );
 static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
@@ -354,10 +354,10 @@ static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pCon
 
 /*-----------------------------------------------------------*/
 
-static int32_t _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase )
+static int _searchCompareFunc( const void * pInputToken,
+                               const void * pBase )
 {
-    int32_t compareValue = 0;
+    int compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
     uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
