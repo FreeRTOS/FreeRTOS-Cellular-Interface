@@ -1126,6 +1126,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
         {
             pContext->pUndefinedRespCBContext = NULL;
         }
+
         PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 

@@ -120,7 +120,7 @@ static int setpktDataPrefixCBReturn = 0;
 static int32_t customCallbackContext = 0;
 
 static commIfRecvType_t testCommIfRecvType = COMM_IF_RECV_NORMAL;
-static char *pCommIntfRecvCustomString = NULL;
+static char * pCommIntfRecvCustomString = NULL;
 
 static bool atCmdStatusUndefindTest = false;
 
@@ -385,8 +385,8 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument )
 }
 
 static CellularCommInterfaceError_t prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
-                                                      void * pUserData,
-                                                      CellularCommInterfaceHandle_t * pCommInterfaceHandle )
+                                                     void * pUserData,
+                                                     CellularCommInterfaceHandle_t * pCommInterfaceHandle )
 {
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
@@ -401,8 +401,8 @@ static CellularCommInterfaceError_t prvCommIntfOpen( CellularCommInterfaceReceiv
 }
 
 static CellularCommInterfaceError_t prvCommIntfOpenCallrecvCallbackNullContext( CellularCommInterfaceReceiveCallback_t receiveCallback,
-                                                                                 void * pUserData,
-                                                                                 CellularCommInterfaceHandle_t * pCommInterfaceHandle )
+                                                                                void * pUserData,
+                                                                                CellularCommInterfaceHandle_t * pCommInterfaceHandle )
 {
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
@@ -428,10 +428,10 @@ static CellularCommInterfaceError_t prvCommIntfClose( CellularCommInterfaceHandl
 }
 
 static CellularCommInterfaceError_t prvCommIntfSend( CellularCommInterfaceHandle_t commInterfaceHandle,
-                                                      const uint8_t * pData,
-                                                      uint32_t dataLength,
-                                                      uint32_t timeoutMilliseconds,
-                                                      uint32_t * pDataSentLength )
+                                                     const uint8_t * pData,
+                                                     uint32_t dataLength,
+                                                     uint32_t timeoutMilliseconds,
+                                                     uint32_t * pDataSentLength )
 {
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
@@ -616,16 +616,18 @@ static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularComm
     {
         *pDataReceivedLength = 0;
     }
+
     return commIntRet;
 }
 
 static CellularCommInterfaceError_t prvCommIntfReceive( CellularCommInterfaceHandle_t commInterfaceHandle,
-                                                         uint8_t * pBuffer,
-                                                         uint32_t bufferLength,
-                                                         uint32_t timeoutMilliseconds,
-                                                         uint32_t * pDataReceivedLength )
+                                                        uint8_t * pBuffer,
+                                                        uint32_t bufferLength,
+                                                        uint32_t timeoutMilliseconds,
+                                                        uint32_t * pDataReceivedLength )
 {
     CellularCommInterfaceError_t commIfRet;
+
     if( testCommIfRecvType == COMM_IF_RECV_CUSTOM_STRING )
     {
         commIfRet = prvCommIntfReceiveCustomString( commInterfaceHandle,
@@ -642,6 +644,7 @@ static CellularCommInterfaceError_t prvCommIntfReceive( CellularCommInterfaceHan
                                               timeoutMilliseconds,
                                               pDataReceivedLength );
     }
+
     return commIfRet;
 }
 
@@ -1434,7 +1437,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback( vo
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
-    pCommIntfRecvCustomString = "OK\r\n"CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n";
+    pCommIntfRecvCustomString = "OK\r\n"CELLULAR_AT_UNDEFINED_STRING_RESP "\r\n";
 
     /* Setup the callback to handle the undefined message. */
     context.undefinedRespCallback = undefinedRespCallback;
@@ -1445,7 +1448,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback( vo
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    threadReturn = true;    /* Set pktio thread return flag. */
+    threadReturn = true; /* Set pktio thread return flag. */
     pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
@@ -1483,7 +1486,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_oka
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
-    pCommIntfRecvCustomString = CELLULAR_AT_UNDEFINED_STRING_RESP"\r\nOK\r\n";
+    pCommIntfRecvCustomString = CELLULAR_AT_UNDEFINED_STRING_RESP "\r\nOK\r\n";
 
     /* Setup the callback to handle the undefined message. */
     context.undefinedRespCallback = undefinedRespCallback;
@@ -1494,7 +1497,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_oka
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    threadReturn = true;    /* Set pktio thread return flag. */
+    threadReturn = true; /* Set pktio thread return flag. */
     pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
@@ -1544,7 +1547,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_fai
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    threadReturn = true;    /* Set pktio thread return flag. */
+    threadReturn = true; /* Set pktio thread return flag. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
@@ -1588,7 +1591,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_no_callback_
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    threadReturn = true;    /* Set pktio thread return flag. */
+    threadReturn = true; /* Set pktio thread return flag. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
