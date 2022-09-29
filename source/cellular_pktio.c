@@ -707,7 +707,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
         {
-            /* This commaned expects raw data to be appended to buffer. Check data
+            /* This command expects raw data to be appended to buffer. Check data
              * prefix first then store the data if this command has data response. */
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_DATA )
