@@ -1115,6 +1115,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
     else
     {
         /* undefinedRespCallback can be set to NULL to unregister the callback. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->undefinedRespCallback = undefinedRespCallback;
 
         if( pContext->undefinedRespCallback != NULL )
@@ -1125,6 +1126,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
         {
             pContext->pUndefinedRespCBContext = NULL;
         }
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;

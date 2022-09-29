@@ -93,7 +93,6 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
     if( ( pBuf != NULL ) )
     {
         pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
-        PlatformMutex_Lock( &pContext->PktRespMutex );
 
         if( pAtResp->status == false )
         {
@@ -115,8 +114,6 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             LogError( ( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" ) );
         }
-
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
     else
     {
@@ -217,12 +214,16 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
     }
     else
     {
-        /* Fill in request info structure. */
-        pContext->pktRespCB = atReq.respCallback;
         LogDebug( ( ">>>>>Start sending [%s]<<<<<", atReq.pAtCmd ) );
+
+        /* Fill in request info structure. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+        pContext->pktRespCB = atReq.respCallback;
         pContext->pPktUsrData = atReq.pData;
         pContext->PktUsrDataLen = ( uint16_t ) atReq.dataLen;
         pContext->pCurrentCmd = atReq.pAtCmd;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         pktStatus = _Cellular_PktioSendAtCmd( pContext, atReq.pAtCmd, atReq.atCmdType, atReq.pAtRspPrefix );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
@@ -252,9 +253,11 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         }
 
         /* No command is waiting response. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
         pContext->pktRespCB = NULL;
         pContext->pCurrentCmd = NULL;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
         LogDebug( ( "<<<<<Exit sending [%s] status[%d]<<<<<", atReq.pAtCmd, pktStatus ) );
     }
 
@@ -281,8 +284,13 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     else
     {
         LogDebug( ( ">>>>>Start sending Data <<<<<" ) );
+
+        /* Send the packet. Data send is regarded as CELLULAR_AT_NO_RESULT. Only
+         * success or error token is expected in the result. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->PktioAtCmdType = CELLULAR_AT_NO_RESULT;
-        /* Send the packet. */
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         *dataReq.pSentDataLength = _Cellular_PktioSendData( pContext, dataReq.pData, dataReq.dataLen );
 
         if( *dataReq.pSentDataLength != dataReq.dataLen )
@@ -298,7 +306,9 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     /* End pattern for specific modem. */
     if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) && ( dataReq.pEndPattern != NULL ) )
     {
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         sendEndPatternLen = _Cellular_PktioSendData( pContext, dataReq.pEndPattern, dataReq.endPatternLen );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( sendEndPatternLen != dataReq.endPatternLen )
         {
@@ -331,7 +341,11 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
             LogError( ( "pkt_recv status=%d, data sending timed out", pktStatus ) );
         }
 
+        /* Set AT command type to CELLULAR_AT_NO_COMMAND for timeout case here. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         LogDebug( ( "<<<<<Exit sending data ret[%d]>>>>>", pktStatus ) );
     }
 
@@ -573,11 +587,21 @@ CellularPktStatus_t _Cellular_AtcmdRequestSuccessToken( CellularContext_t * pCon
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
+
+        /* Set the extra Token table for this AT command. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
+
+        /* Clear the extra Token table for this AT command. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
 
@@ -602,11 +626,21 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( CellularC
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
+
+        /* Set the data receive prefix. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->pktDataPrefixCB = pktDataPrefixCallback;
         pContext->pDataPrefixCBContext = pCallbackContext;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, timeoutMS );
+
+        /* Clear the data receive prefix. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->pktDataPrefixCB = NULL;
         pContext->pDataPrefixCBContext = NULL;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
 
@@ -634,11 +668,20 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
+
+        /* Set the data send prefix callback. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->pktDataSendPrefixCB = pktDataSendPrefixCallback;
         pContext->pDataSendPrefixCBContext = pCallbackContext;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
         pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
+
+        /* Clear the data send prefix callback. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->pDataSendPrefixCBContext = NULL;
         pContext->pktDataSendPrefixCB = NULL;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
@@ -682,11 +725,20 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
     else
     {
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
+
+        /* Set the extra token table. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+
         pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
+
+        /* Clear the extra token table. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = 0;
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = NULL;
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {

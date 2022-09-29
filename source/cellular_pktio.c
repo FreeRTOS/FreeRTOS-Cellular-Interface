@@ -1046,7 +1046,11 @@ static void _pktioReadThread( void * pUserData )
                 /* Keep Reading until there is no more bytes in comm interface. */
                 do
                 {
+                    /* When pktio thread is parsing the response from modem, pktio
+                     * thread holds the PktRespMutex until no RX data from comm interface. */
+                    PlatformMutex_Lock( &pContext->PktRespMutex );
                     bytesRead = _handleRxDataEvent( pContext, &pAtResp );
+                    PlatformMutex_Unlock( &pContext->PktRespMutex );
                 } while( ( bytesRead != 0U ) );
             }
             else
@@ -1205,6 +1209,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
         }
         else
         {
+            PlatformMutex_Lock( &pContext->PktRespMutex );
             pContext->pRespPrefix = pAtRspPrefix;
             pContext->PktioAtCmdType = atType;
             newCmdLen = cmdLen;
@@ -1216,6 +1221,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
             ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf,
                                                 ( const uint8_t * ) &pContext->pktioSendBuf, newCmdLen,
                                                 CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
+            PlatformMutex_Unlock( &pContext->PktRespMutex );
         }
     }
 
@@ -1225,7 +1231,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 /* Sends data to the modem. */
-uint32_t _Cellular_PktioSendData( const CellularContext_t * pContext,
+uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                   const uint8_t * pData,
                                   uint32_t dataLen )
 {
@@ -1245,8 +1251,10 @@ uint32_t _Cellular_PktioSendData( const CellularContext_t * pContext,
     }
     else
     {
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf, pData,
                                             dataLen, CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     LogDebug( ( "PktioSendData sent %d bytes", sentLen ) );

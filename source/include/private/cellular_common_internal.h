@@ -113,8 +113,8 @@ struct CellularContext
     CellularTokenTable_t tokenTable;
 
     /* Packet handler. */
-    PlatformMutex_t pktRequestMutex;
-    PlatformMutex_t PktRespMutex;
+    PlatformMutex_t pktRequestMutex;                               /* The mutex for sending request. */
+    PlatformMutex_t PktRespMutex;                                  /* The mutex for parsing the response from modem. */
     QueueHandle_t pktRespQueue;
     CellularATCommandResponseReceivedCallback_t pktRespCB;
     CellularATCommandDataPrefixCallback_t pktDataPrefixCB;         /* Data prefix callback function for socket receive function. */
