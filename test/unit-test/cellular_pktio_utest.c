@@ -83,6 +83,12 @@ struct _cellularCommContext
     int test3;
 };
 
+typedef enum commIfRecvType
+{
+    COMM_IF_RECV_CUSTOM_STRING,
+    COMM_IF_RECV_NORMAL
+} commIfRecvType_t;
+
 static uint16_t pktioEvtMask = 0x0000U;
 
 static MockPlatformEventGroup_t evtGroup = { 0 };
@@ -112,6 +118,11 @@ static int recvCommFail = 0;
 static int setpktDataPrefixCBReturn = 0;
 
 static int32_t customCallbackContext = 0;
+
+static commIfRecvType_t testCommIfRecvType = COMM_IF_RECV_NORMAL;
+static char *pCommIntfRecvCustomString = NULL;
+
+static bool atCmdStatusUndefindTest = false;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -208,6 +219,9 @@ void setUp()
     setpktDataPrefixCBReturn = 0;
     testInfiniteLoop = 0;
     evtGroupHandle = &evtGroup;
+
+    testCommIfRecvType = COMM_IF_RECV_NORMAL;
+    pCommIntfRecvCustomString = NULL;
 }
 
 /* Called after each test method. */
@@ -231,6 +245,16 @@ int suiteTearDown( int numFailures )
 void dummyDelay( uint32_t milliseconds )
 {
     ( void ) milliseconds;
+}
+
+void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
+{
+    ( void ) pMutex;
+}
+
+void MockPlatformMutex_Lock( PlatformMutex_t * pMutex )
+{
+    ( void ) pMutex;
 }
 
 void * mock_malloc( size_t size )
@@ -360,7 +384,7 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument )
     return threadReturn;
 }
 
-static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
+static CellularCommInterfaceError_t prvCommIntfOpen( CellularCommInterfaceReceiveCallback_t receiveCallback,
                                                       void * pUserData,
                                                       CellularCommInterfaceHandle_t * pCommInterfaceHandle )
 {
@@ -376,7 +400,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpen( CellularCommInterfaceRecei
     return commIntRet;
 }
 
-static CellularCommInterfaceError_t _prvCommIntfOpenCallrecvCallbackNullContext( CellularCommInterfaceReceiveCallback_t receiveCallback,
+static CellularCommInterfaceError_t prvCommIntfOpenCallrecvCallbackNullContext( CellularCommInterfaceReceiveCallback_t receiveCallback,
                                                                                  void * pUserData,
                                                                                  CellularCommInterfaceHandle_t * pCommInterfaceHandle )
 {
@@ -394,7 +418,7 @@ static CellularCommInterfaceError_t _prvCommIntfOpenCallrecvCallbackNullContext(
     return commIntRet;
 }
 
-static CellularCommInterfaceError_t _prvCommIntfClose( CellularCommInterfaceHandle_t commInterfaceHandle )
+static CellularCommInterfaceError_t prvCommIntfClose( CellularCommInterfaceHandle_t commInterfaceHandle )
 {
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
@@ -403,7 +427,7 @@ static CellularCommInterfaceError_t _prvCommIntfClose( CellularCommInterfaceHand
     return commIntRet;
 }
 
-static CellularCommInterfaceError_t _prvCommIntfSend( CellularCommInterfaceHandle_t commInterfaceHandle,
+static CellularCommInterfaceError_t prvCommIntfSend( CellularCommInterfaceHandle_t commInterfaceHandle,
                                                       const uint8_t * pData,
                                                       uint32_t dataLength,
                                                       uint32_t timeoutMilliseconds,
@@ -422,11 +446,11 @@ static CellularCommInterfaceError_t _prvCommIntfSend( CellularCommInterfaceHandl
     return commIntRet;
 }
 
-static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHandle_t commInterfaceHandle,
-                                                         uint8_t * pBuffer,
-                                                         uint32_t bufferLength,
-                                                         uint32_t timeoutMilliseconds,
-                                                         uint32_t * pDataReceivedLength )
+static CellularCommInterfaceError_t prvCommIntfReceiveNormal( CellularCommInterfaceHandle_t commInterfaceHandle,
+                                                              uint8_t * pBuffer,
+                                                              uint32_t bufferLength,
+                                                              uint32_t timeoutMilliseconds,
+                                                              uint32_t * pDataReceivedLength )
 {
     CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
 
@@ -566,12 +590,67 @@ static CellularCommInterfaceError_t _prvCommIntfReceive( CellularCommInterfaceHa
     return commIntRet;
 }
 
+
+static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularCommInterfaceHandle_t commInterfaceHandle,
+                                                                    uint8_t * pBuffer,
+                                                                    uint32_t bufferLength,
+                                                                    uint32_t timeoutMilliseconds,
+                                                                    uint32_t * pDataReceivedLength )
+{
+    CellularCommInterfaceError_t commIntRet = IOT_COMM_INTERFACE_SUCCESS;
+
+    ( void ) commInterfaceHandle;
+    ( void ) pBuffer;
+    ( void ) bufferLength;
+    ( void ) timeoutMilliseconds;
+    ( void ) pDataReceivedLength;
+
+    if( recvCount > 0 )
+    {
+        recvCount--;
+
+        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, strlen( pCommIntfRecvCustomString ) );
+        *pDataReceivedLength = strlen( pCommIntfRecvCustomString );
+    }
+    else
+    {
+        *pDataReceivedLength = 0;
+    }
+    return commIntRet;
+}
+
+static CellularCommInterfaceError_t prvCommIntfReceive( CellularCommInterfaceHandle_t commInterfaceHandle,
+                                                         uint8_t * pBuffer,
+                                                         uint32_t bufferLength,
+                                                         uint32_t timeoutMilliseconds,
+                                                         uint32_t * pDataReceivedLength )
+{
+    CellularCommInterfaceError_t commIfRet;
+    if( testCommIfRecvType == COMM_IF_RECV_CUSTOM_STRING )
+    {
+        commIfRet = prvCommIntfReceiveCustomString( commInterfaceHandle,
+                                                    pBuffer,
+                                                    bufferLength,
+                                                    timeoutMilliseconds,
+                                                    pDataReceivedLength );
+    }
+    else
+    {
+        commIfRet = prvCommIntfReceiveNormal( commInterfaceHandle,
+                                              pBuffer,
+                                              bufferLength,
+                                              timeoutMilliseconds,
+                                              pDataReceivedLength );
+    }
+    return commIfRet;
+}
+
 static CellularCommInterface_t CellularCommInterface =
 {
-    .open  = _prvCommIntfOpen,
-    .send  = _prvCommIntfSend,
-    .recv  = _prvCommIntfReceive,
-    .close = _prvCommIntfClose
+    .open  = prvCommIntfOpen,
+    .send  = prvCommIntfSend,
+    .recv  = prvCommIntfReceive,
+    .close = prvCommIntfClose
 };
 
 static void _shutdownCallback( CellularContext_t * pContext )
@@ -580,6 +659,31 @@ static void _shutdownCallback( CellularContext_t * pContext )
     {
         pContext->bLibShutdown = true;
     }
+}
+
+static CellularPktStatus_t prvUndefinedHandlePacket( CellularContext_t * pContext,
+                                                     _atRespType_t atRespType,
+                                                     const void * pBuf )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    const CellularATCommandResponse_t * pAtResp = NULL;
+
+    switch( atRespType )
+    {
+        case AT_SOLICITED:
+            pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
+            atCmdStatusUndefindTest = pAtResp->status;
+            break;
+
+        case AT_UNSOLICITED:
+            break;
+
+        default:
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+            break;
+    }
+
+    return pktStatus;
 }
 
 CellularPktStatus_t PktioHandlePacketCallback_t( CellularContext_t * pContext,
@@ -822,7 +926,7 @@ void test__Cellular_PktioInit_Thread_Comm_Open_ReceiveCallback_Null_Context_Fail
     context.pPktioShutdownCB = _shutdownCallback;
 
     /* Assign the comm interface to pContext. */
-    commIntf.open = _prvCommIntfOpenCallrecvCallbackNullContext;
+    commIntf.open = prvCommIntfOpenCallrecvCallbackNullContext;
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -1301,6 +1405,195 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_fail( v
 
     /* Verify undefinedRespCallback is called and the expected string is not received. */
     TEST_ASSERT_EQUAL_INT32( 0, customCallbackContext );
+}
+
+/**
+ * @brief Test undefined message callback handling okay in pktio thread when sending AT command.
+ *
+ * The following sequence should have no error :
+ * 1. Sending CELLULAR_AT_NO_RESULT type message ( for example, AT+CFUN=1 )
+ * 2. Receiving "OK\r\n", CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n"
+ * 3. The AT command should success. The UNKNOW_TOKEN should cause a call to undefined callback.
+ * 4. Okay is returned in the undefined response callback.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_RESULT type AT command. */
+    atCmdStatusUndefindTest = false;
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_RESULT;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = "OK\r\n"CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n";
+
+    /* Setup the callback to handle the undefined message. */
+    context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 0;
+    context.pUndefinedRespCBContext = &customCallbackContext;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    threadReturn = true;    /* Set pktio thread return flag. */
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify the command should return success. */
+    TEST_ASSERT_EQUAL( atCmdStatusUndefindTest, true );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 1, customCallbackContext );
+}
+
+/**
+ * @brief Test undefined message callback handling okay in pktio thread when sending AT command.
+ *
+ * The following sequence should have no error :
+ * 1. Sending CELLULAR_AT_NO_RESULT type message ( for example, AT+CFUN=1 )
+ * 2. Receiving CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n", "OK\r\n"
+ * 3. The AT command should success. The UNKNOW_TOKEN should cause a call to undefined callback.
+ * 4. Okay is returned in the undefined response callback.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_okay( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_RESULT type AT command. */
+    atCmdStatusUndefindTest = false;
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_RESULT;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = CELLULAR_AT_UNDEFINED_STRING_RESP"\r\nOK\r\n";
+
+    /* Setup the callback to handle the undefined message. */
+    context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 0;
+    context.pUndefinedRespCBContext = &customCallbackContext;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    threadReturn = true;    /* Set pktio thread return flag. */
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify the command should return success. */
+    TEST_ASSERT_EQUAL( atCmdStatusUndefindTest, true );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 1, customCallbackContext );
+}
+
+/**
+ * @brief Test undefined message callback handling error in pktio thread when sending AT command.
+ *
+ * The following sequence should have no error :
+ * 1. Sending CELLULAR_AT_NO_RESULT type message ( for example, AT+CFUN=1 )
+ * 2. Receiving CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n", "OK\r\n"
+ * 3. The AT command should success. The UNKNOW_TOKEN should cause a call to undefined callback.
+ * 4. Error is returned in the undefined response callback. This would flush the
+ *    pktio read buffer.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_fail( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_RESULT type AT command. */
+    atCmdStatusUndefindTest = false;
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_RESULT;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = "UNKNOWN_UNDEFINED\r\nOK\r\n";
+
+    /* Setup the callback to handle the undefined message. */
+    context.undefinedRespCallback = undefinedRespCallback;
+    customCallbackContext = 1;
+    context.pUndefinedRespCBContext = &customCallbackContext;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    threadReturn = true;    /* Set pktio thread return flag. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify the command should has error. */
+    TEST_ASSERT_EQUAL( atCmdStatusUndefindTest, false );
+
+    /* Verify undefinedRespCallback is called but the expected string is not received. */
+    TEST_ASSERT_EQUAL_INT32( 0, customCallbackContext );
+}
+
+/**
+ * @brief Test undefined message no callback in pktio thread when sending AT command.
+ *
+ * The following sequence should have no error :
+ * 1. Sending CELLULAR_AT_NO_RESULT type message ( for example, AT+CFUN=1 )
+ * 2. Receiving CELLULAR_AT_UNDEFINED_STRING_RESP"\r\n", "OK\r\n"
+ * 3. The AT command should success. The UNKNOW_TOKEN should cause a call to undefined callback.
+ * 4. The command callback won't be called. This would cause a timeout in pkthandler.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_no_callback_fail( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_RESULT type AT command. */
+    atCmdStatusUndefindTest = false;
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_RESULT;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = "UNKNOWN_UNDEFINED\r\nOK\r\n";
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    threadReturn = true;    /* Set pktio thread return flag. */
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify the command should has error. */
+    TEST_ASSERT_EQUAL( atCmdStatusUndefindTest, false );
 }
 
 /**

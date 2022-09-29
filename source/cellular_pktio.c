@@ -240,9 +240,16 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             break;
 
         case CELLULAR_AT_MULTI_DATA_WO_PREFIX:
-        default:
             _saveATData( pLine, pResp );
             pkStatus = CELLULAR_PKT_STATUS_PENDING_BUFFER;
+            break;
+
+        default:
+            /* Unexpected message received when sending the AT command. */
+            LogInfo( ( "Undefind message received %s when sending AT command type %d.",
+                       pLine, atType ) );
+
+            pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
             break;
     }
 
@@ -686,30 +693,36 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         if( pkStatus == CELLULAR_PKT_STATUS_OK )
         {
+            /* This command is completed. Call the user callback to parse the result. */
             if( pContext->pPktioHandlepktCB != NULL )
             {
                 ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
 
+            /* Clean the command type. Further response from cellular modem won't be
+             * regarded as AT_COLICITED response. */
+            pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
+
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
         {
-            /* Check data prefix first then store the data if this command has data response. */
+            /* This commaned expects raw data to be appended to buffer. Check data
+             * prefix first then store the data if this command has data response. */
+        }
+        else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_DATA )
+        {
+            /* The command expects more response line. */
         }
         else
         {
-            if( pkStatus != CELLULAR_PKT_STATUS_PENDING_DATA )
-            {
-                ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
-                pContext->pPktioReadPtr = NULL;
-                FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
-                /* pContext->pCurrentCmd is not NULL since it is a solicited response. */
-                LogError( ( "processLine ERROR, cleaning up! Current command %s", pContext->pCurrentCmd ) );
-            }
+            /* A unexpected message received when sending the AT command.Try to
+             * handle it with undefined response callback. */
+            pContext->recvdMsgType = AT_UNDEFINED;
         }
     }
-    else
+
+    if( pContext->recvdMsgType == AT_UNDEFINED )
     {
         /* Pktio receives AT_UNDEFINED response from modem. This could be module specific
          * response. Cellular module registers the callback function through _Cellular_RegisterUndefinedRespCallback
@@ -724,7 +737,12 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             pContext->pPktioReadPtr = NULL;
             pContext->partialDataRcvdLen = 0;
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
-            pkStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+            pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+        }
+        else
+        {
+            /* The undefined response callback handle this message without problem. */
+            pkStatus = CELLULAR_PKT_STATUS_OK;
         }
     }
 
