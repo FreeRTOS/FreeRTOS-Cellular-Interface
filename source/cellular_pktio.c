@@ -700,7 +700,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             }
 
             /* Clean the command type. Further response from cellular modem won't be
-             * regarded as AT_COLICITED response. */
+             * regarded as AT_SOLICITED response. */
             pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
 
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
