@@ -671,6 +671,8 @@ static CellularPktStatus_t prvUndefinedHandlePacket( CellularContext_t * pContex
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularATCommandResponse_t * pAtResp = NULL;
 
+    ( void ) pContext;
+
     switch( atRespType )
     {
         case AT_SOLICITED:
