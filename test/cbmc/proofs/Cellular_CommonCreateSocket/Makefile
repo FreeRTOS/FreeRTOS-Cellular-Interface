@@ -33,6 +33,7 @@ REMOVE_FUNCTION_BODY += _Cellular_CheckLibraryStatus
 # This value was experimentally chosen to provide 100% coverage
 # without tripping unwinding assertions and without exhausting memory.
 CBMC_MAX_BUFSIZE=15
+CBMC_OBJECT_BITS=9
 
 UNWINDSET += __CPROVER_file_local_cellular_common_c__Cellular_FreeContext.0:$(CBMC_MAX_BUFSIZE)
 UNWINDSET += _Cellular_CreateSocketData.0:$(CBMC_MAX_BUFSIZE)
