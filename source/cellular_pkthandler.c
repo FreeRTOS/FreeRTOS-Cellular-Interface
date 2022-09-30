@@ -308,9 +308,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     /* End pattern for specific modem. */
     if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) && ( dataReq.pEndPattern != NULL ) )
     {
-        PlatformMutex_Lock( &pContext->PktRespMutex );
         sendEndPatternLen = _Cellular_PktioSendData( pContext, dataReq.pEndPattern, dataReq.endPatternLen );
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( sendEndPatternLen != dataReq.endPatternLen )
         {

@@ -609,7 +609,7 @@ static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularComm
     {
         recvCount--;
 
-        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, bufferLength );
+        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, strlen( pCommIntfRecvCustomString ) );
         *pDataReceivedLength = strlen( pCommIntfRecvCustomString );
     }
     else

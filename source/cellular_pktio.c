@@ -735,6 +735,10 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             pContext->recvdMsgType = AT_UNDEFINED;
         }
     }
+    else
+    {
+        /* This is AT_UNDEFINED when not sending the AT command. */
+    }
 
     if( pContext->recvdMsgType == AT_UNDEFINED )
     {
@@ -1254,7 +1258,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
         else
         {
             PlatformMutex_Lock( &pContext->PktRespMutex );
-            strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
+            ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
             pContext->pRespPrefix = pContext->pktRespPrefixBuf;
             pContext->PktioAtCmdType = atType;
             newCmdLen = cmdLen;
