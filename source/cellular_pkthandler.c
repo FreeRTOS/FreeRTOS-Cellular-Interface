@@ -82,7 +82,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
                                                const char * pTokenPtr,
                                                char * pSavePtr );
 static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext,
-                                                    const char *pLine );
+                                                    const char * pLine );
 
 /*-----------------------------------------------------------*/
 
@@ -499,7 +499,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
  * @brief Handle AT_UNDEFINED message type.
  */
 static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext,
-                                                    const char *pLine )
+                                                    const char * pLine )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
@@ -522,6 +522,7 @@ static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext
             pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
         }
     }
+
     return pktStatus;
 }
 

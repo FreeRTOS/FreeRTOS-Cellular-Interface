@@ -65,7 +65,6 @@ static int32_t pktRespCBReturn = 0;
 static bool passCompareString = false;
 static char * pCompareString = NULL;
 static int32_t undefinedCallbackContext = 0;
-static char undefinedCallbackStr[] = CELLULAR_AT_UNDEFINED_STRING_RESP;
 
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );

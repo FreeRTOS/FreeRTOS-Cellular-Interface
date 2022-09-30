@@ -313,7 +313,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
     uint32_t tokenErrorTableSize = 0;
     uint32_t tokenExtraTableSize = 0;
 
-    /* This variable is used in wanring message. */
+    /* This variable is used in warning message. */
     ( void ) pRespPrefix;
 
     /* Lock the response mutex when processing the input line. */
@@ -819,7 +819,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
     CellularATCommandDataSendPrefixCallback_t pktDataSendPrefixCB = NULL;
     void * pDataSendPrefixCBContext = NULL;
 
-    /* Acquire the repsonse lock to keep consistency. */
+    /* Acquire the response lock to keep consistency. */
     PlatformMutex_Lock( &pContext->PktRespMutex );
     pktDataPrefixCB = pContext->pktDataPrefixCB;
     pDataPrefixCBContext = pContext->pDataPrefixCBContext;
