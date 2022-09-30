@@ -135,6 +135,7 @@ struct CellularContext
     char pktioReadBuf[ PKTIO_READ_BUFFER_SIZE + 1 ];
     char * pPktioReadPtr;
     const char * pRespPrefix;
+    char pktRespPrefixBuf[ CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH ];
     CellularATCommandType_t PktioAtCmdType;
     _atRespType_t recvdMsgType;
     CellularUndefinedRespCallback_t undefinedRespCallback;

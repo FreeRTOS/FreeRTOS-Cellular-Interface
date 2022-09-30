@@ -609,7 +609,7 @@ static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularComm
     {
         recvCount--;
 
-        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, strlen( pCommIntfRecvCustomString ) );
+        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, bufferLength );
         *pDataReceivedLength = strlen( pCommIntfRecvCustomString );
     }
     else
@@ -670,22 +670,45 @@ static CellularPktStatus_t prvUndefinedHandlePacket( CellularContext_t * pContex
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularATCommandResponse_t * pAtResp = NULL;
+    char * pLine = NULL;
 
-    ( void ) pContext;
-
-    switch( atRespType )
+    if( pContext != NULL )
     {
-        case AT_SOLICITED:
-            pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
-            atCmdStatusUndefindTest = pAtResp->status;
-            break;
+        switch( atRespType )
+        {
+            case AT_SOLICITED:
+                pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
+                atCmdStatusUndefindTest = pAtResp->status;
+                break;
 
-        case AT_UNSOLICITED:
-            break;
+            case AT_UNSOLICITED:
+                break;
 
-        default:
-            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-            break;
+            default:
+                pLine = ( char * ) pBuf;
+
+                /* undefined message received. Try to handle it with cellular module
+                 * specific handler. */
+                if( pContext->undefinedRespCallback == NULL )
+                {
+                    pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+                }
+                else
+                {
+                    pktStatus = pContext->undefinedRespCallback( pContext->pUndefinedRespCBContext, pLine );
+
+                    if( pktStatus != CELLULAR_PKT_STATUS_OK )
+                    {
+                        pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+                    }
+                }
+
+                break;
+        }
+    }
+    else
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
 
     return pktStatus;
@@ -1370,7 +1393,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_okay( v
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* Verify undefinedRespCallback is called and the expected string is received. */
@@ -1405,7 +1428,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_fail( v
     ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* Verify undefinedRespCallback is called and the expected string is not received. */
@@ -1550,7 +1573,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_callback_fai
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     threadReturn = true; /* Set pktio thread return flag. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* Verify the command should has error. */
@@ -1594,7 +1617,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_SRC_AT_undefined_no_callback_
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     threadReturn = true; /* Set pktio thread return flag. */
-    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* Verify the command should has error. */

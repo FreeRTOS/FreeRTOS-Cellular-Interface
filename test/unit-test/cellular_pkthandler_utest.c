@@ -56,12 +56,16 @@
 #define CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT       "+CPIN:Story for Littel Red Riding Hood: Once upon a time there was a dear little girl who was loved by every one who looked at her, but most of all by her grandmother, and there was nothing that she would not have given to the child. Once she gave her a little cap of red velvet, which suited her so well that she would never wear anything else. So she was always called Little Red Riding Hood."
 #define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE                ( 32U )
 
+#define CELLULAR_AT_UNDEFINED_STRING_RESP               "undefined_string"
+
 static uint16_t queueData = CELLULAR_PKT_STATUS_BAD_PARAM;
 static int32_t queueReturnFail = 0;
 static int32_t queueCreateFail = 0;
 static int32_t pktRespCBReturn = 0;
 static bool passCompareString = false;
 static char * pCompareString = NULL;
+static int32_t undefinedCallbackContext = 0;
+static char undefinedCallbackStr[] = CELLULAR_AT_UNDEFINED_STRING_RESP;
 
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );
@@ -393,6 +397,30 @@ static char * getStringAfterColon( char * pInputStr )
     return ret ? ret + 1 : pInputStr + strlen( pInputStr );
 }
 
+static CellularPktStatus_t undefinedRespCallback( void * pCallbackContext,
+                                                  const char * pLine )
+{
+    CellularPktStatus_t undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+
+    /* Verify pCallbackContext. */
+    TEST_ASSERT_EQUAL_PTR( &undefinedCallbackContext, pCallbackContext );
+
+    /* Verify pLine. */
+    if( strcmp( CELLULAR_AT_UNDEFINED_STRING_RESP, pLine ) == 0 )
+    {
+        *( ( int32_t * ) pCallbackContext ) = 1;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_OK;
+    }
+    else
+    {
+        *( ( int32_t * ) pCallbackContext ) = 0;
+        undefineReturnStatus = CELLULAR_PKT_STATUS_FAILURE;
+    }
+
+    return undefineReturnStatus;
+}
+
+
 /* ========================================================================== */
 
 /**
@@ -651,7 +679,7 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_Less_Than_Urc_Token
 }
 
 /**
- * @brief Test that null buffer AT_UNDEFINED case for _Cellular_HandlePacket.
+ * @brief Test that null buffer invalid message type case for _Cellular_HandlePacket.
  */
 void test__Cellular_HandlePacket_Wrong_RespType( void )
 {
@@ -660,9 +688,90 @@ void test__Cellular_HandlePacket_Wrong_RespType( void )
 
     memset( &context, 0, sizeof( CellularContext_t ) );
 
-    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED, NULL );
+    /* Send invalid message type. */
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED + 1, NULL );
 
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief Test _Cellular_HandlePacket function with AT_UNDEFINED message type.
+ *
+ * AT_UNDEFINED message type is received. A callback function handles the message
+ * without problem. CELLULAR_PKT_STATUS_OK should be returned.
+ */
+void test__Cellular_HandlePacket_AT_UNDEFINED_with_undefined_callback_okay( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char undefinedCallbackStr[] = CELLULAR_AT_UNDEFINED_STRING_RESP;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Set undefined response callback. */
+    undefinedCallbackContext = 0;
+    context.undefinedRespCallback = undefinedRespCallback;
+    context.pUndefinedRespCBContext = &undefinedCallbackContext;
+
+    /* Send AT_UNDEFINED message. */
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED, undefinedCallbackStr );
+
+    /* CELLULAR_PKT_STATUS_OK should be returned, since it is handled. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 1, undefinedCallbackContext );
+}
+
+/**
+ * @brief Test _Cellular_HandlePacket function with AT_UNDEFINED message type.
+ *
+ * AT_UNDEFINED message type is received. A callback function handles the message
+ * but fail to recognized the undefined response. CELLULAR_PKT_STATUS_INVALID_DATA
+ * should be returned.
+ */
+void test__Cellular_HandlePacket_AT_UNDEFINED_with_undefined_callback_fail( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char undefinedCallbackStr[] = "RandomString";
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Set undefined response callback. */
+    undefinedCallbackContext = 1;
+    context.undefinedRespCallback = undefinedRespCallback;
+    context.pUndefinedRespCBContext = &undefinedCallbackContext;
+
+    /* Send AT_UNDEFINED message. */
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED, undefinedCallbackStr );
+
+    /* CELLULAR_PKT_STATUS_INVALID_DATA should be returned. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_DATA, pktStatus );
+
+    /* Verify undefinedRespCallback is called and the expected string is received. */
+    TEST_ASSERT_EQUAL_INT32( 0, undefinedCallbackContext );
+}
+
+/**
+ * @brief Test _Cellular_HandlePacket function with AT_UNDEFINED message type.
+ *
+ * AT_UNDEFINED message type is received. No callback function is registered to handle
+ * the undefined message. CELLULAR_PKT_STATUS_INVALID_DATA should be returned.
+ */
+void test__Cellular_HandlePacket_AT_UNDEFINED_without_undefined_callback( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char undefinedCallbackStr[] = CELLULAR_AT_UNDEFINED_STRING_RESP;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Send AT_UNDEFINED message. */
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED, undefinedCallbackStr );
+
+    /* CELLULAR_PKT_STATUS_INVALID_DATA should be returned. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_INVALID_DATA, pktStatus );
 }
 
 /**
