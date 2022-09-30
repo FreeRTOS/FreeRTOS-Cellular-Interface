@@ -313,6 +313,9 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
     uint32_t tokenErrorTableSize = 0;
     uint32_t tokenExtraTableSize = 0;
 
+    /* This variable is used in wanring message. */
+    ( void ) pRespPrefix;
+
     /* Lock the response mutex when processing the input line. */
     PlatformMutex_Lock( &pContext->PktRespMutex );
 

@@ -81,6 +81,8 @@ static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
                                                const char * pTokenPtr,
                                                char * pSavePtr );
+static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext,
+                                                    const char *pLine );
 
 /*-----------------------------------------------------------*/
 
@@ -493,6 +495,38 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
+/*
+ * @brief Handle AT_UNDEFINED message type.
+ */
+static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext,
+                                                    const char *pLine )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    /* undefined message received. Try to handle it with cellular module
+     * specific handler. */
+    if( pContext->undefinedRespCallback == NULL )
+    {
+        LogError( ( "No undefined callback for AT_UNDEFINED type message %s received.",
+                    atRespType, pLine ) );
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+    }
+    else
+    {
+        pktStatus = pContext->undefinedRespCallback( pContext->pUndefinedRespCBContext, pLine );
+
+        if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        {
+            LogError( ( "undefinedRespCallback returns error %d for AT_UNDEFINED type message %s received.",
+                        pktStatus, atRespType, pLine ) );
+            pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+        }
+    }
+    return pktStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
 {
     if( ( pContext != NULL ) && ( pContext->pktRespQueue != NULL ) )
@@ -514,7 +548,6 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
                                             const void * pBuf )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    char * pLine = NULL;
 
     if( pContext != NULL )
     {
@@ -529,29 +562,8 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
                 break;
 
             case AT_UNDEFINED:
-                /* Handle AT_UNDEFINED message type. */
-                pLine = ( char * ) pBuf;
                 LogInfo( ( "AT_UNDEFINED type message %s received.", atRespType, pLine ) );
-
-                /* undefined message received. Try to handle it with cellular module
-                 * specific handler. */
-                if( pContext->undefinedRespCallback == NULL )
-                {
-                    LogError( ( "No undefined callback for AT_UNDEFINED type message %s received.",
-                                atRespType, pLine ) );
-                    pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                }
-                else
-                {
-                    pktStatus = pContext->undefinedRespCallback( pContext->pUndefinedRespCBContext, pLine );
-
-                    if( pktStatus != CELLULAR_PKT_STATUS_OK )
-                    {
-                        LogError( ( "undefinedRespCallback returns error %d for AT_UNDEFINED type message %s received.",
-                                    pktStatus, atRespType, pLine ) );
-                        pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                    }
-                }
+                pktStatus = _handleUndefinedMessage( pContext, pBuf );
 
                 break;
 
