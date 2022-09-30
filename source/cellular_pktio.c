@@ -1258,8 +1258,15 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
         else
         {
             PlatformMutex_Lock( &pContext->PktRespMutex );
-            ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
-            pContext->pRespPrefix = pContext->pktRespPrefixBuf;
+            if( pAtRspPrefix != NULL )
+            {
+                ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
+                pContext->pRespPrefix = pContext->pktRespPrefixBuf;
+            }
+            else
+            {
+                pContext->pRespPrefix = NULL;
+            }
             pContext->PktioAtCmdType = atType;
             newCmdLen = cmdLen;
             newCmdLen += 1U; /* Include space for \r. */

@@ -2213,6 +2213,34 @@ void test__Cellular_PktioSendAtCmd_Happy_Path( void )
 }
 
 /**
+ * @brief Test that happy path for _Cellular_PktioSendAtCmd.
+ */
+void test__Cellular_PktioSendAtCmd_Happy_Path_No_Prefix( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    struct _cellularCommContext commInterfaceHandle = { 0 };
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "ATE0",
+        CELLULAR_AT_NO_RESULT,
+        NULL,
+        NULL,
+        NULL,
+        0,
+    };
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pCommIntf = pCommIntf;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
  * @brief Test that any NULL parameter for _Cellular_PktioSendData.
  */
 void test__Cellular_PktioSendData_Invalid_Param( void )
