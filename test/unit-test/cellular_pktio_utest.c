@@ -609,7 +609,7 @@ static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularComm
     {
         recvCount--;
 
-        strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, strlen( pCommIntfRecvCustomString ) );
+        ( void ) strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, bufferLength );
         *pDataReceivedLength = strlen( pCommIntfRecvCustomString );
     }
     else
@@ -1939,6 +1939,49 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_URC_TOKEN_STRING_RESP( void )
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test RX data event _handle_data function.
+ *
+ * pktio read thread is in data mode and expects more data to be received. Modem returns
+ * not enough data to pktio. These data will be stored as partial data.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_handle_data( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_RESULT type AT command. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_RESULT;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = "12345";
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Pktio read thread enter data mode by setting dataLength. */
+    context.dataLength = 10;
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    threadReturn = true; /* Set pktio thread return flag. */
+    pktStatus = _Cellular_PktioInit( &context, prvUndefinedHandlePacket );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* Store 5 bytes in the partial data. */
+    TEST_ASSERT_EQUAL_UINT( context.partialDataRcvdLen, 5 );
+
+    /* The data is incomplete. pPktioReadPtr should be the same pktioReadBuf. */
+    TEST_ASSERT_EQUAL( context.pPktioReadPtr, context.pktioReadBuf );
 }
 
 /**
