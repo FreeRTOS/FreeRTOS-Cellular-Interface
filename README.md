@@ -13,7 +13,7 @@
 
 ## Introduction
 
-The FreeRTOS Cellular Interface exposes the capability of a few popular cellular modems through a uniform API. Currently, this repository contains libraries for these three cellular modems.
+The FreeRTOS Cellular Interface exposes the capability of a few popular cellular modems through a uniform API. Currently, this repository supports libraries three cellular modems.
 
 * [Quectel BG96](https://www.quectel.com/product/lte-bg96-cat-m1-nb1-egprs/)
 * [Sierra Wireless HL7802](https://www.sierrawireless.com/products-and-solutions/embedded-solutions/products/hl7802/)
@@ -51,7 +51,6 @@ git clone git@github.com/FreeRTOS/FreeRTOS-Cellular-Interface.git
 At the root of this repository are these folders:
 
 * source : reusable common code that implements the standard AT commands defined by 3GPP TS v27.007.
-* modules : vendor-specific code that implements non-3GPP AT commands for each cellular modem.
 * docs : documentations.
 * test : unit test and cbmc.
 * tools : tools for Coverity static analysis and CMock.
@@ -71,7 +70,7 @@ The FreeRTOS Cellular Interface uses kernel APIs for task synchronization and me
 
 FreeRTOS Cellular Interface now supports AT commands, TCP offloaded Cellular abstraction Layer. In order to add support for a new cellular modem, the developer can use the [common component](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common) that has already implemented the 3GPP standard AT commands.
 
-In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html):
+In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting_module_guide.html):
 
 1. Implement the cellular modem porting interface defined in [cellular_common_portable.h](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common/cellular_common_portable.h) ([Document](https://www.freertos.org/Documentation/api-ref/cellular/cellular__common__portable_8h.html)).
 2. Implement the subset of Cellular Library APIs that use vendor-specific (non-3GPP) AT commands. The APIs to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular/cellular_common__a_p_is.html).
@@ -82,9 +81,9 @@ It is recommended that you start by cloning the implementation of one of the exi
 
  Current Example Implementations:
 
-* [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/bg96)
-* [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/hl7802)
-* [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/sara_r4)
+* [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)
+* [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)
+* [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4)
 
 ## Building Unit Tests
 
