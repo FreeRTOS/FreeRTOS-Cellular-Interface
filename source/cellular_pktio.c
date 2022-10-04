@@ -585,11 +585,9 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
 
     if( bufferEmptyLength > 0 )
     {
-        PlatformMutex_Lock( &pContext->PktRespMutex );
         ( void ) pContext->pCommIntf->recv( pContext->hPktioCommIntf, ( uint8_t * ) pRead,
                                             bufferEmptyLength,
                                             CELLULAR_COMM_IF_RECV_TIMEOUT_MS, &bytesRead );
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( bytesRead > 0U )
         {
@@ -1276,10 +1274,11 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
             ( void ) strncpy( pContext->pktioSendBuf, pAtCmd, cmdLen );
             pContext->pktioSendBuf[ cmdLen ] = '\r';
 
+            PlatformMutex_Unlock( &pContext->PktRespMutex );
+
             ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf,
                                                 ( const uint8_t * ) &pContext->pktioSendBuf, newCmdLen,
                                                 CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
-            PlatformMutex_Unlock( &pContext->PktRespMutex );
         }
     }
 
@@ -1309,10 +1308,8 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
     }
     else
     {
-        PlatformMutex_Lock( &pContext->PktRespMutex );
         ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf, pData,
                                             dataLen, CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     LogDebug( ( "PktioSendData sent %d bytes", sentLen ) );
