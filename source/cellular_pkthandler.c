@@ -770,7 +770,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
         PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->tokenTable.pCellularSrcExtraTokenSuccessTable = pCellularSrcTokenSuccessTable;
         pContext->tokenTable.cellularSrcExtraTokenSuccessTableSize = cellularSrcTokenSuccessTableSize;
-        PlatformMutex_Lock( &pContext->PktRespMutex );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         pktStatus = _Cellular_AtcmdRequestTimeoutWithCallbackRaw( pContext, atReq, atTimeoutMS );
 
