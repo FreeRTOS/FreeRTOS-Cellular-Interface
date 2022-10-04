@@ -983,7 +983,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             bytesRead = bytesRead - 1U;
         }
 
-        /* Preprocess line. Unlock the response mutex since callback function is called. */
+        /* Preprocess line. */
         keepProcess = _preprocessLine( pContext, pTempLine, &bytesRead, &pStartOfData );
 
         if( keepProcess == true )
