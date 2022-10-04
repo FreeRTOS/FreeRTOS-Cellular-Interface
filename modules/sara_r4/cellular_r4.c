@@ -262,7 +262,15 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     uint32_t count = 0;
-
+    CellularAtReq_t atReqGetWoPrefix =
+    {
+        NULL,
+        CELLULAR_AT_WO_PREFIX,
+        NULL,
+        NULL,
+        NULL,
+        0
+    };
     CellularAtReq_t atReqGetNoResult =
     {
         "AT+CFUN=15",
@@ -283,9 +291,9 @@ CellularError_t rebootCellularModem( CellularContext_t * pContext,
     {
         LogInfo( ( "rebootCellularModem: Use ATE0 command to test modem status." ) );
 
-        atReqGetNoResult.pAtCmd = "ATE0";
+        atReqGetWoPrefix.pAtCmd = "ATE0";
 
-        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetNoResult, ENBABLE_MODULE_UE_REBOOT_POLL_TIME );
+        pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqGetWoPrefix, ENBABLE_MODULE_UE_REBOOT_POLL_TIME );
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
         if( cellularStatus == CELLULAR_SUCCESS )

@@ -473,8 +473,8 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
         if( cellularStatus == CELLULAR_SUCCESS )
         {
             Platform_Delay( CELLULAR_HL7802_RESET_DELAY_MS );
-            atReqGetNoResult.pAtCmd = "ATE0";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
+            atReqGetWoPrefix.pAtCmd = "ATE0";
+            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWoPrefix,
                                                             CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
         }
     }
