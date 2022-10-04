@@ -335,6 +335,15 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtReq_t atReqGetWoPrefix =
+    {
+        NULL,
+        CELLULAR_AT_NO_RESULT,
+        NULL,
+        NULL,
+        NULL,
+        0
+    };
     CellularAtReq_t atReqGetNoResult =
     {
         NULL,
@@ -351,8 +360,9 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Disable echo. */
-        atReqGetNoResult.pAtCmd = "ATE0";
-        cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult,
+        atReqGetWoPrefix.pAtCmd = "ATE0";
+        atReqGetWoPrefix.atCmdType = CELLULAR_AT_WO_PREFIX;
+        cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWoPrefix,
                                                         CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
         if( cellularStatus == CELLULAR_SUCCESS )
