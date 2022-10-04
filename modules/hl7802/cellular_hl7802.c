@@ -338,7 +338,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
     CellularAtReq_t atReqGetWoPrefix =
     {
         NULL,
-        CELLULAR_AT_NO_RESULT,
+        CELLULAR_AT_WO_PREFIX,
         NULL,
         NULL,
         NULL,
@@ -361,7 +361,6 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
     {
         /* Disable echo. */
         atReqGetWoPrefix.pAtCmd = "ATE0";
-        atReqGetWoPrefix.atCmdType = CELLULAR_AT_WO_PREFIX;
         cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetWoPrefix,
                                                         CELLULAR_HL7802_AT_TIMEOUT_2_SECONDS_MS );
 
