@@ -771,7 +771,6 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         else
         {
             /* The undefined response callback handle this message without problem. */
-            pkStatus = CELLULAR_PKT_STATUS_OK;
         }
     }
 
