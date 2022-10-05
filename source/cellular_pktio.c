@@ -708,7 +708,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
                 ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
 
-            /* Clean the command type. Further response from cellular modem won't be
+            /* Reset the command type. Further response from cellular modem won't be
              * regarded as AT_SOLICITED response. */
             PlatformMutex_Lock( &pContext->PktRespMutex );
             pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
@@ -752,10 +752,20 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
             LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
                         pLine,
                         ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
+
+            /* Reset the command type. */
+            PlatformMutex_Lock( &pContext->PktRespMutex );
+            pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
+            pContext->pRespPrefix = NULL;
+            PlatformMutex_Unlock( &pContext->PktRespMutex );
+
+            /* Clean the read buffer and read pointer. */
             ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
             pContext->pPktioReadPtr = NULL;
             pContext->partialDataRcvdLen = 0;
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
+
+            /* Return invalid data error code. */
             pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
         }
         else
