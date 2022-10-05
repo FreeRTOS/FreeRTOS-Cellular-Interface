@@ -13,12 +13,6 @@
 
 ## Introduction
 
-The FreeRTOS Cellular Interface exposes the capability of a few popular cellular modems through a uniform API. Currently, this repository supports libraries three cellular modems.
-
-* [Quectel BG96](https://www.quectel.com/product/lte-bg96-cat-m1-nb1-egprs/)
-* [Sierra Wireless HL7802](https://www.sierrawireless.com/iot-modules/lpwa-modules/hl7802/)
-* [U-Blox Sara-R4](https://www.u-blox.com/en/product/sara-r4-series)
-
 The current version of the FreeRTOS Cellular Interface encapsulates the TCP stack offered by those cellular modems.  They all implement the same uniform [Cellular Library API](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/cellular_api.h).  That API hides the complexity of AT commands, and exposes a socket-like interface to C programmers.
 
 Even though applications can choose to use the FreeRTOS Cellular Interface API directly, the API is not designed for such a purpose. In a typical FreeRTOS system, applications use high level libraries, such as the [coreMQTT](https://github.com/FreeRTOS/coreMQTT) library and the [coreHTTP](https://github.com/FreeRTOS/coreHTTP) library, to communicate with other end points. Those high level libraries use an abstract interface, the [Transport Interface](https://github.com/FreeRTOS/coreMQTT/blob/main/source/interface/transport_interface.h), to send and receive data. A Transport Interface can be implemented on top of the FreeRTOS Cellular Interface.
