@@ -42,9 +42,9 @@ Reference @subpage cellular_module_urc_handler for detail information.
 Three cellular module portings can be referenced.<br>
 It is recommended that you start by cloning the implementation of one of the existing modems,<br>
 then make modifications where your modem's vendor-specific (non-3GPP) AT commands are different. <br>
-- <a href="https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-Quectel-BG96">BG96</a>
-- <a href="https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802">HL7802</a>
-- <a href="https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4">SARA R4 series</a>
+- <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96">BG96</a>
+- <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802">HL7802</a>
+- <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4">SARA R4 series</a>
 */
 
 /**

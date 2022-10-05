@@ -19,9 +19,9 @@ This library contains the following three components in three folders.
 Three cellular modules are supported in this library.
 | Cellular module |
 | :--------------------|
-| [Quectel BG96](https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)         |
-| [Sierra HL7802](https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)        |
-| [Ublox SARA R4 series](https://github.com/FreeRTOS/Lab-FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4) |
+| [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)         |
+| [Sierra HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)        |
+| [Ublox SARA R4 series](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4) |
 New cellular module can reference these module porting to be integrated into FreeRTOS Cellular Library.<br>
 Please reference [Porting module Guide](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting_module_guide.html) document for detail information about porting new cellular module.
 - <b>Currently Supported Features in FreeRTOS Cellular Library</b>
