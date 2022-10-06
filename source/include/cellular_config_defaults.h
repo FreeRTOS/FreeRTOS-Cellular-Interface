@@ -388,6 +388,18 @@
 #endif
 
 /**
+ * @brief Cellular AT command response prefix string length.<br>
+ *
+ * The maximum length of AT command response prefix string.
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 32
+ */
+#ifndef CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH
+    #define CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH    ( 32U )
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *
