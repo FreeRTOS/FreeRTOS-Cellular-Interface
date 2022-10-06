@@ -708,13 +708,6 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
                 ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
             }
 
-            /* Reset the command type. Further response from cellular modem won't be
-             * regarded as AT_SOLICITED response. */
-            PlatformMutex_Lock( &pContext->PktRespMutex );
-            pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
-            pContext->pRespPrefix = NULL;
-            PlatformMutex_Unlock( &pContext->PktRespMutex );
-
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
         else if( pkStatus == CELLULAR_PKT_STATUS_PENDING_BUFFER )
