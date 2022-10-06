@@ -29,12 +29,12 @@
     </tr>
     <tr>
         <td>cellular_common.c</td>
-        <td><center>1.8K</center></td>
+        <td><center>1.7K</center></td>
         <td><center>1.5K</center></td>
     </tr>
     <tr>
         <td>cellular_pkthandler.c</td>
-        <td><center>1.7K</center></td>
+        <td><center>1.8K</center></td>
         <td><center>1.6K</center></td>
     </tr>
     <tr>
