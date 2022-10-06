@@ -548,6 +548,8 @@ pktioreadthread
 pktiosendatcmd
 pktiosenddata
 pktioshutdown
+pktrequestmutex
+pktrespmutex
 pktrespqueue
 pktrxcallback
 pktstatus
@@ -800,6 +802,7 @@ technoloyg
 tempvalue
 testindex
 testresultnumber
+threadreturn
 threadroutine
 ticktype
 timeoutatcmddatarecvrequestwithcallback

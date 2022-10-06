@@ -129,7 +129,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
  *
  * @return The data actually send to the comm interface.
  */
-uint32_t _Cellular_PktioSendData( const CellularContext_t * pContext,
+uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                   const uint8_t * pData,
                                   uint32_t dataLen );
 
