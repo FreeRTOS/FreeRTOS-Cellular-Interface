@@ -1436,6 +1436,38 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_fail( v
 }
 
 /**
+ * @brief Test thread receiving rx data event with undefined message type.
+ *
+ * Test pkthandler callback is null case. No error will be returned but the test
+ * case can be observed in coverage report.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_AT_UNDEFINED_callback_null( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_NO_COMMAND resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_NO_COMMAND;
+
+    /* Copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, NULL );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
  * @brief Test undefined message callback handling okay in pktio thread when sending AT command.
  *
  * The following sequence should have no error :
