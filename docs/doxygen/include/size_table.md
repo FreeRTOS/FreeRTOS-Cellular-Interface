@@ -29,7 +29,7 @@
     </tr>
     <tr>
         <td>cellular_common.c</td>
-        <td><center>1.7K</center></td>
+        <td><center>1.8K</center></td>
         <td><center>1.5K</center></td>
     </tr>
     <tr>
@@ -44,7 +44,7 @@
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
-        <td><b><center>14.8K</center></b></td>
+        <td><b><center>14.9K</center></b></td>
         <td><b><center>13.4K</center></b></td>
     </tr>
 </table>
