@@ -13,7 +13,7 @@
 
 ## Introduction
 
-The current version of the FreeRTOS Cellular Interface encapsulates the TCP stack offered by those cellular modems.  They all implement the same uniform [Cellular Library API](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/cellular_api.h).  That API hides the complexity of AT commands, and exposes a socket-like interface to C programmers.
+The Cellular Interface library implement a simple unified [Application Programing Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html) that hide the complexity of AT commands. The cellular modems to be interchangeable with the popular options built upon TCP stack and exposes a socket-like interface to C programmers.
 
 Even though applications can choose to use the FreeRTOS Cellular Interface API directly, the API is not designed for such a purpose. In a typical FreeRTOS system, applications use high level libraries, such as the [coreMQTT](https://github.com/FreeRTOS/coreMQTT) library and the [coreHTTP](https://github.com/FreeRTOS/coreHTTP) library, to communicate with other end points. Those high level libraries use an abstract interface, the [Transport Interface](https://github.com/FreeRTOS/coreMQTT/blob/main/source/interface/transport_interface.h), to send and receive data. A Transport Interface can be implemented on top of the FreeRTOS Cellular Interface.
 
