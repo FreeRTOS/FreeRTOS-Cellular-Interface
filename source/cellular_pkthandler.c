@@ -110,13 +110,6 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
                                              pContext->PktUsrDataLen );
         }
 
-        /* Reset the command type. Further response from cellular modem won't be
-         * regarded as AT command response. */
-        PlatformMutex_Lock( &pContext->PktRespMutex );
-        pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
-        pContext->pRespPrefix = NULL;
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
-
         /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
         if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
         {
