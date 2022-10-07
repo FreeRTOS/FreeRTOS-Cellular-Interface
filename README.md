@@ -7,6 +7,7 @@
     * [Folder Structure](#Folder-Structure)
 * [Integrate FreeRTOS Cellular Interface with MCU platforms](#Integrate-FreeRTOS-Cellular-Interface-with-MCU-platforms)
 * [Adding support for new cellular modems](#Adding-support-for-new-cellular-modems)
+* [Integrate FreeRTOS Cellular Interface with Cellular Modules](#integrate-freertos-cellular-interface-with-cellular-modules)
 * [Building Unit Tests](#Building-Unit-Tests)
 * [Generating documentation](#Generating-documentation)
 * [Contributing](#Contributing)
@@ -78,6 +79,16 @@ It is recommended that you start by cloning the implementation of one of the exi
 * [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)
 * [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)
 * [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4)
+
+## Integrate FreeRTOS Cellular Interface with Cellular Modules
+
+FreeRTOS Cellular Interface provides common interface for modems, but it needs cellular modem to be implemented for different modems. You can follow [Adding support for new cellular modems](#adding-support-for-new-cellular-modems) to add a new cellular modem, or take example implementations (BG96 / HL7802 / Sara-R4) as cellular modem into your project. Follow below steps to integrate FreeRTOS Cellular Interface into your project:
+
+1. Clone this repository into your project.
+2. Clone modem repository or follow [Adding support for new cellular modems](#adding-support-for-new-cellular-modems) to implement your own cellular modem on your project.
+3. Build and execute!
+
+We also provide [Demos for FreeRTOS-Cellular-Interface on Windows simulator](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator) as references for these three example Implementations.
 
 ## Building Unit Tests
 
