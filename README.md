@@ -82,7 +82,7 @@ It is recommended that you start by cloning the implementation of one of the exi
 
 Once comm interface and cellular module implementation are ready, we can start to integrate
 FreeRTOS Cellular Interface. The following diagram depicts the relationship of these software components:
-<p align="center"><img src="./doc/plantuml/images/cellualr_components.png" width="70%"><br>
+<p align="center"><img src="/docs/plantuml/images/cellular_components.png" width="50%"><br>
 
 Follow these steps to integrate FreeRTOS Cellular Interface into your project:
 1. Clone this repository into your project.
@@ -92,7 +92,7 @@ or create your own cellular module implementaion in your project.
 4. Build these software components with your application and execute.
 
 We also provide [Demos for FreeRTOS-Cellular-Interface on Windows simulator](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator)
-as references for these three example Implementations.
+as references for these three cellular modems example implementations.
 
 ## Building Unit Tests
 
