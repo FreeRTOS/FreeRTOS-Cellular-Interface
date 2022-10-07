@@ -48,7 +48,7 @@ At the root of this repository are these folders:
 * test : unit test and cbmc.
 * tools : tools for Coverity static analysis and CMock.
 
-## Integrate FreeRTOS Cellular Interface with MCU platforms
+## Implement Comm Interface with MCU platforms
 
 The FreeRTOS Cellular Interface runs on MCUs.  It uses an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/interface/cellular_comm_interface.h), to communicate with cellular modems. A Comm Interface must be implemented as well on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware, but it can be implemented over other physical interfaces such as SPI as well. The documentation of the Comm Interface is found within the [Cellular API References](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting.html#cellular_porting_comm_if). These are example implementations of the Comm Interface:
 
@@ -78,15 +78,21 @@ It is recommended that you start by cloning the implementation of one of the exi
 * [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)
 * [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4)
 
-## Integrate FreeRTOS Cellular Interface with Cellular Modules
+## Integrate FreeRTOS Cellular Interface with application
 
-FreeRTOS Cellular Interface provides common interface for modems, but it needs cellular modem to be implemented for different modems. You can follow [Adding support for new cellular modems](#adding-support-for-new-cellular-modems) to add a new cellular modem, or take example implementations (BG96 / HL7802 / Sara-R4) as cellular modem into your project. Follow below steps to integrate FreeRTOS Cellular Interface into your project:
+Once comm interface and cellular module implementation are ready, we can start to integrate
+FreeRTOS Cellular Interface. The following diagram depicts the relationship of these software components:
+<p align="center"><img src="./doc/plantuml/images/cellualr_components.png" width="70%"><br>
 
+Follow these steps to integrate FreeRTOS Cellular Interface into your project:
 1. Clone this repository into your project.
-2. Clone modem repository or follow [Adding support for new cellular modems](#adding-support-for-new-cellular-modems) to implement your own cellular modem on your project.
-3. Build and execute!
+2. Clone one of the refenerce cellular module implementations ( BG96 / HL7802 / SARA-R4 )
+or create your own cellular module implementaion in your project.
+3. Implement comm interface.
+4. Build these software components with your application and execute.
 
-We also provide [Demos for FreeRTOS-Cellular-Interface on Windows simulator](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator) as references for these three example Implementations.
+We also provide [Demos for FreeRTOS-Cellular-Interface on Windows simulator](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator)
+as references for these three example Implementations.
 
 ## Building Unit Tests
 
