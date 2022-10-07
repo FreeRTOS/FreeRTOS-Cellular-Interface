@@ -10,19 +10,20 @@ FreeRTOS Cellular Library use communication interface to communicate with cellul
 This library contains the following three components in three folders.
 | FreeRTOS Cellular Library folders | High Level Description |
 | :--------------------| :--------------------- |
-| include              | FreeRTOS Cellular Library APIs definitions help to abstract the control of cellular module. |
-| common               | FreeRTOS Cellular Library APIs implemenation with 3GPP TS v27.007 AT commands. |
-| modules              | FreeRTOS Cellular Library APIs implemenation with cellular module specific AT commands. |
+| source               | Reusable common code that implements the standard AT commands defined by 3GPP TS v27.007. |
+| docs                 | Documentations. |
+| test                 | Unit test and cbmc. |
+| tools                | tools for Coverity static analysis and CMock. |
 
 - <b>Supported cellular modules</b><br>
 Three cellular modules are supported in this library.
 | Cellular module |
 | :--------------------|
-| quectel BG96         |
-| Sierra HL7802        |
-| Ublox SARA R4 series |
+| [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)         |
+| [Sierra HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)        |
+| [Ublox SARA R4 series](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4) |
 New cellular module can reference these module porting to be integrated into FreeRTOS Cellular Library.<br>
-Please reference cellular common library document for detail information about porting new cellular module.
+Please reference [Porting module Guide](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting_module_guide.html) document for detail information about porting new cellular module.
 - <b>Currently Supported Features in FreeRTOS Cellular Library</b>
  - User of FreeRTOS Cellular Library is able to use Cat-M1 cellular technology to connect to network.
  - User of FreeRTOS Cellular Library is able to perform control plane operations like (initialize modem, register on a network etc.) in a vendor agnostic way.

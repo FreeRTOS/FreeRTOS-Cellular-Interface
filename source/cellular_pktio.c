@@ -702,18 +702,18 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         if( pkStatus == CELLULAR_PKT_STATUS_OK )
         {
-            /* This command is completed. Call the user callback to parse the result. */
-            if( pContext->pPktioHandlepktCB != NULL )
-            {
-                ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
-            }
-
             /* Reset the command type. Further response from cellular modem won't be
              * regarded as AT_SOLICITED response. */
             PlatformMutex_Lock( &pContext->PktRespMutex );
             pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
             pContext->pRespPrefix = NULL;
             PlatformMutex_Unlock( &pContext->PktRespMutex );
+
+            /* This command is completed. Call the user callback to parse the result. */
+            if( pContext->pPktioHandlepktCB != NULL )
+            {
+                ( void ) pContext->pPktioHandlepktCB( pContext, AT_SOLICITED, *ppAtResp );
+            }
 
             FREE_AT_RESPONSE_AND_SET_NULL( *ppAtResp );
         }
