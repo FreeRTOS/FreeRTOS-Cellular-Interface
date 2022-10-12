@@ -49,9 +49,10 @@
 
 /*-----------------------------------------------------------*/
 
-#define TEST_CUSTOM_LEADING_CHAR_URC_PREFIX     "TESTURC"
-#define TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD    "testPayload"
-#define TEST_CUSTOM_LEADING_CHAR_URC_STRING     "^"TEST_CUSTOM_LEADING_CHAR_URC_PREFIX ":"TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD
+#define TEST_CUSTOM_LEADING_CHAR_URC_PREFIX            "TESTURC"
+#define TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD           "testPayload"
+#define TEST_CUSTOM_LEADING_CHAR_URC_STRING            "^"TEST_CUSTOM_LEADING_CHAR_URC_PREFIX ":"TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD
+#define TEST_INVALID_CUSTOM_LEADING_CHAR_URC_STRING    "+"TEST_CUSTOM_LEADING_CHAR_URC_PREFIX ":"TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD
 
 /*-----------------------------------------------------------*/
 
@@ -65,6 +66,17 @@ static void prvCustomLeadingCharURCHandler( CellularContext_t * pContext,
     TEST_ASSERT( pContext != NULL );
     TEST_ASSERT( pInputStr != NULL );
     TEST_ASSERT_EQUAL_STRING( TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD, pInputStr );
+    customLeadingCharTestResult = true;
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvInvalidCustomLeadingCharURCHandler( CellularContext_t * pContext,
+                                                   char * pInputStr )
+{
+    TEST_ASSERT( pContext != NULL );
+    TEST_ASSERT( pInputStr != NULL );
+    TEST_ASSERT_EQUAL_STRING( TEST_INVALID_CUSTOM_LEADING_CHAR_URC_STRING, pInputStr );
     customLeadingCharTestResult = true;
 }
 
@@ -192,18 +204,19 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Test CELLULAR_CHECK_IS_URC_LEADING_CHAR.
+ * @brief Test CELLULAR_CHECK_IS_URC_LEADING_CHAR with valid leading char.
  *
  * Cellular interface allows modem porting to override URC leadding char with
  * CELLULAR_CHECK_IS_URC_LEADING_CHAR macros. Input line with custom prefix leading
- * char, for example "^TESTURC:payload", should be handled without problem.
+ * char, for example "^TESTURC:<payload>", should be handled without problem.
  */
-void test__Cellular_HandlePacket_AT_UNSOLICITED_custom_leading_char_happy_paty( void )
+void test__Cellular_HandlePacket_AT_UNSOLICITED_custom_leading_char_happy_path( void )
 {
     CellularContext_t context;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularAtParseTokenMap_t cellularUrcHandlerTable[] =
     {
+        /* Use the URC prefix in the mapping table. */
         { TEST_CUSTOM_LEADING_CHAR_URC_PREFIX, prvCustomLeadingCharURCHandler }
     };
 
@@ -221,6 +234,45 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_custom_leading_char_happy_paty( 
 
     /* Input with custom URC leading char should be handled without problem. */
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, TEST_CUSTOM_LEADING_CHAR_URC_STRING );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* The callback function should be called. The input line will be checked in
+     * callback function. */
+    TEST_ASSERT_EQUAL( customLeadingCharTestResult, true );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Test CELLULAR_CHECK_IS_URC_LEADING_CHAR with invalid custom leading char.
+ *
+ * Input line with invalid leading char is regarded as a URC token. Pkthandler
+ * searches the URC table with the input line instead of URC prefix.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_custom_leading_char_invaild_string( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtParseTokenMap_t cellularUrcHandlerTable[] =
+    {
+        /* Use the URC string instead of the URC prefix in the mapping table. */
+        { TEST_INVALID_CUSTOM_LEADING_CHAR_URC_STRING, prvInvalidCustomLeadingCharURCHandler }
+    };
+
+    /* Clear cellular context. */
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Add a custom leading char URC callback. */
+    context.tokenTable.pCellularUrcHandlerTable = cellularUrcHandlerTable;
+    context.tokenTable.cellularPrefixToParserMapSize = 1;
+
+    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
+
+    /* Reset the callback result. */
+    customLeadingCharTestResult = false;
+
+    /* Input with custom URC leading char should be handled without problem. */
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, TEST_INVALID_CUSTOM_LEADING_CHAR_URC_STRING );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* The callback function should be called. The input line will be checked in
