@@ -49,7 +49,7 @@
 
 /*-----------------------------------------------------------*/
 
-#define TEST_CUSTOM_LEADING_CHAR_URC_PREFIX            "TESTURC"
+#define TEST_CUSTOM_LEADING_CHAR_URC_PREFIX            "TEST_URC"
 #define TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD           "testPayload"
 #define TEST_CUSTOM_LEADING_CHAR_URC_STRING            "^"TEST_CUSTOM_LEADING_CHAR_URC_PREFIX ":"TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD
 #define TEST_INVALID_CUSTOM_LEADING_CHAR_URC_STRING    "+"TEST_CUSTOM_LEADING_CHAR_URC_PREFIX ":"TEST_CUSTOM_LEADING_CHAR_URC_PAYLOAD
@@ -213,7 +213,7 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
  *
  * Cellular interface allows modem porting to override URC leading char with
  * CELLULAR_CHECK_IS_URC_LEADING_CHAR macros. Input line with custom prefix leading
- * char, for example "^TESTURC:<payload>", should be handled without problem.
+ * char, for example "^TEST_URC:<payload>", should be handled without problem.
  */
 void test__Cellular_HandlePacket_AT_UNSOLICITED_custom_leading_char_happy_path( void )
 {
