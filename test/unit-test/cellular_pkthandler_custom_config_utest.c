@@ -125,6 +125,7 @@ QueueHandle_t MockxQueueCreate( int32_t uxQueueLength,
 {
     ( void ) uxQueueLength;
     ( void ) uxItemSize;
+    return NULL;
 }
 
 /*-----------------------------------------------------------*/
@@ -136,6 +137,7 @@ BaseType_t MockxQueueSend( QueueHandle_t queue,
     ( void ) queue;
     ( void ) data;
     ( void ) time;
+    return true;
 }
 
 /*-----------------------------------------------------------*/
@@ -147,6 +149,7 @@ BaseType_t MockxQueueReceive( QueueHandle_t queue,
     ( void ) queue;
     ( void ) data;
     ( void ) time;
+    return pdTRUE;
 }
 
 /*-----------------------------------------------------------*/
@@ -161,6 +164,7 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
 uint16_t MockvQueueDelete( QueueHandle_t queue )
 {
     ( void ) queue;
+    return 0;
 }
 
 /*-----------------------------------------------------------*/
@@ -207,7 +211,7 @@ CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
 /**
  * @brief Test CELLULAR_CHECK_IS_URC_LEADING_CHAR with valid leading char.
  *
- * Cellular interface allows modem porting to override URC leadding char with
+ * Cellular interface allows modem porting to override URC leading char with
  * CELLULAR_CHECK_IS_URC_LEADING_CHAR macros. Input line with custom prefix leading
  * char, for example "^TESTURC:<payload>", should be handled without problem.
  */
