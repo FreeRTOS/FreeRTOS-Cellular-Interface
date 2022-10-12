@@ -7,21 +7,14 @@
     * [Folder Structure](#Folder-Structure)
 * [Integrate FreeRTOS Cellular Interface with MCU platforms](#Integrate-FreeRTOS-Cellular-Interface-with-MCU-platforms)
 * [Adding support for new cellular modems](#Adding-support-for-new-cellular-modems)
+* [Integrate FreeRTOS Cellular Interface with Cellular Modules](#integrate-freertos-cellular-interface-with-cellular-modules)
 * [Building Unit Tests](#Building-Unit-Tests)
 * [Generating documentation](#Generating-documentation)
 * [Contributing](#Contributing)
 
 ## Introduction
 
-The FreeRTOS Cellular Interface exposes the capability of a few popular cellular modems through a uniform API. Currently, this repository contains libraries for these three cellular modems.
-
-* [Quectel BG96](https://www.quectel.com/product/lte-bg96-cat-m1-nb1-egprs/)
-* [Sierra Wireless HL7802](https://www.sierrawireless.com/products-and-solutions/embedded-solutions/products/hl7802/)
-* [U-Blox Sara-R4](https://www.u-blox.com/en/product/sara-r4-series)
-
-The current version of the FreeRTOS Cellular Interface encapsulates the TCP stack offered by those cellular modems.  They all implement the same uniform [Cellular Library API](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/cellular_api.h).  That API hides the complexity of AT commands, and exposes a socket-like interface to C programmers.
-
-Even though applications can choose to use the FreeRTOS Cellular Interface API directly, the API is not designed for such a purpose. In a typical FreeRTOS system, applications use high level libraries, such as the [coreMQTT](https://github.com/FreeRTOS/coreMQTT) library and the [coreHTTP](https://github.com/FreeRTOS/coreHTTP) library, to communicate with other end points. Those high level libraries use an abstract interface, the [Transport Interface](https://github.com/FreeRTOS/coreMQTT/blob/main/source/interface/transport_interface.h), to send and receive data. A Transport Interface can be implemented on top of the FreeRTOS Cellular Interface.
+The Cellular Interface library implement a simple unified [Application Programing Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html) that hide the complexity of AT commands. The cellular modems to be interchangeable with the popular options built upon TCP stack and exposes a socket-like interface to C programmers.
 
 Most cellular modems implement more or less the AT commands defined by the [3GPP TS v27.007](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=1515) standard. This project provides an implementation of such standard AT commands in a [reusable common component](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common). The three Cellular libraries in this project all take advantage of that common code. The library for each modem only implements the vendor-specific AT commands, then exposes the complete Cellular API.
 
@@ -51,12 +44,11 @@ git clone git@github.com/FreeRTOS/FreeRTOS-Cellular-Interface.git
 At the root of this repository are these folders:
 
 * source : reusable common code that implements the standard AT commands defined by 3GPP TS v27.007.
-* modules : vendor-specific code that implements non-3GPP AT commands for each cellular modem.
 * docs : documentations.
 * test : unit test and cbmc.
 * tools : tools for Coverity static analysis and CMock.
 
-## Integrate FreeRTOS Cellular Interface with MCU platforms
+## Implement Comm Interface with MCU platforms
 
 The FreeRTOS Cellular Interface runs on MCUs.  It uses an abstracted interface - the [Comm Interface](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/interface/cellular_comm_interface.h), to communicate with cellular modems. A Comm Interface must be implemented as well on the MCU platform.  The most common implementations of the Comm Interface are over UART hardware, but it can be implemented over other physical interfaces such as SPI as well. The documentation of the Comm Interface is found within the [Cellular API References](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting.html#cellular_porting_comm_if). These are example implementations of the Comm Interface:
 
@@ -71,7 +63,7 @@ The FreeRTOS Cellular Interface uses kernel APIs for task synchronization and me
 
 FreeRTOS Cellular Interface now supports AT commands, TCP offloaded Cellular abstraction Layer. In order to add support for a new cellular modem, the developer can use the [common component](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common) that has already implemented the 3GPP standard AT commands.
 
-In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular_common/index.html):
+In order to port the [common component](https://www.freertos.org/Documentation/api-ref/cellular/cellular_porting_module_guide.html):
 
 1. Implement the cellular modem porting interface defined in [cellular_common_portable.h](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common/cellular_common_portable.h) ([Document](https://www.freertos.org/Documentation/api-ref/cellular/cellular__common__portable_8h.html)).
 2. Implement the subset of Cellular Library APIs that use vendor-specific (non-3GPP) AT commands. The APIs to be implemented are the ones not marked with an "o" in [this table](https://www.freertos.org/Documentation/api-ref/cellular/cellular_common__a_p_is.html).
@@ -82,9 +74,25 @@ It is recommended that you start by cloning the implementation of one of the exi
 
  Current Example Implementations:
 
-* [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/bg96)
-* [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/hl7802)
-* [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/modules/sara_r4)
+* [Quectel BG96](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96)
+* [Sierra Wireless HL7802](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802)
+* [U-Blox Sara-R4](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4)
+
+## Integrate FreeRTOS Cellular Interface with application
+
+Once comm interface and cellular module implementation are ready, we can start to integrate
+FreeRTOS Cellular Interface. The following diagram depicts the relationship of these software components:
+<p align="center"><img src="/docs/plantuml/images/cellular_components.svg" width="50%"><br>
+
+Follow these steps to integrate FreeRTOS Cellular Interface into your project:
+1. Clone this repository into your project.
+2. Clone one of the refenerce cellular module implementations ( BG96 / HL7802 / SARA-R4 )
+or create your own cellular module implementaion in your project.
+3. Implement comm interface.
+4. Build these software components with your application and execute.
+
+We also provide [Demos for FreeRTOS-Cellular-Interface on Windows simulator](https://github.com/FreeRTOS/FreeRTOS/tree/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator)
+as references for these three cellular modems example implementations.
 
 ## Building Unit Tests
 

@@ -150,6 +150,7 @@ closedcallback
 cmakelists
 cmd
 cmdbuf
+cmock
 com
 comm
 commad

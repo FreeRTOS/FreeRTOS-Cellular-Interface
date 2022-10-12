@@ -1,6 +1,3 @@
 [submodule "test/unit-test/CMock"]
 	path = test/unit-test/CMock
 	url = https://github.com/ThrowTheSwitch/CMock
-[submodule "modules/ThirdParty/Community-Supported-Ports"]
-	path = modules/ThirdParty/Community-Supported-Ports
-	url = https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Community-Supported-Ports
