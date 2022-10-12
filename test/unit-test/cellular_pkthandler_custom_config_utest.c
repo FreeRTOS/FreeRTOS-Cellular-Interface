@@ -99,6 +99,7 @@ void dummyDelay( uint32_t milliseconds )
 bool MockPlatformMutex_Create( PlatformMutex_t * pNewMutex,
                                bool recursive )
 {
+    ( void ) pNewMutex;
     ( void ) recursive;
     return true;
 }
