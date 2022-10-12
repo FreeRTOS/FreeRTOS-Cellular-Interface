@@ -55,6 +55,13 @@
     #define strtok_r    strtok_s
 #endif
 
+/* Cellular interface requires URC with prefix starts with "+". Some cellular modem
+ * uses different leading char. This macro can be defined in cellular_config.h to
+ * support different leading char. */
+#ifndef CELLULAR_CHECK_IS_URC_LEADING_CHAR
+    #define CELLULAR_CHECK_IS_URC_LEADING_CHAR( x )    ( ( x ) == '+' )
+#endif
+
 /*-----------------------------------------------------------*/
 
 static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pContext,
@@ -143,7 +150,7 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
      * byte. Use that string to pass to strtok and retrieve the token. Once the
      * token use is retrieved, get the function handler map and call that
      * function. */
-    if( *pSavePtr == '+' )
+    if( CELLULAR_CHECK_IS_URC_LEADING_CHAR( *pSavePtr ) )
     {
         pSavePtr++;
         pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );

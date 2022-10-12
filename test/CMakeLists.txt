@@ -53,7 +53,11 @@ add_library( coverity_analysis
 target_compile_definitions( coverity_analysis PUBLIC CELLULAR_DO_NOT_USE_CUSTOM_CONFIG=1 )
 
 # Cellular include path.
-target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} ${CELLULAR_INTERFACE_INCLUDE_DIRS} ${CELLULAR_TEST_DIRS})
+target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS}
+                                                     ${CELLULAR_INCLUDE_DIRS}
+                                                     ${CELLULAR_INTERFACE_INCLUDE_DIRS}
+                                                     ${CELLULAR_TEST_DIRS}
+                                                     ${CELLULAR_TEST_DIRS}/include/config )
 
 # Cellular private include path.
 target_include_directories( coverity_analysis PRIVATE ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS} )

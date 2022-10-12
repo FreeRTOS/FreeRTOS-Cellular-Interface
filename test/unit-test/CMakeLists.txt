@@ -14,6 +14,7 @@ list(APPEND mock_list
 # list the directories your mocks need
 list(APPEND mock_include_list
             .
+            ${CMAKE_CURRENT_LIST_DIR}/include/config
             ${CMAKE_CURRENT_LIST_DIR}/logging
             ${CELLULAR_COMMON_INCLUDE_DIRS}
             ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
@@ -39,6 +40,7 @@ list(APPEND real_source_files
 # list the directories the module under test includes
 list(APPEND real_include_directories
             .
+            ${CMAKE_CURRENT_LIST_DIR}/include/config
             ${CMAKE_CURRENT_LIST_DIR}/logging
             ${CELLULAR_INCLUDE_DIRS}
             ${CELLULAR_INTERFACE_INCLUDE_DIRS}
@@ -82,6 +84,50 @@ list(APPEND utest_link_list
 list(APPEND utest_dep_list
             ${real_name}
         )
+
+set(pkthandler_custom_config_real_name "${project_name}_pkthandler_custom_config_real")
+
+list(APPEND pkthandler_custom_config_real_include_directories
+            .
+            ${CMAKE_CURRENT_LIST_DIR}/include/pkthandler_custom_config
+            ${CMAKE_CURRENT_LIST_DIR}/logging
+            ${CELLULAR_INCLUDE_DIRS}
+            ${CELLULAR_INTERFACE_INCLUDE_DIRS}
+            ${CELLULAR_COMMON_INCLUDE_DIRS}
+            ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
+        )
+
+create_real_library(${pkthandler_custom_config_real_name}
+                    "${real_source_files}"
+                    "${pkthandler_custom_config_real_include_directories}"
+                    "${mock_name}"
+        )
+
+list(APPEND pkthandler_custom_config_utest_link_list
+            -l${mock_name}
+            lib${pkthandler_custom_config_real_name}.a
+        )
+
+list(APPEND pkthandler_custom_config_utest_dep_list
+            ${pkthandler_custom_config_real_name}
+        )
+
+list(APPEND pkthandler_custom_config_test_include_directories
+            .
+            ${CMAKE_CURRENT_LIST_DIR}/include/pkthandler_custom_config
+            ${CELLULAR_INCLUDE_DIRS}
+            ${CELLULAR_COMMON_INCLUDE_DIRS}
+            ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS}
+            ${CELLULAR_INTERFACE_INCLUDE_DIRS}
+        )
+
+create_test("${project_name}_pkthandler_custom_config_utest"
+            "${project_name}_pkthandler_custom_config_utest.c"
+            "${pkthandler_custom_config_utest_link_list}"
+            "${pkthandler_custom_config_utest_dep_list}"
+            "${pkthandler_custom_config_test_include_directories}"
+        )
+
 
 set(utest_name "${project_name}_pkthandler_utest")
 set(utest_source "${project_name}_pkthandler_utest.c")
