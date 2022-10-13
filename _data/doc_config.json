@@ -1,0 +1,9 @@
+{
+  "name": "FreeRTOS-Cellular-Interface",
+  "releases": [
+    "v0.0.1"
+  ],
+  "branches": [
+    "main"
+  ]
+}
