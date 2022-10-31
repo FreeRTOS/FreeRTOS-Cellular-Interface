@@ -408,6 +408,7 @@ memorystatus
 metadata
 min
 misra
+mit
 mnc
 mno
 modelid
@@ -770,6 +771,7 @@ sockettype
 sockindex
 sortcomparefunc
 sp
+spdx
 spi
 src
 stacksize
