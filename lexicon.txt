@@ -467,7 +467,7 @@ parsetimezoneinfo
 parseyearmonthdayincclkresponse
 partialdata
 partialdatarcvdlen
-passcomparestring 
+passcomparestring
 patbuf
 patcmd
 patcommandpayload
