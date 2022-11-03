@@ -325,6 +325,34 @@ uint16_t MockvQueueDelete( QueueHandle_t queue )
     return 1;
 }
 
+CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
+                                              bool * pResult )
+{
+    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
+
+    TEST_ASSERT( pString != NULL );
+    TEST_ASSERT( pResult != NULL );
+
+    if( strcmp( pString, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP ) == 0 )
+    {
+        *pResult = true;
+    }
+    else if( strcmp( pString, CELLULAR_PLUS_TOKEN_ONLY_STRING ) == 0 )
+    {
+        *pResult = true;
+    }
+    else if( strcmp( pString, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS ) == 0 )
+    {
+        *pResult = true;
+    }
+    else
+    {
+        *pResult = false;
+    }
+
+    return atStatus;
+}
+
 CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
                                                      const char * pSrc,
                                                      int cmock_num_calls )

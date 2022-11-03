@@ -38,6 +38,10 @@ Reference @subpage cellular_module_api for detail information.
 Reference @subpage cellular_module_urc_handler for detail information.
 -# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
 
+<b>Customization config for module porting</b>
+ - <b>Customize config for URC strings</b>
+Reference @subpage cellular_urc_customize_config to customize cellular common to support modem specific URC string format.
+
 <b>Cellular module porting examples</b><br>
 Three cellular module portings can be referenced.<br>
 It is recommended that you start by cloning the implementation of one of the existing modems,<br>
@@ -167,8 +171,10 @@ They can be used to reduce porting effort. <br>
 @page cellular_module_urc_handler cellular_module_urc_handler
 @brief Implement URC handler to handle URC event and call the corresponding callback function. <br>
 - @ref CellularTokenTable_t.pCellularUrcHandlerTable : URC handler table of @ref CellularAtParseTokenHandler_t
-- @ref CellularTokenTable_t.cellularPrefixToParserMapSize
-Example URC handler table.
+- @ref CellularTokenTable_t.cellularPrefixToParserMapSize : The size of the URC handler table
+<br>
+
+<b>Example URC handler table</b>:
 ```
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
@@ -179,7 +185,42 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 }
 uint32_t CellularUrcHandlerTableSize = 4;
 ```
+<br>
+There are two types of URC strings can be handled with this table:
+- <b>URC with prefix</b><br>
+This type of URC string is of the following format:<br>
+> <b>\<URC_leading_char\>\<URC_prefix\>":"\<URC_payload\></b><br>
+The logic to check the URC prefix can be referenced in @ref Cellular_ATIsPrefixPresent<br>
+Example of URC with prefix: <b>"+CREG:2,0"</b><br>
+In this example, <br>
+<b>URC_leading_char</b> is "+"<br>
+<b>URC_prefix</b> is "CREG"<br>
+<b>URC_payload</b> is "2,0"<br>
+The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with 
+parameter <b>pInputStr</b> point to string URC_payload, <b>"2,0"</b> in this example.
+> The default prefix leading char can be referenced in this config @ref CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR.<br>
+> The default valid prefix string chars can be refernced in this config @ref CELLULAR_CHECK_IS_PREFIX_CHAR.<br>
+> Reference @subpage cellular_prefix_string_customize_config for more information.
+
+- <b>URC without prefix</b><br>
+This type of URC string is of fixed format.<br>
+Example of URC without prefix : <b>"NORMAL POWER DOWN"</b><br>
+The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with 
+parameter <b>pInputStr</b> point to URC string, <b>"NORMAL POWER DOWN"</b> in this example.
+<br>
+
 @image html cellular_URC_handler_implementation.png width=80%
+*/
+
+/**
+@page cellular_prefix_string_customize_config Customization config for prefix string.
+@brief The config can be redefined in cellular_config.h to support different modem prefix string format. <br>
+
+@section CELLULAR_CHECK_IS_PREFIX_CHAR
+@copydoc CELLULAR_CHECK_IS_PREFIX_CHAR
+
+@section CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
+@copydoc CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
 */
 
 /**
