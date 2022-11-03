@@ -528,6 +528,7 @@ phexdata
 pinputbuf
 pinputline
 pinputptr
+pinputstr
 pitm
 pkio
 pkt
