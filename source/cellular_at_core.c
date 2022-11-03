@@ -131,10 +131,8 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
         }
         else
         {
-            /* There should be only '+', '_', characters or digit before seperator.
-             * The leading char is checked before. Move the pointer forward by one char.
-             */
-            for( ptrChar = ( char * ) ( &pString[ 1 ] ); ptrChar < ptrPrefixChar; ptrChar++ )
+            /* There should be only '+', '_', characters or digit before seperator. */
+            for( ptrChar = ( char * ) pString; ptrChar < ptrPrefixChar; ptrChar++ )
             {
                 /* It's caused by stanard api isalpha and isdigit. */
                 /* MISRA Ref 4.6.1  [Basic numerical type] */

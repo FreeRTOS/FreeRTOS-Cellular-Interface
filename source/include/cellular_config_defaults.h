@@ -409,7 +409,7 @@
  *
  * For example:
  * > +APP PDP: 0,ACTIVE<br>
- * The prefix string contians space which is not default valid char. User can define
+ * The prefix string contains space which is not default valid char. User can define
  * this config to support this prefix string.
  */
 #ifndef CELLULAR_CHECK_IS_PREFIX_CHAR
@@ -430,7 +430,7 @@
  *
  * For example:
  * > ^SMSO:(list of supported<fso>s)<br>
- * The prefix string contains <b>"^"</b> which is not defalut leading char for prefix
+ * The prefix string contains <b>"^"</b> which is not default leading char for prefix
  * string. User can define this config to support this prefix string.string.
  */
 #ifndef CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR

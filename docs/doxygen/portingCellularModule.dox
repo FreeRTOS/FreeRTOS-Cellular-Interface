@@ -38,10 +38,6 @@ Reference @subpage cellular_module_api for detail information.
 Reference @subpage cellular_module_urc_handler for detail information.
 -# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
 
-<b>Customization config for module porting</b>
- - <b>Customize config for URC strings</b>
-Reference @subpage cellular_urc_customize_config to customize cellular common to support modem specific URC string format.
-
 <b>Cellular module porting examples</b><br>
 Three cellular module portings can be referenced.<br>
 It is recommended that you start by cloning the implementation of one of the existing modems,<br>
@@ -196,17 +192,17 @@ In this example, <br>
 <b>URC_leading_char</b> is "+"<br>
 <b>URC_prefix</b> is "CREG"<br>
 <b>URC_payload</b> is "2,0"<br>
-The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with 
-parameter <b>pInputStr</b> point to string URC_payload, <b>"2,0"</b> in this example.
+The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with
+ parameter <b>pInputStr</b> point to string URC_payload, <b>"2,0"</b> in this example.
 > The default prefix leading char can be referenced in this config @ref CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR.<br>
-> The default valid prefix string chars can be refernced in this config @ref CELLULAR_CHECK_IS_PREFIX_CHAR.<br>
+> The default valid prefix string chars can be referenced in this config @ref CELLULAR_CHECK_IS_PREFIX_CHAR.<br>
 > Reference @subpage cellular_prefix_string_customize_config for more information.
 
 - <b>URC without prefix</b><br>
 This type of URC string is of fixed format.<br>
 Example of URC without prefix : <b>"NORMAL POWER DOWN"</b><br>
-The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with 
-parameter <b>pInputStr</b> point to URC string, <b>"NORMAL POWER DOWN"</b> in this example.
+The URC callback function, @ref CellularAtParseTokenHandler_t, will be called with
+ parameter <b>pInputStr</b> point to URC string, <b>"NORMAL POWER DOWN"</b> in this example.
 <br>
 
 @image html cellular_URC_handler_implementation.png width=80%

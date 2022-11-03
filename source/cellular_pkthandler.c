@@ -131,7 +131,6 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
                                           char * pInputLine )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
     bool inputWithPrefix = false;
 
     /* pInputLine = "+" pTokenPtr + ":" + pSavePtr.
@@ -140,17 +139,13 @@ static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
 
     LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
 
-    /* Check if prefix exist in the input string. */
-    atStatus = Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
+    /* Check if prefix exist in the input string. The pInputLine is checked in _processUrcPacket. */
+    ( void ) Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
 
-    if( atStatus != CELLULAR_AT_SUCCESS )
-    {
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else if( inputWithPrefix == true )
+    if( inputWithPrefix == true )
     {
         /* Cellular_ATIsPrefixPresent check the prefix string is valid and start with
-         * leadding char. ":" is also checked in Cellular_ATIsPrefixPresent. Remove
+         * leading char. ":" is also checked in Cellular_ATIsPrefixPresent. Remove
          * the leading char and split the string. */
         pSavePtr++;
         pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );

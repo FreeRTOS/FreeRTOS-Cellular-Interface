@@ -292,6 +292,7 @@ firmwareversion
 freertos
 freertosconfig
 fucntion
+fso
 functionpointers
 fw
 gcc
@@ -749,6 +750,7 @@ simcardstate
 simlockstate
 sinr
 sms
+smso
 snprintf
 socketclose
 socketconnect
