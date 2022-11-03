@@ -467,6 +467,7 @@ parsetimezoneinfo
 parseyearmonthdayincclkresponse
 partialdata
 partialdatarcvdlen
+passcomparestring 
 patbuf
 patcmd
 patcommandpayload
@@ -494,6 +495,7 @@ pcomminterface
 pcomminterfacehandle
 pcommintf
 pcontext
+pcomparestring
 pcurrentcmd
 pcwriteto
 pdata
