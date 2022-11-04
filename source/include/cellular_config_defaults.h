@@ -434,8 +434,8 @@
     #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar )                    \
     ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( inputChar ) != '_' ) ) && \
-      ( CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( inputChar ) )
+      ( ( inputChar ) != '_' ) &&                                         \
+      ( !( CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( inputChar ) ) ) )
 #endif
 
 /**
