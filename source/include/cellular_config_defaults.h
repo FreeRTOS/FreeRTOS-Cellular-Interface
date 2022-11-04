@@ -400,6 +400,24 @@
 #endif
 
 /**
+ * @brief Macro to check prefix leading char.<br>
+ *
+ * Cellular interface requires prefix string starts with "+". Some cellular modem
+ * uses different leading char. This macro can be defined in cellular_config.h to
+ * support different leading char.<br>
+ *
+ * <b>Default value (if undefined):</b> '+'
+ *
+ * For example:
+ * > ^SMSO:(list of supported<fso>s)<br>
+ * The prefix string contains <b>"^"</b> which is not default leading char for prefix
+ * string. User can define this config to support this prefix string.
+ */
+#ifndef CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
+    #define CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( x )    ( ( x ) == '+' )
+#endif
+
+/**
  * @brief Macro to check prefix chars.<br>
  *
  * The macro to check prefix string contains valid char. Modem with different prefix
@@ -416,25 +434,8 @@
     #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar )                    \
     ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
       ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
-#endif
-
-/**
- * @brief Macro to check prefix leading char.<br>
- *
- * Cellular interface requires prefix string starts with "+". Some cellular modem
- * uses different leading char. This macro can be defined in cellular_config.h to
- * support different leading char.<br>
- *
- * <b>Default value (if undefined):</b> '+'
- *
- * For example:
- * > ^SMSO:(list of supported<fso>s)<br>
- * The prefix string contains <b>"^"</b> which is not default leading char for prefix
- * string. User can define this config to support this prefix string.string.
- */
-#ifndef CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
-    #define CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( x )    ( ( x ) == '+' )
+      ( ( inputChar ) != '_' ) ) && \
+      ( CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( inputChar ) )
 #endif
 
 /**
