@@ -1,7 +1,15 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.3.1 (November 2022)
+### Updates
+ - [#116](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/116) Added a SPDX identifier to the library.
+
+
 ## v1.3.0 (October 2022)
 ### Updates
+ - [#113](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/113) Reset AT command type before calling callback.
+ - [#110](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/110) Handle undefined message when sending AT command.
+ - [#108](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/108) Update compare function return value.
  - [#102](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/102) MISRA C:2012 Compliance update.
  - [#101](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/101) Add Cellular common AT command timeout.
  - [#99](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/99) CBMC Starter kit update.

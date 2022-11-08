@@ -23,7 +23,7 @@ The common component that implements the 3GPP TS v27.007 standard has been writt
 * GNU Complexity scores are not over 8.
 * MISRA coding standard. Any deviations from the MISRA C:2012 guidelines are documented in source code comments marked by "`coverity`".
 
-**FreeRTOS Cellular Interface v1.3.0 [source code](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/v1.3.0/source) is part of the [FreeRTOS 202210.00 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202210.00-LTS) release.**
+**FreeRTOS Cellular Interface v1.3.1 [source code](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/v1.3.1/source) is part of the [FreeRTOS 202210.01 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202210.01-LTS) release.**
 
 ## Getting Started
 
