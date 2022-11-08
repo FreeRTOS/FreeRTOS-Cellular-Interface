@@ -167,6 +167,11 @@
  */
 #define CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT             "*CPIN:READY"
 
+/**
+ * @brief Cellular sample prefix string with invalid prefix char.
+ */
+#define CELLULAR_SAMPLE_PREFIX_STRING_INVALID_PREFIX_CHAR          "+*CPIN:READY"
+
 static int mallocAllocFail = 0;
 
 /* ============================   UNITY FIXTURES ============================ */
@@ -1051,6 +1056,20 @@ void test_Cellular_ATIsPrefixPresent_Wrong_Prefix( void )
     bool Result;
 
     strcpy( pString, CELLULAR_SAMPLE_PREFIX_STRING_STAR_FIRST_INPUT );
+    cellularStatus = Cellular_ATIsPrefixPresent( pString, &Result );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( false, Result );
+}
+
+/**
+ * @brief Test the string with wrong prefix case for Cellular_ATIsPrefixPresent to return CELLULAR_AT_BAD_PARAMETER.
+ */
+void test_Cellular_ATIsPrefixPresent_Invalid_Prefix_Char( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    char pString[] = CELLULAR_SAMPLE_PREFIX_STRING_INVALID_PREFIX_CHAR;
+    bool Result;
+
     cellularStatus = Cellular_ATIsPrefixPresent( pString, &Result );
     TEST_ASSERT_EQUAL( CELLULAR_AT_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( false, Result );

@@ -293,6 +293,7 @@ firmwareversion
 freertos
 freertosconfig
 fucntion
+fso
 functionpointers
 fw
 gcc
@@ -468,6 +469,7 @@ parsetimezoneinfo
 parseyearmonthdayincclkresponse
 partialdata
 partialdatarcvdlen
+passcomparestring
 patbuf
 patcmd
 patcommandpayload
@@ -495,6 +497,7 @@ pcomminterface
 pcomminterfacehandle
 pcommintf
 pcontext
+pcomparestring
 pcurrentcmd
 pcwriteto
 pdata
@@ -529,6 +532,7 @@ phexdata
 pinputbuf
 pinputline
 pinputptr
+pinputstr
 pitm
 pkio
 pkt
@@ -751,6 +755,7 @@ simcardstate
 simlockstate
 sinr
 sms
+smso
 snprintf
 socketclose
 socketconnect
