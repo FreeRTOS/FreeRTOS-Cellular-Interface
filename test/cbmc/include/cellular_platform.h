@@ -45,9 +45,13 @@
  *
  */
 
+#undef LogError
 #define LogError
+#undef LogDebug
 #define LogDebug
+#undef LogWarn
 #define LogWarn
+#undef LogInfo
 #define LogInfo
 
 #define configASSERT
