@@ -43,6 +43,7 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/complexity@main
         with:
           path: ./
+          doxygen_link: https://sourceforge.net/projects/doxygen/files/rel-1.9.4/doxygen-1.9.4.linux.bin.tar.gz
   doxygen:
     runs-on: ubuntu-latest
     steps:
@@ -93,7 +94,7 @@ jobs:
       - name: Install Python3
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7.10'
+          python-version: '3.11.0'
       - name: Measure sizes
         uses: FreeRTOS/CI-CD-Github-Actions/memory_statistics@main
         with:

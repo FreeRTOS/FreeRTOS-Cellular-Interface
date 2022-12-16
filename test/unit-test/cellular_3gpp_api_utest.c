@@ -7972,7 +7972,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_AtCmd
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8003,7 +8003,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Null_
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8065,7 +8065,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8096,7 +8096,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_CPSMS
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8126,7 +8126,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8156,7 +8156,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8186,7 +8186,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8216,7 +8216,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8246,7 +8246,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8306,7 +8306,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Happy
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
@@ -8337,7 +8337,7 @@ void test_Cellular_CommonGetPsmSettings_Cb_Cellular_RecvFuncGetPsmSettings_Timer
     Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
     Cellular_ATStrtoi_StubWithCallback( Mock_Cellular_ATStrtoi );
 
-    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonGetPsmSettings( cellularHandle, &psmSettings );
