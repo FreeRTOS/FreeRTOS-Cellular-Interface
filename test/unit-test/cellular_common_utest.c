@@ -507,7 +507,7 @@ void test__Cellular_TranslatePktStatus_Each_Case( void )
  */
 void test__Cellular_TranslateAtCoreStatus_Each_Case( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
     pktStatus = _Cellular_TranslateAtCoreStatus( CELLULAR_AT_SUCCESS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
@@ -524,17 +524,17 @@ void test__Cellular_TranslateAtCoreStatus_Each_Case( void )
  */
 void test__Cellular_CreateSocketData_Mem_Alloc_Fail( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
     CellularSocketHandle_t socketHandle;
 
     mallocAllocFail = 1;
     memset( &context, 0, sizeof( CellularContext_t ) );
-    pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
-                                            CELLULAR_SOCKET_TYPE_DGRAM,
-                                            CELLULAR_SOCKET_PROTOCOL_TCP,
-                                            &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, pktStatus );
+    cellularStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
+                                                 CELLULAR_SOCKET_TYPE_DGRAM,
+                                                 CELLULAR_SOCKET_PROTOCOL_TCP,
+                                                 &socketHandle );
+    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
 }
 
 /**
@@ -542,7 +542,7 @@ void test__Cellular_CreateSocketData_Mem_Alloc_Fail( void )
  */
 void test__Cellular_CreateSocketData_No_Socket_Data_Entry_Fail( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
     CellularSocketHandle_t socketHandle;
     uint32_t i = 0;
@@ -554,11 +554,11 @@ void test__Cellular_CreateSocketData_No_Socket_Data_Entry_Fail( void )
         context.pSocketData[ i ] = malloc( sizeof( CellularSocketContext_t ) );
     }
 
-    pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
-                                            CELLULAR_SOCKET_TYPE_DGRAM,
-                                            CELLULAR_SOCKET_PROTOCOL_TCP,
-                                            &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, pktStatus );
+    cellularStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
+                                                 CELLULAR_SOCKET_TYPE_DGRAM,
+                                                 CELLULAR_SOCKET_PROTOCOL_TCP,
+                                                 &socketHandle );
+    TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
 }
 
 /**
@@ -566,16 +566,16 @@ void test__Cellular_CreateSocketData_No_Socket_Data_Entry_Fail( void )
  */
 void test__Cellular_CreateSocketData_Happy_Path( void )
 {
-    CellularPktStatus_t pktStatus = CELLULAR_AT_SUCCESS;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
     CellularSocketHandle_t socketHandle;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-    pktStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
-                                            CELLULAR_SOCKET_TYPE_DGRAM,
-                                            CELLULAR_SOCKET_PROTOCOL_TCP,
-                                            &socketHandle );
-    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, pktStatus );
+    cellularStatus = _Cellular_CreateSocketData( &context, 0, CELLULAR_SOCKET_DOMAIN_AF_INET,
+                                                 CELLULAR_SOCKET_TYPE_DGRAM,
+                                                 CELLULAR_SOCKET_PROTOCOL_TCP,
+                                                 &socketHandle );
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 }
 
 /**
