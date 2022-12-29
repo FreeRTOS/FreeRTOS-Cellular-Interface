@@ -774,7 +774,7 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
     }
     else
     {
-        *ppModuleContext = pContext->pModueContext;
+        *ppModuleContext = pContext->pModuleContext;
     }
 
     return cellularStatus;
