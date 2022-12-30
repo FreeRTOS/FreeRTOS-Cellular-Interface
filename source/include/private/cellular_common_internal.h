@@ -151,7 +151,7 @@ struct CellularContext
     CellularSocketContext_t * pSocketData[ CELLULAR_NUM_SOCKET_MAX ]; /* All socket related information. */
 
     /* Module Context. */
-    void * pModueContext;
+    void * pModuleContext;
 };
 
 /*-----------------------------------------------------------*/
