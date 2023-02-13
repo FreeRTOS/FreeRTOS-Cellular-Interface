@@ -758,7 +758,7 @@ void test__Cellular_HandlePacket_Wrong_RespType( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Send invalid message type. */
-    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED + 1, NULL );
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED + 1, CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT );
 
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }

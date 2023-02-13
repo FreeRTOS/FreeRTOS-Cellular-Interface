@@ -61,8 +61,6 @@
 
 static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pContext,
                                                        const void * pBuf );
-static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
-                                          char * pInputLine );
 static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf );
 static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( CellularContext_t * pContext,
@@ -78,8 +76,6 @@ static int _searchCompareFunc( const void * pInputToken,
                                const void * pBase );
 static int32_t _sortCompareFunc( const void * pElem1Ptr,
                                  const void * pElem2Ptr );
-static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
-                                         const char * pInputLine );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
                                                const char * pTokenPtr,
                                                char * pSavePtr );
@@ -94,34 +90,28 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularATCommandResponse_t * pAtResp = NULL;
 
-    if( ( pBuf != NULL ) )
+    /* pBuf is checked in _Cellular_HandlePacket. */
+    pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
+
+    if( pAtResp->status == false )
     {
-        pAtResp = ( const CellularATCommandResponse_t * ) pBuf;
-
-        if( pAtResp->status == false )
-        {
-            /* The modem returns error code to indicate that the command failed. */
-            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-        }
-
-        if( ( pContext->pktRespCB != NULL ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
-        {
-            pktStatus = pContext->pktRespCB( pContext,
-                                             ( const CellularATCommandResponse_t * ) pBuf,
-                                             pContext->pPktUsrData,
-                                             pContext->PktUsrDataLen );
-        }
-
-        /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
-        if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
-        {
-            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            LogError( ( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" ) );
-        }
+        /* The modem returns error code to indicate that the command failed. */
+        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
-    else
+
+    if( ( pContext->pktRespCB != NULL ) && ( pktStatus == CELLULAR_PKT_STATUS_OK ) )
     {
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        pktStatus = pContext->pktRespCB( pContext,
+                                         ( const CellularATCommandResponse_t * ) pBuf,
+                                         pContext->pPktUsrData,
+                                         pContext->PktUsrDataLen );
+    }
+
+    /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
+    if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
+    {
+        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
+        LogError( ( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" ) );
     }
 
     return pktStatus;
@@ -129,82 +119,75 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
-static CellularPktStatus_t urcParseToken( CellularContext_t * pContext,
-                                          char * pInputLine )
-{
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    bool inputWithPrefix = false;
-
-    /* pInputLine = "+" pTokenPtr + ":" + pSavePtr.
-     * if string not start with "+", then pTokenPtr = pSavePtr = pInputPtr. */
-    char * pSavePtr = pInputLine, * pTokenPtr = pInputLine;
-
-    LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
-
-    /* Check if prefix exist in the input string. The pInputLine is checked in _processUrcPacket. */
-    ( void ) Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
-
-    if( inputWithPrefix == true )
-    {
-        /* Cellular_ATIsPrefixPresent check the prefix string is valid and start with
-         * leading char. ":" is also checked in Cellular_ATIsPrefixPresent. Remove
-         * the leading char and split the string. */
-        pSavePtr++;
-        pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );
-
-        if( pTokenPtr == NULL )
-        {
-            LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine ) );
-            pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
-        }
-    }
-    else
-    {
-        /* This is the input without prefix case. Nothing need to be done for this case.
-         * There are some special cases. For example, "+URC" the string without  ":" should
-         * be regarded as URC without prefix. */
-    }
-
-    if( pktStatus == CELLULAR_PKT_STATUS_OK )
-    {
-        /* Now get the handler function based on the token. */
-        pktStatus = _atParseGetHandler( pContext, pTokenPtr, pSavePtr );
-    }
-
-    return pktStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief copy the URC log in the buffer to a heap memory and process it.
- */
 static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    bool inputWithPrefix = false;
+    char * pInputLine = NULL;
+    char * pSavePtr = NULL, * pTokenPtr = NULL;
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
-    char * payload = NULL;
 
-    if( pBuf != NULL )
+    LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
+
+    /* pBuf is checked in _Cellular_HandlePacket. */
+    atStatus = Cellular_ATStrDup( &pInputLine, pBuf );
+
+    if( atStatus != CELLULAR_AT_SUCCESS )
     {
-        atStatus = Cellular_ATStrDup( &payload, pBuf );
-
-        if( atStatus == CELLULAR_AT_SUCCESS )
-        {
-            /* The payload is null terminated. */
-            pktStatus = urcParseToken( pContext, ( char * ) payload );
-            Platform_Free( payload );
-        }
-        else
-        {
-            pktStatus = CELLULAR_PKT_STATUS_FAILURE;
-            LogWarn( ( "Couldn't allocate memory of %u for urc", ( uint32_t ) strlen( pBuf ) ) );
-        }
+        /* Fail to allocate memory. */
+        pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else
     {
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        /* Check if prefix exist in the input string. The pInputLine is checked in Cellular_ATStrDup. */
+        ( void ) Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
+
+        if( inputWithPrefix == true )
+        {
+            /* Cellular_ATIsPrefixPresent check the prefix string is valid and start with
+             * leading char. ":" is also checked in Cellular_ATIsPrefixPresent. Remove
+             * the leading char and split the string into the following substrings :
+             * pInputLine = "+" pTokenPtr + ":" + pSavePtr. */
+            pSavePtr = pInputLine + 1;
+            pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );
+
+            if( pTokenPtr == NULL )
+            {
+                LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine ) );
+                pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
+            }
+            else
+            {
+                pktStatus = _atParseGetHandler( pContext, pTokenPtr, pSavePtr );
+            }
+        }
+        else
+        {
+            /* This is the input without prefix case. Nothing need to be done for this case.
+             * There are some special cases. For example, "+URC" the string without  ":" should
+             * be regarded as URC without prefix. */
+            pktStatus = _atParseGetHandler( pContext, pInputLine, pInputLine );
+        }
+
+        if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
+        {
+            /* No URC callback function available, check for generic call back. */
+            LogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
+
+            if( inputWithPrefix == true )
+            {
+                /* inputWithPrefix is true means the string starts with '+'.
+                 * Restore string to "+pTokenPtr:pSavePtr" for callback function. */
+                *( pSavePtr - 1 ) = ':';
+            }
+
+            _Cellular_GenericCallback( pContext, pInputLine );
+            pktStatus = CELLULAR_PKT_STATUS_OK;
+        }
+
+        /* Free the allocated pInputLine. */
+        Platform_Free( pInputLine );
     }
 
     return pktStatus;
@@ -442,14 +425,6 @@ static int32_t _sortCompareFunc( const void * pElem1Ptr,
 
 /*-----------------------------------------------------------*/
 
-static void _Cellular_ProcessGenericUrc( const CellularContext_t * pContext,
-                                         const char * pInputLine )
-{
-    _Cellular_GenericCallback( pContext, pInputLine );
-}
-
-/*-----------------------------------------------------------*/
-
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
                                                const char * pTokenPtr,
                                                char * pSavePtr )
@@ -459,7 +434,6 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     const CellularAtParseTokenMap_t * pTokenMap = pContext->tokenTable.pCellularUrcHandlerTable;
     uint32_t tokenMapSize = pContext->tokenTable.cellularPrefixToParserMapSize;
-    uint8_t decrementPointer = 0U;
 
     /* MISRA Ref 21.9.1 [Use of bsearch] */
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-219 */
@@ -484,18 +458,8 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
     }
     else
     {
-        /* No URC callback function available, check for generic call back. */
-        LogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
-
-        if( pSavePtr != pTokenPtr )
-        {
-            /* pSavePtr != pTokenPtr means the string starts with '+'.
-             * Restore string to "+pTokenPtr:pSavePtr" for callback function. */
-            decrementPointer = 1U;
-            *( pSavePtr - 1 ) = ':';
-        }
-
-        _Cellular_ProcessGenericUrc( pContext, pTokenPtr - decrementPointer );
+        /* No URC callback function available. */
+        pktStatus = CELLULAR_PKT_STATUS_PREFIX_MISMATCH;
     }
 
     return pktStatus;
@@ -560,7 +524,15 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    if( pContext != NULL )
+    if( pContext == NULL )
+    {
+        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+    }
+    else if( pBuf == NULL )
+    {
+        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+    }
+    else
     {
         switch( atRespType )
         {
@@ -574,7 +546,6 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
             case AT_UNDEFINED:
                 pktStatus = _handleUndefinedMessage( pContext, pBuf );
-
                 break;
 
             default:
@@ -582,10 +553,6 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
                 LogError( ( "_Cellular_HandlePacket Callback type (%d) error", atRespType ) );
                 break;
         }
-    }
-    else
-    {
-        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
     }
 
     return pktStatus;
