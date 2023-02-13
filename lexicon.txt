@@ -355,7 +355,7 @@ ingroup
 inidcate
 init
 inputline
-inputwithprefix 
+inputwithprefix
 int
 interdelayms
 intf
