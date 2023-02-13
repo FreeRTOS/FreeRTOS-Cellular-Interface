@@ -128,10 +128,10 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
     char * pSavePtr = NULL, * pTokenPtr = NULL;
     CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
 
-    LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
-
     /* pBuf is checked in _Cellular_HandlePacket. */
     atStatus = Cellular_ATStrDup( &pInputLine, pBuf );
+
+    LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
 
     if( atStatus != CELLULAR_AT_SUCCESS )
     {
