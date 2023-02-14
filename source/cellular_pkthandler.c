@@ -119,6 +119,9 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
+/**
+ * @brief copy the URC log in the buffer to a heap memory and process it.
+ */
 static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
                                               const char * pBuf )
 {
@@ -131,15 +134,16 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
     /* pBuf is checked in _Cellular_HandlePacket. */
     atStatus = Cellular_ATStrDup( &pInputLine, pBuf );
 
-    LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
-
     if( atStatus != CELLULAR_AT_SUCCESS )
     {
         /* Fail to allocate memory. */
+        LogError( ( "Failed to allocate memory for URC [%s]", pBuf ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else
     {
+        LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
+
         /* Check if prefix exist in the input string. The pInputLine is checked in Cellular_ATStrDup. */
         ( void ) Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
 
@@ -172,7 +176,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
 
         if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
         {
-            /* No URC callback function available, check for generic call back. */
+            /* No URC callback function available, check for generic callback. */
             LogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
 
             if( inputWithPrefix == true )
