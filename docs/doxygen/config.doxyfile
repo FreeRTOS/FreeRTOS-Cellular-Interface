@@ -42,19 +42,19 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = coreMQTT
+PROJECT_NAME           = "FreeRTOS: FreeRTOS Cellular Library"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v2.1.0
+PROJECT_NUMBER         = v1.3.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "MQTT 3.1.1 Client Library"
+PROJECT_BRIEF          = "FreeRTOS Cellular Library"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
@@ -283,11 +283,26 @@ TAB_SIZE               = 4
 # with the commands \{ and \} for these it is advised to use the version @{ and
 # @} or use a double escape (\\{ and \\})
 
-ALIASES                = "transportcallback=@ingroup mqtt_callback_types" \
-                         "transportstruct=@ingroup mqtt_struct_types" \
-                         "transportpage=@page mqtt_transport_interface Transport Interface" \
-                         "transportsectionimplementation=@section mqtt_transport_interface_implementation Implementing the Transport Interface" \
-                         "transportsectionoverview=@section mqtt_transport_interface_overview Transport Interface Overview"
+ALIASES                = "dependencies_section{1}=@section \1_dependencies Dependencies" \
+                         "dependencies_brief{1}=@brief Dependencies of the \1." \
+                         "describeconfig=Configuration settings are C pre-processor constants. They can be set with a @c #`define` in the iot_config.h or by using a compiler option such as `-D` in gcc. If a configuration setting is not defined, the library will use a \"sensible\" default value (unless otherwise noted). Because they are compile-time constants, a library must be rebuilt if a configuration setting is changed." \
+                         "functions_page{2}=@page \1_functions Functions" \
+                         "functions_brief{1}=@brief Functions of the \1 library.<br><br>The \1 library consists of the following functions." \
+                         "functions_page{3}=@page \1_functions \3" \
+                         "function_name{1}=@subpage \1" \
+                         "function_brief{1}=<br>@copybrief \1" \
+                         "function_page{3}=@page \2_function_\3 \1" \
+                         "function_snippet{3}=@snippet \3 declare_\1_\2" \
+                         "handles_group{2}=@defgroup \1_datatypes_handles \2 Handles" \
+                         "handles_brief{1}=@brief Opaque handles of the \1." \
+                         "enums_group{2}=@defgroup \1_datatypes_enums \2 Enumerated types" \
+                         "enums_brief{1}=@brief Enumerated types of the \1." \
+                         "functionpointers_group{2}=@defgroup \1_datatypes_functionpointers \2 Function pointer types" \
+                         "functionpointers_brief{1}=@brief Function pointer types of the \1." \
+                         "structs_group{21}=@defgroup \1_datatypes_structs \2 Structured types" \
+                         "structs_brief{1}=@brief Structured types of the \1." \
+                         "paramstructs_group{2}=@defgroup \1_datatypes_paramstructs \2 Parameter structures" \
+                         "paramstructs_brief{2}=@brief Structures passed as parameters to [\2 functions](@ref \1_functions)<br>These structures are passed as parameters to library functions. Documentation for these structures will state the functions associated with each parameter structure and the purpose of each member." \
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For
@@ -914,6 +929,8 @@ WARN_LOGFILE           =
 
 INPUT                  = ./docs/doxygen \
                          ./source/include \
+                         ./source/include/common \
+                         ./source/include/private \
                          ./source/interface \
                          ./source
 
@@ -1005,8 +1022,9 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = source/include \
-                         docs/doxygen/include
+EXAMPLE_PATH           = docs/doxygen/include \
+                         source/include \
+                         source/include/common \
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -2368,7 +2386,7 @@ TAGFILES               =
 # tag file that is based on the input files it reads. See section "Linking to
 # external documentation" for more information about the usage of tag files.
 
-GENERATE_TAGFILE       = docs/doxygen/output/mqtt.tag
+GENERATE_TAGFILE       = docs/doxygen/output/cellular.tag
 
 # If the ALLEXTERNALS tag is set to YES, all external class will be listed in
 # the class index. If set to NO, only the inherited external classes will be
