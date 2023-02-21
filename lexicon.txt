@@ -386,8 +386,10 @@ ktcpstat
 lac
 len
 libatdata
+libatdatamutex
 libcleanup
 libinit
+libstatusmutex
 linelength
 liniked
 linux
@@ -528,6 +530,7 @@ pendptr
 pendstr
 periodicrauvalue
 periodictauvalue
+pgenericcallbackcontext
 ph
 phexdata
 pinputbuf
@@ -547,15 +550,19 @@ pkthandlercleanup
 pkthandlerinit
 pkthanlder
 pktio
+pktioatcmdtype
 pktiobuffer
 pktioinit
 pktioreadbuf
 pktioreadthread
 pktiosendatcmd
+pktiosendbuf
 pktiosenddata
 pktioshutdown
 pktrequestmutex
+pktrespcb
 pktrespmutex
+pktrespprefixbuf
 pktrespqueue
 pktrxcallback
 pktstatus
@@ -568,9 +575,12 @@ pline
 plmn
 plmninfo
 pmodemdata
+pmodemeventcallbackcontext
 pmodeminfo
+pmodulecontext
 pmutex
 pnetworkinfo
+pnetworkregistrationcallbackcontext
 pnetworktime
 pnewmutex
 pnext
@@ -585,12 +595,15 @@ poutputratprioritieslength
 ppatresponse
 ppdatastart
 ppdnconfig
+ppdneventcallbackcontext
 ppdnstatusbuffers
 ppdptypestr
 ppdst
 ppkeylist
 ppktiocommevent
+ppktiohandlepktcb
 ppktioreadptr
+ppktioshutdowncb
 ppktusrdata
 ppmodulecontext
 ppouttoken
@@ -611,6 +624,7 @@ premotesocketaddress
 preprocess
 presolvedaddress
 presp
+prespprefix
 presult
 printf
 prioirty
@@ -623,6 +637,7 @@ psaveptr
 psentdatalength
 pservicestatus
 psignalinfo
+psignalstrengthchangedcallbackcontext
 psimcardinfo
 psimcardstatus
 psm
@@ -649,6 +664,7 @@ ptokenptr
 ptokentable
 ptr
 puk
+pundefinedrespcbcontext
 puserdata
 pvportmalloc
 pwr
@@ -675,6 +691,7 @@ readline
 receivecallback
 recognise
 recv
+recvdmsgtype
 recvfuncgeteidrxsettings
 recvfuncgethplmn
 recvfuncgeticcid
@@ -821,6 +838,7 @@ timeoutmilliseconds
 timeoutms
 timezonenegative
 todo
+tokentable
 tokentabletype
 translateatcorestatus
 translatepktstatus
@@ -836,7 +854,9 @@ uint
 uknown
 umnoprof
 undefinedrespcallback
+unhandled
 unneccessary
+upperthreshold
 urat
 urc
 urcevent

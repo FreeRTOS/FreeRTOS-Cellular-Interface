@@ -71,7 +71,7 @@
 typedef struct signalBarsTable
 {
     int8_t upperThreshold; /**<  Threshold for signal bars. */
-    uint8_t bars; /**<  The level in integer of bars. */
+    uint8_t bars;          /**<  The level in integer of bars. */
 } signalBarsTable_t;
 
 /*-----------------------------------------------------------*/

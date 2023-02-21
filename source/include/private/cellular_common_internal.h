@@ -53,11 +53,11 @@
  */
 typedef enum CellularNetworkRegType
 {
-    CELLULAR_REG_TYPE_CREG = 0,  /**<  Register type for circuit switched network. */
-    CELLULAR_REG_TYPE_CGREG,  /**<  Register type for GPRS packet networks. */
-    CELLULAR_REG_TYPE_CEREG,  /**<  Register type for EPS(LTE) packet networks. */
-    CELLULAR_REG_TYPE_MAX,  /**<  Maximum value for register type. */
-    CELLULAR_REG_TYPE_UNKNOWN  /**<  Unknown value for register type. */
+    CELLULAR_REG_TYPE_CREG = 0, /**<  Register type for circuit switched network. */
+    CELLULAR_REG_TYPE_CGREG,    /**<  Register type for GPRS packet networks. */
+    CELLULAR_REG_TYPE_CEREG,    /**<  Register type for EPS(LTE) packet networks. */
+    CELLULAR_REG_TYPE_MAX,      /**<  Maximum value for register type. */
+    CELLULAR_REG_TYPE_UNKNOWN   /**<  Unknown value for register type. */
 } CellularNetworkRegType_t;
 
 /**
@@ -66,16 +66,16 @@ typedef enum CellularNetworkRegType
  */
 typedef struct _callbackEvents
 {
-    CellularUrcNetworkRegistrationCallback_t networkRegistrationCallback;  /**<  Callback used to inform about a Network Registration URC event. */
-    void * pNetworkRegistrationCallbackContext;  /**<  The context passed to CellularUrcNetworkRegistrationCallback_t. */
-    CellularUrcPdnEventCallback_t pdnEventCallback;  /**<  Callback used to inform about PDN URC events. */
-    void * pPdnEventCallbackContext;  /**<  The context passed to CellularUrcPdnEventCallback_t. */
-    CellularUrcSignalStrengthChangedCallback_t signalStrengthChangedCallback;  /**<  Callback used to inform about signal strength changed URC event. */
-    void * pSignalStrengthChangedCallbackContext;  /**<  The context passed to CellularUrcSignalStrengthChangedCallback_t. */
-    CellularUrcGenericCallback_t genericCallback;  /**<  Generic callback used to inform all other URC events. */
-    void * pGenericCallbackContext;  /**<  The context passed to CellularUrcGenericCallback_t. */
-    CellularModemEventCallback_t modemEventCallback;  /**<  Callback used to inform about modem events. */
-    void * pModemEventCallbackContext;  /**<  The context passed to CellularModemEventCallback_t. */
+    CellularUrcNetworkRegistrationCallback_t networkRegistrationCallback;     /**<  Callback used to inform about a Network Registration URC event. */
+    void * pNetworkRegistrationCallbackContext;                               /**<  The context passed to CellularUrcNetworkRegistrationCallback_t. */
+    CellularUrcPdnEventCallback_t pdnEventCallback;                           /**<  Callback used to inform about PDN URC events. */
+    void * pPdnEventCallbackContext;                                          /**<  The context passed to CellularUrcPdnEventCallback_t. */
+    CellularUrcSignalStrengthChangedCallback_t signalStrengthChangedCallback; /**<  Callback used to inform about signal strength changed URC event. */
+    void * pSignalStrengthChangedCallbackContext;                             /**<  The context passed to CellularUrcSignalStrengthChangedCallback_t. */
+    CellularUrcGenericCallback_t genericCallback;                             /**<  Generic callback used to inform all other URC events. */
+    void * pGenericCallbackContext;                                           /**<  The context passed to CellularUrcGenericCallback_t. */
+    CellularModemEventCallback_t modemEventCallback;                          /**<  Callback used to inform about modem events. */
+    void * pModemEventCallbackContext;                                        /**<  The context passed to CellularModemEventCallback_t. */
 } _callbackEvents_t;
 
 /**
@@ -103,55 +103,55 @@ typedef struct cellularAtData
  */
 struct CellularContext
 {
-    const CellularCommInterface_t * pCommIntf;  /**<  Communication interface for target specific. */
+    const CellularCommInterface_t * pCommIntf; /**<  Communication interface for target specific. */
 
     /* Common library. */
-    bool bLibOpened;  /**<  CellularLib is currently open. */
-    bool bLibShutdown;  /**<  CellularLib prematurely shut down. */
-    bool bLibClosing;  /**<  Graceful shutdown in progress. */
+    bool bLibOpened;                 /**<  CellularLib is currently open. */
+    bool bLibShutdown;               /**<  CellularLib prematurely shut down. */
+    bool bLibClosing;                /**<  Graceful shutdown in progress. */
     PlatformMutex_t libStatusMutex;  /**<  The mutex for changing lib status. */
     PlatformMutex_t libAtDataMutex;  /**<  The mutex for AT data in cellular context. */
-    _callbackEvents_t cbEvents;  /**<  Call back functions registered to report events. */
-    cellularAtData_t libAtData;  /**<  Global variables. */
+    _callbackEvents_t cbEvents;      /**<  Call back functions registered to report events. */
+    cellularAtData_t libAtData;      /**<  Global variables. */
 
-    CellularTokenTable_t tokenTable;  /**<  Token table to config pkthandler and pktio. */
+    CellularTokenTable_t tokenTable; /**<  Token table to config pkthandler and pktio. */
 
     /* Packet handler. */
-    PlatformMutex_t pktRequestMutex;  /**<  The mutex for sending request. */
-    PlatformMutex_t PktRespMutex;  /**<  The mutex for parsing the response from modem. */
-    QueueHandle_t pktRespQueue;  /**<  Message queue to send/receive response. */
-    CellularATCommandResponseReceivedCallback_t pktRespCB;  /**<  Callback used to inform about the response of an AT command sent using Cellular_ATCommandRaw API. */
-    CellularATCommandDataPrefixCallback_t pktDataPrefixCB  /**<  Data prefix callback function for socket receive function. */
-    void * pDataPrefixCBContext;  /**<  The pCallbackContext passed to CellularATCommandDataPrefixCallback_t. */
-    CellularATCommandDataSendPrefixCallback_t pktDataSendPrefixCB;  /**<  Data prefix callback function for socket send function. */
-    void * pDataSendPrefixCBContext;  /**<  The pCallbackContext passed to CellularATCommandDataSendPrefixCallback_t. */
-    void * pPktUsrData;  /**<  The pData passed to CellularATCommandResponseReceivedCallback_t. */
-    uint16_t PktUsrDataLen;  /**<  The dataLen passed to CellularATCommandResponseReceivedCallback_t. */
-    const char * pCurrentCmd;  /**<  Debug purpose. */
+    PlatformMutex_t pktRequestMutex;                               /**<  The mutex for sending request. */
+    PlatformMutex_t PktRespMutex;                                  /**<  The mutex for parsing the response from modem. */
+    QueueHandle_t pktRespQueue;                                    /**<  Message queue to send/receive response. */
+    CellularATCommandResponseReceivedCallback_t pktRespCB;         /**<  Callback used to inform about the response of an AT command sent using Cellular_ATCommandRaw API. */
+    CellularATCommandDataPrefixCallback_t pktDataPrefixCB;         /**<  Data prefix callback function for socket receive function. */
+    void * pDataPrefixCBContext;                                   /**<  The pCallbackContext passed to CellularATCommandDataPrefixCallback_t. */
+    CellularATCommandDataSendPrefixCallback_t pktDataSendPrefixCB; /**<  Data prefix callback function for socket send function. */
+    void * pDataSendPrefixCBContext;                               /**<  The pCallbackContext passed to CellularATCommandDataSendPrefixCallback_t. */
+    void * pPktUsrData;                                            /**<  The pData passed to CellularATCommandResponseReceivedCallback_t. */
+    uint16_t PktUsrDataLen;                                        /**<  The dataLen passed to CellularATCommandResponseReceivedCallback_t. */
+    const char * pCurrentCmd;                                      /**<  Debug purpose. */
 
     /* Packet IO. */
-    bool bPktioUp;  /**<  A flag to indicate if packet IO up. */
-    CellularCommInterfaceHandle_t hPktioCommIntf;  /**<  Opaque handle to comm interface. */
-    PlatformEventGroupHandle_t pPktioCommEvent;  /**<  Event group handler for common event in packet IO. */
-    _pPktioShutdownCallback_t pPktioShutdownCB;  /**<  Callback used to inform packet IO thread shutdown. */
-    _pPktioHandlePacketCallback_t pPktioHandlepktCB;  /**<  Callback used to inform packet received. */
-    char pktioSendBuf[ PKTIO_WRITE_BUFFER_SIZE + 1 ];  /**<  Buffer to send AT command to cellular devices. */
-    char pktioReadBuf[ PKTIO_READ_BUFFER_SIZE + 1 ];  /**<  Buffer to receive messages from cellular devices. */
-    char * pPktioReadPtr;  /**<  Pointer points to unhandled read buffer. */
-    const char * pRespPrefix;  /**<  The prefix to check in the response message. */
-    char pktRespPrefixBuf[ CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH ];  /**<  Buffer to store prefix string. */
-    CellularATCommandType_t PktioAtCmdType;  /**<  Represents AT Command type. */
-    _atRespType_t recvdMsgType;  /**<  The received AT response type. */
-    CellularUndefinedRespCallback_t undefinedRespCallback;  /**<  Undefined response callback function. */
-    void * pUndefinedRespCBContext;  /**<  The pCallbackContext passed to CellularUndefinedRespCallback_t. */
+    bool bPktioUp;                                                     /**<  A flag to indicate if packet IO up. */
+    CellularCommInterfaceHandle_t hPktioCommIntf;                      /**<  Opaque handle to comm interface. */
+    PlatformEventGroupHandle_t pPktioCommEvent;                        /**<  Event group handler for common event in packet IO. */
+    _pPktioShutdownCallback_t pPktioShutdownCB;                        /**<  Callback used to inform packet IO thread shutdown. */
+    _pPktioHandlePacketCallback_t pPktioHandlepktCB;                   /**<  Callback used to inform packet received. */
+    char pktioSendBuf[ PKTIO_WRITE_BUFFER_SIZE + 1 ];                  /**<  Buffer to send AT command to cellular devices. */
+    char pktioReadBuf[ PKTIO_READ_BUFFER_SIZE + 1 ];                   /**<  Buffer to receive messages from cellular devices. */
+    char * pPktioReadPtr;                                              /**<  Pointer points to unhandled read buffer. */
+    const char * pRespPrefix;                                          /**<  The prefix to check in the response message. */
+    char pktRespPrefixBuf[ CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH ]; /**<  Buffer to store prefix string. */
+    CellularATCommandType_t PktioAtCmdType;                            /**<  Represents AT Command type. */
+    _atRespType_t recvdMsgType;                                        /**<  The received AT response type. */
+    CellularUndefinedRespCallback_t undefinedRespCallback;             /**<  Undefined response callback function. */
+    void * pUndefinedRespCBContext;                                    /**<  The pCallbackContext passed to CellularUndefinedRespCallback_t. */
 
     /* PktIo data handling. */
-    uint32_t dataLength;  /**<  The data length in pLine. */
-    uint32_t partialDataRcvdLen;  /**<  The valid data length need to be handled. */
+    uint32_t dataLength;                                              /**<  The data length in pLine. */
+    uint32_t partialDataRcvdLen;                                      /**<  The valid data length need to be handled. */
 
-    CellularSocketContext_t * pSocketData[ CELLULAR_NUM_SOCKET_MAX ];  /**<  All socket related information. */
+    CellularSocketContext_t * pSocketData[ CELLULAR_NUM_SOCKET_MAX ]; /**<  All socket related information. */
 
-    void * pModueContext;  /**<  Module Context. */
+    void * pModuleContext;                                            /**<  Module Context. */
 };
 
 /*-----------------------------------------------------------*/
