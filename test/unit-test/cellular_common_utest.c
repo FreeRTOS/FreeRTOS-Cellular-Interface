@@ -863,11 +863,11 @@ void test__Cellular_GetModuleContext_Happy_Path( void )
     int32_t * pModuleContext;
 
     memset( &context, 0, sizeof( CellularContext_t ) );
-    context.pModueContext = &moduleContext;
+    context.pModuleContext = &moduleContext;
     cellularStatus = _Cellular_GetModuleContext( &context, ( void ** ) &pModuleContext );
 
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-    TEST_ASSERT_EQUAL( pModuleContext, context.pModueContext );
+    TEST_ASSERT_EQUAL( pModuleContext, context.pModuleContext );
 }
 
 /**
