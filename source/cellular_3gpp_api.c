@@ -106,15 +106,16 @@
 /*-----------------------------------------------------------*/
 
 /**
+ * @ingroup cellular_datatypes_structs
  * @brief operator information.
  */
 typedef struct cellularOperatorInfo
 {
-    CellularPlmnInfo_t plmnInfo;                             /* Device registered PLMN info (MCC and MNC).  */
-    CellularRat_t rat;                                       /* Device registered Radio Access Technology (Cat-M, Cat-NB, GPRS etc).  */
-    CellularNetworkRegistrationMode_t networkRegMode;        /* Network Registered mode of the device (Manual, Auto etc).   */
-    CellularOperatorNameFormat_t operatorNameFormat;         /* Format of registered network operator name. */
-    char operatorName[ CELLULAR_NETWORK_NAME_MAX_SIZE + 1 ]; /* Registered network operator name. */
+    CellularPlmnInfo_t plmnInfo;                             /**<  Device registered PLMN info (MCC and MNC).  */
+    CellularRat_t rat;                                       /**<  Device registered Radio Access Technology (Cat-M, Cat-NB, GPRS etc).  */
+    CellularNetworkRegistrationMode_t networkRegMode;        /**<  Network Registered mode of the device (Manual, Auto etc).   */
+    CellularOperatorNameFormat_t operatorNameFormat;         /**<  Format of registered network operator name. */
+    char operatorName[ CELLULAR_NETWORK_NAME_MAX_SIZE + 1 ]; /**<  Registered network operator name. */
 } cellularOperatorInfo_t;
 
 /*-----------------------------------------------------------*/

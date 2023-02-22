@@ -65,12 +65,13 @@
 /*-----------------------------------------------------------*/
 
 /**
+ * @ingroup cellular_datatypes_structs
  * @brief Parameters in Signal Bars Look up table for measuring Signal Bars.
  */
 typedef struct signalBarsTable
 {
-    int8_t upperThreshold;
-    uint8_t bars;
+    int8_t upperThreshold; /**<  Threshold for signal bars. */
+    uint8_t bars;          /**<  The level in integer of bars. */
 } signalBarsTable_t;
 
 /*-----------------------------------------------------------*/
