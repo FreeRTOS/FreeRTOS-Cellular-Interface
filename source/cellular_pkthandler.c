@@ -190,8 +190,10 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
             pktStatus = CELLULAR_PKT_STATUS_OK;
         }
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
         /* Free the allocated pInputLine. */
         Platform_Free( pInputLine );
+#endif
     }
 
     return pktStatus;
@@ -774,6 +776,11 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
 
 /*-----------------------------------------------------------*/
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+static StaticQueue_t sQueueBuffer;
+static uint8_t sQueueStorage[sizeof(CellularPktStatus_t)];
+#endif
+
 CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -781,8 +788,11 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Create the response queue which is used to post reponses to the sender. */
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+        pContext->pktRespQueue = xQueueCreateStatic( 1, ( uint32_t ) sizeof( CellularPktStatus_t ), sQueueStorage, &sQueueBuffer );
+#else
         pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
-
+#endif
         if( pContext->pktRespQueue == NULL )
         {
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;

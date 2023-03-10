@@ -1781,7 +1781,13 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
 {
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+    cellularOperatorInfo_t operatorInfo;
+    cellularOperatorInfo_t * pOperatorInfo = &operatorInfo;
+#else
     cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) Platform_Malloc( sizeof( cellularOperatorInfo_t ) );
+#endif
+
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -1820,7 +1826,9 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
         }
     }
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
     Platform_Free( pOperatorInfo );
+#endif
 
     return cellularStatus;
 }

@@ -764,6 +764,11 @@ CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
 
 /*-----------------------------------------------------------*/
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+static char atStringBuffer[4][128];
+static uint8_t sBufferIndex = 0;
+#endif
+
 CellularATError_t Cellular_ATStrDup( char ** ppDst,
                                      const char * pSrc )
 {
@@ -789,7 +794,12 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
 
     if( atStatus == CELLULAR_AT_SUCCESS )
     {
-        *ppDst = ( char * ) Platform_Malloc( sizeof( char ) * ( strlen( pTempSrc ) + 1U ) );
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
+        *ppDst =  ( char * ) Platform_Malloc( sizeof( char ) * ( strlen( pTempSrc ) + 1U ) );
+#else
+        *ppDst = atStringBuffer[sBufferIndex];
+        sBufferIndex = (sBufferIndex + 1) % 4;
+#endif
 
         if( *ppDst != NULL )
         {

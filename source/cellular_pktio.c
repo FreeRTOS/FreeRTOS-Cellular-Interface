@@ -126,6 +126,12 @@ static uint32_t _convertCharPtrDistance( const char * pEndPtr,
 
 /*-----------------------------------------------------------*/
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+#define AT_COMMAND_LINE_POOL_SIZE (32)
+static CellularATCommandLine_t sATCommandLinePool[AT_COMMAND_LINE_POOL_SIZE];
+static uint8_t sATCommandPoolIndex = 0;
+#endif
+
 static void _saveData( char * pLine,
                        CellularATCommandResponse_t * pResp,
                        uint32_t dataLen )
@@ -136,7 +142,12 @@ static void _saveData( char * pLine,
 
     LogDebug( ( "_saveData : Save data %p with length %ld", pLine, dataLen ) );
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 1 )
+    pNew = &sATCommandLinePool[sATCommandPoolIndex];
+    sATCommandPoolIndex = (sATCommandPoolIndex + 1) % AT_COMMAND_LINE_POOL_SIZE;
+#else
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
+#endif
     configASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
@@ -255,12 +266,14 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
 }
 
 /*-----------------------------------------------------------*/
-
+static CellularATCommandResponse_t sResponseBuffer[8];
+static uint8_t responseBufferIndex = 0;
 static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
 {
     CellularATCommandResponse_t * pNew = NULL;
 
-    pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
+    pNew = &sResponseBuffer[responseBufferIndex];
+    responseBufferIndex = (responseBufferIndex + 1) % 8;
     configASSERT( ( pNew != NULL ) );
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
@@ -279,7 +292,9 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
 static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp )
 {
     CellularATCommandLine_t * pCurrLine = NULL;
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
     CellularATCommandLine_t * pToFree = NULL;
+#endif
 
     if( pResp != NULL )
     {
@@ -287,14 +302,18 @@ static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp )
 
         while( pCurrLine != NULL )
         {
-            pToFree = pCurrLine;
+            // pToFree = pCurrLine;
             pCurrLine = pCurrLine->pNext;
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
             /* Ruese the pktiobuffer. No need to free pToFree->pLine here. */
             Platform_Free( pToFree );
+#endif
         }
 
+#if ( CELLULAR_CONFIG_NO_DYNAMIC_ALLOCATION == 0 )
         Platform_Free( pResp );
+#endif
     }
 }
 
