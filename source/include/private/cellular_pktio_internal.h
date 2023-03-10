@@ -135,6 +135,8 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                   const uint8_t * pData,
                                   uint32_t dataLen );
 
+void PktIO_ReadThread();
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }

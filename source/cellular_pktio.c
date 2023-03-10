@@ -1152,6 +1152,11 @@ static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext )
     }
 }
 
+#if (CELLULAR_CONFIG_USE_STATIC_THREAD_FOR_READ_THREAD == 1)
+static bool initComplete = false;
+static CellularContext_t* sContext;
+#endif
+
 /*-----------------------------------------------------------*/
 
 CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
@@ -1183,11 +1188,19 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
         ( void ) PlatformEventGroup_ClearBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
                                                ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ALL_EVENTS ) );
 
+// No need to create a thread because this will occur on the existing xbeerx thread
+#if ( CELLULAR_CONFIG_USE_STATIC_THREAD_FOR_READ_THREAD == 0 )
         /* Create the Read thread. */
         status = Platform_CreateDetachedThread( _pktioReadThread,
                                                 ( void * ) pContext,
                                                 PLATFORM_THREAD_DEFAULT_PRIORITY,
                                                 PLATFORM_THREAD_DEFAULT_STACK_SIZE );
+#else
+        // Instead just mark status as true and set the relevant context pointer
+        status = true;
+        sContext = pContext;
+        initComplete = true;
+#endif
 
         if( status == true )
         {
@@ -1356,3 +1369,9 @@ void _Cellular_PktioShutdown( CellularContext_t * pContext )
 }
 
 /*-----------------------------------------------------------*/
+
+void PktIO_ReadThread() {
+  if (initComplete) {
+    _pktioReadThread(sContext);
+  }
+}
