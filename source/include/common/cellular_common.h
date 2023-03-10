@@ -90,7 +90,7 @@ typedef struct CellularAtDataReq
  *
  * @return Void.
  */
-typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
+typedef CellularPktStatus_t ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
                                                   char * pInputStr );
 
 /**
