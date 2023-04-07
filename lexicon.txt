@@ -665,6 +665,8 @@ ptokentable
 ptr
 puk
 pundefinedrespcbcontext
+purcdatacallbackcontext
+purcdatalength
 puserdata
 pvportmalloc
 pwr
@@ -859,6 +861,7 @@ unneccessary
 upperthreshold
 urat
 urc
+urcdatacallback
 urcevent
 urcprocesscgev
 urcprocessciev

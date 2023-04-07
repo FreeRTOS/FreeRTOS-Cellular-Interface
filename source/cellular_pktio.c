@@ -113,6 +113,14 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
                                     CellularATCommandResponse_t ** ppAtResp );
 static void _pktioReadThread( void * pUserData );
 static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
+static bool _getNextLine( CellularContext_t * pContext,
+                          char ** ppLine,
+                          uint32_t * pBytesRead,
+                          uint32_t currentLineLength,
+                          CellularPktStatus_t pktStatus );
+static bool _preprocessUrcData( CellularContext_t * pContext,
+                                char ** pLine,
+                                uint32_t * pBytesRead );
 
 /*-----------------------------------------------------------*/
 
@@ -640,28 +648,40 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
 
     if( bytesDataAndLeft >= pContext->dataLength )
     {
-        /* Add data to the response linked list. */
-        _saveRawData( pStartOfData, pAtResp, pContext->dataLength );
+        /* There is no command waiting for response if pAtResp is NULL. The is the
+         * case that URC data is received from the buffer. */
+        if( pAtResp != NULL )
+        {
+            /* Add data to the response linked list. */
+            _saveRawData( pStartOfData, pAtResp, pContext->dataLength );
 
-        /* Advance pLine to a point after data. */
-        *ppLine = &pStartOfData[ pContext->dataLength ];
+            /* Advance pLine to a point after data. */
+            *ppLine = &pStartOfData[ pContext->dataLength ];
 
-        /* There are more bytes after the data. */
-        *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
+            /* There are more bytes after the data. */
+            *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
-                    pContext->pktioReadBuf,
-                    pStartOfData,
-                    bytesBeforeData,
-                    *pBytesLeft,
-                    bytesRead ) );
+            LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
+                        pContext->pktioReadBuf,
+                        pStartOfData,
+                        bytesBeforeData,
+                        *pBytesLeft,
+                        bytesRead ) );
 
-        /* reset the data related variables. */
-        pContext->dataLength = 0U;
+            /* reset the data related variables. */
+            pContext->dataLength = 0U;
 
-        /* Set the pPktioReadPtr to indicate data already handled. */
-        pContext->pPktioReadPtr = *ppLine;
-        pContext->partialDataRcvdLen = *pBytesLeft;
+            /* Set the pPktioReadPtr to indicate data already handled. */
+            pContext->pPktioReadPtr = *ppLine;
+            pContext->partialDataRcvdLen = *pBytesLeft;
+        }
+        else
+        {
+            /* This the the URC data receive case. The data required by URC data callback
+             * is received. Leave the data mode by setting dataLength to 0. */
+            *pBytesLeft = bytesRead;
+            pContext->dataLength = 0U;
+        }
     }
     else
     {
@@ -811,6 +831,79 @@ static bool _findLineInStream( CellularContext_t * pContext,
         pContext->pPktioReadPtr = pTempLine;
         pContext->partialDataRcvdLen = bytesRead;
         keepProcess = false;
+    }
+
+    return keepProcess;
+}
+
+/*-----------------------------------------------------------*/
+
+static bool _preprocessUrcData( CellularContext_t * pContext,
+                                char ** pLine,
+                                uint32_t * pBytesRead )
+{
+    char * pTempLine = *pLine;
+    bool keepProcess = true;
+    uint32_t bufferLength = 0;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    if( pContext->urcDataCallback != NULL )
+    {
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+        pktStatus = pContext->urcDataCallback( pContext->pUrcDataCallbackContext,
+                                               pTempLine,
+                                               *pBytesRead,
+                                               &bufferLength );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
+        if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
+        {
+            /* This is not a URC data line. Return true to parse other data. */
+            keepProcess = true;
+        }
+        else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
+        {
+            /* Partial URC data line is received. The prefix URC is waiting for more
+             * data to be received. */
+            pContext->pPktioReadPtr = pTempLine;
+            pContext->partialDataRcvdLen = *pBytesRead;
+            keepProcess = false;
+        }
+        else if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        {
+            /* The Urc data callback function returns other error. This indicate that
+             * the token is corrupted and the reader buffer need to be dropped. */
+            LogError( ( "CellularUrcDataCallback returns error %d. Clean the read buffer.", pktStatus ) );
+
+            /* Clean the read buffer and read pointer. */
+            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+            pContext->pPktioReadPtr = NULL;
+            pContext->partialDataRcvdLen = 0;
+            keepProcess = false;
+        }
+        else if( bufferLength > *pBytesRead )
+        {
+            /* The Urc data callback function returns incorrect buffer length. */
+            LogError( ( "CellularUrcDataCallback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
+                        bufferLength, *pBytesRead ) );
+
+            /* Clean the read buffer and read pointer. */
+            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+            pContext->pPktioReadPtr = NULL;
+            pContext->partialDataRcvdLen = 0;
+            keepProcess = false;
+        }
+        else
+        {
+            /* This is a complete URC data. The URC data is handled in the callback
+             * successfully. Move the read pointer forward. */
+            pTempLine = &pTempLine[ bufferLength ];
+            *pLine = pTempLine;
+            pContext->pPktioReadPtr = *pLine;
+
+            /* Calculate remain bytes in the buffer. */
+            *pBytesRead = *pBytesRead - bufferLength;
+        }
     }
 
     return keepProcess;
@@ -992,8 +1085,14 @@ static void _handleAllReceived( CellularContext_t * pContext,
             bytesRead = bytesRead - 1U;
         }
 
+        /* Preprocess Urc Data from the input buffer. */
+        keepProcess = _preprocessUrcData( pContext, &pTempLine, &bytesRead );
+
         /* Preprocess line. */
-        keepProcess = _preprocessLine( pContext, pTempLine, &bytesRead, &pStartOfData );
+        if( keepProcess == true )
+        {
+            keepProcess = _preprocessLine( pContext, pTempLine, &bytesRead, &pStartOfData );
+        }
 
         if( keepProcess == true )
         {

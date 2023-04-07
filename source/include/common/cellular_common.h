@@ -223,6 +223,25 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
 typedef CellularPktStatus_t ( * CellularUndefinedRespCallback_t )( void * pCallbackContext,
                                                                    const char * pLine );
 
+/**
+ * @ingroup cellular_common_datatypes_functionpointers
+ * @brief Callback used to process URC data buffer.
+ *
+ * @param[in] pUrcDataCallbackContext The pCallbackContext in _Cellular_TimeoutAtcmdDataRecvRequestWithCallback.
+ * @param[in] pBuffer The data buffer with modem response data.
+ * @param[in] bufferLength The length of the input buffer.
+ * @param[out] pUrcDataLength The length of the URC data in the buffer.
+ *
+ * @return CELLULAR_PKT_STATUS_OK if the operation is successful.
+ * CELLULAR_PKT_STATUS_SIZE_MISMATCH if more data is required.
+ * CELLULAR_PKT_STATUS_PREFIX_MISMATCH if this is not a URC data buffer
+ * Otherwise an error code indicating the cause of the error.
+ */
+typedef CellularPktStatus_t ( * CellularUrcDataCallback_t ) ( void * pUrcDataCallbackContext,
+                                                              char * pBuffer,
+                                                              uint32_t bufferLength,
+                                                              uint32_t * pUrcDataLength );
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -622,6 +641,24 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
 CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pContext,
                                                          CellularUndefinedRespCallback_t undefinedRespCallback,
                                                          void * pCallbackContext );
+
+/**
+ * @brief Register URC data callback.
+ *
+ * Cellular module can register the callback function to handle URC data from input
+ * buffer.
+ *
+ * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] urcDataCallback The callback function to handle the URC data.
+ * @param[in] pUrcDataCallbackContext The pUrcDataCallbackContext passed to the urcDataCallback
+ * callback function if urcDataCallback is not NULL.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error code
+ * indicating the cause of the error.
+ */
+CellularError_t _Cellular_RegisterUrcDataCallback( CellularContext_t * pContext,
+                                                   CellularUrcDataCallback_t urcDataCallback,
+                                                   void * pUrcDataCallbackContext );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus

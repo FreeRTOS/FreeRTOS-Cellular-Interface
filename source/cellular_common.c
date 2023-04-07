@@ -1137,3 +1137,37 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
 }
 
 /*-----------------------------------------------------------*/
+
+CellularError_t _Cellular_RegisterUrcDataCallback( CellularContext_t * pContext,
+                                                   CellularUrcDataCallback_t urcDataCallback,
+                                                   void * pUrcDataCallbackContext )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_RegisterUrcDataCallback: invalid context." ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else
+    {
+        /* urcDataCallback can be set to NULL to unregister the callback. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+        pContext->urcDataCallback = urcDataCallback;
+
+        if( pContext->urcDataCallback != NULL )
+        {
+            pContext->pUrcDataCallbackContext = pUrcDataCallbackContext;
+        }
+        else
+        {
+            pContext->pUrcDataCallbackContext = NULL;
+        }
+
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
