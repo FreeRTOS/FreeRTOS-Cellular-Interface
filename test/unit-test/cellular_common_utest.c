@@ -1640,3 +1640,77 @@ void test__Cellular_RegisterUndefinedRespCallback_Happy_Path( void )
     TEST_ASSERT_NULL( context.undefinedRespCallback );
     TEST_ASSERT_NULL( context.pUndefinedRespCBContext );
 }
+
+/**
+ * @brief _Cellular_RegisterUrcDataCallback - parameter null context.
+ * pContext parameter is NULL. Verify the return value.
+ */
+void test__Cellular_RegisterUrcDataCallback_Null_Context( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* API call. */
+    cellularStatus = _Cellular_RegisterUrcDataCallback( NULL, NULL, NULL );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+}
+
+CellularPktStatus_t prvDummyUrcDataCallback ( void * pUrcDataCallbackContext,
+                                              char * pBuffer,
+                                              uint32_t bufferLength,
+                                              uint32_t * pUrcDataLength )
+{
+    ( void ) pUrcDataCallbackContext;
+    ( void ) pBuffer;
+    ( void ) bufferLength;
+    ( void ) pUrcDataLength;
+
+    return CELLULAR_PKT_STATUS_OK;
+}
+
+/**
+ * @brief _Cellular_RegisterUrcDataCallback - parameter NULL callback.
+ * urcDataCallback parameter is NULL. Verify the member variable is updated.
+ */
+void test__Cellular_RegisterUrcDataCallback_Null_Callback( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t cellularContext;
+    uint32_t urcDataCallbackContext;
+
+    /* Setup internal variable. */
+    memset( &cellularContext, 0, sizeof( CellularContext_t ) );
+    cellularContext.urcDataCallback = prvDummyUrcDataCallback;
+    cellularContext.pUrcDataCallbackContext = &urcDataCallbackContext;
+
+    /* API call. */
+    cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, NULL, &urcDataCallbackContext );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( NULL, cellularContext.urcDataCallback );
+    /* The callback context will be cleaned when urcDataCallback is NULL. */
+    TEST_ASSERT_EQUAL( NULL, cellularContext.pUrcDataCallbackContext );
+}
+
+/**
+ * @brief _Cellular_RegisterUrcDataCallback - Setup the URC data callback.
+ * Verify the URC data callback and callback context are set correctly.
+ */
+void test__Cellular_RegisterUrcDataCallback_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t cellularContext;
+    uint32_t urcDataCallbackContext;
+
+    /* Setup internal variable. */
+    memset( &cellularContext, 0, sizeof( CellularContext_t ) );
+    cellularContext.urcDataCallback = NULL;
+
+    /* API call. */
+    cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, prvDummyUrcDataCallback, &urcDataCallbackContext );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( prvDummyUrcDataCallback, cellularContext.urcDataCallback );
+    TEST_ASSERT_EQUAL( &urcDataCallbackContext, cellularContext.pUrcDataCallbackContext );
+}
