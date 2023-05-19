@@ -79,18 +79,18 @@
 #define MAX_QIRD_STRING_PREFIX_STRING                        ( 14U )           /* The max data prefix string is "+QIRD: 1460\r\n" */
 
 /* URC data callback test string. */
-#define URC_DATA_CALLBACK_PREFIX_MISMATCH_STR           "+URC_PREFIX_MISMATCH:\r\n"
-#define URC_DATA_CALLBACK_OTHER_ERROR_STR               "+URC_OTHER_ERROR:\r\n"
-#define URC_DATA_CALLBACK_INCORRECT_BUFFER_LEN_STR      "+URC_INCORRECT_LENGTH:\r\n"
-#define URC_DATA_CALLBACK_MATCH_STR                     "+URC_DATA:123\r\n"
-#define URC_DATA_CALLBACK_MATCH_STR_LENGTH              15
-#define URC_DATA_CALLBACK_LEFT_OVER_STR                 "+URC_STRING:123\r\n"
+#define URC_DATA_CALLBACK_PREFIX_MISMATCH_STR                "+URC_PREFIX_MISMATCH:\r\n"
+#define URC_DATA_CALLBACK_OTHER_ERROR_STR                    "+URC_OTHER_ERROR:\r\n"
+#define URC_DATA_CALLBACK_INCORRECT_BUFFER_LEN_STR           "+URC_INCORRECT_LENGTH:\r\n"
+#define URC_DATA_CALLBACK_MATCH_STR                          "+URC_DATA:123\r\n"
+#define URC_DATA_CALLBACK_MATCH_STR_LENGTH                   15
+#define URC_DATA_CALLBACK_LEFT_OVER_STR                      "+URC_STRING:123\r\n"
 
-#define URC_DATA_CALLBACK_MATCH_STR_PREFIX              "+URC_PART_DATA:"
-#define URC_DATA_CALLBACK_MATCH_STR_PREFIX_LENGTH       15
-#define URC_DATA_CALLBACK_MATCH_STR_PART1               URC_DATA_CALLBACK_MATCH_STR_PREFIX"14\r\n1234"
-#define URC_DATA_CALLBACK_MATCH_STR_PART2               "1234567890\r\n"
-#define URC_DATA_CALLBACK_MATCH_STR_PART_LENGTH         35
+#define URC_DATA_CALLBACK_MATCH_STR_PREFIX                   "+URC_PART_DATA:"
+#define URC_DATA_CALLBACK_MATCH_STR_PREFIX_LENGTH            15
+#define URC_DATA_CALLBACK_MATCH_STR_PART1                    URC_DATA_CALLBACK_MATCH_STR_PREFIX "14\r\n1234"
+#define URC_DATA_CALLBACK_MATCH_STR_PART2                    "1234567890\r\n"
+#define URC_DATA_CALLBACK_MATCH_STR_PART_LENGTH              35
 
 struct _cellularCommContext
 {
@@ -634,6 +634,7 @@ static CellularCommInterfaceError_t prvCommIntfReceiveCustomString( CellularComm
 
         ( void ) strncpy( ( char * ) pBuffer, pCommIntfRecvCustomString, bufferLength );
         *pDataReceivedLength = strlen( pCommIntfRecvCustomString );
+
         if( pCommIntfRecvCustomStringCallback != NULL )
         {
             pCommIntfRecvCustomStringCallback();
@@ -1590,7 +1591,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_success( v
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
-    pCommIntfRecvCustomString = URC_DATA_CALLBACK_MATCH_STR""URC_DATA_CALLBACK_LEFT_OVER_STR;
+    pCommIntfRecvCustomString = URC_DATA_CALLBACK_MATCH_STR ""URC_DATA_CALLBACK_LEFT_OVER_STR;
     pUrcDataPkthandlerString = URC_DATA_CALLBACK_LEFT_OVER_STR;
     dataUrcPktHandlerCallbackIsCalled = 0;
 

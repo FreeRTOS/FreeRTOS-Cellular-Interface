@@ -1656,10 +1656,10 @@ void test__Cellular_RegisterUrcDataCallback_Null_Context( void )
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
 
-CellularPktStatus_t prvDummyUrcDataCallback ( void * pUrcDataCallbackContext,
-                                              char * pBuffer,
-                                              uint32_t bufferLength,
-                                              uint32_t * pUrcDataLength )
+CellularPktStatus_t prvDummyUrcDataCallback( void * pUrcDataCallbackContext,
+                                             char * pBuffer,
+                                             uint32_t bufferLength,
+                                             uint32_t * pUrcDataLength )
 {
     ( void ) pUrcDataCallbackContext;
     ( void ) pBuffer;
