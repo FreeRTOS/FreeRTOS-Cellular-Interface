@@ -1688,6 +1688,7 @@ void test__Cellular_RegisterUrcDataCallback_Null_Callback( void )
     cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, NULL, &urcDataCallbackContext );
 
     /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( NULL, cellularContext.urcDataCallback );
     /* The callback context will be cleaned when urcDataCallback is NULL. */
     TEST_ASSERT_EQUAL( NULL, cellularContext.pUrcDataCallbackContext );
@@ -1711,6 +1712,7 @@ void test__Cellular_RegisterUrcDataCallback_Happy_Path( void )
     cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, prvDummyUrcDataCallback, &urcDataCallbackContext );
 
     /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( prvDummyUrcDataCallback, cellularContext.urcDataCallback );
     TEST_ASSERT_EQUAL( &urcDataCallbackContext, cellularContext.pUrcDataCallbackContext );
 }
