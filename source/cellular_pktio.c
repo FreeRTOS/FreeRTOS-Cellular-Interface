@@ -648,40 +648,28 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
 
     if( bytesDataAndLeft >= pContext->dataLength )
     {
-        /* There is no command waiting for response if pAtResp is NULL. The is the
-         * case that URC data is received from the buffer. */
-        if( pAtResp != NULL )
-        {
-            /* Add data to the response linked list. */
-            _saveRawData( pStartOfData, pAtResp, pContext->dataLength );
+        /* Add data to the response linked list. */
+        _saveRawData( pStartOfData, pAtResp, pContext->dataLength );
 
-            /* Advance pLine to a point after data. */
-            *ppLine = &pStartOfData[ pContext->dataLength ];
+        /* Advance pLine to a point after data. */
+        *ppLine = &pStartOfData[ pContext->dataLength ];
 
-            /* There are more bytes after the data. */
-            *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
+        /* There are more bytes after the data. */
+        *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-            LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
-                        pContext->pktioReadBuf,
-                        pStartOfData,
-                        bytesBeforeData,
-                        *pBytesLeft,
-                        bytesRead ) );
+        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
+                    pContext->pktioReadBuf,
+                    pStartOfData,
+                    bytesBeforeData,
+                    *pBytesLeft,
+                    bytesRead ) );
 
-            /* reset the data related variables. */
-            pContext->dataLength = 0U;
+        /* reset the data related variables. */
+        pContext->dataLength = 0U;
 
-            /* Set the pPktioReadPtr to indicate data already handled. */
-            pContext->pPktioReadPtr = *ppLine;
-            pContext->partialDataRcvdLen = *pBytesLeft;
-        }
-        else
-        {
-            /* This the the URC data receive case. The data required by URC data callback
-             * is received. Leave the data mode by setting dataLength to 0. */
-            *pBytesLeft = bytesRead;
-            pContext->dataLength = 0U;
-        }
+        /* Set the pPktioReadPtr to indicate data already handled. */
+        pContext->pPktioReadPtr = *ppLine;
+        pContext->partialDataRcvdLen = *pBytesLeft;
     }
     else
     {
