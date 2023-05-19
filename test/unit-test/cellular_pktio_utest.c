@@ -955,12 +955,14 @@ static CellularPktStatus_t prvDataUrcPktHandlerCallback( CellularContext_t * pCo
 {
     int compareResult;
 
+    ( void ) pContext;
+
     dataUrcPktHandlerCallbackIsCalled = 1;
 
     /* Verify the atRespType is AT_UNSOLICITED. */
     TEST_ASSERT_EQUAL( AT_UNSOLICITED, atRespType );
 
-    /* Verify the pBuffer contains the same string in pCommIntfRecvCustomString. */
+    /* Verify the pBuffer contains the same string passed in the test. */
     compareResult = strncmp( pBuffer, pUrcDataPkthandlerString, strlen( pBuffer ) );
     TEST_ASSERT_EQUAL( 0, compareResult );
 
@@ -1428,7 +1430,8 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_prefix_mis
     /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
-    /* This test verifies the pktio will continue to process the data in prvDataUrcPktHandlerCallback. */
+    /* This test verifies that the pktio rx thread will continue to process the
+     * data in the callback function. */
     TEST_ASSERT_EQUAL( 1, dataUrcPktHandlerCallbackIsCalled );
 }
 

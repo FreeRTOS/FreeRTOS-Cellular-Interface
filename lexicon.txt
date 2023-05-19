@@ -269,6 +269,7 @@ efhplmnwact
 eidrxlist
 eidrxsettingslist
 emerg
+endcode
 endcond
 endif
 endpatternlen
@@ -377,6 +378,7 @@ isurc
 isvalidpdn
 isvalidsocket
 jan
+keepprocess
 keylist
 keylistlen
 kselacq
@@ -409,6 +411,7 @@ mcc
 md
 mem
 memorystatus
+memset
 metadata
 min
 misra
@@ -656,6 +659,7 @@ pstr
 pstring
 pstrvalue
 ptemp
+ptempline
 ptempstring
 ptestusrdata
 ptofree
