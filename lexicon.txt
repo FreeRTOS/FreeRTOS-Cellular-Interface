@@ -355,7 +355,7 @@ inet
 ingroup
 inidcate
 init
-inputbuffercallback 
+inputbuffercallback
 inputline
 inputwithprefix
 int
@@ -488,7 +488,7 @@ pbandcfg
 pbervalue
 pbuf
 pbuffer
-pbufferlengthhandled 
+pbufferlengthhandled
 pbytesread
 pc
 pcallbackcontext
@@ -539,7 +539,7 @@ pgenericcallbackcontext
 ph
 phexdata
 pinputbuf
-pinputbuffercallbackcontext 
+pinputbuffercallbackcontext
 pinputline
 pinputptr
 pinputstr
