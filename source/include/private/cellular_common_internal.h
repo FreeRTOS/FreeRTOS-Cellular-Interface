@@ -145,7 +145,7 @@ struct CellularContext
     CellularUndefinedRespCallback_t undefinedRespCallback;             /**<  Undefined response callback function. */
     void * pUndefinedRespCBContext;                                    /**<  The pCallbackContext passed to CellularUndefinedRespCallback_t. */
     CellularInputBufferCallback_t inputBufferCallback;                 /**<  URC data preprocess callback function. */
-    void * pInputBufferCallbackContext;                                /**<  the callback context passed to urcDataCallback. */
+    void * pInputBufferCallbackContext;                                /**<  the callback context passed to inputBufferCallback. */
 
     /* PktIo data handling. */
     uint32_t dataLength;                                              /**<  The data length in pLine. */
