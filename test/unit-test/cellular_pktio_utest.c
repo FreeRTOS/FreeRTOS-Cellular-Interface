@@ -141,10 +141,10 @@ static void ( * pCommIntfRecvCustomStringCallback )( void ) = NULL;
 
 static bool atCmdStatusUndefindTest = false;
 
-static void * urcDataCallbackContext = NULL;
+static void * inputBufferCallbackContext = NULL;
 
 static int dataUrcPktHandlerCallbackIsCalled = 0;
-static char * pUrcDataPkthandlerString;
+static char * pInputBufferPkthandlerString;
 
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
@@ -901,36 +901,36 @@ CellularPktStatus_t undefinedRespCallback( void * pCallbackContext,
     return undefineReturnStatus;
 }
 
-static CellularPktStatus_t cellularUrcDataCallback( void * pUrcDataCallbackContext,
-                                                    char * pBuffer,
-                                                    uint32_t bufferLength,
-                                                    uint32_t * pUrcDataLength )
+static CellularPktStatus_t cellularInputBufferCallback( void * pInputBufferCallbackContext,
+                                                        char * pBuffer,
+                                                        uint32_t bufferLength,
+                                                        uint32_t * pInputBufferLength )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_FAILURE;
 
     /* Verify the callback context. */
-    TEST_ASSERT_EQUAL( urcDataCallbackContext, pUrcDataCallbackContext );
+    TEST_ASSERT_EQUAL( inputBufferCallbackContext, pInputBufferCallbackContext );
 
     /* Verify the callback context. */
     if( strncmp( pBuffer, URC_DATA_CALLBACK_PREFIX_MISMATCH_STR, bufferLength ) == 0 )
     {
-        *pUrcDataLength = 0;
+        *pInputBufferLength = 0;
         pktStatus = CELLULAR_PKT_STATUS_PREFIX_MISMATCH;
     }
     else if( strncmp( pBuffer, URC_DATA_CALLBACK_OTHER_ERROR_STR, bufferLength ) == 0 )
     {
-        *pUrcDataLength = 0;
+        *pInputBufferLength = 0;
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else if( strncmp( pBuffer, URC_DATA_CALLBACK_INCORRECT_BUFFER_LEN_STR, bufferLength ) == 0 )
     {
         /* Return incorrect buffer length. */
-        *pUrcDataLength = bufferLength + 1;
+        *pInputBufferLength = bufferLength + 1;
         pktStatus = CELLULAR_PKT_STATUS_OK;
     }
     else if( strncmp( pBuffer, URC_DATA_CALLBACK_MATCH_STR, URC_DATA_CALLBACK_MATCH_STR_LENGTH ) == 0 )
     {
-        *pUrcDataLength = 15;
+        *pInputBufferLength = 15;
         pktStatus = CELLULAR_PKT_STATUS_OK;
     }
     else if( strncmp( pBuffer, URC_DATA_CALLBACK_MATCH_STR_PREFIX, URC_DATA_CALLBACK_MATCH_STR_PREFIX_LENGTH ) == 0 )
@@ -941,7 +941,7 @@ static CellularPktStatus_t cellularUrcDataCallback( void * pUrcDataCallbackConte
         }
         else if( bufferLength == URC_DATA_CALLBACK_MATCH_STR_PART_LENGTH )
         {
-            *pUrcDataLength = URC_DATA_CALLBACK_MATCH_STR_PART_LENGTH;
+            *pInputBufferLength = URC_DATA_CALLBACK_MATCH_STR_PART_LENGTH;
             pktStatus = CELLULAR_PKT_STATUS_OK;
         }
     }
@@ -963,13 +963,13 @@ static CellularPktStatus_t prvDataUrcPktHandlerCallback( CellularContext_t * pCo
     TEST_ASSERT_EQUAL( AT_UNSOLICITED, atRespType );
 
     /* Verify the pBuffer contains the same string passed in the test. */
-    compareResult = strncmp( pBuffer, pUrcDataPkthandlerString, strlen( pBuffer ) );
+    compareResult = strncmp( pBuffer, pInputBufferPkthandlerString, strlen( pBuffer ) );
     TEST_ASSERT_EQUAL( 0, compareResult );
 
     return CELLULAR_PKT_STATUS_OK;
 }
 
-static void prvUrcDataCommIntfRecvCallback( void )
+static void prvInputBufferCommIntfRecvCallback( void )
 {
     pCommIntfRecvCustomString = URC_DATA_CALLBACK_MATCH_STR_PART2;
 }
@@ -1381,7 +1381,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__Test( void )
 }
 
 /**
- * @brief _preprocessUrcData - urcDataCallback returns CELLULAR_PKT_STATUS_PREFIX_MISMATCH.
+ * @brief _preprocessInputBuffer - inputBufferCallback returns CELLULAR_PKT_STATUS_PREFIX_MISMATCH.
  *
  * CELLULAR_PKT_STATUS_PREFIX_MISMATCH is returned by the callback function. Verify
  * that RX thread keep process the data.
@@ -1395,7 +1395,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_pktDataPrefixCB__Test( void )
  * @endcode
  * ( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH ) is true.
  */
-void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_prefix_mismatch( void )
+void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessInputBuffer_prefix_mismatch( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1415,13 +1415,13 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_prefix_mis
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
     /* Setup the URC data callback for testing. */
-    context.urcDataCallback = cellularUrcDataCallback;
-    context.pUrcDataCallbackContext = NULL;
+    context.inputBufferCallback = cellularInputBufferCallback;
+    context.pInputBufferCallbackContext = NULL;
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     pCommIntfRecvCustomString = URC_DATA_CALLBACK_PREFIX_MISMATCH_STR;
-    pUrcDataPkthandlerString = URC_DATA_CALLBACK_PREFIX_MISMATCH_STR;
+    pInputBufferPkthandlerString = URC_DATA_CALLBACK_PREFIX_MISMATCH_STR;
     dataUrcPktHandlerCallbackIsCalled = 0;
 
     /* API call. */
@@ -1436,7 +1436,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_prefix_mis
 }
 
 /**
- * @brief _preprocessUrcData - urcDataCallback returns other errors.
+ * @brief _preprocessInputBuffer - inputBufferCallback returns other errors.
  *
  * Other error is returned by the callback function. Verify that RX thread stop
  * processing the data.
@@ -1454,7 +1454,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_prefix_mis
  * @endcode
  * ( pktStatus != CELLULAR_PKT_STATUS_OK ) is true.
  */
-void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_other_error( void )
+void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessInputBuffer_other_error( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1474,8 +1474,8 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_other_erro
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
     /* Setup the URC data callback for testing. */
-    context.urcDataCallback = cellularUrcDataCallback;
-    context.pUrcDataCallbackContext = NULL;
+    context.inputBufferCallback = cellularInputBufferCallback;
+    context.pInputBufferCallbackContext = NULL;
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
@@ -1493,7 +1493,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_other_erro
 }
 
 /**
- * @brief _preprocessUrcData - urcDataCallback returns incorrect buffer length.
+ * @brief _preprocessInputBuffer - inputBufferCallback returns incorrect buffer length.
  *
  * Incorrect buffer length is returned by the callback function. Verify that RX
  * thread stop processing the data.
@@ -1511,7 +1511,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_other_erro
  * @endcode
  * ( bufferLength > *pBytesRead ) is true.
  */
-void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_incorrect_buffer_length( void )
+void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessInputBuffer_incorrect_buffer_length( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1531,8 +1531,8 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_incorrect_
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
     /* Setup the URC data callback for testing. */
-    context.urcDataCallback = cellularUrcDataCallback;
-    context.pUrcDataCallbackContext = NULL;
+    context.inputBufferCallback = cellularInputBufferCallback;
+    context.pInputBufferCallbackContext = NULL;
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
@@ -1550,7 +1550,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_incorrect_
 }
 
 /**
- * @brief _preprocessUrcData - urcDataCallback returns success.
+ * @brief _preprocessInputBuffer - inputBufferCallback returns success.
  *
  * Callback function successfully handle the URC data line. Verify that RX
  * thread keep processing the data after the URC data.
@@ -1569,7 +1569,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_incorrect_
  * @endcode
  * The else case.
  */
-void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_success( void )
+void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessInputBuffer_success( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1589,13 +1589,13 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_success( v
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
     /* Setup the URC data callback for testing. */
-    context.urcDataCallback = cellularUrcDataCallback;
-    context.pUrcDataCallbackContext = NULL;
+    context.inputBufferCallback = cellularInputBufferCallback;
+    context.pInputBufferCallbackContext = NULL;
     recvCount = 1;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     pCommIntfRecvCustomString = URC_DATA_CALLBACK_MATCH_STR ""URC_DATA_CALLBACK_LEFT_OVER_STR;
-    pUrcDataPkthandlerString = URC_DATA_CALLBACK_LEFT_OVER_STR;
+    pInputBufferPkthandlerString = URC_DATA_CALLBACK_LEFT_OVER_STR;
     dataUrcPktHandlerCallbackIsCalled = 0;
 
     /* API call. */
@@ -1609,7 +1609,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_success( v
 }
 
 /**
- * @brief _preprocessUrcData - urcDataCallback returns size mismatch.
+ * @brief _preprocessInputBuffer - inputBufferCallback returns size mismatch.
  *
  * Callback function returns size mismatch. Verify that the RX thread stop processing
  * the data and receive more data from comm interface. The callback function will be
@@ -1627,7 +1627,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_success( v
  * @endcode
  * ( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH ) is true.
  */
-void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_size_mismatch( void )
+void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessInputBuffer_size_mismatch( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     CellularContext_t context;
@@ -1647,13 +1647,13 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event__preprocessUrcData_size_misma
     pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
 
     /* Setup the URC data callback for testing. */
-    context.urcDataCallback = cellularUrcDataCallback;
-    context.pUrcDataCallbackContext = NULL;
+    context.inputBufferCallback = cellularInputBufferCallback;
+    context.pInputBufferCallbackContext = NULL;
     recvCount = 2;
     atCmdType = CELLULAR_AT_NO_RESULT;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     pCommIntfRecvCustomString = URC_DATA_CALLBACK_MATCH_STR_PART1;
-    pCommIntfRecvCustomStringCallback = prvUrcDataCommIntfRecvCallback;
+    pCommIntfRecvCustomStringCallback = prvInputBufferCommIntfRecvCallback;
     dataUrcPktHandlerCallbackIsCalled = 0;
 
     /* API call. */

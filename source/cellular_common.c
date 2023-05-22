@@ -1138,9 +1138,9 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
 
 /*-----------------------------------------------------------*/
 
-CellularError_t _Cellular_RegisterUrcDataCallback( CellularContext_t * pContext,
-                                                   CellularUrcDataCallback_t urcDataCallback,
-                                                   void * pUrcDataCallbackContext )
+CellularError_t _Cellular_RegisterInputBufferCallback( CellularContext_t * pContext,
+                                                       CellularInputBufferCallback_t inputBufferCallback,
+                                                       void * pInputBufferCallbackContext )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
@@ -1151,17 +1151,17 @@ CellularError_t _Cellular_RegisterUrcDataCallback( CellularContext_t * pContext,
     }
     else
     {
-        /* urcDataCallback can be set to NULL to unregister the callback. */
+        /* inputBufferCallback can be set to NULL to unregister the callback. */
         PlatformMutex_Lock( &pContext->PktRespMutex );
-        pContext->urcDataCallback = urcDataCallback;
+        pContext->inputBufferCallback = inputBufferCallback;
 
-        if( pContext->urcDataCallback != NULL )
+        if( pContext->inputBufferCallback != NULL )
         {
-            pContext->pUrcDataCallbackContext = pUrcDataCallbackContext;
+            pContext->pInputBufferCallbackContext = pInputBufferCallbackContext;
         }
         else
         {
-            pContext->pUrcDataCallbackContext = NULL;
+            pContext->pInputBufferCallbackContext = NULL;
         }
 
         PlatformMutex_Unlock( &pContext->PktRespMutex );

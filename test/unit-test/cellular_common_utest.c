@@ -410,6 +410,20 @@ void MockPlatformMutex_Destroy( PlatformMutex_t * pMutex )
     pMutex->created = false;
 }
 
+
+static CellularPktStatus_t prvDummyInputBufferCallback( void * pInputBufferCallbackContext,
+                                                        char * pBuffer,
+                                                        uint32_t bufferLength,
+                                                        uint32_t * pBufferLengthHandled )
+{
+    ( void ) pInputBufferCallbackContext;
+    ( void ) pBuffer;
+    ( void ) bufferLength;
+    ( void ) pBufferLengthHandled;
+
+    return CELLULAR_PKT_STATUS_OK;
+}
+
 /* ========================================================================== */
 
 /**
@@ -1642,77 +1656,64 @@ void test__Cellular_RegisterUndefinedRespCallback_Happy_Path( void )
 }
 
 /**
- * @brief _Cellular_RegisterUrcDataCallback - parameter null context.
+ * @brief _Cellular_RegisterInputBufferCallback - parameter null context.
  * pContext parameter is NULL. Verify the return value.
  */
-void test__Cellular_RegisterUrcDataCallback_Null_Context( void )
+void test__Cellular_RegisterInputBufferCallback_Null_Context( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
     /* API call. */
-    cellularStatus = _Cellular_RegisterUrcDataCallback( NULL, NULL, NULL );
+    cellularStatus = _Cellular_RegisterInputBufferCallback( NULL, NULL, NULL );
 
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
 }
 
-CellularPktStatus_t prvDummyUrcDataCallback( void * pUrcDataCallbackContext,
-                                             char * pBuffer,
-                                             uint32_t bufferLength,
-                                             uint32_t * pUrcDataLength )
-{
-    ( void ) pUrcDataCallbackContext;
-    ( void ) pBuffer;
-    ( void ) bufferLength;
-    ( void ) pUrcDataLength;
-
-    return CELLULAR_PKT_STATUS_OK;
-}
-
 /**
- * @brief _Cellular_RegisterUrcDataCallback - parameter NULL callback.
- * urcDataCallback parameter is NULL. Verify the member variable is updated.
+ * @brief _Cellular_RegisterInputBufferCallback - parameter NULL callback.
+ * inputBufferCallback parameter is NULL. Verify the member variable is updated.
  */
-void test__Cellular_RegisterUrcDataCallback_Null_Callback( void )
+void test__Cellular_RegisterInputBufferCallback_Null_Callback( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t cellularContext;
-    uint32_t urcDataCallbackContext;
+    uint32_t inputBufferCallbackContext;
 
     /* Setup internal variable. */
     memset( &cellularContext, 0, sizeof( CellularContext_t ) );
-    cellularContext.urcDataCallback = prvDummyUrcDataCallback;
-    cellularContext.pUrcDataCallbackContext = &urcDataCallbackContext;
+    cellularContext.inputBufferCallback = prvDummyInputBufferCallback;
+    cellularContext.pInputBufferCallbackContext = &inputBufferCallbackContext;
 
     /* API call. */
-    cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, NULL, &urcDataCallbackContext );
+    cellularStatus = _Cellular_RegisterInputBufferCallback( &cellularContext, NULL, &inputBufferCallbackContext );
 
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-    TEST_ASSERT_EQUAL( NULL, cellularContext.urcDataCallback );
-    /* The callback context will be cleaned when urcDataCallback is NULL. */
-    TEST_ASSERT_EQUAL( NULL, cellularContext.pUrcDataCallbackContext );
+    TEST_ASSERT_EQUAL( NULL, cellularContext.inputBufferCallback );
+    /* The callback context will be cleaned when inputBufferCallback is NULL. */
+    TEST_ASSERT_EQUAL( NULL, cellularContext.pInputBufferCallbackContext );
 }
 
 /**
- * @brief _Cellular_RegisterUrcDataCallback - Setup the URC data callback.
+ * @brief _Cellular_RegisterInputBufferCallback - Setup the URC data callback.
  * Verify the URC data callback and callback context are set correctly.
  */
-void test__Cellular_RegisterUrcDataCallback_Happy_Path( void )
+void test__Cellular_RegisterInputBufferCallback_Happy_Path( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t cellularContext;
-    uint32_t urcDataCallbackContext;
+    uint32_t inputBufferCallbackContext;
 
     /* Setup internal variable. */
     memset( &cellularContext, 0, sizeof( CellularContext_t ) );
-    cellularContext.urcDataCallback = NULL;
+    cellularContext.inputBufferCallback = NULL;
 
     /* API call. */
-    cellularStatus = _Cellular_RegisterUrcDataCallback( &cellularContext, prvDummyUrcDataCallback, &urcDataCallbackContext );
+    cellularStatus = _Cellular_RegisterInputBufferCallback( &cellularContext, prvDummyInputBufferCallback, &inputBufferCallbackContext );
 
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-    TEST_ASSERT_EQUAL( prvDummyUrcDataCallback, cellularContext.urcDataCallback );
-    TEST_ASSERT_EQUAL( &urcDataCallbackContext, cellularContext.pUrcDataCallbackContext );
+    TEST_ASSERT_EQUAL( prvDummyInputBufferCallback, cellularContext.inputBufferCallback );
+    TEST_ASSERT_EQUAL( &inputBufferCallbackContext, cellularContext.pInputBufferCallbackContext );
 }

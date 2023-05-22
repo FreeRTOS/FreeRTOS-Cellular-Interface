@@ -144,8 +144,8 @@ struct CellularContext
     _atRespType_t recvdMsgType;                                        /**<  The received AT response type. */
     CellularUndefinedRespCallback_t undefinedRespCallback;             /**<  Undefined response callback function. */
     void * pUndefinedRespCBContext;                                    /**<  The pCallbackContext passed to CellularUndefinedRespCallback_t. */
-    CellularUrcDataCallback_t urcDataCallback;                         /**<  URC data preprocess callback function. */
-    void * pUrcDataCallbackContext;                                    /**<  the callback context passed to urcDataCallback. */
+    CellularInputBufferCallback_t inputBufferCallback;                 /**<  URC data preprocess callback function. */
+    void * pInputBufferCallbackContext;                                /**<  the callback context passed to urcDataCallback. */
 
     /* PktIo data handling. */
     uint32_t dataLength;                                              /**<  The data length in pLine. */

@@ -118,9 +118,9 @@ static bool _getNextLine( CellularContext_t * pContext,
                           uint32_t * pBytesRead,
                           uint32_t currentLineLength,
                           CellularPktStatus_t pktStatus );
-static bool _preprocessUrcData( CellularContext_t * pContext,
-                                char ** pLine,
-                                uint32_t * pBytesRead );
+static bool _preprocessInputBuffer( CellularContext_t * pContext,
+                                    char ** pLine,
+                                    uint32_t * pBytesRead );
 
 /*-----------------------------------------------------------*/
 
@@ -826,42 +826,42 @@ static bool _findLineInStream( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static bool _preprocessUrcData( CellularContext_t * pContext,
-                                char ** pLine,
-                                uint32_t * pBytesRead )
+static bool _preprocessInputBuffer( CellularContext_t * pContext,
+                                    char ** pLine,
+                                    uint32_t * pBytesRead )
 {
     char * pTempLine = *pLine;
     bool keepProcess = true;
     uint32_t bufferLength = 0;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    if( pContext->urcDataCallback != NULL )
+    if( pContext->inputBufferCallback != NULL )
     {
         PlatformMutex_Lock( &pContext->PktRespMutex );
-        pktStatus = pContext->urcDataCallback( pContext->pUrcDataCallbackContext,
-                                               pTempLine,
-                                               *pBytesRead,
-                                               &bufferLength );
+        pktStatus = pContext->inputBufferCallback( pContext->pInputBufferCallbackContext,
+                                                   pTempLine,
+                                                   *pBytesRead,
+                                                   &bufferLength );
         PlatformMutex_Unlock( &pContext->PktRespMutex );
 
         if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
         {
-            /* This is not a URC data line. Return true to parse other data. */
+            /* Input buffer is not handled in the callback. pktio should keep processing
+             * the input buffer. */
             keepProcess = true;
         }
         else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
         {
-            /* Partial URC data line is received. The prefix URC is waiting for more
-             * data to be received. */
+            /* Input buffer is handled in the callback. The callback expects to be called
+             * again with more data received. pktio won't keep process this input buffer. */
             pContext->pPktioReadPtr = pTempLine;
             pContext->partialDataRcvdLen = *pBytesRead;
             keepProcess = false;
         }
         else if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            /* The Urc data callback function returns other error. This indicate that
-             * the token is corrupted and the reader buffer need to be dropped. */
-            LogError( ( "CellularUrcDataCallback returns error %d. Clean the read buffer.", pktStatus ) );
+            /* Modem returns unexpected response. */
+            LogError( ( "Input buffer callback returns error %d. Clean the read buffer.", pktStatus ) );
 
             /* Clean the read buffer and read pointer. */
             ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
@@ -871,8 +871,8 @@ static bool _preprocessUrcData( CellularContext_t * pContext,
         }
         else if( bufferLength > *pBytesRead )
         {
-            /* The Urc data callback function returns incorrect buffer length. */
-            LogError( ( "CellularUrcDataCallback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
+            /* The input buffer callback returns incorrect buffer length. */
+            LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
                         bufferLength, *pBytesRead ) );
 
             /* Clean the read buffer and read pointer. */
@@ -883,8 +883,9 @@ static bool _preprocessUrcData( CellularContext_t * pContext,
         }
         else
         {
-            /* This is a complete URC data. The URC data is handled in the callback
-             * successfully. Move the read pointer forward. */
+            /* The input buffer is handled in the callback successfully. Move
+             * the read pointer forward. pktio will keep processing the line
+             * after. */
             pTempLine = &pTempLine[ bufferLength ];
             *pLine = pTempLine;
             pContext->pPktioReadPtr = *pLine;
@@ -1073,8 +1074,11 @@ static void _handleAllReceived( CellularContext_t * pContext,
             bytesRead = bytesRead - 1U;
         }
 
-        /* Preprocess Urc Data from the input buffer. */
-        keepProcess = _preprocessUrcData( pContext, &pTempLine, &bytesRead );
+        /* Preprocess the input buffer in the callback function. pktio processes the
+         * input buffer in line. This function allows the porting to process the input
+         * buffer before pktio processing lines in the buffer. For example, porting
+         * can make use of input buffer callback to handle binary stream in URC. */
+        keepProcess = _preprocessInputBuffer( pContext, &pTempLine, &bytesRead );
 
         /* Preprocess line. */
         if( keepProcess == true )
