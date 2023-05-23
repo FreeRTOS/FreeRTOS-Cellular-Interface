@@ -269,6 +269,7 @@ efhplmnwact
 eidrxlist
 eidrxsettingslist
 emerg
+endcode
 endcond
 endif
 endpatternlen
@@ -354,6 +355,7 @@ inet
 ingroup
 inidcate
 init
+inputbuffercallback
 inputline
 inputwithprefix
 int
@@ -377,6 +379,7 @@ isurc
 isvalidpdn
 isvalidsocket
 jan
+keepprocess
 keylist
 keylistlen
 kselacq
@@ -409,6 +412,7 @@ mcc
 md
 mem
 memorystatus
+memset
 metadata
 min
 misra
@@ -484,6 +488,7 @@ pbandcfg
 pbervalue
 pbuf
 pbuffer
+pbufferlengthhandled
 pbytesread
 pc
 pcallbackcontext
@@ -534,6 +539,7 @@ pgenericcallbackcontext
 ph
 phexdata
 pinputbuf
+pinputbuffercallbackcontext
 pinputline
 pinputptr
 pinputstr
@@ -656,6 +662,7 @@ pstr
 pstring
 pstrvalue
 ptemp
+ptempline
 ptempstring
 ptestusrdata
 ptofree

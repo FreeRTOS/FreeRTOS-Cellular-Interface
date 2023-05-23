@@ -113,6 +113,14 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
                                     CellularATCommandResponse_t ** ppAtResp );
 static void _pktioReadThread( void * pUserData );
 static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
+static bool _getNextLine( CellularContext_t * pContext,
+                          char ** ppLine,
+                          uint32_t * pBytesRead,
+                          uint32_t currentLineLength,
+                          CellularPktStatus_t pktStatus );
+static bool _preprocessInputBuffer( CellularContext_t * pContext,
+                                    char ** pLine,
+                                    uint32_t * pBytesRead );
 
 /*-----------------------------------------------------------*/
 
@@ -862,6 +870,80 @@ static bool _findLineInStream( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
+static bool _preprocessInputBuffer( CellularContext_t * pContext,
+                                    char ** pLine,
+                                    uint32_t * pBytesRead )
+{
+    char * pTempLine = *pLine;
+    bool keepProcess = true;
+    uint32_t bufferLength = 0;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+
+    if( pContext->inputBufferCallback != NULL )
+    {
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+        pktStatus = pContext->inputBufferCallback( pContext->pInputBufferCallbackContext,
+                                                   pTempLine,
+                                                   *pBytesRead,
+                                                   &bufferLength );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+
+        if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
+        {
+            /* Input buffer is not handled in the callback. pktio should keep processing
+             * the input buffer. */
+            keepProcess = true;
+        }
+        else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
+        {
+            /* Input buffer is handled in the callback. The callback expects to be called
+             * again with more data received. pktio won't keep process this input buffer. */
+            pContext->pPktioReadPtr = pTempLine;
+            pContext->partialDataRcvdLen = *pBytesRead;
+            keepProcess = false;
+        }
+        else if( pktStatus != CELLULAR_PKT_STATUS_OK )
+        {
+            /* Modem returns unexpected response. */
+            LogError( ( "Input buffer callback returns error %d. Clean the read buffer.", pktStatus ) );
+
+            /* Clean the read buffer and read pointer. */
+            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+            pContext->pPktioReadPtr = NULL;
+            pContext->partialDataRcvdLen = 0;
+            keepProcess = false;
+        }
+        else if( bufferLength > *pBytesRead )
+        {
+            /* The input buffer callback returns incorrect buffer length. */
+            LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
+                        bufferLength, *pBytesRead ) );
+
+            /* Clean the read buffer and read pointer. */
+            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+            pContext->pPktioReadPtr = NULL;
+            pContext->partialDataRcvdLen = 0;
+            keepProcess = false;
+        }
+        else
+        {
+            /* The input buffer is handled in the callback successfully. Move
+             * the read pointer forward. pktio will keep processing the line
+             * after. */
+            pTempLine = &pTempLine[ bufferLength ];
+            *pLine = pTempLine;
+            pContext->pPktioReadPtr = *pLine;
+
+            /* Calculate remain bytes in the buffer. */
+            *pBytesRead = *pBytesRead - bufferLength;
+        }
+    }
+
+    return keepProcess;
+}
+
+/*-----------------------------------------------------------*/
+
 static bool _preprocessLine( CellularContext_t * pContext,
                              char * pLine,
                              uint32_t * pBytesRead,
@@ -1036,8 +1118,17 @@ static void _handleAllReceived( CellularContext_t * pContext,
             bytesRead = bytesRead - 1U;
         }
 
+        /* Preprocess the input buffer in the callback function. pktio processes the
+         * input buffer in line. This function allows the porting to process the input
+         * buffer before pktio processing lines in the buffer. For example, porting
+         * can make use of input buffer callback to handle binary stream in URC. */
+        keepProcess = _preprocessInputBuffer( pContext, &pTempLine, &bytesRead );
+
         /* Preprocess line. */
-        keepProcess = _preprocessLine( pContext, pTempLine, &bytesRead, &pStartOfData );
+        if( keepProcess == true )
+        {
+            keepProcess = _preprocessLine( pContext, pTempLine, &bytesRead, &pStartOfData );
+        }
 
         if( keepProcess == true )
         {
