@@ -486,7 +486,8 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
             if( ( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( pRespPrefix == NULL ) ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_DATA_WO_PREFIX ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) )
+                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) ||
+                ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE ) )
             {
                 atRespType = AT_SOLICITED;
             }
