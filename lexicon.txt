@@ -640,6 +640,8 @@ prl
 processmodemrdy
 processpowerdown
 prssivalue
+prvpacketcallbackerror
+prvpacketcallbacksuccess
 ps
 psaveptr
 psentdatalength
