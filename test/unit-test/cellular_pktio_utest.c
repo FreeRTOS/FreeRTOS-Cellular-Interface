@@ -979,6 +979,7 @@ static CellularPktStatus_t prvPacketCallbackError( CellularContext_t * pContext,
                                                    const void * pBuffer )
 {
     const CellularATCommandResponse_t * pAtResp = ( const CellularATCommandResponse_t * ) pBuffer;
+
     ( void ) pContext;
 
     /* Verify the response type is AT_SOLICITED. */
@@ -2223,7 +2224,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
     recvCount = 1;
     atCmdType = CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
-    pCommIntfRecvCustomString = "12345\r\n";    /* Dummy string to be verified in the callback. */
+    pCommIntfRecvCustomString = "12345\r\n"; /* Dummy string to be verified in the callback. */
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackSuccess );
@@ -2260,7 +2261,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
     recvCount = 1;
     atCmdType = CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
-    pCommIntfRecvCustomString = "ERROR\r\n";            /* Return one of the error token. */
+    pCommIntfRecvCustomString = "ERROR\r\n"; /* Return one of the error token. */
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackError );
@@ -2310,7 +2311,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_NO_RE
     atCmdType = CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     context.pRespPrefix = "+CMD_PREFIX";
-    pCommIntfRecvCustomString = "+CMD_PREFIX:12345\r\n";    /* Dummy string to be verified in the callback. */
+    pCommIntfRecvCustomString = "+CMD_PREFIX:12345\r\n"; /* Dummy string to be verified in the callback. */
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackSuccess );
@@ -2348,7 +2349,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_NO_RE
     atCmdType = CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     context.pRespPrefix = "+CMD_PREFIX";
-    pCommIntfRecvCustomString = "ERROR\r\n";    /* Return one of the error token. */
+    pCommIntfRecvCustomString = "ERROR\r\n"; /* Return one of the error token. */
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackError );

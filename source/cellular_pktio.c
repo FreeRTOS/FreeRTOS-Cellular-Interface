@@ -252,11 +252,14 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
 
         case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
         case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+            /* Save the line in the response. */
             _saveATData( pLine, pResp );
 
             /* Returns CELLULAR_PKT_STATUS_OK to indicate that the response of the
-             * command is received. */
+             * command is received. No success result code is expected. Set the response
+             * status to true here. */
             pkStatus = CELLULAR_PKT_STATUS_OK;
+            pResp->status = true;
             break;
 
         default:
@@ -383,27 +386,20 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
                 pResp->status = false;
                 pkStatus = CELLULAR_PKT_STATUS_OK;
             }
-            else
-            {
-                pkStatus = _processIntermediateResponse( pLine, pResp, atType );
+        }
 
-                /* This is the case that no final result code is expected. The AT
-                 * command only expect one response from modem. */
-                if( pkStatus == CELLULAR_PKT_STATUS_OK )
-                {
-                    pResp->status = true;
-                }
-            }
+        if( result != true )
+        {
+            pkStatus = _processIntermediateResponse( pLine, pResp, atType );
         }
     }
 
     if( ( result == true ) && ( pResp->status == false ) )
     {
-        LogWarn( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
-                   ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+        LogWarn( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s",
                    pLine,
-                   ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
-                   pkStatus ) );
+                   ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                   ( pRespPrefix != NULL ? pRespPrefix : "NULL" ) ) );
     }
 
     PlatformMutex_Unlock( &pContext->PktRespMutex );
