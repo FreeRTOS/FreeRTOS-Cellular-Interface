@@ -388,7 +388,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
                 pkStatus = _processIntermediateResponse( pLine, pResp, atType );
 
                 /* This is the case that no final result code is expected. The AT
-                 * command only expect one resonse from modem. */
+                 * command only expect one response from modem. */
                 if( pkStatus == CELLULAR_PKT_STATUS_OK )
                 {
                     pResp->status = true;

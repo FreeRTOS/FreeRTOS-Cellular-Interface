@@ -504,6 +504,7 @@ pclosedcallbackcontext
 pcomminterface
 pcomminterfacehandle
 pcommintf
+pcommintfrecvcustomstring
 pcontext
 pcomparestring
 pcurrentcmd
@@ -545,6 +546,7 @@ pinputptr
 pinputstr
 pitm
 pkio
+pkstatus
 pkt
 pktdataprefixcallback
 pktdataprefixcb

@@ -2189,7 +2189,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_STRING_
  * @brief _processIntermediateResponse - Successfully handle AT command type CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE.
  *
  * Successfully handle at command type CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE. Verify
- * the respones string in the callback function.
+ * the response string in the callback function.
  *
  * <b>Coverage</b>
  * @code{c}
@@ -2197,7 +2197,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_STRING_
  *             ...
  *             _saveATData( pLine, pResp );
  *
- *             pkStatus = CELLULAR_PKT_STATUS_OK;
+ *             pktStatus = CELLULAR_PKT_STATUS_OK;
  *             break;
  * @endcode
  * The CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE case.
@@ -2228,7 +2228,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackSuccess );
 
-    /* Veification. */
+    /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* The result is verified in prvPacketCallbackSuccess. */
@@ -2265,7 +2265,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackError );
 
-    /* Veification. */
+    /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* The result is verified in prvPacketCallbackError. */
@@ -2276,7 +2276,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
  * @brief _processIntermediateResponse - Successfully handle AT command type CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE.
  *
  * Successfully handle at command type CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE. Verify
- * the respones string in the callback function.
+ * the response string in the callback function.
  *
  * <b>Coverage</b>
  * @code{c}
@@ -2315,7 +2315,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_NO_RE
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackSuccess );
 
-    /* Veification. */
+    /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* The result is verified in prvPacketCallbackSuccess. */
@@ -2353,7 +2353,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_NO_RE
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvPacketCallbackError );
 
-    /* Veification. */
+    /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 
     /* The result is verified in prvPacketCallbackError. */
