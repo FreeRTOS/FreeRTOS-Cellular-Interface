@@ -205,6 +205,26 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
 
             break;
 
+        case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+
+            if( pResp->pItm == NULL )
+            {
+                _saveATData( pLine, pResp );
+
+                /* This command only expect one response and no result code. */
+                pResp->status = true;
+                pkStatus = CELLULAR_PKT_STATUS_OK;
+            }
+            else
+            {
+                /* We already have an intermediate response. */
+                pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
+            }
+
+            break;
+
         case CELLULAR_AT_WITH_PREFIX:
 
             if( pResp->pItm == NULL )
@@ -213,6 +233,30 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
                  * function _getMsgType(), so the failure condition here won't be touched.
                  */
                 _saveATData( pLine, pResp );
+            }
+            else
+            {
+                /* We already have an intermediate response. */
+                pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
+                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                            pLine, pkStatus, pResp->pItm->pLine ) );
+            }
+
+            break;
+
+        case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+
+            if( pResp->pItm == NULL )
+            {
+                /* The removed code which demonstrate the existence of the prefix has been done in
+                 * function _getMsgType(), so the failure condition here won't be touched.
+                 */
+                _saveATData( pLine, pResp );
+
+                /* This command only expect one response and no result code. */
+                pResp->status = true;
+                pkStatus = CELLULAR_PKT_STATUS_OK;
+                
             }
             else
             {

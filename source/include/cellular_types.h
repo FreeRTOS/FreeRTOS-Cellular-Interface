@@ -358,13 +358,15 @@ typedef enum CellularPktStatus
  */
 typedef enum CellularATCommandType
 {
-    CELLULAR_AT_NO_RESULT,            /**<  no response expected, only OK, ERROR etc. */
-    CELLULAR_AT_WO_PREFIX,            /**<  string response without a prefix. */
-    CELLULAR_AT_WITH_PREFIX,          /**<  string response with a prefix. */
-    CELLULAR_AT_MULTI_WITH_PREFIX,    /**<  multiple line response all start with a prefix. */
-    CELLULAR_AT_MULTI_WO_PREFIX,      /**<  multiple line response with or without a prefix. */
-    CELLULAR_AT_MULTI_DATA_WO_PREFIX, /**<  multiple line data response with or without a prefix. */
-    CELLULAR_AT_NO_COMMAND            /**<  no command is waiting response. */
+    CELLULAR_AT_NO_RESULT,                    /**<  no response expected, only OK, ERROR etc. */
+    CELLULAR_AT_WO_PREFIX,                    /**<  string response without a prefix. */
+    CELLULAR_AT_WITH_PREFIX,                  /**<  string response with a prefix. */
+    CELLULAR_AT_MULTI_WITH_PREFIX,            /**<  multiple line response all start with a prefix. */
+    CELLULAR_AT_MULTI_WO_PREFIX,              /**<  multiple line response with or without a prefix. */
+    CELLULAR_AT_MULTI_DATA_WO_PREFIX,         /**<  multiple line data response with or without a prefix. */
+    CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE,     /**<  string response without a prefix and no result code is expected. */
+    CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE,   /**<  string response WITH a prefix and no result code is expected. */
+    CELLULAR_AT_NO_COMMAND                    /**<  no command is waiting response. */
 } CellularATCommandType_t;
 
 /**

@@ -1755,6 +1755,60 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_STRING_
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
+static CellularPktStatus_t prvHandlePacketCallback( CellularContext_t * pContext,
+                                                    _atRespType_t atRespType,
+                                                    const void * pBuffer )
+{
+    const CellularATCommandResponse_t * pAtResp = ( const CellularATCommandResponse_t * ) pBuffer;
+    int cmpResult;
+
+    ( void ) pContext;
+
+    /* Verify the response type is AT_SOLICITED. */
+    TEST_ASSERT_EQUAL( AT_SOLICITED, atRespType );
+
+    /* Verify the string is the same as expected. */
+    TEST_ASSERT_NOT_EQUAL( NULL, pAtResp );
+    TEST_ASSERT_NOT_EQUAL( NULL, pAtResp->pItm );
+    TEST_ASSERT_NOT_EQUAL( NULL, pAtResp->pItm->pLine );
+    cmpResult = strncmp( pAtResp->pItm->pLine, pCommIntfRecvCustomString, strlen( pAtResp->pItm->pLine ) );
+    TEST_ASSERT_EQUAL( 0, cmpResult );
+
+    return CELLULAR_PKT_STATUS_OK;
+}
+
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE_success( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    pCommIntfRecvCustomString = "12345\r\n";    /* Dummy string to be verified in the callback. */
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, prvHandlePacketCallback );
+
+    /* Veification. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* The result is verified in prvHandlePacketCallback. */
+}
+
 /**
  * @brief Test thread receiving rx data event with success token for _Cellular_PktioInit to return CELLULAR_PKT_STATUS_OK.
  */
