@@ -2163,6 +2163,23 @@ static CellularPktStatus_t prvHandlePacketCallback( CellularContext_t * pContext
     return CELLULAR_PKT_STATUS_OK;
 }
 
+/**
+ * @brief _processIntermediateResponse - Successfully handle at command type CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE.
+ *
+ * Successfully handle at command type CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE. Verify
+ * the respones string in the callback function.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ *         case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+ *             ...
+ *             _saveATData( pLine, pResp );
+ *
+ *             pkStatus = CELLULAR_PKT_STATUS_OK;
+ *             break;
+ * @endcode
+ * The CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE case.
+ */
 void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE_success( void )
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -2185,6 +2202,55 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WO_PREFIX_NO_RESU
     atCmdType = CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE;
     testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
     pCommIntfRecvCustomString = "12345\r\n";    /* Dummy string to be verified in the callback. */
+
+    /* Check that CELLULAR_PKT_STATUS_OK is returned. */
+    pktStatus = _Cellular_PktioInit( &context, prvHandlePacketCallback );
+
+    /* Veification. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* The result is verified in prvHandlePacketCallback. */
+}
+
+/**
+ * @brief _processIntermediateResponse - Successfully handle at command type CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE.
+ *
+ * Successfully handle at command type CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE. Verify
+ * the respones string in the callback function.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ *         case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+ *             _saveATData( pLine, pResp );
+ *
+ *             pkStatus = CELLULAR_PKT_STATUS_OK;
+ *             break;
+ * @endcode
+ * The CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE case.
+ */
+void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE_success( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* copy the token table. */
+    ( void ) memcpy( &context.tokenTable, &tokenTable, sizeof( CellularTokenTable_t ) );
+
+    /* Assign the comm interface to pContext. */
+    context.pCommIntf = pCommIntf;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    /* Test the rx_data event with CELLULAR_AT_WO_PREFIX resp. */
+    pktioEvtMask = PKTIO_EVT_MASK_RX_DATA;
+    recvCount = 1;
+    atCmdType = CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE;
+    testCommIfRecvType = COMM_IF_RECV_CUSTOM_STRING;
+    context.pRespPrefix = "+CMD_PREFIX";
+    pCommIntfRecvCustomString = "+CMD_PREFIX:12345\r\n";    /* Dummy string to be verified in the callback. */
 
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, prvHandlePacketCallback );

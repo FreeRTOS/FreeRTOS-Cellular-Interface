@@ -213,26 +213,6 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
 
             break;
 
-        case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
-
-            if( pResp->pItm == NULL )
-            {
-                _saveATData( pLine, pResp );
-
-                /* This command only expect one response and no result code. */
-                pResp->status = true;
-                pkStatus = CELLULAR_PKT_STATUS_OK;
-            }
-            else
-            {
-                /* We already have an intermediate response. */
-                pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
-                            pLine, pkStatus, pResp->pItm->pLine ) );
-            }
-
-            break;
-
         case CELLULAR_AT_WITH_PREFIX:
 
             if( pResp->pItm == NULL )
@@ -241,30 +221,6 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
                  * function _getMsgType(), so the failure condition here won't be touched.
                  */
                 _saveATData( pLine, pResp );
-            }
-            else
-            {
-                /* We already have an intermediate response. */
-                pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
-                            pLine, pkStatus, pResp->pItm->pLine ) );
-            }
-
-            break;
-
-        case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
-
-            if( pResp->pItm == NULL )
-            {
-                /* The removed code which demonstrate the existence of the prefix has been done in
-                 * function _getMsgType(), so the failure condition here won't be touched.
-                 */
-                _saveATData( pLine, pResp );
-
-                /* This command only expect one response and no result code. */
-                pResp->status = true;
-                pkStatus = CELLULAR_PKT_STATUS_OK;
-                
             }
             else
             {
@@ -292,6 +248,15 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
         case CELLULAR_AT_MULTI_DATA_WO_PREFIX:
             _saveATData( pLine, pResp );
             pkStatus = CELLULAR_PKT_STATUS_PENDING_BUFFER;
+            break;
+
+        case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+        case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+            _saveATData( pLine, pResp );
+
+            /* Returns CELLULAR_PKT_STATUS_OK to indicate that the response of the
+             * command is received. */
+            pkStatus = CELLULAR_PKT_STATUS_OK;
             break;
 
         default:
@@ -421,6 +386,13 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
             else
             {
                 pkStatus = _processIntermediateResponse( pLine, pResp, atType );
+
+                /* This is the case that no final result code is expected. The AT
+                 * command only expect one resonse from modem. */
+                if( pkStatus == CELLULAR_PKT_STATUS_OK )
+                {
+                    pResp->status = true;
+                }
             }
         }
     }
