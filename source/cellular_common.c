@@ -65,12 +65,13 @@
 /*-----------------------------------------------------------*/
 
 /**
+ * @ingroup cellular_datatypes_structs
  * @brief Parameters in Signal Bars Look up table for measuring Signal Bars.
  */
 typedef struct signalBarsTable
 {
-    int8_t upperThreshold;
-    uint8_t bars;
+    int8_t upperThreshold; /**<  Threshold for signal bars. */
+    uint8_t bars;          /**<  The level in integer of bars. */
 } signalBarsTable_t;
 
 /*-----------------------------------------------------------*/
@@ -774,7 +775,7 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
     }
     else
     {
-        *ppModuleContext = pContext->pModueContext;
+        *ppModuleContext = pContext->pModuleContext;
     }
 
     return cellularStatus;
@@ -1127,6 +1128,40 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
         else
         {
             pContext->pUndefinedRespCBContext = NULL;
+        }
+
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
+    }
+
+    return cellularStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+CellularError_t _Cellular_RegisterInputBufferCallback( CellularContext_t * pContext,
+                                                       CellularInputBufferCallback_t inputBufferCallback,
+                                                       void * pInputBufferCallbackContext )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    if( pContext == NULL )
+    {
+        LogError( ( "_Cellular_RegisterUrcDataCallback: invalid context." ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+    }
+    else
+    {
+        /* inputBufferCallback can be set to NULL to unregister the callback. */
+        PlatformMutex_Lock( &pContext->PktRespMutex );
+        pContext->inputBufferCallback = inputBufferCallback;
+
+        if( pContext->inputBufferCallback != NULL )
+        {
+            pContext->pInputBufferCallbackContext = pInputBufferCallbackContext;
+        }
+        else
+        {
+            pContext->pInputBufferCallbackContext = NULL;
         }
 
         PlatformMutex_Unlock( &pContext->PktRespMutex );

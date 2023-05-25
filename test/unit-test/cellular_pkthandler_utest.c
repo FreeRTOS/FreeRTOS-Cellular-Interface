@@ -52,6 +52,7 @@
 #define CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP    "+QIRD: 32\r123243154354364576587utrhfgdghfg"
 #define CELLULAR_URC_TOKEN_STRING_INPUT                 "RDY"
 #define CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS      "+RDY"
+#define CELLULAR_URC_TOKEN_STRING_INPUT_WITH_PAYLOAD    "+RDY:START"
 #define CELLULAR_URC_TOKEN_STRING_GREATER_INPUT         "RDYY"
 #define CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT         "RD"
 #define CELLULAR_PLUS_TOKEN_ONLY_STRING                 "+"
@@ -325,6 +326,38 @@ uint16_t MockvQueueDelete( QueueHandle_t queue )
     free( queue );
     queue = NULL;
     return 1;
+}
+
+CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
+                                              bool * pResult )
+{
+    CellularATError_t atStatus = CELLULAR_AT_SUCCESS;
+
+    TEST_ASSERT( pString != NULL );
+    TEST_ASSERT( pResult != NULL );
+
+    if( strcmp( pString, CELLULAR_AT_MULTI_DATA_WO_PREFIX_STRING_RESP ) == 0 )
+    {
+        *pResult = true;
+    }
+    else if( strcmp( pString, CELLULAR_PLUS_TOKEN_ONLY_STRING ) == 0 )
+    {
+        *pResult = true;
+    }
+    else if( strcmp( pString, CELLULAR_URC_TOKEN_STRING_INPUT_WITH_PAYLOAD ) == 0 )
+    {
+        *pResult = true;
+    }
+    else if( strcmp( pString, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS ) == 0 )
+    {
+        *pResult = false;
+    }
+    else
+    {
+        *pResult = false;
+    }
+
+    return atStatus;
 }
 
 CellularATError_t _CMOCK_Cellular_ATStrDup_CALLBACK( char ** ppDst,
@@ -623,10 +656,45 @@ void test__Cellular_HandlePacket_AT_UNSOLICITED_Happy_Path( void )
 
     /* set for cellularAtParseTokenHandler function */
     passCompareString = false;
-    pCompareString = getStringAfterColon( CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
+    pCompareString = getStringAfterColon( CELLULAR_URC_TOKEN_STRING_INPUT_WITH_PAYLOAD );
+
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT_WITH_PAYLOAD );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( true, passCompareString );
+}
+
+/**
+ * @brief Test input string without payload for _Cellular_HandlePacket.
+ *
+ * URC input string "+RDY" should be regarded as URC without prefix.
+ * If there is a handler function registered in the table, the handler function is
+ * called with pInputStr point to "+RDY" string.
+ */
+void test__Cellular_HandlePacket_AT_UNSOLICITED_Input_String_without_payload( void )
+{
+    CellularContext_t context;
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularAtParseTokenMap_t cellularTestUrcHandlerTable[] =
+    {
+        /* Use the URC string instead of the URC prefix in the mapping table. */
+        { CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS, cellularAtParseTokenHandler }
+    };
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.tokenTable.pCellularUrcHandlerTable = cellularTestUrcHandlerTable;
+    context.tokenTable.cellularPrefixToParserMapSize = 1;
+
+    Cellular_ATStrDup_StubWithCallback( _CMOCK_Cellular_ATStrDup_CALLBACK );
+
+    /* set for cellularAtParseTokenHandler function */
+    passCompareString = false;
+    pCompareString = CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS;
 
     pktStatus = _Cellular_HandlePacket( &context, AT_UNSOLICITED, CELLULAR_URC_TOKEN_STRING_INPUT_START_PLUS );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* passCompareString is set to true in cellularAtParseTokenHandler if pCompareString
+     * equals to parameter pInputStr. */
     TEST_ASSERT_EQUAL( true, passCompareString );
 }
 
@@ -690,7 +758,7 @@ void test__Cellular_HandlePacket_Wrong_RespType( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
 
     /* Send invalid message type. */
-    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED + 1, NULL );
+    pktStatus = _Cellular_HandlePacket( &context, AT_UNDEFINED + 1, CELLULAR_URC_TOKEN_STRING_SMALLER_INPUT );
 
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }

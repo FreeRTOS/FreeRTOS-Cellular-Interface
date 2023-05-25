@@ -61,15 +61,15 @@ The following communication interface implementation can be used as reference.
 FreeRTOS Cellular Interface offloads the TCP/IP stacks to cellular module. The implementation
 of the socket APIs use module specific AT commands. Cellular socket APIs abstract the differences
 between different cellular module. The following are cellular socket APIs:
-- @function_name{Cellular_CreateSocket}
-- @function_name{Cellular_SocketSetSockOpt}
-- @function_name{Cellular_SocketSend}
-- @function_name{Cellular_SocketRecv}
-- @function_name{Cellular_SocketClose}
-- @function_name{Cellular_GetHostByName}
-- @function_name{Cellular_SocketRegisterDataReadyCallback}
-- @function_name{Cellular_SocketRegisterClosedCallback}
-- @function_name{Cellular_SocketRegisterSocketOpenCallback}
+- @ref Cellular_CreateSocket
+- @ref Cellular_SocketSetSockOpt
+- @ref Cellular_SocketSend
+- @ref Cellular_SocketRecv
+- @ref Cellular_SocketClose
+- @ref Cellular_GetHostByName
+- @ref Cellular_SocketRegisterDataReadyCallback
+- @ref Cellular_SocketRegisterClosedCallback
+- @ref Cellular_SocketRegisterSocketOpenCallback
 
 Cellular socket APIs and cellular modem events change cellular socket state.
 See the below graph for the socket state transitions:
@@ -196,110 +196,71 @@ Some configuration settings are C pre-processor constants, and some are function
 */
 
 /**
-@functions_page{cellular,cellular}
-@functions_brief{cellular}
+@page cellular_functions Functions
+@brief Functions of the cellular library.<br><br>
 
 <b>Control plane APIs</b>
 
-- @function_name{Cellular_Init}
-@function_brief{Cellular_Init}
-- @function_name{Cellular_Cleanup}
-@function_brief{Cellular_Cleanup}
-- @function_name{Cellular_SetRatPriority}
-@function_brief{Cellular_SetRatPriority}
-- @function_name{Cellular_GetRatPriority}
-@function_brief{Cellular_GetRatPriority}
-- @function_name{Cellular_RfOn}
-@function_brief{Cellular_RfOn}
-- @function_name{Cellular_RfOff}
-@function_brief{Cellular_RfOff}
+- @ref Cellular_Init
+- @ref Cellular_Cleanup
+- @ref Cellular_SetRatPriority
+- @ref Cellular_GetRatPriority
+- @ref Cellular_RfOn
+- @ref Cellular_RfOff
 
 <b>Hardware info</b>
 
-- @function_name{Cellular_GetSimCardStatus}
-@function_brief{Cellular_GetSimCardStatus}
-- @function_name{Cellular_GetSimCardInfo}
-@function_brief{Cellular_GetSimCardInfo}
-- @function_name{Cellular_GetModemInfo}
-@function_brief{Cellular_GetModemInfo}
+- @ref Cellular_GetSimCardStatus
+- @ref Cellular_GetSimCardInfo
+- @ref Cellular_GetModemInfo
 
 <b>Network registration</b>
 
-- @function_name{Cellular_GetRegisteredNetwork}
-@function_brief{Cellular_GetRegisteredNetwork}
-- @function_name{Cellular_GetNetworkTime}
-@function_brief{Cellular_GetNetworkTime}
-- @function_name{Cellular_GetSignalInfo}
-@function_brief{Cellular_GetSignalInfo}
-- @function_name{Cellular_GetServiceStatus}
-@function_brief{Cellular_GetServiceStatus}
+- @ref Cellular_GetRegisteredNetwork
+- @ref Cellular_GetNetworkTime
+- @ref Cellular_GetSignalInfo
+- @ref Cellular_GetServiceStatus
 
 <b>Enable data network</b>
 
-- @function_name{Cellular_SetPdnConfig}
-@function_brief{Cellular_SetPdnConfig}
-- @function_name{Cellular_GetPdnStatus}
-@function_brief{Cellular_GetPdnStatus}
-- @function_name{Cellular_ActivatePdn}
-@function_brief{Cellular_ActivatePdn}
-- @function_name{Cellular_DeactivatePdn}
-@function_brief{Cellular_DeactivatePdn}
-- @function_name{Cellular_GetIPAddress}
-@function_brief{Cellular_GetIPAddress}
-- @function_name{Cellular_SetDns}
-@function_brief{Cellular_SetDns}
+- @ref Cellular_SetPdnConfig
+- @ref Cellular_GetPdnStatus
+- @ref Cellular_ActivatePdn
+- @ref Cellular_DeactivatePdn
+- @ref Cellular_GetIPAddress
+- @ref Cellular_SetDns
 
 <b>Device and network status callback functions</b>
 
-- @function_name{Cellular_RegisterUrcNetworkRegistrationEventCallback}
-@function_brief{Cellular_RegisterUrcNetworkRegistrationEventCallback}
-- @function_name{Cellular_RegisterUrcPdnEventCallback}
-@function_brief{Cellular_RegisterUrcPdnEventCallback}
-- @function_name{Cellular_RegisterUrcSignalStrengthChangedCallback}
-@function_brief{Cellular_RegisterUrcSignalStrengthChangedCallback}
-- @function_name{Cellular_RegisterModemEventCallback}
-@function_brief{Cellular_RegisterModemEventCallback}
-- @function_name{Cellular_RegisterUrcGenericCallback}
-@function_brief{Cellular_RegisterUrcGenericCallback}
+- @ref Cellular_RegisterUrcNetworkRegistrationEventCallback
+- @ref Cellular_RegisterUrcPdnEventCallback
+- @ref Cellular_RegisterUrcSignalStrengthChangedCallback
+- @ref Cellular_RegisterModemEventCallback
+- @ref Cellular_RegisterUrcGenericCallback
 
 <b>Power saveing modes</b>
 
-- @function_name{Cellular_GetPsmSettings}
-@function_brief{Cellular_GetPsmSettings}
-- @function_name{Cellular_SetPsmSettings}
-@function_brief{Cellular_SetPsmSettings}
-- @function_name{Cellular_GetEidrxSettings}
-@function_brief{Cellular_GetEidrxSettings}
-- @function_name{Cellular_SetEidrxSettings}
-@function_brief{Cellular_SetEidrxSettings}
+- @ref Cellular_GetPsmSettings
+- @ref Cellular_SetPsmSettings
+- @ref Cellular_GetEidrxSettings
+- @ref Cellular_SetEidrxSettings
 
 <b>Custom AT command</b>
 
-- @function_name{Cellular_ATCommandRaw}
-@function_brief{Cellular_ATCommandRaw}
+- @ref Cellular_ATCommandRaw
 
 <b>Data plan APIs</b>
 
-- @function_name{Cellular_CreateSocket}
-@function_brief{Cellular_CreateSocket}
-- @function_name{Cellular_SocketConnect}
-@function_brief{Cellular_SocketConnect}
-- @function_name{Cellular_SocketSend}
-@function_brief{Cellular_SocketSend}
-- @function_name{Cellular_SocketRecv}
-@function_brief{Cellular_SocketRecv}
-- @function_name{Cellular_SocketClose}
-@function_brief{Cellular_SocketClose}
-- @function_name{Cellular_GetHostByName}
-@function_brief{Cellular_GetHostByName}
-- @function_name{Cellular_SocketSetSockOpt}
-@function_brief{Cellular_SocketSetSockOpt}
-- @function_name{Cellular_SocketRegisterSocketOpenCallback}
-@function_brief{Cellular_SocketRegisterSocketOpenCallback}
-- @function_name{Cellular_SocketRegisterDataReadyCallback}
-@function_brief{Cellular_SocketRegisterDataReadyCallback}
-- @function_name{Cellular_SocketRegisterClosedCallback}
-@function_brief{Cellular_SocketRegisterClosedCallback}
+- @ref Cellular_CreateSocket
+- @ref Cellular_SocketConnect
+- @ref Cellular_SocketSend
+- @ref Cellular_SocketRecv
+- @ref Cellular_SocketClose
+- @ref Cellular_GetHostByName
+- @ref Cellular_SocketSetSockOpt
+- @ref Cellular_SocketRegisterSocketOpenCallback
+- @ref Cellular_SocketRegisterDataReadyCallback
+- @ref Cellular_SocketRegisterClosedCallback
 */
 
 /**

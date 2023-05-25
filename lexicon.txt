@@ -269,6 +269,7 @@ efhplmnwact
 eidrxlist
 eidrxsettingslist
 emerg
+endcode
 endcond
 endif
 endpatternlen
@@ -293,6 +294,7 @@ firmwareversion
 freertos
 freertosconfig
 fucntion
+fso
 functionpointers
 fw
 gcc
@@ -353,7 +355,9 @@ inet
 ingroup
 inidcate
 init
+inputbuffercallback
 inputline
+inputwithprefix
 int
 interdelayms
 intf
@@ -375,6 +379,7 @@ isurc
 isvalidpdn
 isvalidsocket
 jan
+keepprocess
 keylist
 keylistlen
 kselacq
@@ -384,8 +389,10 @@ ktcpstat
 lac
 len
 libatdata
+libatdatamutex
 libcleanup
 libinit
+libstatusmutex
 linelength
 liniked
 linux
@@ -405,6 +412,7 @@ mcc
 md
 mem
 memorystatus
+memset
 metadata
 min
 misra
@@ -468,6 +476,7 @@ parsetimezoneinfo
 parseyearmonthdayincclkresponse
 partialdata
 partialdatarcvdlen
+passcomparestring
 patbuf
 patcmd
 patcommandpayload
@@ -479,6 +488,7 @@ pbandcfg
 pbervalue
 pbuf
 pbuffer
+pbufferlengthhandled
 pbytesread
 pc
 pcallbackcontext
@@ -495,6 +505,7 @@ pcomminterface
 pcomminterfacehandle
 pcommintf
 pcontext
+pcomparestring
 pcurrentcmd
 pcwriteto
 pdata
@@ -524,11 +535,14 @@ pendptr
 pendstr
 periodicrauvalue
 periodictauvalue
+pgenericcallbackcontext
 ph
 phexdata
 pinputbuf
+pinputbuffercallbackcontext
 pinputline
 pinputptr
+pinputstr
 pitm
 pkio
 pkt
@@ -542,15 +556,19 @@ pkthandlercleanup
 pkthandlerinit
 pkthanlder
 pktio
+pktioatcmdtype
 pktiobuffer
 pktioinit
 pktioreadbuf
 pktioreadthread
 pktiosendatcmd
+pktiosendbuf
 pktiosenddata
 pktioshutdown
 pktrequestmutex
+pktrespcb
 pktrespmutex
+pktrespprefixbuf
 pktrespqueue
 pktrxcallback
 pktstatus
@@ -563,9 +581,12 @@ pline
 plmn
 plmninfo
 pmodemdata
+pmodemeventcallbackcontext
 pmodeminfo
+pmodulecontext
 pmutex
 pnetworkinfo
+pnetworkregistrationcallbackcontext
 pnetworktime
 pnewmutex
 pnext
@@ -580,12 +601,15 @@ poutputratprioritieslength
 ppatresponse
 ppdatastart
 ppdnconfig
+ppdneventcallbackcontext
 ppdnstatusbuffers
 ppdptypestr
 ppdst
 ppkeylist
 ppktiocommevent
+ppktiohandlepktcb
 ppktioreadptr
+ppktioshutdowncb
 ppktusrdata
 ppmodulecontext
 ppouttoken
@@ -606,6 +630,7 @@ premotesocketaddress
 preprocess
 presolvedaddress
 presp
+prespprefix
 presult
 printf
 prioirty
@@ -618,6 +643,7 @@ psaveptr
 psentdatalength
 pservicestatus
 psignalinfo
+psignalstrengthchangedcallbackcontext
 psimcardinfo
 psimcardstatus
 psm
@@ -636,6 +662,7 @@ pstr
 pstring
 pstrvalue
 ptemp
+ptempline
 ptempstring
 ptestusrdata
 ptofree
@@ -644,6 +671,7 @@ ptokenptr
 ptokentable
 ptr
 puk
+pundefinedrespcbcontext
 puserdata
 pvportmalloc
 pwr
@@ -670,6 +698,7 @@ readline
 receivecallback
 recognise
 recv
+recvdmsgtype
 recvfuncgeteidrxsettings
 recvfuncgethplmn
 recvfuncgeticcid
@@ -751,6 +780,7 @@ simcardstate
 simlockstate
 sinr
 sms
+smso
 snprintf
 socketclose
 socketconnect
@@ -815,6 +845,7 @@ timeoutmilliseconds
 timeoutms
 timezonenegative
 todo
+tokentable
 tokentabletype
 translateatcorestatus
 translatepktstatus
@@ -830,7 +861,9 @@ uint
 uknown
 umnoprof
 undefinedrespcallback
+unhandled
 unneccessary
+upperthreshold
 urat
 urc
 urcevent

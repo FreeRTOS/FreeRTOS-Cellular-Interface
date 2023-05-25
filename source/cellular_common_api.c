@@ -153,7 +153,7 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         pContext = *pCellularHandle;
-        cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModueContext );
+        cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModuleContext );
     }
 
     /* Setup UE, URC and query register status. */

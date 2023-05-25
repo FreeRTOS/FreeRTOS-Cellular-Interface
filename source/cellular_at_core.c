@@ -45,15 +45,6 @@
 
 /*-----------------------------------------------------------*/
 
-#ifndef CELLULAR_CHECK_IS_PREFIX_CHAR
-    #define CELLULAR_CHECK_IS_PREFIX_CHAR( inputChar )                    \
-    ( ( ( ( int32_t ) isalpha( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( ( int32_t ) isdigit( ( ( int8_t ) ( inputChar ) ) ) ) == 0 ) && \
-      ( ( inputChar ) != '+' ) && ( ( inputChar ) != '_' ) )
-#endif
-
-/*-----------------------------------------------------------*/
-
 /**
  * @brief String validation results.
  */
@@ -133,6 +124,10 @@ CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
         ptrPrefixChar = strchr( pString, ( int32_t ) ':' );
 
         if( ptrPrefixChar == NULL )
+        {
+            *pResult = false;
+        }
+        else if( !CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR( *pString ) )
         {
             *pResult = false;
         }
