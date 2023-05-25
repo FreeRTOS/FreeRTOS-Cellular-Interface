@@ -440,7 +440,7 @@ data from modem. BG96 port make use of this API to receive binary data with the 
         .atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX,  /* The command expects multiple line or data received. */
         .pAtRspPrefix = "+QIRD",                        /* The response prefix for this command. */
         .respCallback = _Cellular_RecvFuncData,         /* The callback function to parse the response from modem. */
-        .pData = ( void * ) &dataRecv,                  /* The data pointer to in the callback function. */
+        .pData = ( void * ) &dataRecv,                  /* The data pointer in the callback function. */
         .dataLen = bufferLength                         /* The length of the data pointer. */
     };
 
