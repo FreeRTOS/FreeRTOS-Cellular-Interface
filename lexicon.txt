@@ -20,6 +20,7 @@ atcmdupdatemccmnc
 atcommandraw
 atcommandtype
 atcore
+atdatareqsocketsend
 atgetnexttok
 atgetspecificnexttok
 athexstrtohex
@@ -43,6 +44,8 @@ atreqgetimsi
 atreqgetmanufactureid
 atreqgetmodelid
 atreqgetnoresult
+atreqsocketrecv
+atreqsocketsend
 atresp
 atresptype
 atstrdup
@@ -231,6 +234,7 @@ datalen
 datalength
 datamode
 datareadycallback
+datarecv
 datareq
 datatimeoutms
 datatypes
@@ -276,6 +280,7 @@ endpatternlen
 enougth
 enum
 enums
+eof
 eps
 erange
 errno
@@ -385,6 +390,7 @@ keylistlen
 kselacq
 ktcp
 ktcprcv
+ktcpsnd
 ktcpstat
 lac
 len
@@ -679,6 +685,7 @@ px
 qccid
 qcfg
 qird
+qisend
 qsort
 qual
 quectel
@@ -710,6 +717,7 @@ recvfuncgetsimlockstatus
 recvfuncipaddress
 recvfuncupdatemccmnc
 recvlen
+recvtimeout
 recvtimeoutms
 reg
 registermodemeventcallback
@@ -758,6 +766,7 @@ searchcomparefunc
 sec
 semophores
 sendendpatternlen
+sendtimeout
 sendtimeoutms
 sensorhub
 seperator
@@ -791,10 +800,12 @@ socketindex
 socketopencallback
 socketprotocol
 socketrecv
+socketrecvdataprefix
 socketregisterclosedcallback
 socketregisterdatareadycallback
 socketregistersocketopencallback
 socketsend
+socketsenddataprefix
 socketsetsockopt
 socketstate
 sockettype

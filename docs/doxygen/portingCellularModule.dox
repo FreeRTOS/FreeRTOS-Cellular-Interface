@@ -38,8 +38,8 @@ Reference @subpage cellular_module_api for detail information.
 Reference @subpage cellular_module_urc_handler for detail information.
 -# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
 
-<b>Sending and receving binary data with cellular common APIs</b><br>
-Cellualr common APIs supports send/receive binary data. These APIs can be used to implement
+<b>Sending and receiving binary data with cellular common APIs</b><br>
+Cellular common APIs supports send/receive binary data. These APIs can be used to implement
 socket send or socket receive functions. The following page provides example and description about
 how to use these APIs to interact with cellular modem:
 - @subpage cellular_sending_binary_data
@@ -313,14 +313,14 @@ Send binary data command is split into two steps:
  - **Send the binary data**
 
 
-Take the socket send command of refernece port BG96 for example:
+Take the socket send command of reference port BG96 for example:
 ```
 AT+QISEND=0,5 //Send fixed length data and the data length is 5 bytes
 > test2
 SEND OK
 ```
 
-The first step sends the command "AT+QISEND=0,5" and wating for the response "> ".
+The first step sends the command "AT+QISEND=0,5" and waiting for the response "> ".
 ```
 AT+QISEND=0,5
 >
@@ -338,7 +338,7 @@ SEND OK
 receives the data.
 
 > One thing to mentioned in the example is that cellular interface processes the response
-> in line. The respone "> " doesn't contain line ending char. Cellular interface passes the response
+> in line. The respone "> " does not contain line ending char. Cellular interface passes the response
 > to the port through data send prefix callback function. The port may fix the input stream
 > in the callback function. In this example, the response is fixed to ">\n" in the callback.
 > Cellular interface can process the fixed input stream.
@@ -411,9 +411,9 @@ OK
 
 /**
 @page cellular_receiving_binary_data Receiving binary data with Cellular Common APIs
-Receive binary data command relys on the port to indicate start and length of the binary data in the input stream.
+Receive binary data command relies on the port to indicate start and length of the binary data in the input stream.
 
-Take the socket receive command of refernece port BG96 for example:
+Take the socket receive command of reference port BG96 for example:
 ```
 AT+QIRD=11,1500         // Read data received from incoming connection.
 +QIRD: 4                // Actual data length is 4 bytes.
@@ -431,7 +431,7 @@ data from modem. BG96 port make use of this API to receive binary data with the 
     static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,   /* Not used in this example. */
                                                      char * pLine,              /* The input buffer with response from cellular modem. */
                                                      uint32_t lineLength,       /* The length of pLine. */
-                                                     char ** ppDataStart,       /* Start addrss of the binary data in pLine. */
+                                                     char ** ppDataStart,       /* Start address of the binary data in pLine. */
                                                      uint32_t * pDataLength );  /* The length of the binary data. */
 
     CellularAtReq_t atReqSocketRecv =
@@ -446,7 +446,7 @@ data from modem. BG96 port make use of this API to receive binary data with the 
 
     pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,                /* The cellular context pointer. */
                                                                    atReqSocketRecv,         /* The AT command structure. */
-                                                                   recvTimeout,             /* Timout value for this AT command. */
+                                                                   recvTimeout,             /* Timeout value for this AT command. */
                                                                    socketRecvDataPrefix,    /* The data prefix callback function. */
                                                                    NULL );                  /* The context of the data prefix callback. */
 ```
