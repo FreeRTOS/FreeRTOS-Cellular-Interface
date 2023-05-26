@@ -434,6 +434,11 @@ data from modem. BG96 port make use of this API to receive binary data with the 
                                                      char ** ppDataStart,       /* Start address of the binary data in pLine. */
                                                      uint32_t * pDataLength );  /* The length of the binary data. */
 
+    static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,                    /* The cellular module context. */
+                                                       const CellularATCommandResponse_t * pAtResp,     /* The response from cellular modem. */
+                                                       void * pData,                                    /* Point to dataRecv in this example. */
+                                                       uint16_t dataLen );                              /* The length of the buffer pointed by &pData. */
+
     CellularAtReq_t atReqSocketRecv =
     {
         .pAtCmd = cmdBuf,                               /* In this example, AT+QIRD=11,1500. */
@@ -468,15 +473,15 @@ callback function.
 decide the start and length of the binary data.
 - **Other error** : Indicate that the moden returns unexpected response.
 
-
 Cellular interface library calls the response callback function, _Cellular_RecvFuncData
 in this example, when it successfully receives the binary data from cellular modem. The
-pAtResp parameter of _Cellular_RecvFuncData contains the following list in this example:
+@ref CellularATCommandResponse_t pAtResp parameter of _Cellular_RecvFuncData contains
+the following list in this example:
 ```
-CellularATCommandResponse_t     CellularATCommandLine_t      CellularATCommandLine_t
-pAtResp                         pItm                         pItm
----------------------------     -------------------------    -------------------------
-pItm                         -> pNext                     -> pNext
-                                pLine = "+QIRD: 4"           pLine = "test"
+Structure    | CellularATCommandResponse_t     CellularATCommandLine_t      CellularATCommandLine_t
+Name         | pAtResp                         pAtResp->pItm                pAtResp->pNext->pItm
+-------------| ---------------------------     -------------------------    -------------------------
+Member       | pItm                         -> pNext                     -> pNext
+             |                                 pLine = "+QIRD: 4"           pLine = "test"
 ```
 */
