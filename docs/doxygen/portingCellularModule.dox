@@ -38,6 +38,13 @@ Reference @subpage cellular_module_api for detail information.
 Reference @subpage cellular_module_urc_handler for detail information.
 -# <b>Create FreeRTOS Cellular Library APIs implemented with 3GPP TS v27.007 AT commands ( @ref cellular_common_api.h ) in cellular_(module_name)_wrapper.c</b><br>
 
+<b>Sending and receiving binary data with cellular common APIs</b><br>
+Cellular common APIs supports send/receive binary data. These APIs can be used to implement
+socket send or socket receive functions. The following page provides example and description about
+how to use these APIs to interact with cellular modem:
+- @subpage cellular_sending_binary_data
+- @subpage cellular_receiving_binary_data
+
 <b>Cellular module porting examples</b><br>
 Three cellular module portings can be referenced.<br>
 It is recommended that you start by cloning the implementation of one of the existing modems,<br>
@@ -45,6 +52,7 @@ then make modifications where your modem's vendor-specific (non-3GPP) AT command
 - <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Quectel-BG96">BG96</a>
 - <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-Sierra-Wireless-HL7802">HL7802</a>
 - <a href="https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface-Reference-ublox-SARA-R4">SARA R4 series</a>
+
 */
 
 /**
@@ -295,3 +303,185 @@ The following APIs can be used when implementating FreeRTOS Cellular Library API
 
 */
 
+/**
+@page cellular_sending_binary_data Sending binary data with Cellular Common APIs
+
+Send binary data command is split into two steps:
+
+ - **Send the AT command**
+
+ - **Send the binary data**
+
+
+Take the socket send command of reference port BG96 for example:
+```
+AT+QISEND=0,5 //Send fixed length data and the data length is 5 bytes
+> test2
+SEND OK
+```
+
+The first step sends the command "AT+QISEND=0,5" and waiting for the response "> ".
+```
+AT+QISEND=0,5
+>
+```
+">" is a result code in the port to indicate that modem is ready to accept the
+binary data.
+
+The second step send the binary data "test2" to the modem and waits for the response
+"SEND OK".
+```
+test2
+SEND OK
+```
+"SEND OK" is a result code in the port to indicate the modem successfully
+receives the data.
+
+> One thing to mentioned in the example is that cellular interface processes the response
+> in line. The respone "> " does not contain line ending char. Cellular interface passes the response
+> to the port through data send prefix callback function. The port may fix the input stream
+> in the callback function. In this example, the response is fixed to ">\n" in the callback.
+> Cellular interface can process the fixed input stream.
+
+_Cellular_AtcmdDataSend is the general cellular common API to send binary data to cellular modem. BG96 port
+make use of this API to send binary data with the following parameters:
+
+```
+    /* The structure to send the AT command. Mapping to the first step of send binary data. */
+    CellularAtReq_t atReqSocketSend =
+    {
+        .pAtCmd = cmdBuf,                    /* In this example, "AT+QISEND=0,5". */
+        .atCmdType = CELLULAR_AT_NO_RESULT,  /* The command expects only result code to indicate status from modem. */
+        .pAtRspPrefix = NULL,                /* No prefix for the result since the type is CELLULAR_AT_NO_RESULT. */
+        .respCallback = NULL,                /* No response callback since the type is CELLULAR_AT_NO_RESULT. */
+        .pData = NULL,                       /* No data since the type is CELLULAR_AT_NO_RESULT. */
+        .dataLen = 0,                        /* Data length is 0. */
+    };
+
+    /* The structure to send the binary data. Mapping to the second step of send binary data. */
+    CellularAtDataReq_t atDataReqSocketSend =
+    {
+        .pData = pData,                      /* Point to the data to send. */
+        .dataLen = dataLength,               /* The length of the data to send. */
+        .pSentDataLength = pSentDataLength,  /* The actual data sent to the modem. */
+        .pEndPattern = NULL,                 /* The end pattern to send after the binary data. */
+        .endPatternLen = 0                   /* The length of the end pattern. */
+    };
+
+    /* The send binary data send API in cellular common layer. */
+    pktStatus = _Cellular_AtcmdDataSend( pContext,                  /* The cellular context. */
+                                         atReqSocketSend,           /* Send AT command request. */
+                                         atDataReqSocketSend,       /* Send binary data. */
+                                         socketSendDataPrefix,      /* Data prefix callback. BG96 port fix the input stream "> " in this function. */
+                                         NULL,                      /* Data prefix callback context. Not used in this example. */
+                                         PACKET_REQ_TIMEOUT_MS,     /* AT command send timeout. */
+                                         sendTimeout,               /* Binary data send timeout. */
+                                         0U );                      /* The delay between AT command and binary data. */
+```
+
+To adapt with various cellular modems AT command, cellular interface provides the
+following APIs in common layer to send binary stream to modem:
+- @ref _Cellular_AtcmdDataSend : The general API to send the binary stream.
+- @ref _Cellular_TimeoutAtcmdDataSendRequestWithCallback : A compact version of _Cellular_AtcmdDataSend
+without pktDataSendPrefixCallback and interDelayMS parameters.
+- @ref _Cellular_TimeoutAtcmdDataSendSuccessToken : An extension of _Cellular_TimeoutAtcmdDataSendRequestWithCallback
+with extra success token.
+
+HL7802 socket send command reference port example
+```
+AT+KTCPSND=1,18
+CONNECT                 // CONNECT is considered a success result code only when sending the AT+KTCPSND command
+                        // _Cellular_TimeoutAtcmdDataSendSuccessToken can be used in this case.
+...Data send...
+--EOF--Pattern--        // Modem required the end pattern sent after the binary data.
+                        // The pEndPattern of CellularAtDataReq_t can be used in this case.
+OK
+```
+
+SARA-R4 socket send command reference port example
+```
+AT+USOWR=3,16
+@16 bytes of data       // "@" is not a new line. SARA-R4 port fixes the input stream in the callback.
+                        // SARA-R4 requires to wait for a minimum of 50 ms before sending data.
+                        // The interDelayMS parameter of _Cellular_AtcmdDataSend can be used in this case.
++USOWR: 3,16
+OK
+```
+*/
+
+/**
+@page cellular_receiving_binary_data Receiving binary data with Cellular Common APIs
+Receive binary data command relies on the port to indicate start and length of the binary data in the input stream.
+
+Take the socket receive command of reference port BG96 for example:
+```
+AT+QIRD=11,1500         // Read data received from incoming connection.
++QIRD: 4                // Actual data length is 4 bytes.
+test                    // The binary data returns from the modem
+OK                      // The success result code
+```
+
+The binary data "test" should not be parsed by cellular interface. The port needs to indicate
+the start of binary data and the length in data prefix callback function.
+
+_Cellular_TimeoutAtcmdDataRecvRequestWithCallback is cellular common API to receive binary
+data from modem. BG96 port make use of this API to receive binary data with the following parameters:
+
+```
+    static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,   /* Not used in this example. */
+                                                     char * pLine,              /* The input buffer with response from cellular modem. */
+                                                     uint32_t lineLength,       /* The length of pLine. */
+                                                     char ** ppDataStart,       /* Start address of the binary data in pLine. */
+                                                     uint32_t * pDataLength );  /* The length of the binary data. */
+
+    static CellularPktStatus_t _Cellular_RecvFuncData( CellularContext_t * pContext,                    /* The cellular module context. */
+                                                       const CellularATCommandResponse_t * pAtResp,     /* The response from cellular modem. */
+                                                       void * pData,                                    /* Point to dataRecv in this example. */
+                                                       uint16_t dataLen );                              /* The length of the buffer pointed by &pData. */
+
+    CellularAtReq_t atReqSocketRecv =
+    {
+        .pAtCmd = cmdBuf,                               /* In this example, AT+QIRD=11,1500. */
+        .atCmdType = CELLULAR_AT_MULTI_DATA_WO_PREFIX,  /* The command expects multiple line or data received. */
+        .pAtRspPrefix = "+QIRD",                        /* The response prefix for this command. */
+        .respCallback = _Cellular_RecvFuncData,         /* The callback function to parse the response from modem. */
+        .pData = ( void * ) &dataRecv,                  /* The data pointer in the callback function. */
+        .dataLen = bufferLength                         /* The length of the data pointer. */
+    };
+
+    pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,                /* The cellular context pointer. */
+                                                                   atReqSocketRecv,         /* The AT command structure. */
+                                                                   recvTimeout,             /* Timeout value for this AT command. */
+                                                                   socketRecvDataPrefix,    /* The data prefix callback function. */
+                                                                   NULL );                  /* The context of the data prefix callback. */
+```
+
+The data receive callback @ref CellularATCommandDataPrefixCallback_t, socketRecvDataPrefix
+in this example, can return the following value to cellular interface library:
+- **CELLULAR_PKT_STATUS_OK** : Cellular interface libary should keep process the
+input buffer. The following data in the input buffer will be regarded as binary
+data when ppDataStart and pDataLength is set in the function.
+<table>
+<tr><td colspan="20"> pLine
+<tr><td>0<td>1<td>2<td>3<td>4<td>5<td>6<td>7<td>8<td>9<td>10<td>11<td>12<td>13<td>14<td>15<td>16<td>17<td>18<td>19
+<tr><td>+<td>Q<td>I<td>R<td>D<td>:<td>&nbsp;&nbsp;<td>4<td>\\r<td>\\n<td>t<td>e<td>s<td>t<td>\\r<td>\\n<td>O<td>K<td>\\r<td>\\n
+<tr><td colspan="10"><td colspan="10">^ ppDataStart point to this address in pLine<br>with pDataLength is set to 4.
+</table>
+The binary data will be stored in the response and passed to the AT command response
+callback function.
+- **CELLULAR_PKT_STATUS_SIZE_MISMATCH** : The callback function needs more data to
+decide the start and length of the binary data.
+- **Other error** : Indicate that the moden returns unexpected response.
+
+Cellular interface library calls the response callback function, _Cellular_RecvFuncData
+in this example, when it successfully receives the binary data from cellular modem. The
+@ref CellularATCommandResponse_t pAtResp parameter of _Cellular_RecvFuncData contains
+the following list in this example:
+```
+Structure    | CellularATCommandResponse_t     CellularATCommandLine_t      CellularATCommandLine_t
+Name         | pAtResp                         pAtResp->pItm                pAtResp->pNext->pItm
+-------------| ---------------------------     -------------------------    -------------------------
+Member       | pItm                         -> pNext                     -> pNext
+             |                                 pLine = "+QIRD: 4"           pLine = "test"
+```
+*/
