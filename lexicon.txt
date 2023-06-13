@@ -510,6 +510,7 @@ pclosedcallbackcontext
 pcomminterface
 pcomminterfacehandle
 pcommintf
+pcommintfrecvcustomstring
 pcontext
 pcomparestring
 pcurrentcmd
@@ -551,6 +552,7 @@ pinputptr
 pinputstr
 pitm
 pkio
+pkstatus
 pkt
 pktdataprefixcallback
 pktdataprefixcb
@@ -644,6 +646,8 @@ prl
 processmodemrdy
 processpowerdown
 prssivalue
+prvpacketcallbackerror
+prvpacketcallbacksuccess
 ps
 psaveptr
 psentdatalength

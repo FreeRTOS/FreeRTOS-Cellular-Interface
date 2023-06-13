@@ -39,12 +39,12 @@
     </tr>
     <tr>
         <td>cellular_pktio.c</td>
-        <td><center>2.1K</center></td>
+        <td><center>2.2K</center></td>
         <td><center>1.9K</center></td>
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
-        <td><b><center>14.9K</center></b></td>
+        <td><b><center>15.0K</center></b></td>
         <td><b><center>13.6K</center></b></td>
     </tr>
 </table>
