@@ -1210,23 +1210,17 @@ static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pCon
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            LogDebug( ( "Recv IP address: Context id: %s", pToken ) );
+            LogDebug( ( "Recv IP address: Context id: %s, Address %s", pToken, pInputLine ) );
 
             if( pInputLine[ 0 ] != '\0' )
             {
-                atCoreStatus = Cellular_ATGetNextTok( &pInputLine, &pToken );
+                ( void ) strncpy( pData, pInputLine, dataLen );
             }
             else
             {
-                /* This is the case "+CGPADDR: 1". Return "0.0.0.0" in this case.*/
-                ( void ) strncpy( pData, "0,0,0,0", dataLen );
+                /* This is the case "+CGPADDR: <cid>". Return empty string. */
+                ( void ) memset( pData, 0, dataLen );
             }
-        }
-
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
-        {
-            LogDebug( ( "Recv IP address: Ip Addr: %s", pToken ) );
-            ( void ) strncpy( pData, pToken, dataLen );
         }
 
         pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
