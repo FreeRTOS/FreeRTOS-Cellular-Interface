@@ -250,6 +250,18 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             pkStatus = CELLULAR_PKT_STATUS_PENDING_BUFFER;
             break;
 
+        case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+        case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+            /* Save the line in the response. */
+            _saveATData( pLine, pResp );
+
+            /* Returns CELLULAR_PKT_STATUS_OK to indicate that the response of the
+             * command is received. No success result code is expected. Set the response
+             * status to true here. */
+            pkStatus = CELLULAR_PKT_STATUS_OK;
+            pResp->status = true;
+            break;
+
         default:
             /* Unexpected message received when sending the AT command. */
             LogInfo( ( "Undefind message received %s when sending AT command type %d.",
@@ -374,20 +386,20 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
                 pResp->status = false;
                 pkStatus = CELLULAR_PKT_STATUS_OK;
             }
-            else
-            {
-                pkStatus = _processIntermediateResponse( pLine, pResp, atType );
-            }
+        }
+
+        if( result != true )
+        {
+            pkStatus = _processIntermediateResponse( pLine, pResp, atType );
         }
     }
 
     if( ( result == true ) && ( pResp->status == false ) )
     {
-        LogWarn( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s, status: %d",
-                   ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+        LogWarn( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s",
                    pLine,
-                   ( pRespPrefix != NULL ? pRespPrefix : "NULL" ),
-                   pkStatus ) );
+                   ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
+                   ( pRespPrefix != NULL ? pRespPrefix : "NULL" ) ) );
     }
 
     PlatformMutex_Unlock( &pContext->PktRespMutex );
@@ -470,7 +482,8 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
             if( ( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( pRespPrefix == NULL ) ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_DATA_WO_PREFIX ) ||
                 ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) )
+                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) ||
+                ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE ) )
             {
                 atRespType = AT_SOLICITED;
             }

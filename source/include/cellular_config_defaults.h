@@ -441,6 +441,18 @@
 #endif
 
 /**
+ * @brief Cellular AT string length.<br>
+ *
+ * The maximum length of an AT string.<br>
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 256
+ */
+#ifndef CELLULAR_AT_MAX_STRING_SIZE
+    #define CELLULAR_AT_MAX_STRING_SIZE    ( 256U )
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *

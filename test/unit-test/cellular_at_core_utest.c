@@ -889,6 +889,20 @@ void test_Cellular_ATStrStartWith_Empty_Prefix( void )
 }
 
 /**
+ * @brief Test the long string case for Cellular_ATStrStartWith to return CELLULAR_AT_BAD_PARAMETER.
+ */
+void test_Cellular_ATStrStartWith_ATStringTooLong( void )
+{
+    CellularATError_t cellularStatus = CELLULAR_AT_SUCCESS;
+    bool result;
+    char * pPrefix = "";
+    char pStringSuccess[] = CELLULAR_SAMPLE_PREFIX_STRING_LARGE_INPUT;
+
+    cellularStatus = Cellular_ATStrStartWith( pStringSuccess, pPrefix, &result );
+    TEST_ASSERT_EQUAL( CELLULAR_AT_BAD_PARAMETER, cellularStatus );
+}
+
+/**
  * @brief Test that any NULL parameter causes Cellular_ATStrtoi to return CELLULAR_AT_BAD_PARAMETER.
  */
 void test_Cellular_ATStrtoi_Invalid_Param( void )
