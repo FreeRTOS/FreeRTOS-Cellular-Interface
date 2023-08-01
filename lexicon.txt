@@ -147,6 +147,7 @@ checkcrsmreadstatus
 checklibrarystatus
 chk
 ci
+cid
 ciev
 clearbits
 closedcallback
