@@ -20,6 +20,7 @@ atcmdupdatemccmnc
 atcommandraw
 atcommandtype
 atcore
+atdatareqsocketsend
 atgetnexttok
 atgetspecificnexttok
 athexstrtohex
@@ -43,6 +44,8 @@ atreqgetimsi
 atreqgetmanufactureid
 atreqgetmodelid
 atreqgetnoresult
+atreqsocketrecv
+atreqsocketsend
 atresp
 atresptype
 atstrdup
@@ -232,6 +235,7 @@ datalen
 datalength
 datamode
 datareadycallback
+datarecv
 datareq
 datatimeoutms
 datatypes
@@ -270,12 +274,14 @@ efhplmnwact
 eidrxlist
 eidrxsettingslist
 emerg
+endcode
 endcond
 endif
 endpatternlen
 enougth
 enum
 enums
+eof
 eps
 erange
 errno
@@ -355,6 +361,7 @@ inet
 ingroup
 inidcate
 init
+inputbuffercallback
 inputline
 inputwithprefix
 int
@@ -378,11 +385,13 @@ isurc
 isvalidpdn
 isvalidsocket
 jan
+keepprocess
 keylist
 keylistlen
 kselacq
 ktcp
 ktcprcv
+ktcpsnd
 ktcpstat
 lac
 len
@@ -410,6 +419,7 @@ mcc
 md
 mem
 memorystatus
+memset
 metadata
 min
 misra
@@ -485,6 +495,7 @@ pbandcfg
 pbervalue
 pbuf
 pbuffer
+pbufferlengthhandled
 pbytesread
 pc
 pcallbackcontext
@@ -500,6 +511,7 @@ pclosedcallbackcontext
 pcomminterface
 pcomminterfacehandle
 pcommintf
+pcommintfrecvcustomstring
 pcontext
 pcomparestring
 pcurrentcmd
@@ -535,11 +547,13 @@ pgenericcallbackcontext
 ph
 phexdata
 pinputbuf
+pinputbuffercallbackcontext
 pinputline
 pinputptr
 pinputstr
 pitm
 pkio
+pkstatus
 pkt
 pktdataprefixcallback
 pktdataprefixcb
@@ -633,6 +647,8 @@ prl
 processmodemrdy
 processpowerdown
 prssivalue
+prvpacketcallbackerror
+prvpacketcallbacksuccess
 ps
 psaveptr
 psentdatalength
@@ -657,6 +673,7 @@ pstr
 pstring
 pstrvalue
 ptemp
+ptempline
 ptempstring
 ptestusrdata
 ptofree
@@ -673,6 +690,7 @@ px
 qccid
 qcfg
 qird
+qisend
 qsort
 qual
 quectel
@@ -704,6 +722,7 @@ recvfuncgetsimlockstatus
 recvfuncipaddress
 recvfuncupdatemccmnc
 recvlen
+recvtimeout
 recvtimeoutms
 reg
 registermodemeventcallback
@@ -752,6 +771,7 @@ searchcomparefunc
 sec
 semophores
 sendendpatternlen
+sendtimeout
 sendtimeoutms
 sensorhub
 seperator
@@ -785,10 +805,12 @@ socketindex
 socketopencallback
 socketprotocol
 socketrecv
+socketrecvdataprefix
 socketregisterclosedcallback
 socketregisterdatareadycallback
 socketregistersocketopencallback
 socketsend
+socketsenddataprefix
 socketsetsockopt
 socketstate
 sockettype
