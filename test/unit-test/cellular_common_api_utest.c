@@ -842,6 +842,78 @@ void test_Cellular_CommonSocketSetSockOpt_Option_PdnContextId_WrongSize_Failure_
 }
 
 /**
+ * @brief Test that option ssl context id happy path case for Cellular_CommonSocketSetSockOpt.
+ */
+void test_Cellular_CommonSocketSetSockOpt_Option_SslContextId_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    uint32_t optionValue = 0;
+
+    socketHandle.socketState = SOCKETSTATE_ALLOCATED;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
+                                                      CELLULAR_SOCKET_OPTION_LEVEL_SECURE,
+                                                      CELLULAR_SOCKET_OPTION_SSL_CONTEXT_ID,
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint8_t ) );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that option ssl context id failure path case for Cellular_CommonSocketSetSockOpt.
+ */
+void test_Cellular_CommonSocketSetSockOpt_Option_SslContextId_Failure_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    uint32_t optionValue = 0;
+
+    socketHandle.socketState = SOCKETSTATE_CONNECTING;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
+                                                      CELLULAR_SOCKET_OPTION_LEVEL_SECURE,
+                                                      CELLULAR_SOCKET_OPTION_SSL_CONTEXT_ID,
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint8_t ) );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Test that option ssl context id failure path case with wrong size for Cellular_CommonSocketSetSockOpt.
+ */
+void test_Cellular_CommonSocketSetSockOpt_Option_SslContextId_WrongSize_Failure_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    uint32_t optionValue = 0;
+
+    socketHandle.socketState = SOCKETSTATE_ALLOCATED;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketSetSockOpt( &context, &socketHandle,
+                                                      CELLULAR_SOCKET_OPTION_LEVEL_SECURE,
+                                                      CELLULAR_SOCKET_OPTION_SSL_CONTEXT_ID,
+                                                      ( const uint8_t * ) &optionValue, sizeof( uint32_t ) );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
  * @brief Test that option pdn context id failure path case for Cellular_CommonSocketSetSockOpt.
  */
 void test_Cellular_CommonSocketSetSockOpt_Option_Unsupported_Failure_Path( void )
