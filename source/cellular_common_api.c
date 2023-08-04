@@ -117,11 +117,23 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
         if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint8_t ) ) )
         {
             socketHandle->sslConfig.sslContextId = *pOptionValue;
-            socketHandle->sslConfig.useSsl = 1;
         }
         else
         {
             LogError( ( "Cellular_SocketSetSockOpt: Cannot change the sslContextID in this state %d or length %d is invalid.",
+                        socketHandle->socketState, optionValueLength ) );
+            cellularStatus = CELLULAR_INTERNAL_FAILURE;
+        }
+    }
+    else if( option == CELLULAR_SOCKET_OPTION_SSL_USAGE )
+    {
+        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint8_t ) ) )
+        {
+            socketHandle->sslConfig.useSsl = *pOptionValue;
+        }
+        else
+        {
+            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the useSsl in this state %d or length %d is invalid.",
                         socketHandle->socketState, optionValueLength ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }

@@ -329,6 +329,7 @@ typedef enum CellularSocketOption
     CELLULAR_SOCKET_OPTION_RECV_TIMEOUT,       /**< Set receive timeout (in milliseconds). */
     CELLULAR_SOCKET_OPTION_PDN_CONTEXT_ID,     /**< Set PDN Context ID to use for the socket. */
     CELLULAR_SOCKET_OPTION_SSL_CONTEXT_ID,     /**< Set SSL Context ID to use for the socket. */
+    CELLULAR_SOCKET_OPTION_SSL_USAGE,          /**< Set SSL or non SSL to use for the socket. */
     CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT      /**< Set local port. */
 } CellularSocketOption_t;
 
