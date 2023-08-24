@@ -73,17 +73,15 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/doxygen@v2
         with:
           path: ./
-
   spell-check:
     runs-on: ubuntu-latest
     steps:
       - name: Clone This Repo
         uses: actions/checkout@v3
       - name: Run spellings check
-        uses: FreeRTOS/CI-CD-GitHub-Actions/spellings@v2
+        uses: FreeRTOS/CI-CD-GitHub-Actions/rust-spell-check@v2
         with:
           path: ./
-
   formatting:
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +90,6 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/formatting@v2
         with:
           path: ./
-
   git-secrets:
     runs-on: ubuntu-latest
     steps:
@@ -109,7 +106,6 @@ jobs:
         run: |
           git-secrets --register-aws
           git-secrets --scan
-
   memory_statistics:
     runs-on: ubuntu-latest
     steps:
