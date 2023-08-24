@@ -26,7 +26,7 @@
  */
 
 /**
- * @brief FreeRTOS Cellular Library API implemenation with 3GPP AT command.
+ * @brief FreeRTOS Cellular Library API [implementation with 3GPP AT command.
  */
 
 /* Standard includes. */
@@ -101,7 +101,7 @@
 #define T3412_TIMER_UNIT_1MINUTES            ( 5U )
 #define T3412_TIMER_UNIT_DEACTIVATED         ( 7U )
 
-#define CELULAR_PDN_CONTEXT_TYPE_MAX_SIZE    ( 7U ) /* The length of "IPV4V6" + 1. */
+#define CELLULAR_PDN_CONTEXT_TYPE_MAX_SIZE    ( 7U ) /* The length of "IPV4V6" + 1. */
 
 /*-----------------------------------------------------------*/
 
@@ -1268,7 +1268,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
                 if( ( tempValue >= 0 ) &&
                     ( tempValue <= ( int32_t ) UINT8_MAX ) )
                 {
-                    pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue = ( uint8_t ) tempValue;
+                    pEidrxSettingsList->eidrxList[ count ].requestedEdrxValue = ( uint8_t ) tempValue;
                 }
                 else
                 {
@@ -1335,7 +1335,7 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
     {
         LogDebug( ( "GetEidrx setting[%d]: RAT: %d, Value: 0x%x",
                     count, pEidrxSettingsList->eidrxList[ count ].rat,
-                    pEidrxSettingsList->eidrxList[ count ].requestedEdrxVaue ) );
+                    pEidrxSettingsList->eidrxList[ count ].requestedEdrxValue ) );
     }
     else
     {
@@ -1698,7 +1698,7 @@ CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle
                            "AT+CEDRXS=",
                            pEidrxSettings->mode,
                            pEidrxSettings->rat,
-                           PRINTF_BYTE_TO_BINARY_INT4( pEidrxSettings->requestedEdrxVaue ) );
+                           PRINTF_BYTE_TO_BINARY_INT4( pEidrxSettings->requestedEdrxValue ) );
         LogDebug( ( "Eidrx setting: %s ", cmdBuf ) );
         /* Query the PSMsettings from the network. */
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqSetEidrx );
@@ -2138,7 +2138,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     char cmdBuf[ CELLULAR_AT_CMD_MAX_SIZE ] = { '\0' };
-    char pPdpTypeStr[ CELULAR_PDN_CONTEXT_TYPE_MAX_SIZE ] = { '\0' };
+    char pPdpTypeStr[ CELLULAR_PDN_CONTEXT_TYPE_MAX_SIZE ] = { '\0' };
     CellularAtReq_t atReqSetPdn = { 0 };
 
     atReqSetPdn.pAtCmd = cmdBuf;
@@ -2718,7 +2718,7 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
     atReqGetImsi.pData = pSimCardInfo->imsi;
     atReqGetImsi.dataLen = CELLULAR_IMSI_MAX_SIZE + 1U;
 
-    atReqGetHplmn.pAtCmd = "AT+CRSM=176,28514,0,0,0"; /* READ BINARY commmand. HPLMN Selector with Access Technology( 6F62 ). */
+    atReqGetHplmn.pAtCmd = "AT+CRSM=176,28514,0,0,0"; /* READ BINARY command. HPLMN Selector with Access Technology( 6F62 ). */
     atReqGetHplmn.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetHplmn.pAtRspPrefix = "+CRSM";
     atReqGetHplmn.respCallback = _Cellular_RecvFuncGetHplmn;

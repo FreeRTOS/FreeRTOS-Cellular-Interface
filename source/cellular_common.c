@@ -356,19 +356,19 @@ static uint8_t _getSignalBars( int16_t compareValue,
     if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
     {
         pSignalBarsTable = gsmSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( gsmSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( gsmSignalBarsTable );
     }
 
     if( ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_LTE ) )
     {
         pSignalBarsTable = lteCATMSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( lteCATMSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( lteCATMSignalBarsTable );
     }
 
     if( rat == CELLULAR_RAT_NBIOT )
     {
         pSignalBarsTable = lteNBIotSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( lteNBIotSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( lteNBIotSignalBarsTable );
     }
 
     for( i = 0; i < tableSize; i++ )
@@ -721,7 +721,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     int16_t berValue = 0;
 
-    static const uint16_t rxqualValueToBerTable[] =
+    static const uint16_t rxEqualValueToBerTable[] =
     {
         14,  /* Assumed value 0.14%. */
         28,  /* Assumed value 0.28%.*/
@@ -750,7 +750,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
         }
         else
         {
-            berValue = ( int16_t ) rxqualValueToBerTable[ csqBer ];
+            berValue = ( int16_t ) rxEqualValueToBerTable[ csqBer ];
         }
     }
 
@@ -965,7 +965,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
         }
     }
 
-    /* Defines the Mutexes and Semophores. */
+    /* Defines the Mutexes and Semaphores. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         if( _Cellular_CreateLibStatusMutex( pContext ) != true )

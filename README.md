@@ -14,7 +14,7 @@
 
 ## Introduction
 
-The Cellular Interface library implement a simple unified [Application Programing Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html) that hide the complexity of AT commands. The cellular modems to be interchangeable with the popular options built upon TCP stack and exposes a socket-like interface to C programmers.
+The Cellular Interface library implement a simple unified [Application Programming Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html) that hide the complexity of AT commands. The cellular modems to be interchangeable with the popular options built upon TCP stack and exposes a socket-like interface to C programmers.
 
 Most cellular modems implement more or less the AT commands defined by the [3GPP TS v27.007](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=1515) standard. This project provides an implementation of such standard AT commands in a [reusable common component](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/main/source/include/common). The three Cellular libraries in this project all take advantage of that common code. The library for each modem only implements the vendor-specific AT commands, then exposes the complete Cellular API.
 
@@ -88,8 +88,8 @@ FreeRTOS Cellular Interface. The following diagram depicts the relationship of t
 
 Follow these steps to integrate FreeRTOS Cellular Interface into your project:
 1. Clone this repository into your project.
-2. Clone one of the refenerce cellular module implementations ( BG96 / HL7802 / SARA-R4 )
-or create your own cellular module implementaion in your project.
+2. Clone one of the reference cellular module implementations ( BG96 / HL7802 / SARA-R4 )
+or create your own cellular module implementation in your project.
 3. Implement comm interface.
 4. Build these software components with your application and execute.
 

@@ -72,7 +72,7 @@ _Ref 21.6.1_
 #### Rule 21.9
 _Ref 21.9.1_
 
-- MISRA C-2012 Rule 21.9 does not allow the use of bsearch. This is becasue of
+- MISRA C-2012 Rule 21.9 does not allow the use of bsearch. This is because of
     unspecified behavior, which relates to the treatment of elements that compare as
     equal, can be avoided by ensuring that the comparison function never returns 0.
     When two elements are otherwise equal, the comparison function could

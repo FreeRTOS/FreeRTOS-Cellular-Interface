@@ -780,7 +780,7 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
 
     if( pContext != NULL )
     {
-        /* Create the response queue which is used to post reponses to the sender. */
+        /* Create the response queue which is used to post responses to the sender. */
         pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
 
         if( pContext->pktRespQueue == NULL )
