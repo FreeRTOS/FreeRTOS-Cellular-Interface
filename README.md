@@ -16,7 +16,7 @@
 ## Introduction
 
 The Cellular Interface library implement a simple unified
-[Application Programing Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html)
+[Application Programming Interfaces (APIs)](https://www.freertos.org/Documentation/api-ref/cellular/index.html)
 that hide the complexity of AT commands. The cellular modems to be
 interchangeable with the popular options built upon TCP stack and exposes a
 socket-like interface to C programmers.
@@ -136,8 +136,8 @@ relationship of these software components:
 Follow these steps to integrate FreeRTOS Cellular Interface into your project:
 
 1. Clone this repository into your project.
-2. Clone one of the refenerce cellular module implementations ( BG96 / HL7802 /
-   SARA-R4 ) or create your own cellular module implementaion in your project.
+2. Clone one of the reference cellular module implementations ( BG96 / HL7802 /
+   SARA-R4 ) or create your own cellular module implementation in your project.
 3. Implement comm interface.
 4. Build these software components with your application and execute.
 
