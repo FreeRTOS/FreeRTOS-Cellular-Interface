@@ -91,15 +91,15 @@
 
 #define T3412_TIMER_UNIT( x )     ( ( uint32_t ) ( ( ( x ) & 0x000000E0U ) >> 5U ) ) /* Bits 6, 7, 8. */
 #define T3412_TIMER_VALUE( x )    ( ( uint32_t ) ( ( x ) & 0x0000001FU ) )
-#define T3412_TIMER_DEACTIVATED              ( 0xFFFFFFFFU )
+#define T3412_TIMER_DEACTIVATED               ( 0xFFFFFFFFU )
 
-#define T3412_TIMER_UNIT_10MINUTES           ( 0U )
-#define T3412_TIMER_UNIT_1HOURS              ( 1U )
-#define T3412_TIMER_UNIT_10HOURS             ( 2U )
-#define T3412_TIMER_UNIT_2SECONDS            ( 3U )
-#define T3412_TIMER_UNIT_30SECONDS           ( 4U )
-#define T3412_TIMER_UNIT_1MINUTES            ( 5U )
-#define T3412_TIMER_UNIT_DEACTIVATED         ( 7U )
+#define T3412_TIMER_UNIT_10MINUTES            ( 0U )
+#define T3412_TIMER_UNIT_1HOURS               ( 1U )
+#define T3412_TIMER_UNIT_10HOURS              ( 2U )
+#define T3412_TIMER_UNIT_2SECONDS             ( 3U )
+#define T3412_TIMER_UNIT_30SECONDS            ( 4U )
+#define T3412_TIMER_UNIT_1MINUTES             ( 5U )
+#define T3412_TIMER_UNIT_DEACTIVATED          ( 7U )
 
 #define CELLULAR_PDN_CONTEXT_TYPE_MAX_SIZE    ( 7U ) /* The length of "IPV4V6" + 1. */
 
