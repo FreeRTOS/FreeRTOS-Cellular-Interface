@@ -698,18 +698,7 @@ CellularError_t Cellular_UploadFileToStorage(CellularHandle_t cellularHandle,
                                     const char* fileContent,
                                     uint32_t fileSize,
                                     uint32_t* pSentDataLength);      
-
-/**
- * @brief  Gets the space information of the specified storage.
- *
- * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[in] storage_pattern Storage pattern to be listed.
- *
- * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
- * code indicating the cause of the error.
- */
-CellularError_t Cellular_GetSpaceInformationOfTheStorage(CellularHandle_t cellularHandle,
-                                                const char* storage_pattern);                                                         
+                                                 
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
