@@ -656,30 +656,6 @@ CellularError_t Cellular_ConfigureSSLContext(CellularHandle_t cellularHandle,
                                       const char* inputArg);
 
 /**
- * @brief Delete a File in the Storage.
- *
- * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[in] filename Name of the file to be deleted.
- *
- * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
- * code indicating the cause of the error.
- */
-CellularError_t Cellular_DeleteFileFromStorage(CellularHandle_t cellularHandle, 
-                                            const char* filename);
-
-/**
- * @brief  Lists the information of a single file.
- *
- * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[in] filename Name of the file to be listed.
- *
- * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
- * code indicating the cause of the error.
- */
-CellularError_t Cellular_VerifyFileFromStorage(CellularHandle_t cellularHandle, 
-                                    const char* filename);
-
-/**
  * @brief Upload a File into the Storage.
  *
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
