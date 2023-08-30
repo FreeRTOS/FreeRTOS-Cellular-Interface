@@ -639,6 +639,42 @@ CellularError_t Cellular_SocketRegisterClosedCallback( CellularHandle_t cellular
                                                        CellularSocketClosedCallback_t closedCallback,
                                                        void * pCallbackContext );
 
+/**
+ * @brief Configure parameters of an SSL Context.
+ *
+ * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] sslContextId The SSL context ID.
+ * @param[in] sslConfigurationParameter The SSL parameter to be configured.
+ * @param[in] inputArg The value to be passed to the SSL parameter.
+ *
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularError_t Cellular_ConfigureSSLContext( CellularHandle_t cellularHandle,
+                                              uint8_t sslContextId,
+                                              const char* sslConfigurationParameter,
+                                              const char* inputArg );
+
+/**
+ * @brief Upload a File into the Storage.
+ *
+ * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
+ * @param[in] filename Name of the file to be uploaded.
+ * @param[in] fileContent Content of the file to be uploaded.
+ * @param[in] fileSize Size of the file to be uploaded.
+ * @param[out] pSentDataLength Out parameter to provide the length of the actual
+ * data sent. Note that it may be less than the dataLength in case complete data
+ * could not be sent.
+ * 
+ * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
+ * code indicating the cause of the error.
+ */
+CellularError_t Cellular_UploadFileToStorage( CellularHandle_t cellularHandle,
+                                              const char* filename,
+                                              const char* fileContent,
+                                              uint32_t fileSize,
+                                              uint32_t* pSentDataLength );
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
