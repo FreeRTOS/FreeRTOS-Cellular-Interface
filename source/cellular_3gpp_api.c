@@ -26,7 +26,7 @@
  */
 
 /**
- * @brief FreeRTOS Cellular Library API [implementation with 3GPP AT command.
+ * @brief FreeRTOS Cellular Library API implementation with 3GPP AT command.
  */
 
 /* Standard includes. */
