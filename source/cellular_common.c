@@ -102,13 +102,13 @@ static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-    static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
+static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 #endif
 
 static CellularContext_t * cellularContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 
 #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-    static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
+static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
 #endif
 
 /*-----------------------------------------------------------*/
@@ -125,13 +125,13 @@ static CellularContext_t * _Cellular_AllocContext( void )
         if( cellularContextTable[ i ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-                {
-                    pContext = &cellularStaticContextTable[ i ];
-                }
+            {
+                pContext = &cellularStaticContextTable[ i ];
+            }
             #else
-                {
-                    pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
-                }
+            {
+                pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
+            }
             #endif
 
             if( pContext != NULL )
@@ -163,9 +163,9 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
         {
             cellularContextTable[ i ] = NULL;
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
-                {
-                    Platform_Free( pContext );
-                }
+            {
+                Platform_Free( pContext );
+            }
             #endif
             break;
         }
@@ -262,9 +262,9 @@ static void libClose( CellularContext_t * pContext )
         if( pContext->pSocketData[ i ] != NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
-                {
-                    Platform_Free( pContext->pSocketData[ i ] );
-                }
+            {
+                Platform_Free( pContext->pSocketData[ i ] );
+            }
             #endif
             pContext->pSocketData[ i ] = NULL;
         }
@@ -356,19 +356,19 @@ static uint8_t _getSignalBars( int16_t compareValue,
     if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
     {
         pSignalBarsTable = gsmSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( gsmSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( gsmSignalBarsTable );
     }
 
     if( ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_LTE ) )
     {
         pSignalBarsTable = lteCATMSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( lteCATMSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( lteCATMSignalBarsTable );
     }
 
     if( rat == CELLULAR_RAT_NBIOT )
     {
         pSignalBarsTable = lteNBIotSignalBarsTable;
-        tableSize = ( uint8_t ) ARRY_SIZE( lteNBIotSignalBarsTable );
+        tableSize = ( uint8_t ) ARRAY_SIZE( lteNBIotSignalBarsTable );
     }
 
     for( i = 0; i < tableSize; i++ )
@@ -545,13 +545,13 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         if( pContext->pSocketData[ socketId ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-                {
-                    pSocketData = &cellularStaticSocketDataTable[ socketId ];
-                }
+            {
+                pSocketData = &cellularStaticSocketDataTable[ socketId ];
+            }
             #else
-                {
-                    pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
-                }
+            {
+                pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
+            }
             #endif
 
             if( pSocketData != NULL )
@@ -721,7 +721,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     int16_t berValue = 0;
 
-    static const uint16_t rxqualValueToBerTable[] =
+    static const uint16_t rxEqualValueToBerTable[] =
     {
         14,  /* Assumed value 0.14%. */
         28,  /* Assumed value 0.28%.*/
@@ -750,7 +750,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
         }
         else
         {
-            berValue = ( int16_t ) rxqualValueToBerTable[ csqBer ];
+            berValue = ( int16_t ) rxEqualValueToBerTable[ csqBer ];
         }
     }
 
@@ -965,7 +965,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
         }
     }
 
-    /* Defines the Mutexes and Semophores. */
+    /* Defines the Mutexes and Semaphores. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
         if( _Cellular_CreateLibStatusMutex( pContext ) != true )

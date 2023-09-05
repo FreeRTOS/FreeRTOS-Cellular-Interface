@@ -2915,7 +2915,7 @@ void test__Cellular_PktioShutdown_Null_Parameter( void )
     /* Mock null context */
     _Cellular_PktioShutdown( NULL );
 
-    /* Mock context exist but member bPktioUp is fasle.*/
+    /* Mock context exist but member bPktioUp is false. */
     _Cellular_PktioShutdown( &context );
 }
 

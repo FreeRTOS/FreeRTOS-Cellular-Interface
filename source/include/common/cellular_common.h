@@ -95,7 +95,7 @@ typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
 
 /**
  * @ingroup cellular_common_datatypes_paramstructs
- * @brief the URC token and URC handler mapping structure used by pkthanlder.
+ * @brief the URC token and URC handler mapping structure used by pkthandler.
  */
 typedef struct CellularAtParseTokenMap
 {
@@ -444,7 +444,7 @@ CellularError_t _Cellular_ConvertCsqSignalRssi( int16_t csqRssi,
                                                 int16_t * pRssiValue );
 
 /**
- * @brief Convert CSQ command retruned BER value.
+ * @brief Convert CSQ command returned BER value.
  *
  * @param[in] csqBer The CSQ command returned BER index.
  * @param[out] pBerValue The output parameter to return the converted
@@ -584,7 +584,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularC
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] atReq The AT command data structure with send command response callback.
  * @param[in] dataReq The following data request after the at request.
- * @param[in] pktDataSendPrefixCallback The callback function to inidcate the data sending start.
+ * @param[in] pktDataSendPrefixCallback The callback function to indicate the data sending start.
  * @param[in] pCallbackContext The callback context pass to pktDataSendPrefixCallback function.
  * @param[in] atTimeoutMS The timeout value to wait for the AT command response from cellular modem.
  * @param[in] dataTimeoutMS The timeout value to wait for the data command response from cellular modem.

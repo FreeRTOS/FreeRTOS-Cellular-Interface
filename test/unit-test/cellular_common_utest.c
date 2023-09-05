@@ -124,7 +124,7 @@ static CellularTokenTable_t tokenTable =
 /* Look up table is maintained here as global scope within this file instead of
  * block scope to help developers to convert BER value. */
 /* coverity[misra_c_2012_rule_8_9_violation] */
-static const uint16_t rxqualValueToBerTable[] =
+static const uint16_t rxEqualValueToBerTable[] =
 {
     14,  /* Assumed value 0.14%. */
     28,  /* Assumed value 0.28%.*/
@@ -667,7 +667,7 @@ void test__Cellular_IsValidSocket_Null_Context( void )
 /**
  * @brief Test that bad socket Index parameter case for _Cellular_IsValidSocket.
  */
-void test__Cellular_IsValidSocket_Bad_SocketInex_Parameter( void )
+void test__Cellular_IsValidSocket_Bad_SocketIndex_Parameter( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
@@ -851,7 +851,7 @@ void test__Cellular_ConvertCsqSignalBer_Happy( void )
 
     cellularStatus = _Cellular_ConvertCsqSignalBer( csqBer, &berValue );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
-    TEST_ASSERT_EQUAL( rxqualValueToBerTable[ csqBer ], berValue );
+    TEST_ASSERT_EQUAL( rxEqualValueToBerTable[ csqBer ], berValue );
 }
 
 /**
