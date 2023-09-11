@@ -89,7 +89,7 @@ typedef enum parseTimeConditionState
 {
     PARSE_TIME_FIRST_CALL_FAILURE_CONDITION = 6,
     PARSE_TIME_SECOND_CALL_FAILURE_CONDITION = 7,
-    PARSE_TIME_THRID_CALL_FAILURE_CONDITION = 8,
+    PARSE_TIME_THIRD_CALL_FAILURE_CONDITION = 8,
     PARSE_TIME_FOURTH_CALL_FAILURE_CONDITION = 9,
     PARSE_TIME_FIFTH_CALL_FAILURE_CONDITION = 10,
     PARSE_TIME_SIXTH_CALL_FAILURE_CONDITION = 11
@@ -392,7 +392,7 @@ CellularATError_t Mock_Cellular_ATStrtoi( const char * pStr,
                 *pResult = atoi( pStr );
             }
         }
-        else if( cbCondition == PARSE_TIME_THRID_CALL_FAILURE_CONDITION )
+        else if( cbCondition == PARSE_TIME_THIRD_CALL_FAILURE_CONDITION )
         {
             if( cmock_num_calls == 3 )
             {
@@ -1864,13 +1864,13 @@ void test_Cellular_CommonSetEidrxSettings_Happy_Path( void )
     CellularHandle_t cellularHandle = &context;
     CellularEidrxSettings_t eidrxSettings;
 
-    eidrxSettings.requestedEdrxVaue = 0xF;
+    eidrxSettings.requestedEdrxValue = 0xF;
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
 
-    eidrxSettings.requestedEdrxVaue = 0x0;
+    eidrxSettings.requestedEdrxValue = 0x0;
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
     cellularStatus = Cellular_CommonSetEidrxSettings( cellularHandle, &eidrxSettings );
@@ -3328,7 +3328,7 @@ void test_Cellular_CommonGetNetworkTime_Bad_Parameter( void )
 }
 
 /**
- * @brief Test that retrieve networ time failure case Cellular_CommonGetNetworkTime to return CELLULAR_SUCCESS.
+ * @brief Test that retrieve network time failure case Cellular_CommonGetNetworkTime to return CELLULAR_SUCCESS.
  */
 void test_Cellular_CommonGetNetworkTime_Retrieve_Network_Time_Failure( void )
 {
@@ -3665,7 +3665,7 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKRe
 /**
  * @brief Test that _parseTimeZoneInCCLKResponse negative case in _Cellular_RecvFuncGetNetworkTime to return CELLULAR_INTERNAL_FAILURE.
  */
-void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Nagetive( void )
+void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_TimeZone_InCCLKResp_Negative( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t context;
@@ -4046,7 +4046,7 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     /* parse time failure case condition. */
-    cbCondition = PARSE_TIME_THRID_CALL_FAILURE_CONDITION;
+    cbCondition = PARSE_TIME_THIRD_CALL_FAILURE_CONDITION;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
 
     Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
@@ -4083,7 +4083,7 @@ void test_Cellular_CommonGetNetworkTime_RecvFuncCallback_Parse_YearMonthDAy_CCLK
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     /* parse time failure case condition. */
-    cbCondition = PARSE_TIME_THRID_CALL_FAILURE_CONDITION;
+    cbCondition = PARSE_TIME_THIRD_CALL_FAILURE_CONDITION;
     negativeNumberCase = 1;
     _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_RecvFuncGetNetworkTime );
 
@@ -6545,7 +6545,7 @@ void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStat
 }
 
 /**
- * @brief Test that SimLockState Uknown case in callback function _Cellular_RecvFuncGetSimLockStatus
+ * @brief Test that SimLockState Unknown case in callback function _Cellular_RecvFuncGetSimLockStatus
  * for Cellular_CommonGetSimCardLockStatus to return CELLULAR_INTERNAL_FAILURE.
  */
 void test_Cellular_CommonGetSimCardLockStatus_Cb_Cellular_RecvFuncGetSimLockStatus_SimLockState_Unknown( void )

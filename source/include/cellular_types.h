@@ -474,7 +474,7 @@ typedef struct CellularServiceStatus
  */
 typedef struct CellularATCommandLine
 {
-    struct CellularATCommandLine * pNext; /**< The CellularATCommandLine structure pointer points to the next element of the liniked list. */
+    struct CellularATCommandLine * pNext; /**< The CellularATCommandLine structure pointer points to the next element of the linked list. */
     char * pLine;                         /**< The content of the at command. */
 } CellularATCommandLine_t;
 
@@ -611,8 +611,8 @@ typedef struct CellularEidrxSettings
      * 1 1 1 0   5242.88 seconds
      * 1 1 1 1   10485.76 seconds
      */
-    uint8_t requestedEdrxVaue;  /**< Requested eDRX value encoded as per spec (as shown above). */
-    uint8_t nwProvidedEdrxVaue; /**< Network provided eDRX value encoded as per spec (as shown above). Only applicable in URC. */
+    uint8_t requestedEdrxValue;  /**< Requested eDRX value encoded as per spec (as shown above). */
+    uint8_t nwProvidedEdrxValue; /**< Network provided eDRX value encoded as per spec (as shown above). Only applicable in URC. */
 
     /*
      * LTE Cat M1 mode
@@ -721,7 +721,7 @@ typedef struct CellularSocketAddress
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
  * @param[in] pAtResp The response received for the AT command.
  * @param[in] pData is pATCommandPayload pointer in Cellular_ATCommandRaw parameters.
- * @param[in] dataLen is the string length of pATCommandPayloadin in Cellular_ATCommandRaw parameters.
+ * @param[in] dataLen is the string length of pATCommandPayload in in Cellular_ATCommandRaw parameters.
  *
  * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
  * code indicating the cause of the error.

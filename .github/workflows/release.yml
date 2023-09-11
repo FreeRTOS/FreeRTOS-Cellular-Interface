@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       commit_id:
-        description: 'Commit ID to tag and create a release for'
+        description: "Commit ID to tag and create a release for"
         required: true
       version_number:
-        description: 'Release Version Number (Eg, v1.0.0)'
+        description: "Release Version Number (Eg, v1.0.0)"
         required: true
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.commit_id }}
       - name: Configure git identity
@@ -24,7 +24,9 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git config --global user.email ${{ github.actor }}@users.noreply.github.com
       - name: create a new branch that references commit id
-        run: git checkout -b ${{ github.event.inputs.version_number }} ${{ github.event.inputs.commit_id }}
+        run:
+          git checkout -b ${{ github.event.inputs.version_number }} ${{
+          github.event.inputs.commit_id }}
       - name: Generate SBOM
         uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
         with:
@@ -53,7 +55,7 @@ jobs:
       - name: Install ZIP tools
         run: sudo apt-get install zip unzip
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.commit_id }}
           path: FreeRTOS-Cellular-Interface
@@ -93,8 +95,12 @@ jobs:
       - name: Create artifact of ZIP
         uses: actions/upload-artifact@v2
         with:
-          name: FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip
-          path: zip-check/FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip
+          name:
+            FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number
+            }}.zip
+          path:
+            zip-check/FreeRTOS-Cellular-Interface-${{
+            github.event.inputs.version_number }}.zip
   deploy-doxygen:
     needs: tag-commit
     name: Deploy doxygen documentation
@@ -120,13 +126,17 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.version_number }}
           release_name: ${{ github.event.inputs.version_number }}
-          body: Release ${{ github.event.inputs.version_number }} of the FreeRTOS-Cellular-Interface Library.
+          body:
+            Release ${{ github.event.inputs.version_number }} of the
+            FreeRTOS-Cellular-Interface Library.
           draft: false
           prerelease: false
       - name: Download ZIP artifact
         uses: actions/download-artifact@v2
         with:
-          name: FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip
+          name:
+            FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number
+            }}.zip
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -134,6 +144,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip
-          asset_name: FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip
+          asset_path:
+            ./FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number
+            }}.zip
+          asset_name:
+            FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number
+            }}.zip
           asset_content_type: application/zip
