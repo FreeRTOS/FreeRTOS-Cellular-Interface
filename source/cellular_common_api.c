@@ -112,32 +112,6 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
     }
-    else if( option == CELLULAR_SOCKET_OPTION_SSL_CONTEXT_ID )
-    {
-        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint8_t ) ) )
-        {
-            socketHandle->sslConfig.sslContextId = *pOptionValue;
-        }
-        else
-        {
-            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the sslContextID in this state %d or length %d is invalid.",
-                        socketHandle->socketState, optionValueLength ) );
-            cellularStatus = CELLULAR_INTERNAL_FAILURE;
-        }
-    }
-    else if( option == CELLULAR_SOCKET_OPTION_SSL_USAGE )
-    {
-        if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint8_t ) ) )
-        {
-            socketHandle->sslConfig.useSsl = *pOptionValue;
-        }
-        else
-        {
-            LogError( ( "Cellular_SocketSetSockOpt: Cannot change the useSsl in this state %d or length %d is invalid.",
-                        socketHandle->socketState, optionValueLength ) );
-            cellularStatus = CELLULAR_INTERNAL_FAILURE;
-        }
-    }
     else if( option == CELLULAR_SOCKET_OPTION_SET_LOCAL_PORT )
     {
         if( ( socketHandle->socketState == SOCKETSTATE_ALLOCATED ) && ( optionValueLength == sizeof( uint16_t ) ) )
@@ -464,14 +438,15 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
     }
     else
     {
-        if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_IP )
-        {
-            LogError( ( "Cellular_SocketSetSockOpt: Option not supported" ) );
-            cellularStatus = CELLULAR_UNSUPPORTED;
-        }
-        else /* optionLevel CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT. */
+        if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT )
         {
             cellularStatus = _socketSetSockOptLevelTransport( option, socketHandle, pOptionValue, optionValueLength );
+        }
+        else
+        {
+            /* Other socket option levels are not supported in common layer. Modem ports
+             * can use their own implementation for these options. */
+            cellularStatus = CELLULAR_UNSUPPORTED;
         }
     }
 
