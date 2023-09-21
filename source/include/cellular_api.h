@@ -652,8 +652,8 @@ CellularError_t Cellular_SocketRegisterClosedCallback( CellularHandle_t cellular
  */
 CellularError_t Cellular_ConfigureSSLContext( CellularHandle_t cellularHandle,
                                               uint8_t sslContextId,
-                                              const char* sslConfigurationParameter,
-                                              const char* inputArg );
+                                              const char * sslConfigurationParameter,
+                                              const char * inputArg );
 
 /**
  * @brief Upload a File into the Storage.
@@ -665,15 +665,15 @@ CellularError_t Cellular_ConfigureSSLContext( CellularHandle_t cellularHandle,
  * @param[out] pSentDataLength Out parameter to provide the length of the actual
  * data sent. Note that it may be less than the dataLength in case complete data
  * could not be sent.
- * 
+ *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
  */
 CellularError_t Cellular_UploadFileToStorage( CellularHandle_t cellularHandle,
-                                              const char* filename,
-                                              const char* fileContent,
+                                              const char * filename,
+                                              const char * fileContent,
                                               uint32_t fileSize,
-                                              uint32_t* pSentDataLength );
+                                              uint32_t * pSentDataLength );
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
