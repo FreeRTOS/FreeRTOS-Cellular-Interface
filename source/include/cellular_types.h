@@ -315,7 +315,7 @@ typedef enum CellularSocketOptionLevel
 {
     CELLULAR_SOCKET_OPTION_LEVEL_IP,        /**< IP layer options. */
     CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT, /**< Transport (TCP/UDP) layer options. */
-    CELLULAR_SOCKET_OPTION_LEVEL_SECURE     /**< Secure sockets layer options. */   
+    CELLULAR_SOCKET_OPTION_LEVEL_SECURE     /**< Secure sockets layer options. */
 } CellularSocketOptionLevel_t;
 
 /**
