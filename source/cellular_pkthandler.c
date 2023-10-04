@@ -820,7 +820,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                LogError( ( "AtParseFail for %u: %d %s %s", i, result,
+                LogError( ( "AtParseFail for %lu: %ld %s %s", i, result,
                             pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }
@@ -836,7 +836,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
         for( i = 0; i < tokenMapSize; i++ )
         {
-            LogDebug( ( "Callbacks setup for %u : %s", i, pTokenMap[ i ].pStrValue ) );
+            LogDebug( ( "Callbacks setup for %lu : %s", i, pTokenMap[ i ].pStrValue ) );
         }
     }
     else

@@ -489,7 +489,7 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        LogDebug( ( "TimeZoneInfo: Timezone %d Year %d Month %d day %d,", pTimeInfo->timeZone,
+        LogDebug( ( "TimeZoneInfo: Timezone %ld Year %d Month %d day %d,", pTimeInfo->timeZone,
                     pTimeInfo->year,
                     pTimeInfo->month,
                     pTimeInfo->day ) );
