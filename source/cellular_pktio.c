@@ -174,7 +174,7 @@ static void _saveRawData( char * pLine,
                           CellularATCommandResponse_t * pResp,
                           uint32_t dataLen )
 {
-    LogDebug( ( "Save [%p] %ld data to pResp", pLine, dataLen ) );
+    LogDebug( ( "Save [%p] %lu data to pResp", pLine, dataLen ) );
     _saveData( pLine, pResp, dataLen );
 }
 
@@ -546,7 +546,7 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
     /* Move the leftover data or AT command response to the start of buffer.
      * Set the pRead pointer to the empty buffer space. */
 
-    LogDebug( ( "moved the partial line/data from %p to %p %ld",
+    LogDebug( ( "moved the partial line/data from %p to %p %lu",
                 pContext->pPktioReadPtr, pContext->pktioReadBuf, pContext->partialDataRcvdLen ) );
 
     ( void ) memmove( pContext->pktioReadBuf, pContext->pPktioReadPtr, pContext->partialDataRcvdLen );
@@ -617,7 +617,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
             /* Add a NULL after the bytesRead. This is required for further processing. */
             pRead[ bytesRead ] = '\0';
 
-            LogDebug( ( "AT Read %ld bytes, data[%p]", bytesRead, pRead ) );
+            LogDebug( ( "AT Read %lu bytes, data[%p]", bytesRead, pRead ) );
             /* Set the pBytesRead only when actual bytes read from comm interface. */
             *pBytesRead = bytesRead + partialDataRead;
 
@@ -670,7 +670,7 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         /* There are more bytes after the data. */
         *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %ld left %ld, read total %ld",
+        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %lu left %lu, read total %lu",
                     pContext->pktioReadBuf,
                     pStartOfData,
                     bytesBeforeData,
@@ -1427,7 +1427,7 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                             dataLen, CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
     }
 
-    LogDebug( ( "PktioSendData sent %ld bytes", sentLen ) );
+    LogDebug( ( "PktioSendData sent %lu bytes", sentLen ) );
     return sentLen;
 }
 
