@@ -456,7 +456,7 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
 
         if( ( pContext->bLibShutdown == true ) || ( pContext->bLibClosing == true ) )
         {
-            LogError( ( "Cellular Lib indicated a failure[%"CELLULAR_LOG_FMT_INT32"][%"CELLULAR_LOG_FMT_INT32"]", pContext->bLibShutdown, pContext->bLibClosing ) );
+            LogError( ( "Cellular Lib indicated a failure[%"CELLULAR_LOG_FMT_INT"][%"CELLULAR_LOG_FMT_INT"]", pContext->bLibShutdown, pContext->bLibClosing ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
 
@@ -487,7 +487,7 @@ CellularError_t _Cellular_TranslatePktStatus( CellularPktStatus_t status )
         case CELLULAR_PKT_STATUS_BAD_RESPONSE:
         case CELLULAR_PKT_STATUS_SIZE_MISMATCH:
         default:
-            LogError( ( "_Cellular_TranslatePktStatus: Status %"CELLULAR_LOG_FMT_INT32"", status ) );
+            LogError( ( "_Cellular_TranslatePktStatus: Status %"CELLULAR_LOG_FMT_INT"", status ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
             break;
     }
@@ -517,7 +517,7 @@ CellularPktStatus_t _Cellular_TranslateAtCoreStatus( CellularATError_t status )
         case CELLULAR_AT_ERROR:
         case CELLULAR_AT_UNKNOWN:
         default:
-            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %"CELLULAR_LOG_FMT_INT32"", status ) );
+            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %"CELLULAR_LOG_FMT_INT"", status ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             break;
     }
@@ -668,7 +668,7 @@ CellularError_t _Cellular_IsValidPdn( uint8_t contextId )
 
     if( ( contextId > CELLULAR_PDN_CONTEXT_ID_MAX ) || ( contextId < CELLULAR_PDN_CONTEXT_ID_MIN ) )
     {
-        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %"CELLULAR_LOG_FMT_INT32"",
+        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %"CELLULAR_LOG_FMT_INT"",
                     contextId ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
@@ -701,7 +701,7 @@ CellularError_t _Cellular_ConvertCsqSignalRssi( int16_t csqRssi,
         }
         else
         {
-            rssiValue = SIGNAL_QUALITY_CSQ_RSSI_BASE + ( csqRssi * SIGNAL_QUALITY_CSQ_RSSI_STEP );
+            rssiValue = ( int16_t )( SIGNAL_QUALITY_CSQ_RSSI_BASE + csqRssi * SIGNAL_QUALITY_CSQ_RSSI_STEP );
         }
     }
 
@@ -797,12 +797,12 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
         if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rssi, rat );
-            LogDebug( ( "_computeSignalBars: RSSI %"CELLULAR_LOG_FMT_INT32" Bars %"CELLULAR_LOG_FMT_INT32"", pSignalInfo->rssi, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSSI %"CELLULAR_LOG_FMT_INT" Bars %"CELLULAR_LOG_FMT_INT"", pSignalInfo->rssi, pSignalInfo->bars ) );
         }
         else if( ( rat == CELLULAR_RAT_LTE ) || ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_NBIOT ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rsrp, rat );
-            LogDebug( ( "_computeSignalBars: RSRP %"CELLULAR_LOG_FMT_INT32" Bars %"CELLULAR_LOG_FMT_INT32"", pSignalInfo->rsrp, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSRP %"CELLULAR_LOG_FMT_INT" Bars %"CELLULAR_LOG_FMT_INT"", pSignalInfo->rsrp, pSignalInfo->bars ) );
         }
         else
         {

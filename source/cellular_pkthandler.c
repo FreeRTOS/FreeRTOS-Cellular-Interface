@@ -240,14 +240,14 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
                 if( pktStatus != CELLULAR_PKT_STATUS_OK )
                 {
-                    LogWarn( ( "Modem returns error in sending AT command %"CELLULAR_LOG_FMT_STR", pktStatus %"CELLULAR_LOG_FMT_INT32".",
+                    LogWarn( ( "Modem returns error in sending AT command %"CELLULAR_LOG_FMT_STR", pktStatus %"CELLULAR_LOG_FMT_INT".",
                                atReq.pAtCmd, pktStatus ) );
                 } /* Ignore errors from callbacks as they will be handled elsewhere. */
             }
             else
             {
                 pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-                LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT32", AT cmd %"CELLULAR_LOG_FMT_STR" timed out", pktStatus, atReq.pAtCmd ) );
+                LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT", AT cmd %"CELLULAR_LOG_FMT_STR" timed out", pktStatus, atReq.pAtCmd ) );
             }
         }
 
@@ -257,7 +257,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         pContext->pktRespCB = NULL;
         pContext->pCurrentCmd = NULL;
         PlatformMutex_Unlock( &pContext->PktRespMutex );
-        LogDebug( ( "<<<<<Exit sending [%"CELLULAR_LOG_FMT_STR"] status[%"CELLULAR_LOG_FMT_INT32"]<<<<<", atReq.pAtCmd, pktStatus ) );
+        LogDebug( ( "<<<<<Exit sending [%"CELLULAR_LOG_FMT_STR"] status[%"CELLULAR_LOG_FMT_INT"]<<<<<", atReq.pAtCmd, pktStatus ) );
     }
 
     return pktStatus;
@@ -329,13 +329,13 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
             }
             else
             {
-                LogWarn( ( "Modem returns error in sending data, pktStatus %"CELLULAR_LOG_FMT_INT32".", pktStatus ) );
+                LogWarn( ( "Modem returns error in sending data, pktStatus %"CELLULAR_LOG_FMT_INT".", pktStatus ) );
             }
         }
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-            LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT32", data sending timed out", pktStatus ) );
+            LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT", data sending timed out", pktStatus ) );
         }
 
         /* Set AT command type to CELLULAR_AT_NO_COMMAND for timeout case here. */
@@ -343,7 +343,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
         PlatformMutex_Unlock( &pContext->PktRespMutex );
 
-        LogDebug( ( "<<<<<Exit sending data ret[%"CELLULAR_LOG_FMT_INT32"]>>>>>", pktStatus ) );
+        LogDebug( ( "<<<<<Exit sending data ret[%"CELLULAR_LOG_FMT_INT"]>>>>>", pktStatus ) );
     }
 
     return pktStatus;
@@ -495,7 +495,7 @@ static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "undefinedRespCallback returns error %"CELLULAR_LOG_FMT_INT32" for AT_UNDEFINED type message %"CELLULAR_LOG_FMT_STR" received.",
+            LogError( ( "undefinedRespCallback returns error %"CELLULAR_LOG_FMT_INT" for AT_UNDEFINED type message %"CELLULAR_LOG_FMT_STR" received.",
                         pktStatus, pLine ) );
             pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
         }
@@ -554,7 +554,7 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
             default:
                 pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-                LogError( ( "_Cellular_HandlePacket Callback type (%"CELLULAR_LOG_FMT_INT32") error", atRespType ) );
+                LogError( ( "_Cellular_HandlePacket Callback type (%"CELLULAR_LOG_FMT_INT") error", atRespType ) );
                 break;
         }
     }
@@ -820,8 +820,8 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                LogError( ( "AtParseFail for %"CELLULAR_LOG_FMT_UINT32": %"CELLULAR_LOG_FMT_INT32" %"CELLULAR_LOG_FMT_STR" %"CELLULAR_LOG_FMT_STR"", i, result,
-                            pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
+                LogError( ( "AtParseFail for %"CELLULAR_LOG_FMT_UINT32": %"CELLULAR_LOG_FMT_INT32" %"CELLULAR_LOG_FMT_STR" %"CELLULAR_LOG_FMT_STR"",
+                            i, result, pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }
         }

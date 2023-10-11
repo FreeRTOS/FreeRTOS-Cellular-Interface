@@ -452,8 +452,12 @@
     #define CELLULAR_AT_MAX_STRING_SIZE    ( 256U )
 #endif
 
+#ifndef CELLULAR_LOG_FMT_SIZE
+    #define CELLULAR_LOG_FMT_SIZE     "lu"
+#endif
+
 #ifndef CELLULAR_LOG_FMT_UINT32
-    #define CELLULAR_LOG_FMT_UINT32     "lu"
+    #define CELLULAR_LOG_FMT_UINT32     "u"
 #endif
 
 #ifndef CELLULAR_LOG_FMT_UINT16
@@ -464,8 +468,12 @@
     #define CELLULAR_LOG_FMT_UINT8     "u"
 #endif
 
+#ifndef CELLULAR_LOG_FMT_INT
+    #define CELLULAR_LOG_FMT_INT     "d"
+#endif
+
 #ifndef CELLULAR_LOG_FMT_INT32
-    #define CELLULAR_LOG_FMT_INT32     "ld"
+    #define CELLULAR_LOG_FMT_INT32     "d"
 #endif
 
 #ifndef CELLULAR_LOG_FMT_INT16
@@ -481,11 +489,11 @@
 #endif
 
 #ifndef CELLULAR_LOG_FMT_STR
-    #define CELLULAR_LOG_FMT_STR     "S"
+    #define CELLULAR_LOG_FMT_STR     "s"
 #endif
 
 #ifndef CELLULAR_LOG_FMT_PTR
-    #define CELLULAR_LOG_FMT_PTR     "P"
+    #define CELLULAR_LOG_FMT_PTR     "p"
 #endif
 
 #ifndef CELLULAR_LOG_FMT_UINT32_HEX

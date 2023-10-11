@@ -489,12 +489,13 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        LogDebug( ( "TimeZoneInfo: Timezone %"CELLULAR_LOG_FMT_INT32" Year %"CELLULAR_LOG_FMT_INT32" Month %"CELLULAR_LOG_FMT_INT32" day %"CELLULAR_LOG_FMT_INT32",", pTimeInfo->timeZone,
+        LogDebug( ( "TimeZoneInfo: Timezone %"CELLULAR_LOG_FMT_INT32" Year %"CELLULAR_LOG_FMT_INT" Month %"CELLULAR_LOG_FMT_INT" day %"CELLULAR_LOG_FMT_INT",",
+                    pTimeInfo->timeZone,
                     pTimeInfo->year,
                     pTimeInfo->month,
                     pTimeInfo->day ) );
 
-        LogDebug( ( "Hour %"CELLULAR_LOG_FMT_INT32" Minute %"CELLULAR_LOG_FMT_INT32" Second %"CELLULAR_LOG_FMT_INT32"",
+        LogDebug( ( "Hour %"CELLULAR_LOG_FMT_INT" Minute %"CELLULAR_LOG_FMT_INT" Second %"CELLULAR_LOG_FMT_INT"",
                     pTimeInfo->hour,
                     pTimeInfo->minute,
                     pTimeInfo->second ) );
@@ -843,7 +844,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
             pCommandLine = pCommandLine->pNext;
         }
 
-        LogDebug( ( "atcmd network register status %"CELLULAR_LOG_FMT_INT32" pktStatus:%"CELLULAR_LOG_FMT_INT32"", regType, pktStatus ) );
+        LogDebug( ( "atcmd network register status %"CELLULAR_LOG_FMT_INT" pktStatus:%"CELLULAR_LOG_FMT_INT"", regType, pktStatus ) );
     }
 
     return pktStatus;
@@ -1319,7 +1320,7 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
         {
             if( parseEidrxToken( pToken, tokenIndex, pEidrxSettingsList, count ) != CELLULAR_AT_SUCCESS )
             {
-                LogInfo( ( "parseEidrxToken %"CELLULAR_LOG_FMT_STR" index %"CELLULAR_LOG_FMT_INT32" failed", pToken, tokenIndex ) );
+                LogInfo( ( "parseEidrxToken %"CELLULAR_LOG_FMT_STR" index %"CELLULAR_LOG_FMT_INT" failed", pToken, tokenIndex ) );
             }
 
             tokenIndex++;
@@ -1333,13 +1334,13 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        LogDebug( ( "GetEidrx setting[%"CELLULAR_LOG_FMT_INT32"]: RAT: %"CELLULAR_LOG_FMT_INT32", Value: 0x%"CELLULAR_LOG_FMT_UINT32_HEX"",
+        LogDebug( ( "GetEidrx setting[%"CELLULAR_LOG_FMT_INT"]: RAT: %"CELLULAR_LOG_FMT_INT", Value: 0x%"CELLULAR_LOG_FMT_UINT32_HEX"",
                     count, pEidrxSettingsList->eidrxList[ count ].rat,
                     pEidrxSettingsList->eidrxList[ count ].requestedEdrxValue ) );
     }
     else
     {
-        LogError( ( "GetEidrx: Parsing Error encountered, atCoreStatus: %"CELLULAR_LOG_FMT_INT32"", atCoreStatus ) );
+        LogError( ( "GetEidrx: Parsing Error encountered, atCoreStatus: %"CELLULAR_LOG_FMT_INT"", atCoreStatus ) );
     }
 
     return atCoreStatus;
@@ -1694,7 +1695,7 @@ CellularError_t Cellular_CommonSetEidrxSettings( CellularHandle_t cellularHandle
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT32",%"CELLULAR_LOG_FMT_INT32",\"" PRINTF_BINARY_PATTERN_INT4 "\"",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT",%"CELLULAR_LOG_FMT_INT",\"" PRINTF_BINARY_PATTERN_INT4 "\"",
                            "AT+CEDRXS=",
                            pEidrxSettings->mode,
                            pEidrxSettings->rat,
@@ -1855,14 +1856,14 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
         ( void ) strncpy( pServiceStatus->operatorName, operatorInfo.operatorName, CELLULAR_NETWORK_NAME_MAX_SIZE );
         pServiceStatus->operatorNameFormat = operatorInfo.operatorNameFormat;
 
-        LogDebug( ( "SrvStatus: rat %"CELLULAR_LOG_FMT_INT32" cs %"CELLULAR_LOG_FMT_INT32", ps %"CELLULAR_LOG_FMT_INT32", mode %"CELLULAR_LOG_FMT_INT32", csRejType %"CELLULAR_LOG_FMT_INT32",",
+        LogDebug( ( "SrvStatus: rat %"CELLULAR_LOG_FMT_INT" cs %"CELLULAR_LOG_FMT_INT", ps %"CELLULAR_LOG_FMT_INT", mode %"CELLULAR_LOG_FMT_INT", csRejType %"CELLULAR_LOG_FMT_INT",",
                     pServiceStatus->rat,
                     pServiceStatus->csRegistrationStatus,
                     pServiceStatus->psRegistrationStatus,
                     pServiceStatus->networkRegistrationMode,
                     pServiceStatus->csRejectionType ) );
 
-        LogDebug( ( "csRej %"CELLULAR_LOG_FMT_INT32", psRejType %"CELLULAR_LOG_FMT_INT32", psRej %"CELLULAR_LOG_FMT_INT32", plmn %"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_STR"",
+        LogDebug( ( "csRej %"CELLULAR_LOG_FMT_INT", psRejType %"CELLULAR_LOG_FMT_INT", psRej %"CELLULAR_LOG_FMT_INT", plmn %"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_STR"",
                     pServiceStatus->csRejectionCause,
                     pServiceStatus->psRejectionType,
                     pServiceStatus->psRejectionCause,
@@ -2048,13 +2049,13 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT32"", "AT+CGPADDR=", contextId );
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT"", "AT+CGPADDR=", contextId );
 
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetIp );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%"CELLULAR_LOG_FMT_STR", pktStatus: %"CELLULAR_LOG_FMT_INT32"", cmdBuf, pktStatus ) );
+            LogError( ( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%"CELLULAR_LOG_FMT_STR", pktStatus: %"CELLULAR_LOG_FMT_INT"", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2170,7 +2171,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
                 break;
 
             default:
-                LogError( ( "Cellular_CommonSetPdnConfig: Invalid pdn context type %"CELLULAR_LOG_FMT_INT32"",
+                LogError( ( "Cellular_CommonSetPdnConfig: Invalid pdn context type %"CELLULAR_LOG_FMT_INT"",
                             CELLULAR_PDN_CONTEXT_IPV4V6 ) );
                 cellularStatus = CELLULAR_BAD_PARAMETER;
                 break;
@@ -2195,7 +2196,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT32",\"%"CELLULAR_LOG_FMT_STR"\",\"%"CELLULAR_LOG_FMT_STR"\"",
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR"%"CELLULAR_LOG_FMT_INT",\"%"CELLULAR_LOG_FMT_STR"\",\"%"CELLULAR_LOG_FMT_STR"\"",
                            "AT+CGDCONT=",
                            contextId,
                            pPdpTypeStr,
@@ -2204,7 +2205,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%"CELLULAR_LOG_FMT_STR", PktRet: %"CELLULAR_LOG_FMT_INT32"", cmdBuf, pktStatus ) );
+            LogError( ( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%"CELLULAR_LOG_FMT_STR", PktRet: %"CELLULAR_LOG_FMT_INT"", cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2685,7 +2686,7 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetSimLockStatus );
 
         cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
-        LogDebug( ( "_Cellular_GetSimStatus, Sim Insert State[%"CELLULAR_LOG_FMT_INT32"], Lock State[%"CELLULAR_LOG_FMT_INT32"]",
+        LogDebug( ( "_Cellular_GetSimStatus, Sim Insert State[%"CELLULAR_LOG_FMT_INT"], Lock State[%"CELLULAR_LOG_FMT_INT"]",
                     pSimCardStatus->simCardState, pSimCardStatus->simCardLockState ) );
     }
 
@@ -2834,7 +2835,7 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+CPSMS=%"CELLULAR_LOG_FMT_INT32",", pPsmSettings->mode );
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+CPSMS=%"CELLULAR_LOG_FMT_INT",", pPsmSettings->mode );
         cmdBufLen = ( uint32_t ) strlen( cmdBuf );
         cmdBufLen = cmdBufLen + appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                                      pPsmSettings->periodicRauValue, false );
@@ -2977,7 +2978,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetPsmSettings( CellularContext_t *
 
                 if( atCoreStatus != CELLULAR_AT_SUCCESS )
                 {
-                    LogInfo( ( "parseGetPsmToken %"CELLULAR_LOG_FMT_STR" index %"CELLULAR_LOG_FMT_INT32" failed", pToken, tokenIndex ) );
+                    LogInfo( ( "parseGetPsmToken %"CELLULAR_LOG_FMT_STR" index %"CELLULAR_LOG_FMT_UINT8" failed", pToken, tokenIndex ) );
                 }
 
                 tokenIndex++;
