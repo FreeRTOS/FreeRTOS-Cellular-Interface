@@ -661,7 +661,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
             }
             else
             {
-                firstNibble = ( uint8_t )( firstNibble << 4 );
+                firstNibble = ( uint8_t ) ( firstNibble << 4 );
                 ( pHexData )[ i ] = firstNibble | secondNibble;
             }
 

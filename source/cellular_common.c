@@ -102,13 +102,13 @@ static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
+    static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 #endif
 
 static CellularContext_t * cellularContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 
 #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
+    static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
 #endif
 
 /*-----------------------------------------------------------*/
@@ -125,13 +125,13 @@ static CellularContext_t * _Cellular_AllocContext( void )
         if( cellularContextTable[ i ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-            {
-                pContext = &cellularStaticContextTable[ i ];
-            }
+                {
+                    pContext = &cellularStaticContextTable[ i ];
+                }
             #else
-            {
-                pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
-            }
+                {
+                    pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
+                }
             #endif
 
             if( pContext != NULL )
@@ -163,9 +163,9 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
         {
             cellularContextTable[ i ] = NULL;
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
-            {
-                Platform_Free( pContext );
-            }
+                {
+                    Platform_Free( pContext );
+                }
             #endif
             break;
         }
@@ -262,9 +262,9 @@ static void libClose( CellularContext_t * pContext )
         if( pContext->pSocketData[ i ] != NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
-            {
-                Platform_Free( pContext->pSocketData[ i ] );
-            }
+                {
+                    Platform_Free( pContext->pSocketData[ i ] );
+                }
             #endif
             pContext->pSocketData[ i ] = NULL;
         }
@@ -456,7 +456,7 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
 
         if( ( pContext->bLibShutdown == true ) || ( pContext->bLibClosing == true ) )
         {
-            LogError( ( "Cellular Lib indicated a failure[%"CELLULAR_LOG_FMT_INT"][%"CELLULAR_LOG_FMT_INT"]", pContext->bLibShutdown, pContext->bLibClosing ) );
+            LogError( ( "Cellular Lib indicated a failure[%"CELLULAR_LOG_FMT_INT "][%"CELLULAR_LOG_FMT_INT "]", pContext->bLibShutdown, pContext->bLibClosing ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
 
@@ -487,7 +487,7 @@ CellularError_t _Cellular_TranslatePktStatus( CellularPktStatus_t status )
         case CELLULAR_PKT_STATUS_BAD_RESPONSE:
         case CELLULAR_PKT_STATUS_SIZE_MISMATCH:
         default:
-            LogError( ( "_Cellular_TranslatePktStatus: Status %"CELLULAR_LOG_FMT_INT"", status ) );
+            LogError( ( "_Cellular_TranslatePktStatus: Status %"CELLULAR_LOG_FMT_INT "", status ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
             break;
     }
@@ -517,7 +517,7 @@ CellularPktStatus_t _Cellular_TranslateAtCoreStatus( CellularATError_t status )
         case CELLULAR_AT_ERROR:
         case CELLULAR_AT_UNKNOWN:
         default:
-            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %"CELLULAR_LOG_FMT_INT"", status ) );
+            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %"CELLULAR_LOG_FMT_INT "", status ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             break;
     }
@@ -545,13 +545,13 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         if( pContext->pSocketData[ socketId ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-            {
-                pSocketData = &cellularStaticSocketDataTable[ socketId ];
-            }
+                {
+                    pSocketData = &cellularStaticSocketDataTable[ socketId ];
+                }
             #else
-            {
-                pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
-            }
+                {
+                    pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
+                }
             #endif
 
             if( pSocketData != NULL )
@@ -599,7 +599,7 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
 
     if( socketHandle->socketState == SOCKETSTATE_CONNECTING )
     {
-        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%"CELLULAR_LOG_FMT_UINT32"]", socketHandle->socketId ) );
+        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%"CELLULAR_LOG_FMT_UINT32 "]", socketHandle->socketId ) );
     }
 
     taskENTER_CRITICAL();
@@ -652,7 +652,7 @@ CellularError_t _Cellular_IsValidSocket( const CellularContext_t * pContext,
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %"CELLULAR_LOG_FMT_UINT32"", sockIndex ) );
+            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %"CELLULAR_LOG_FMT_UINT32 "", sockIndex ) );
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
     }
@@ -668,7 +668,7 @@ CellularError_t _Cellular_IsValidPdn( uint8_t contextId )
 
     if( ( contextId > CELLULAR_PDN_CONTEXT_ID_MAX ) || ( contextId < CELLULAR_PDN_CONTEXT_ID_MIN ) )
     {
-        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %"CELLULAR_LOG_FMT_INT"",
+        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %"CELLULAR_LOG_FMT_INT "",
                     contextId ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
@@ -701,7 +701,7 @@ CellularError_t _Cellular_ConvertCsqSignalRssi( int16_t csqRssi,
         }
         else
         {
-            rssiValue = ( int16_t )( SIGNAL_QUALITY_CSQ_RSSI_BASE + csqRssi * SIGNAL_QUALITY_CSQ_RSSI_STEP );
+            rssiValue = ( int16_t ) ( SIGNAL_QUALITY_CSQ_RSSI_BASE + csqRssi * SIGNAL_QUALITY_CSQ_RSSI_STEP );
         }
     }
 
@@ -797,12 +797,12 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
         if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rssi, rat );
-            LogDebug( ( "_computeSignalBars: RSSI %"CELLULAR_LOG_FMT_INT" Bars %"CELLULAR_LOG_FMT_INT"", pSignalInfo->rssi, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSSI %"CELLULAR_LOG_FMT_INT " Bars %"CELLULAR_LOG_FMT_INT "", pSignalInfo->rssi, pSignalInfo->bars ) );
         }
         else if( ( rat == CELLULAR_RAT_LTE ) || ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_NBIOT ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rsrp, rat );
-            LogDebug( ( "_computeSignalBars: RSRP %"CELLULAR_LOG_FMT_INT" Bars %"CELLULAR_LOG_FMT_INT"", pSignalInfo->rsrp, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSRP %"CELLULAR_LOG_FMT_INT " Bars %"CELLULAR_LOG_FMT_INT "", pSignalInfo->rsrp, pSignalInfo->bars ) );
         }
         else
         {
@@ -916,7 +916,7 @@ CellularSocketContext_t * _Cellular_GetSocketData( const CellularContext_t * pCo
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_GetSocketData, invalid socket handle %"CELLULAR_LOG_FMT_UINT32"", sockIndex ) );
+            LogError( ( "_Cellular_GetSocketData, invalid socket handle %"CELLULAR_LOG_FMT_UINT32 "", sockIndex ) );
         }
         else
         {
