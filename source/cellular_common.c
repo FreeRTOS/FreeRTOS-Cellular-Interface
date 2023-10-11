@@ -192,7 +192,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
 
     PlatformMutex_Lock( &pContext->libStatusMutex );
 
-    ( CellularPktStatus_t ) _Cellular_AtParseInit( pContext );
+    ( void ) _Cellular_AtParseInit( pContext );
     _Cellular_LockAtDataMutex( pContext );
     _Cellular_InitAtData( pContext, 0 );
     _Cellular_UnlockAtDataMutex( pContext );
