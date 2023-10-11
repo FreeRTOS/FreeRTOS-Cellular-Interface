@@ -137,12 +137,12 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
     if( atStatus != CELLULAR_AT_SUCCESS )
     {
         /* Fail to allocate memory. */
-        LogError( ( "Failed to allocate memory for URC [%s]", pBuf ) );
+        LogError( ( "Failed to allocate memory for URC [%"CELLULAR_LOG_FMT_STR"]", pBuf ) );
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
     }
     else
     {
-        LogDebug( ( "Next URC token to parse [%s]", pInputLine ) );
+        LogDebug( ( "Next URC token to parse [%"CELLULAR_LOG_FMT_STR"]", pInputLine ) );
 
         /* Check if prefix exist in the input string. The pInputLine is checked in Cellular_ATStrDup. */
         ( void ) Cellular_ATIsPrefixPresent( pInputLine, &inputWithPrefix );
@@ -158,7 +158,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
 
             if( pTokenPtr == NULL )
             {
-                LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %s", pInputLine ) );
+                LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %"CELLULAR_LOG_FMT_STR"", pInputLine ) );
                 pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
             }
             else
@@ -177,7 +177,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
         if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
         {
             /* No URC callback function available, check for generic callback. */
-            LogDebug( ( "No URC Callback func avail %s, now trying generic URC Callback", pTokenPtr ) );
+            LogDebug( ( "No URC Callback func avail %"CELLULAR_LOG_FMT_STR", now trying generic URC Callback", pTokenPtr ) );
 
             if( inputWithPrefix == true )
             {
@@ -213,7 +213,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
     }
     else
     {
-        LogDebug( ( ">>>>>Start sending [%s]<<<<<", atReq.pAtCmd ) );
+        LogDebug( ( ">>>>>Start sending [%"CELLULAR_LOG_FMT_STR"]<<<<<", atReq.pAtCmd ) );
 
         /* Fill in request info structure. */
         PlatformMutex_Lock( &pContext->PktRespMutex );
@@ -240,14 +240,14 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
                 if( pktStatus != CELLULAR_PKT_STATUS_OK )
                 {
-                    LogWarn( ( "Modem returns error in sending AT command %s, pktStatus %d.",
+                    LogWarn( ( "Modem returns error in sending AT command %"CELLULAR_LOG_FMT_STR", pktStatus %"CELLULAR_LOG_FMT_INT32".",
                                atReq.pAtCmd, pktStatus ) );
                 } /* Ignore errors from callbacks as they will be handled elsewhere. */
             }
             else
             {
                 pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-                LogError( ( "pkt_recv status=%d, AT cmd %s timed out", pktStatus, atReq.pAtCmd ) );
+                LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT32", AT cmd %"CELLULAR_LOG_FMT_STR" timed out", pktStatus, atReq.pAtCmd ) );
             }
         }
 
@@ -257,7 +257,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         pContext->pktRespCB = NULL;
         pContext->pCurrentCmd = NULL;
         PlatformMutex_Unlock( &pContext->PktRespMutex );
-        LogDebug( ( "<<<<<Exit sending [%s] status[%d]<<<<<", atReq.pAtCmd, pktStatus ) );
+        LogDebug( ( "<<<<<Exit sending [%"CELLULAR_LOG_FMT_STR"] status[%"CELLULAR_LOG_FMT_INT32"]<<<<<", atReq.pAtCmd, pktStatus ) );
     }
 
     return pktStatus;
@@ -329,13 +329,13 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
             }
             else
             {
-                LogWarn( ( "Modem returns error in sending data, pktStatus %d.", pktStatus ) );
+                LogWarn( ( "Modem returns error in sending data, pktStatus %"CELLULAR_LOG_FMT_INT32".", pktStatus ) );
             }
         }
         else
         {
             pktStatus = CELLULAR_PKT_STATUS_TIMED_OUT;
-            LogError( ( "pkt_recv status=%d, data sending timed out", pktStatus ) );
+            LogError( ( "pkt_recv status=%"CELLULAR_LOG_FMT_INT32", data sending timed out", pktStatus ) );
         }
 
         /* Set AT command type to CELLULAR_AT_NO_COMMAND for timeout case here. */
@@ -343,7 +343,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
         pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
         PlatformMutex_Unlock( &pContext->PktRespMutex );
 
-        LogDebug( ( "<<<<<Exit sending data ret[%d]>>>>>", pktStatus ) );
+        LogDebug( ( "<<<<<Exit sending data ret[%"CELLULAR_LOG_FMT_INT32"]>>>>>", pktStatus ) );
     }
 
     return pktStatus;
@@ -456,7 +456,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
         }
         else
         {
-            LogWarn( ( "No URC Callback func avail %s", pTokenPtr ) );
+            LogWarn( ( "No URC Callback func avail %"CELLULAR_LOG_FMT_STR"", pTokenPtr ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
     }
@@ -479,13 +479,13 @@ static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext
 {
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    LogInfo( ( "AT_UNDEFINED message received %s\r\n", pLine ) );
+    LogInfo( ( "AT_UNDEFINED message received %"CELLULAR_LOG_FMT_STR"\r\n", pLine ) );
 
     /* undefined message received. Try to handle it with cellular module
      * specific handler. */
     if( pContext->undefinedRespCallback == NULL )
     {
-        LogError( ( "No undefined callback for AT_UNDEFINED type message %s received.",
+        LogError( ( "No undefined callback for AT_UNDEFINED type message %"CELLULAR_LOG_FMT_STR" received.",
                     pLine ) );
         pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
     }
@@ -495,7 +495,7 @@ static CellularPktStatus_t _handleUndefinedMessage( CellularContext_t * pContext
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "undefinedRespCallback returns error %d for AT_UNDEFINED type message %s received.",
+            LogError( ( "undefinedRespCallback returns error %"CELLULAR_LOG_FMT_INT32" for AT_UNDEFINED type message %"CELLULAR_LOG_FMT_STR" received.",
                         pktStatus, pLine ) );
             pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
         }
@@ -554,7 +554,7 @@ CellularPktStatus_t _Cellular_HandlePacket( CellularContext_t * pContext,
 
             default:
                 pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-                LogError( ( "_Cellular_HandlePacket Callback type (%d) error", atRespType ) );
+                LogError( ( "_Cellular_HandlePacket Callback type (%"CELLULAR_LOG_FMT_INT32") error", atRespType ) );
                 break;
         }
     }
@@ -820,7 +820,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                LogError( ( "AtParseFail for %u: %d %s %s", i, result,
+                LogError( ( "AtParseFail for %"CELLULAR_LOG_FMT_UINT32": %"CELLULAR_LOG_FMT_INT32" %"CELLULAR_LOG_FMT_STR" %"CELLULAR_LOG_FMT_STR"", i, result,
                             pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }
@@ -836,7 +836,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
         for( i = 0; i < tokenMapSize; i++ )
         {
-            LogDebug( ( "Callbacks setup for %u : %s", i, pTokenMap[ i ].pStrValue ) );
+            LogDebug( ( "Callbacks setup for %"CELLULAR_LOG_FMT_UINT32" : %"CELLULAR_LOG_FMT_STR"", i, pTokenMap[ i ].pStrValue ) );
         }
     }
     else

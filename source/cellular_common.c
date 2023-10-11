@@ -456,7 +456,7 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
 
         if( ( pContext->bLibShutdown == true ) || ( pContext->bLibClosing == true ) )
         {
-            LogError( ( "Cellular Lib indicated a failure[%d][%d]", pContext->bLibShutdown, pContext->bLibClosing ) );
+            LogError( ( "Cellular Lib indicated a failure[%"CELLULAR_LOG_FMT_INT32"][%"CELLULAR_LOG_FMT_INT32"]", pContext->bLibShutdown, pContext->bLibClosing ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
 
@@ -487,7 +487,7 @@ CellularError_t _Cellular_TranslatePktStatus( CellularPktStatus_t status )
         case CELLULAR_PKT_STATUS_BAD_RESPONSE:
         case CELLULAR_PKT_STATUS_SIZE_MISMATCH:
         default:
-            LogError( ( "_Cellular_TranslatePktStatus: Status %d", status ) );
+            LogError( ( "_Cellular_TranslatePktStatus: Status %"CELLULAR_LOG_FMT_INT32"", status ) );
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
             break;
     }
@@ -517,7 +517,7 @@ CellularPktStatus_t _Cellular_TranslateAtCoreStatus( CellularATError_t status )
         case CELLULAR_AT_ERROR:
         case CELLULAR_AT_UNKNOWN:
         default:
-            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %d", status ) );
+            LogError( ( "_Cellular_TranslateAtCoreStatus: Status %"CELLULAR_LOG_FMT_INT32"", status ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
             break;
     }
@@ -599,7 +599,7 @@ CellularError_t _Cellular_RemoveSocketData( CellularContext_t * pContext,
 
     if( socketHandle->socketState == SOCKETSTATE_CONNECTING )
     {
-        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%u]", socketHandle->socketId ) );
+        LogWarn( ( "_Cellular_RemoveSocket, socket is connecting state [%"CELLULAR_LOG_FMT_UINT32"]", socketHandle->socketId ) );
     }
 
     taskENTER_CRITICAL();
@@ -652,7 +652,7 @@ CellularError_t _Cellular_IsValidSocket( const CellularContext_t * pContext,
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %u", sockIndex ) );
+            LogError( ( "_Cellular_IsValidSocket, invalid socket handle %"CELLULAR_LOG_FMT_UINT32"", sockIndex ) );
             cellularStatus = CELLULAR_BAD_PARAMETER;
         }
     }
@@ -668,7 +668,7 @@ CellularError_t _Cellular_IsValidPdn( uint8_t contextId )
 
     if( ( contextId > CELLULAR_PDN_CONTEXT_ID_MAX ) || ( contextId < CELLULAR_PDN_CONTEXT_ID_MIN ) )
     {
-        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %d",
+        LogError( ( "_Cellular_IsValidPdn: ContextId out of range %"CELLULAR_LOG_FMT_INT32"",
                     contextId ) );
         cellularStatus = CELLULAR_BAD_PARAMETER;
     }
@@ -797,12 +797,12 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
         if( ( rat == CELLULAR_RAT_GSM ) || ( rat == CELLULAR_RAT_EDGE ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rssi, rat );
-            LogDebug( ( "_computeSignalBars: RSSI %d Bars %d", pSignalInfo->rssi, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSSI %"CELLULAR_LOG_FMT_INT32" Bars %"CELLULAR_LOG_FMT_INT32"", pSignalInfo->rssi, pSignalInfo->bars ) );
         }
         else if( ( rat == CELLULAR_RAT_LTE ) || ( rat == CELLULAR_RAT_CATM1 ) || ( rat == CELLULAR_RAT_NBIOT ) )
         {
             pSignalInfo->bars = _getSignalBars( pSignalInfo->rsrp, rat );
-            LogDebug( ( "_computeSignalBars: RSRP %d Bars %d", pSignalInfo->rsrp, pSignalInfo->bars ) );
+            LogDebug( ( "_computeSignalBars: RSRP %"CELLULAR_LOG_FMT_INT32" Bars %"CELLULAR_LOG_FMT_INT32"", pSignalInfo->rsrp, pSignalInfo->bars ) );
         }
         else
         {
@@ -916,7 +916,7 @@ CellularSocketContext_t * _Cellular_GetSocketData( const CellularContext_t * pCo
     {
         if( ( sockIndex >= CELLULAR_NUM_SOCKET_MAX ) || ( pContext->pSocketData[ sockIndex ] == NULL ) )
         {
-            LogError( ( "_Cellular_GetSocketData, invalid socket handle %u", sockIndex ) );
+            LogError( ( "_Cellular_GetSocketData, invalid socket handle %"CELLULAR_LOG_FMT_UINT32"", sockIndex ) );
         }
         else
         {

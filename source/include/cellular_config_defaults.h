@@ -452,6 +452,46 @@
     #define CELLULAR_AT_MAX_STRING_SIZE    ( 256U )
 #endif
 
+#ifndef CELLULAR_LOG_FMT_UINT32
+    #define CELLULAR_LOG_FMT_UINT32     "lu"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_UINT16
+    #define CELLULAR_LOG_FMT_UINT16     "u"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_UINT8
+    #define CELLULAR_LOG_FMT_UINT8     "u"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_INT32
+    #define CELLULAR_LOG_FMT_INT32     "ld"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_INT16
+    #define CELLULAR_LOG_FMT_INT16     "d"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_INT8
+    #define CELLULAR_LOG_FMT_INT8     "d"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_CHAR
+    #define CELLULAR_LOG_FMT_CHAR     "c"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_STR
+    #define CELLULAR_LOG_FMT_STR     "S"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_PTR
+    #define CELLULAR_LOG_FMT_PTR     "P"
+#endif
+
+#ifndef CELLULAR_LOG_FMT_UINT32_HEX
+    #define CELLULAR_LOG_FMT_UINT32_HEX     "x"
+#endif
+
 /**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.

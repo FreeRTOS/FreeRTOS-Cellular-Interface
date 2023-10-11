@@ -142,7 +142,7 @@ static void _saveData( char * pLine,
 
     ( void ) dataLen;
 
-    LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
+    LogDebug( ( "_saveData : Save data %"CELLULAR_LOG_FMT_PTR" with length %"CELLULAR_LOG_FMT_INT32"", pLine, dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     configASSERT( ( pNew != NULL ) );
@@ -174,7 +174,7 @@ static void _saveRawData( char * pLine,
                           CellularATCommandResponse_t * pResp,
                           uint32_t dataLen )
 {
-    LogDebug( ( "Save [%p] %d data to pResp", pLine, dataLen ) );
+    LogDebug( ( "Save [%"CELLULAR_LOG_FMT_PTR"] %"CELLULAR_LOG_FMT_INT32" data to pResp", pLine, dataLen ) );
     _saveData( pLine, pResp, dataLen );
 }
 
@@ -183,7 +183,7 @@ static void _saveRawData( char * pLine,
 static void _saveATData( char * pLine,
                          CellularATCommandResponse_t * pResp )
 {
-    LogDebug( ( "Save [%s] %lu AT data to pResp", pLine, strlen( pLine ) ) );
+    LogDebug( ( "Save [%"CELLULAR_LOG_FMT_STR"] %"CELLULAR_LOG_FMT_UINT32" AT data to pResp", pLine, strlen( pLine ) ) );
     _saveData( pLine, pResp, ( uint32_t ) ( strlen( pLine ) + 1U ) );
 }
 
@@ -207,7 +207,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR", status: %"CELLULAR_LOG_FMT_INT32", previous line %"CELLULAR_LOG_FMT_STR"",
                             pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
@@ -226,7 +226,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %s, status: %d, previous line %s",
+                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR", status: %"CELLULAR_LOG_FMT_INT32", previous line %"CELLULAR_LOG_FMT_STR"",
                             pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
@@ -264,7 +264,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
 
         default:
             /* Unexpected message received when sending the AT command. */
-            LogInfo( ( "Undefind message received %s when sending AT command type %d.",
+            LogInfo( ( "Undefind message received %"CELLULAR_LOG_FMT_STR" when sending AT command type %"CELLULAR_LOG_FMT_INT32".",
                        pLine, atType ) );
 
             pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
@@ -361,7 +361,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
         {
             pResp->status = true;
             pkStatus = CELLULAR_PKT_STATUS_OK;
-            LogDebug( ( "Final AT response is SUCCESS [%s] in extra table", pLine ) );
+            LogDebug( ( "Final AT response is SUCCESS [%"CELLULAR_LOG_FMT_STR"] in extra table", pLine ) );
         }
         else
         {
@@ -372,7 +372,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
             {
                 pResp->status = true;
                 pkStatus = CELLULAR_PKT_STATUS_OK;
-                LogDebug( ( "Final AT response is SUCCESS [%s]", pLine ) );
+                LogDebug( ( "Final AT response is SUCCESS [%"CELLULAR_LOG_FMT_STR"]", pLine ) );
             }
         }
 
@@ -396,7 +396,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
 
     if( ( result == true ) && ( pResp->status == false ) )
     {
-        LogWarn( ( "Modem return ERROR: line %s, cmd : %s, respPrefix %s",
+        LogWarn( ( "Modem return ERROR: line %"CELLULAR_LOG_FMT_STR", cmd : %"CELLULAR_LOG_FMT_STR", respPrefix %"CELLULAR_LOG_FMT_STR"",
                    pLine,
                    ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
                    ( pRespPrefix != NULL ? pRespPrefix : "NULL" ) ) );
@@ -546,7 +546,7 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
     /* Move the leftover data or AT command response to the start of buffer.
      * Set the pRead pointer to the empty buffer space. */
 
-    LogDebug( ( "moved the partial line/data from %p to %p %d",
+    LogDebug( ( "moved the partial line/data from %"CELLULAR_LOG_FMT_PTR" to %"CELLULAR_LOG_FMT_PTR" %"CELLULAR_LOG_FMT_INT32"",
                 pContext->pPktioReadPtr, pContext->pktioReadBuf, pContext->partialDataRcvdLen ) );
 
     ( void ) memmove( pContext->pktioReadBuf, pContext->pPktioReadPtr, pContext->partialDataRcvdLen );
@@ -617,7 +617,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
             /* Add a NULL after the bytesRead. This is required for further processing. */
             pRead[ bytesRead ] = '\0';
 
-            LogDebug( ( "AT Read %d bytes, data[%p]", bytesRead, pRead ) );
+            LogDebug( ( "AT Read %"CELLULAR_LOG_FMT_INT32" bytes, data[%"CELLULAR_LOG_FMT_PTR"]", bytesRead, pRead ) );
             /* Set the pBytesRead only when actual bytes read from comm interface. */
             *pBytesRead = bytesRead + partialDataRead;
 
@@ -670,7 +670,7 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         /* There are more bytes after the data. */
         *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
+        LogDebug( ( "_handleData : read buffer buffer %"CELLULAR_LOG_FMT_PTR" start %"CELLULAR_LOG_FMT_PTR" prefix %"CELLULAR_LOG_FMT_INT32" left %"CELLULAR_LOG_FMT_INT32", read total %"CELLULAR_LOG_FMT_INT32"",
                     pContext->pktioReadBuf,
                     pStartOfData,
                     bytesBeforeData,
@@ -715,10 +715,10 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         if( *ppAtResp == NULL )
         {
             *ppAtResp = _Cellular_AtResponseNew();
-            LogDebug( ( "Allocate at response %p", ( void * ) *ppAtResp ) );
+            LogDebug( ( "Allocate at response %"CELLULAR_LOG_FMT_PTR"", ( void * ) *ppAtResp ) );
         }
 
-        LogDebug( ( "AT solicited Resp[%s]", pLine ) );
+        LogDebug( ( "AT solicited Resp[%"CELLULAR_LOG_FMT_STR"]", pLine ) );
 
         /* Process Line will store the Line data in AT response. */
         pkStatus = _Cellular_ProcessLine( pContext, pLine, *ppAtResp, pContext->PktioAtCmdType, pContext->pRespPrefix );
@@ -772,7 +772,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         if( pkStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %s, cmd %s",
+            LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %"CELLULAR_LOG_FMT_STR", cmd %"CELLULAR_LOG_FMT_STR"",
                         pLine,
                         ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
 
@@ -828,7 +828,7 @@ static bool _findLineInStream( CellularContext_t * pContext,
     }
     else
     {
-        LogDebug( ( "%p is not a complete line", pTempLine ) );
+        LogDebug( ( "%"CELLULAR_LOG_FMT_PTR" is not a complete line", pTempLine ) );
         pContext->pPktioReadPtr = pTempLine;
         pContext->partialDataRcvdLen = bytesRead;
         keepProcess = false;
@@ -874,7 +874,7 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
         else if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
             /* Modem returns unexpected response. */
-            LogError( ( "Input buffer callback returns error %d. Clean the read buffer.", pktStatus ) );
+            LogError( ( "Input buffer callback returns error %"CELLULAR_LOG_FMT_INT32". Clean the read buffer.", pktStatus ) );
 
             /* Clean the read buffer and read pointer. */
             ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
@@ -885,7 +885,7 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
         else if( bufferLength > *pBytesRead )
         {
             /* The input buffer callback returns incorrect buffer length. */
-            LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
+            LogError( ( "Input buffer callback returns bufferLength %"CELLULAR_LOG_FMT_UINT32". Modem returns length %"CELLULAR_LOG_FMT_UINT32". Clean the read buffer.",
                         bufferLength, *pBytesRead ) );
 
             /* Clean the read buffer and read pointer. */
@@ -954,7 +954,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
-                LogError( ( "pktDataSendPrefixCB returns error %d", pktStatus ) );
+                LogError( ( "pktDataSendPrefixCB returns error %"CELLULAR_LOG_FMT_INT32"", pktStatus ) );
                 keepProcess = false;
             }
         }
@@ -982,14 +982,14 @@ static bool _preprocessLine( CellularContext_t * pContext,
             else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
             {
                 /* The modem driver is waiting for more data to decide. */
-                LogDebug( ( "%p is not a complete line", pTempLine ) );
+                LogDebug( ( "%"CELLULAR_LOG_FMT_PTR" is not a complete line", pTempLine ) );
                 pContext->pPktioReadPtr = pTempLine;
                 pContext->partialDataRcvdLen = *pBytesRead;
                 keepProcess = false;
             }
             else
             {
-                LogError( ( "pktDataPrefixCB returns error %d", pktStatus ) );
+                LogError( ( "pktDataPrefixCB returns error %"CELLULAR_LOG_FMT_INT32"", pktStatus ) );
                 keepProcess = false;
             }
         }
@@ -1026,7 +1026,7 @@ static bool _handleDataResult( CellularContext_t * pContext,
     else
     {
         *pBytesRead = bytesLeft;
-        LogDebug( ( "_handleData okay, keep processing %u bytes %p", bytesLeft, *ppLine ) );
+        LogDebug( ( "_handleData okay, keep processing %"CELLULAR_LOG_FMT_UINT32" bytes %"CELLULAR_LOG_FMT_PTR"", bytesLeft, *ppLine ) );
     }
 
     return keepProcess;
@@ -1131,7 +1131,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             }
             else
             {
-                LogDebug( ( "_handleMsgType failed %d", pktStatus ) );
+                LogDebug( ( "_handleMsgType failed %"CELLULAR_LOG_FMT_INT32"", pktStatus ) );
                 keepProcess = false;
             }
         }
@@ -1313,7 +1313,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        LogDebug( ( "Thread create: read_thread status:%d", pktStatus ) );
+        LogDebug( ( "Thread create: read_thread status:%"CELLULAR_LOG_FMT_INT32"", pktStatus ) );
     }
     else
     {
@@ -1427,7 +1427,7 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                             dataLen, CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
     }
 
-    LogDebug( ( "PktioSendData sent %d bytes", sentLen ) );
+    LogDebug( ( "PktioSendData sent %"CELLULAR_LOG_FMT_INT32" bytes", sentLen ) );
     return sentLen;
 }
 

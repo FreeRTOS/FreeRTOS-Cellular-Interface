@@ -230,7 +230,7 @@ static CellularPktStatus_t _parseCellIdInRegStatus( const char * pToken,
         }
         else
         {
-            LogError( ( "Error in processing Cell Id. Token %s", pToken ) );
+            LogError( ( "Error in processing Cell Id. Token %"CELLULAR_LOG_FMT_STR"", pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -255,7 +255,7 @@ static CellularPktStatus_t _parseRatInfoInRegStatus( const char * pToken,
         if( var >= ( int32_t ) CELLULAR_RAT_MAX )
         {
             atCoreStatus = CELLULAR_AT_ERROR;
-            LogError( ( "Error in processing RAT. Token %s", pToken ) );
+            LogError( ( "Error in processing RAT. Token %"CELLULAR_LOG_FMT_STR"", pToken ) );
         }
         else if( ( var == ( int32_t ) CELLULAR_RAT_GSM ) || ( var == ( int32_t ) CELLULAR_RAT_EDGE ) ||
                  ( var == ( int32_t ) CELLULAR_RAT_CATM1 ) || ( var == ( int32_t ) CELLULAR_RAT_NBIOT ) )
@@ -442,15 +442,15 @@ static void _regStatusGenerateLog( char * pRegPayload,
 
     if( regType == CELLULAR_REG_TYPE_CREG )
     {
-        LogDebug( ( "URC: CREG: %s", pRegPayload ) );
+        LogDebug( ( "URC: CREG: %"CELLULAR_LOG_FMT_STR"", pRegPayload ) );
     }
     else if( regType == CELLULAR_REG_TYPE_CGREG )
     {
-        LogDebug( ( "URC: CGREG: %s", pRegPayload ) );
+        LogDebug( ( "URC: CGREG: %"CELLULAR_LOG_FMT_STR"", pRegPayload ) );
     }
     else if( regType == CELLULAR_REG_TYPE_CEREG )
     {
-        LogDebug( ( "URC: CEREG: %s", pRegPayload ) );
+        LogDebug( ( "URC: CEREG: %"CELLULAR_LOG_FMT_STR"", pRegPayload ) );
     }
     else
     {
