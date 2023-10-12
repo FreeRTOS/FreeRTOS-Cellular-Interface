@@ -458,7 +458,7 @@
  * <b>Default value (if undefined):</b> "lu"
  */
 #ifndef CELLULAR_LOG_FMT_SIZE
-    #define CELLULAR_LOG_FMT_SIZE           "lu"
+    #define CELLULAR_LOG_FMT_SIZE    "lu"
 #endif
 
 /**
@@ -467,7 +467,7 @@
  * <b>Default value (if undefined):</b> "u"
  */
 #ifndef CELLULAR_LOG_FMT_UINT32
-    #define CELLULAR_LOG_FMT_UINT32         "u"
+    #define CELLULAR_LOG_FMT_UINT32    "u"
 #endif
 
 /**
@@ -476,7 +476,7 @@
  * <b>Default value (if undefined):</b> "u"
  */
 #ifndef CELLULAR_LOG_FMT_UINT16
-    #define CELLULAR_LOG_FMT_UINT16         "u"
+    #define CELLULAR_LOG_FMT_UINT16    "u"
 #endif
 
 /**
@@ -485,7 +485,7 @@
  * <b>Default value (if undefined):</b> "u"
  */
 #ifndef CELLULAR_LOG_FMT_UINT8
-    #define CELLULAR_LOG_FMT_UINT8          "u"
+    #define CELLULAR_LOG_FMT_UINT8    "u"
 #endif
 
 /**
@@ -494,7 +494,7 @@
  * <b>Default value (if undefined):</b> "d"
  */
 #ifndef CELLULAR_LOG_FMT_INT
-    #define CELLULAR_LOG_FMT_INT            "d"
+    #define CELLULAR_LOG_FMT_INT    "d"
 #endif
 
 /**
@@ -503,7 +503,7 @@
  * <b>Default value (if undefined):</b> "d"
  */
 #ifndef CELLULAR_LOG_FMT_INT32
-    #define CELLULAR_LOG_FMT_INT32          "d"
+    #define CELLULAR_LOG_FMT_INT32    "d"
 #endif
 
 /**
@@ -512,7 +512,7 @@
  * <b>Default value (if undefined):</b> "d"
  */
 #ifndef CELLULAR_LOG_FMT_INT16
-    #define CELLULAR_LOG_FMT_INT16          "d"
+    #define CELLULAR_LOG_FMT_INT16    "d"
 #endif
 
 /**
@@ -521,7 +521,7 @@
  * <b>Default value (if undefined):</b> "d"
  */
 #ifndef CELLULAR_LOG_FMT_INT8
-    #define CELLULAR_LOG_FMT_INT8           "d"
+    #define CELLULAR_LOG_FMT_INT8    "d"
 #endif
 
 /**
@@ -530,7 +530,7 @@
  * <b>Default value (if undefined):</b> "d"
  */
 #ifndef CELLULAR_LOG_FMT_CHAR
-    #define CELLULAR_LOG_FMT_CHAR           "c"
+    #define CELLULAR_LOG_FMT_CHAR    "c"
 #endif
 
 /**
@@ -539,7 +539,7 @@
  * <b>Default value (if undefined):</b> "s"
  */
 #ifndef CELLULAR_LOG_FMT_STR
-    #define CELLULAR_LOG_FMT_STR            "s"
+    #define CELLULAR_LOG_FMT_STR    "s"
 #endif
 
 /**
@@ -548,7 +548,7 @@
  * <b>Default value (if undefined):</b> "p"
  */
 #ifndef CELLULAR_LOG_FMT_PTR
-    #define CELLULAR_LOG_FMT_PTR            "p"
+    #define CELLULAR_LOG_FMT_PTR    "p"
 #endif
 
 /**
@@ -557,7 +557,7 @@
  * <b>Default value (if undefined):</b> "x"
  */
 #ifndef CELLULAR_LOG_FMT_UINT32_HEX
-    #define CELLULAR_LOG_FMT_UINT32_HEX     "x"
+    #define CELLULAR_LOG_FMT_UINT32_HEX    "x"
 #endif
 
 /**
