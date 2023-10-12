@@ -8,13 +8,13 @@ jobs:
     name: Calculate object sizes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-            submodules: 'recursive'
+          submodules: "recursive"
       - name: Measure sizes
         uses: FreeRTOS/CI-CD-Github-Actions/memory_statistics@main
         with:
-            config: .github/memory_statistics_config.json
+          config: .github/memory_statistics_config.json
       - name: Upload table
         uses: actions/upload-artifact@v2
         with:

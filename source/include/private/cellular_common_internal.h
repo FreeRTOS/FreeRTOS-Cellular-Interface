@@ -159,7 +159,7 @@ struct CellularContext
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Netwrok registration respone parsing function.
+ * @brief Network registration respone parsing function.
  *
  * Parse the network registration response from AT command response or URC.
  * The result is stored in the pContext.

@@ -344,7 +344,7 @@
 #endif
 
 /**
- * @brief Default radio access technoloyg.<br>
+ * @brief Default radio access technology.<br>
  *
  * <b>Possible values:</b>`Any value before CELLULAR_RAT_MAX` ( Reference : @ref CellularRat_t )<br>
  * <b>Default value (if undefined):</b> CELLULAR_RAT_CATM1

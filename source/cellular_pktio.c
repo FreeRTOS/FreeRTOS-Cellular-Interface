@@ -310,7 +310,7 @@ static void _Cellular_AtResponseFree( CellularATCommandResponse_t * pResp )
             pToFree = pCurrLine;
             pCurrLine = pCurrLine->pNext;
 
-            /* Ruese the pktiobuffer. No need to free pToFree->pLine here. */
+            /* Reuse the packet io buffer. No need to free pToFree->pLine here. */
             Platform_Free( pToFree );
         }
 
@@ -562,7 +562,7 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
 /*-----------------------------------------------------------*/
 
 /* pBytesRead : bytes read from comm interface. */
-/* partialData : leftover bytes in the pktioreadbuf. Not enougth to be a command. */
+/* partialData : leftover bytes in the pktioreadbuf. Not enough to be a command. */
 static char * _Cellular_ReadLine( CellularContext_t * pContext,
                                   uint32_t * pBytesRead,
                                   const CellularATCommandResponse_t * pAtResp )
@@ -947,7 +947,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
         if( pktDataSendPrefixCB != NULL )
         {
             /* Check if the AT command response is the data send prefix.
-             * Data send prefix is an SRC success token for data send AT commmand.
+             * Data send prefix is an SRC success token for data send AT command.
              * It is used to indicate modem can receive data now. */
             /* This function may fix the data stream if the data send prefix is not a line. */
             pktStatus = pktDataSendPrefixCB( pDataSendPrefixCBContext, pTempLine, pBytesRead );
@@ -1126,7 +1126,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             }
             else if( ( pktStatus == CELLULAR_PKT_STATUS_OK ) || ( pktStatus == CELLULAR_PKT_STATUS_PENDING_DATA ) )
             {
-                /* Process AT reponse success. Get the next Line. */
+                /* Process AT response success. Get the next Line. */
                 keepProcess = _getNextLine( pContext, &pTempLine, &bytesRead, currentLineLength, pktStatus );
             }
             else
