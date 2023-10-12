@@ -102,13 +102,13 @@ static void _Cellular_SetShutdownCallback( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-    static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
+static CellularContext_t cellularStaticContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 #endif
 
 static CellularContext_t * cellularContextTable[ CELLULAR_CONTEXT_MAX ] = { 0 };
 
 #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-    static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
+static CellularSocketContext_t cellularStaticSocketDataTable[ CELLULAR_NUM_SOCKET_MAX ] = { 0 };
 #endif
 
 /*-----------------------------------------------------------*/
@@ -125,13 +125,13 @@ static CellularContext_t * _Cellular_AllocContext( void )
         if( cellularContextTable[ i ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
-                {
-                    pContext = &cellularStaticContextTable[ i ];
-                }
+            {
+                pContext = &cellularStaticContextTable[ i ];
+            }
             #else
-                {
-                    pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
-                }
+            {
+                pContext = ( CellularContext_t * ) Platform_Malloc( sizeof( CellularContext_t ) );
+            }
             #endif
 
             if( pContext != NULL )
@@ -163,9 +163,9 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
         {
             cellularContextTable[ i ] = NULL;
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 0 )
-                {
-                    Platform_Free( pContext );
-                }
+            {
+                Platform_Free( pContext );
+            }
             #endif
             break;
         }
@@ -262,9 +262,9 @@ static void libClose( CellularContext_t * pContext )
         if( pContext->pSocketData[ i ] != NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 0 )
-                {
-                    Platform_Free( pContext->pSocketData[ i ] );
-                }
+            {
+                Platform_Free( pContext->pSocketData[ i ] );
+            }
             #endif
             pContext->pSocketData[ i ] = NULL;
         }
@@ -545,13 +545,13 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         if( pContext->pSocketData[ socketId ] == NULL )
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
-                {
-                    pSocketData = &cellularStaticSocketDataTable[ socketId ];
-                }
+            {
+                pSocketData = &cellularStaticSocketDataTable[ socketId ];
+            }
             #else
-                {
-                    pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
-                }
+            {
+                pSocketData = ( CellularSocketContext_t * ) Platform_Malloc( sizeof( CellularSocketContext_t ) );
+            }
             #endif
 
             if( pSocketData != NULL )
