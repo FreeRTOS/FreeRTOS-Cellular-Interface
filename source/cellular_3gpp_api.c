@@ -62,7 +62,7 @@
 /* Length of HPLMN including RAT. */
 #define CRSM_HPLMN_RAT_LENGTH               ( 9U )
 
-#define PRINTF_BINARY_PATTERN_INT4          "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR ""
+#define PRINTF_BINARY_PATTERN_INT4          "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR "%"CELLULAR_LOG_FMT_CHAR
 #define PRINTF_BYTE_TO_BINARY_INT4( i )          \
     ( ( ( ( i ) & 0x08U ) != 0U ) ? '1' : '0' ), \
     ( ( ( ( i ) & 0x04U ) != 0U ) ? '1' : '0' ), \
@@ -269,7 +269,7 @@ static CellularPktStatus_t _parseTimeZoneInCCLKResponse( char ** ppToken,
         }
         else
         {
-            LogError( ( "Error in Processing TimeZone Information. Token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+            LogError( ( "Error in Processing TimeZone Information. Token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
         }
     }
 
@@ -298,7 +298,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
         }
         else
         {
-            LogError( ( "Error in Processing Year. Token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+            LogError( ( "Error in Processing Year. Token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -322,7 +322,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
             }
             else
             {
-                LogError( ( "Error in Processing month. Token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+                LogError( ( "Error in Processing month. Token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -346,7 +346,7 @@ static CellularPktStatus_t _parseYearMonthDayInCCLKResponse( char ** ppToken,
             }
             else
             {
-                LogError( ( "Error in Processing Day. token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+                LogError( ( "Error in Processing Day. token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -377,7 +377,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
         }
         else
         {
-            LogError( ( "Error in Processing Hour. token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+            LogError( ( "Error in Processing Hour. token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -400,7 +400,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
             }
             else
             {
-                LogError( ( "Error in Processing minute. Token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+                LogError( ( "Error in Processing minute. Token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -432,7 +432,7 @@ static CellularPktStatus_t _parseTimeInCCLKResponse( char ** ppToken,
             }
             else
             {
-                LogError( ( "Error in Processing Second. Token %"CELLULAR_LOG_FMT_STR "", *ppToken ) );
+                LogError( ( "Error in Processing Second. Token %"CELLULAR_LOG_FMT_STR, *ppToken ) );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -495,7 +495,7 @@ static CellularPktStatus_t _parseTimeZoneInfo( char * pTimeZoneResp,
                     pTimeInfo->month,
                     pTimeInfo->day ) );
 
-        LogDebug( ( "Hour %"CELLULAR_LOG_FMT_INT " Minute %"CELLULAR_LOG_FMT_INT " Second %"CELLULAR_LOG_FMT_INT "",
+        LogDebug( ( "Hour %"CELLULAR_LOG_FMT_INT " Minute %"CELLULAR_LOG_FMT_INT " Second %"CELLULAR_LOG_FMT_INT,
                     pTimeInfo->hour,
                     pTimeInfo->minute,
                     pTimeInfo->second ) );
@@ -844,7 +844,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetNetworkReg( CellularContext_t * 
             pCommandLine = pCommandLine->pNext;
         }
 
-        LogDebug( ( "atcmd network register status %"CELLULAR_LOG_FMT_INT " pktStatus:%"CELLULAR_LOG_FMT_INT "", regType, pktStatus ) );
+        LogDebug( ( "atcmd network register status %"CELLULAR_LOG_FMT_INT " pktStatus:%"CELLULAR_LOG_FMT_INT, regType, pktStatus ) );
     }
 
     return pktStatus;
@@ -905,7 +905,7 @@ static bool _parseCopsRegModeToken( char * pToken,
             }
             else
             {
-                LogError( ( "_parseCopsRegMode: Error in processing Network Registration mode. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+                LogError( ( "_parseCopsRegMode: Error in processing Network Registration mode. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
                 parseStatus = false;
             }
         }
@@ -944,7 +944,7 @@ static bool _parseCopsNetworkNameFormatToken( const char * pToken,
             }
             else
             {
-                LogError( ( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+                LogError( ( "_parseCopsNetworkNameFormat: Error in processing Network Registration mode. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
                 parseStatus = false;
             }
         }
@@ -1031,7 +1031,7 @@ static bool _parseCopsRatToken( const char * pToken,
             }
             else
             {
-                LogError( ( "_parseCopsNetworkName: Error in processing RAT. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+                LogError( ( "_parseCopsNetworkName: Error in processing RAT. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
                 parseStatus = false;
             }
         }
@@ -1165,7 +1165,7 @@ static CellularPktStatus_t _Cellular_RecvFuncUpdateMccMnc( CellularContext_t * p
 
         if( atCoreStatus == CELLULAR_AT_ERROR )
         {
-            LogError( ( "ERROR: COPS %"CELLULAR_LOG_FMT_STR "", pCopsResponse ) );
+            LogError( ( "ERROR: COPS %"CELLULAR_LOG_FMT_STR, pCopsResponse ) );
             pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
         }
     }
@@ -1211,7 +1211,7 @@ static CellularPktStatus_t _Cellular_RecvFuncIpAddress( CellularContext_t * pCon
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            LogDebug( ( "Recv IP address: Context id: %"CELLULAR_LOG_FMT_STR ", Address %"CELLULAR_LOG_FMT_STR "", pToken, pInputLine ) );
+            LogDebug( ( "Recv IP address: Context id: %"CELLULAR_LOG_FMT_STR ", Address %"CELLULAR_LOG_FMT_STR, pToken, pInputLine ) );
 
             if( pInputLine[ 0 ] != '\0' )
             {
@@ -1254,7 +1254,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
                 }
                 else
                 {
-                    LogError( ( "Error in processing RAT value. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+                    LogError( ( "Error in processing RAT value. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -1273,7 +1273,7 @@ static CellularATError_t parseEidrxToken( char * pToken,
                 }
                 else
                 {
-                    LogError( ( "Error in processing Requested Edrx value. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+                    LogError( ( "Error in processing Requested Edrx value. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
                     atCoreStatus = CELLULAR_AT_ERROR;
                 }
             }
@@ -1334,13 +1334,13 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        LogDebug( ( "GetEidrx setting[%"CELLULAR_LOG_FMT_INT "]: RAT: %"CELLULAR_LOG_FMT_INT ", Value: 0x%"CELLULAR_LOG_FMT_UINT32_HEX "",
+        LogDebug( ( "GetEidrx setting[%"CELLULAR_LOG_FMT_INT "]: RAT: %"CELLULAR_LOG_FMT_INT ", Value: 0x%"CELLULAR_LOG_FMT_UINT32_HEX,
                     count, pEidrxSettingsList->eidrxList[ count ].rat,
                     pEidrxSettingsList->eidrxList[ count ].requestedEdrxValue ) );
     }
     else
     {
-        LogError( ( "GetEidrx: Parsing Error encountered, atCoreStatus: %"CELLULAR_LOG_FMT_INT "", atCoreStatus ) );
+        LogError( ( "GetEidrx: Parsing Error encountered, atCoreStatus: %"CELLULAR_LOG_FMT_INT, atCoreStatus ) );
     }
 
     return atCoreStatus;
@@ -1387,7 +1387,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
             if( ( strcmp( "+CEDRXS: 0", pInputLine ) == 0 ) ||
                 ( strcmp( "+CEDRXS:", pInputLine ) == 0 ) )
             {
-                LogDebug( ( "GetEidrx: empty EDRXS setting %"CELLULAR_LOG_FMT_STR "", pInputLine ) );
+                LogDebug( ( "GetEidrx: empty EDRXS setting %"CELLULAR_LOG_FMT_STR, pInputLine ) );
             }
             else
             {
@@ -1502,7 +1502,7 @@ static CellularATError_t parseT3412TimerValue( char * pToken,
     {
         if( tempValue < 0 )
         {
-            LogError( ( "Error in processing Periodic Processing Active time value. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+            LogError( ( "Error in processing Periodic Processing Active time value. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
         else
@@ -1572,7 +1572,7 @@ static CellularATError_t parseT3324TimerValue( char * pToken,
     {
         if( tempValue < 0 )
         {
-            LogError( ( "Error in processing Periodic Processing Active time value. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+            LogError( ( "Error in processing Periodic Processing Active time value. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
         else
@@ -1863,7 +1863,7 @@ CellularError_t Cellular_CommonGetServiceStatus( CellularHandle_t cellularHandle
                     pServiceStatus->networkRegistrationMode,
                     pServiceStatus->csRejectionType ) );
 
-        LogDebug( ( "csRej %"CELLULAR_LOG_FMT_INT ", psRejType %"CELLULAR_LOG_FMT_INT ", psRej %"CELLULAR_LOG_FMT_INT ", plmn %"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_STR "",
+        LogDebug( ( "csRej %"CELLULAR_LOG_FMT_INT ", psRejType %"CELLULAR_LOG_FMT_INT ", psRej %"CELLULAR_LOG_FMT_INT ", plmn %"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_STR,
                     pServiceStatus->csRejectionCause,
                     pServiceStatus->psRejectionType,
                     pServiceStatus->psRejectionCause,
@@ -2049,13 +2049,13 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_INT "", "AT+CGPADDR=", contextId );
+        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_INT, "AT+CGPADDR=", contextId );
 
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetIp );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%"CELLULAR_LOG_FMT_STR ", pktStatus: %"CELLULAR_LOG_FMT_INT "", cmdBuf, pktStatus ) );
+            LogError( ( "_Cellular_GetIPAddress: couldn't retrieve the IP, cmdBuf:%"CELLULAR_LOG_FMT_STR ", pktStatus: %"CELLULAR_LOG_FMT_INT, cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2171,7 +2171,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
                 break;
 
             default:
-                LogError( ( "Cellular_CommonSetPdnConfig: Invalid pdn context type %"CELLULAR_LOG_FMT_INT "",
+                LogError( ( "Cellular_CommonSetPdnConfig: Invalid pdn context type %"CELLULAR_LOG_FMT_INT,
                             CELLULAR_PDN_CONTEXT_IPV4V6 ) );
                 cellularStatus = CELLULAR_BAD_PARAMETER;
                 break;
@@ -2205,7 +2205,7 @@ CellularError_t Cellular_CommonSetPdnConfig( CellularHandle_t cellularHandle,
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%"CELLULAR_LOG_FMT_STR ", PktRet: %"CELLULAR_LOG_FMT_INT "", cmdBuf, pktStatus ) );
+            LogError( ( "Cellular_CommonSetPdnConfig: can't set PDN, cmdBuf:%"CELLULAR_LOG_FMT_STR ", PktRet: %"CELLULAR_LOG_FMT_INT, cmdBuf, pktStatus ) );
             cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
         }
     }
@@ -2275,7 +2275,7 @@ static CellularSimCardLockState_t _getSimLockState( char * pToken )
         }
         else
         {
-            LogError( ( "Unknown SIM Lock State %"CELLULAR_LOG_FMT_STR "", pToken ) );
+            LogError( ( "Unknown SIM Lock State %"CELLULAR_LOG_FMT_STR, pToken ) );
         }
     }
 
@@ -2331,7 +2331,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetSimLockStatus( CellularContext_t
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            LogDebug( ( "SIM Lock State: %"CELLULAR_LOG_FMT_STR "", pToken ) );
+            LogDebug( ( "SIM Lock State: %"CELLULAR_LOG_FMT_STR, pToken ) );
             *pSimLockState = _getSimLockState( pToken );
         }
 
@@ -2413,7 +2413,7 @@ static bool _parseHplmn( char * pToken,
     }
     else if( ( strlen( pToken ) < ( CRSM_HPLMN_RAT_LENGTH ) ) || ( strncmp( pToken, "FFFFFF", 6 ) == 0 ) )
     {
-        LogError( ( "_parseHplmn: Error in processing HPLMN invalid token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+        LogError( ( "_parseHplmn: Error in processing HPLMN invalid token %"CELLULAR_LOG_FMT_STR, pToken ) );
         parseStatus = false;
     }
     else
@@ -2759,7 +2759,7 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
         }
         else
         {
-            LogDebug( ( "SimInfo updated: IMSI:%"CELLULAR_LOG_FMT_STR ", Hplmn:%"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_STR ", ICCID:%"CELLULAR_LOG_FMT_STR "",
+            LogDebug( ( "SimInfo updated: IMSI:%"CELLULAR_LOG_FMT_STR ", Hplmn:%"CELLULAR_LOG_FMT_STR "%"CELLULAR_LOG_FMT_STR ", ICCID:%"CELLULAR_LOG_FMT_STR,
                         pSimCardInfo->imsi, pSimCardInfo->plmn.mcc, pSimCardInfo->plmn.mnc,
                         pSimCardInfo->iccid ) );
         }
@@ -2782,7 +2782,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%"CELLULAR_LOG_FMT_CHAR "",
+        ( void ) snprintf( cmdBuf, cmdLen, "\"" PRINTF_BINARY_PATTERN_INT8 "\"%"CELLULAR_LOG_FMT_CHAR,
                            PRINTF_BYTE_TO_BINARY_INT8( value ), endOfString ? '\0' : ',' );
     }
     else
@@ -2790,7 +2790,7 @@ static uint32_t appendBinaryPattern( char * cmdBuf,
         /* MISRA Ref 21.6.1 [Use of snprintf] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-216 */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
-        ( void ) snprintf( cmdBuf, cmdLen, "%"CELLULAR_LOG_FMT_CHAR "", endOfString ? '\0' : ',' );
+        ( void ) snprintf( cmdBuf, cmdLen, "%"CELLULAR_LOG_FMT_CHAR, endOfString ? '\0' : ',' );
     }
 
     retLen = ( uint32_t ) strlen( cmdBuf );
@@ -2877,7 +2877,7 @@ static CellularATError_t parseCpsmsMode( char * pToken,
         }
         else
         {
-            LogError( ( "Error in processing mode. Token %"CELLULAR_LOG_FMT_STR "", pToken ) );
+            LogError( ( "Error in processing mode. Token %"CELLULAR_LOG_FMT_STR, pToken ) );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }

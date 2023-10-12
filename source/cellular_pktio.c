@@ -142,7 +142,7 @@ static void _saveData( char * pLine,
 
     ( void ) dataLen;
 
-    LogDebug( ( "_saveData : Save data %"CELLULAR_LOG_FMT_PTR " with length %"CELLULAR_LOG_FMT_UINT32 "", pLine, dataLen ) );
+    LogDebug( ( "_saveData : Save data %"CELLULAR_LOG_FMT_PTR " with length %"CELLULAR_LOG_FMT_UINT32, pLine, dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     configASSERT( ( pNew != NULL ) );
@@ -207,7 +207,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR ", status: %"CELLULAR_LOG_FMT_INT ", previous line %"CELLULAR_LOG_FMT_STR "",
+                LogError( ( "CELLULAR_AT_WO_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR ", status: %"CELLULAR_LOG_FMT_INT ", previous line %"CELLULAR_LOG_FMT_STR,
                             pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
@@ -226,7 +226,7 @@ static CellularPktStatus_t _processIntermediateResponse( char * pLine,
             {
                 /* We already have an intermediate response. */
                 pkStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR ", status: %"CELLULAR_LOG_FMT_INT ", previous line %"CELLULAR_LOG_FMT_STR "",
+                LogError( ( "CELLULAR_AT_WITH_PREFIX process intermediate response ERROR: %"CELLULAR_LOG_FMT_STR ", status: %"CELLULAR_LOG_FMT_INT ", previous line %"CELLULAR_LOG_FMT_STR,
                             pLine, pkStatus, pResp->pItm->pLine ) );
             }
 
@@ -396,7 +396,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
 
     if( ( result == true ) && ( pResp->status == false ) )
     {
-        LogWarn( ( "Modem return ERROR: line %"CELLULAR_LOG_FMT_STR ", cmd : %"CELLULAR_LOG_FMT_STR ", respPrefix %"CELLULAR_LOG_FMT_STR "",
+        LogWarn( ( "Modem return ERROR: line %"CELLULAR_LOG_FMT_STR ", cmd : %"CELLULAR_LOG_FMT_STR ", respPrefix %"CELLULAR_LOG_FMT_STR,
                    pLine,
                    ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ),
                    ( pRespPrefix != NULL ? pRespPrefix : "NULL" ) ) );
@@ -546,7 +546,7 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
     /* Move the leftover data or AT command response to the start of buffer.
      * Set the pRead pointer to the empty buffer space. */
 
-    LogDebug( ( "moved the partial line/data from %"CELLULAR_LOG_FMT_PTR " to %"CELLULAR_LOG_FMT_PTR " %"CELLULAR_LOG_FMT_UINT32 "",
+    LogDebug( ( "moved the partial line/data from %"CELLULAR_LOG_FMT_PTR " to %"CELLULAR_LOG_FMT_PTR " %"CELLULAR_LOG_FMT_UINT32,
                 pContext->pPktioReadPtr, pContext->pktioReadBuf, pContext->partialDataRcvdLen ) );
 
     ( void ) memmove( pContext->pktioReadBuf, pContext->pPktioReadPtr, pContext->partialDataRcvdLen );
@@ -670,7 +670,7 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         /* There are more bytes after the data. */
         *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-        LogDebug( ( "_handleData : read buffer buffer %"CELLULAR_LOG_FMT_PTR " start %"CELLULAR_LOG_FMT_PTR " prefix %"CELLULAR_LOG_FMT_UINT32 " left %"CELLULAR_LOG_FMT_UINT32 ", read total %"CELLULAR_LOG_FMT_UINT32 "",
+        LogDebug( ( "_handleData : read buffer buffer %"CELLULAR_LOG_FMT_PTR " start %"CELLULAR_LOG_FMT_PTR " prefix %"CELLULAR_LOG_FMT_UINT32 " left %"CELLULAR_LOG_FMT_UINT32 ", read total %"CELLULAR_LOG_FMT_UINT32,
                     pContext->pktioReadBuf,
                     pStartOfData,
                     bytesBeforeData,
@@ -715,7 +715,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         if( *ppAtResp == NULL )
         {
             *ppAtResp = _Cellular_AtResponseNew();
-            LogDebug( ( "Allocate at response %"CELLULAR_LOG_FMT_PTR "", ( void * ) *ppAtResp ) );
+            LogDebug( ( "Allocate at response %"CELLULAR_LOG_FMT_PTR, ( void * ) *ppAtResp ) );
         }
 
         LogDebug( ( "AT solicited Resp[%"CELLULAR_LOG_FMT_STR "]", pLine ) );
@@ -772,7 +772,7 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
 
         if( pkStatus != CELLULAR_PKT_STATUS_OK )
         {
-            LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %"CELLULAR_LOG_FMT_STR ", cmd %"CELLULAR_LOG_FMT_STR "",
+            LogError( ( "recvdMsgType is AT_UNDEFINED for Message: %"CELLULAR_LOG_FMT_STR ", cmd %"CELLULAR_LOG_FMT_STR,
                         pLine,
                         ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
 
@@ -954,7 +954,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
-                LogError( ( "pktDataSendPrefixCB returns error %"CELLULAR_LOG_FMT_INT "", pktStatus ) );
+                LogError( ( "pktDataSendPrefixCB returns error %"CELLULAR_LOG_FMT_INT, pktStatus ) );
                 keepProcess = false;
             }
         }
@@ -989,7 +989,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
             }
             else
             {
-                LogError( ( "pktDataPrefixCB returns error %"CELLULAR_LOG_FMT_INT "", pktStatus ) );
+                LogError( ( "pktDataPrefixCB returns error %"CELLULAR_LOG_FMT_INT, pktStatus ) );
                 keepProcess = false;
             }
         }
@@ -1026,7 +1026,7 @@ static bool _handleDataResult( CellularContext_t * pContext,
     else
     {
         *pBytesRead = bytesLeft;
-        LogDebug( ( "_handleData okay, keep processing %"CELLULAR_LOG_FMT_UINT32 " bytes %"CELLULAR_LOG_FMT_PTR "", bytesLeft, *ppLine ) );
+        LogDebug( ( "_handleData okay, keep processing %"CELLULAR_LOG_FMT_UINT32 " bytes %"CELLULAR_LOG_FMT_PTR, bytesLeft, *ppLine ) );
     }
 
     return keepProcess;
@@ -1131,7 +1131,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
             }
             else
             {
-                LogDebug( ( "_handleMsgType failed %"CELLULAR_LOG_FMT_INT "", pktStatus ) );
+                LogDebug( ( "_handleMsgType failed %"CELLULAR_LOG_FMT_INT, pktStatus ) );
                 keepProcess = false;
             }
         }

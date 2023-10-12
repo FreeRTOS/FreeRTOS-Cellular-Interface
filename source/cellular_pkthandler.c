@@ -158,7 +158,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
 
             if( pTokenPtr == NULL )
             {
-                LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %"CELLULAR_LOG_FMT_STR "", pInputLine ) );
+                LogError( ( "_Cellular_AtParse : input string error, start with \"+\" but no token %"CELLULAR_LOG_FMT_STR, pInputLine ) );
                 pktStatus = CELLULAR_PKT_STATUS_BAD_REQUEST;
             }
             else
@@ -456,7 +456,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
         }
         else
         {
-            LogWarn( ( "No URC Callback func avail %"CELLULAR_LOG_FMT_STR "", pTokenPtr ) );
+            LogWarn( ( "No URC Callback func avail %"CELLULAR_LOG_FMT_STR, pTokenPtr ) );
             pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         }
     }
@@ -820,7 +820,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
             if( result >= 0 )
             {
-                LogError( ( "AtParseFail for %"CELLULAR_LOG_FMT_UINT32 ": %"CELLULAR_LOG_FMT_INT32 " %"CELLULAR_LOG_FMT_STR " %"CELLULAR_LOG_FMT_STR "",
+                LogError( ( "AtParseFail for %"CELLULAR_LOG_FMT_UINT32 ": %"CELLULAR_LOG_FMT_INT32 " %"CELLULAR_LOG_FMT_STR " %"CELLULAR_LOG_FMT_STR,
                             i, result, pTokenMap[ i ].pStrValue, pTokenMap[ i + 1U ].pStrValue ) );
                 finit = false;
             }
@@ -836,7 +836,7 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
 
         for( i = 0; i < tokenMapSize; i++ )
         {
-            LogDebug( ( "Callbacks setup for %"CELLULAR_LOG_FMT_UINT32 " : %"CELLULAR_LOG_FMT_STR "", i, pTokenMap[ i ].pStrValue ) );
+            LogDebug( ( "Callbacks setup for %"CELLULAR_LOG_FMT_UINT32 " : %"CELLULAR_LOG_FMT_STR, i, pTokenMap[ i ].pStrValue ) );
         }
     }
     else
