@@ -142,7 +142,7 @@ static void _saveData( char * pLine,
 
     ( void ) dataLen;
 
-    LogDebug( ( "_saveData : Save data %p with length %d", pLine, dataLen ) );
+    LogDebug( ( "_saveData : Save data %p with length %u", pLine, ( unsigned int ) dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
     configASSERT( ( pNew != NULL ) );
@@ -174,7 +174,7 @@ static void _saveRawData( char * pLine,
                           CellularATCommandResponse_t * pResp,
                           uint32_t dataLen )
 {
-    LogDebug( ( "Save [%p] %d data to pResp", pLine, dataLen ) );
+    LogDebug( ( "Save [%p] %u data to pResp", pLine, ( unsigned int ) dataLen ) );
     _saveData( pLine, pResp, dataLen );
 }
 
@@ -183,7 +183,7 @@ static void _saveRawData( char * pLine,
 static void _saveATData( char * pLine,
                          CellularATCommandResponse_t * pResp )
 {
-    LogDebug( ( "Save [%s] %lu AT data to pResp", pLine, strlen( pLine ) ) );
+    LogDebug( ( "Save [%s] %u AT data to pResp", pLine, ( unsigned int ) strlen( pLine ) ) );
     _saveData( pLine, pResp, ( uint32_t ) ( strlen( pLine ) + 1U ) );
 }
 
@@ -546,8 +546,8 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
     /* Move the leftover data or AT command response to the start of buffer.
      * Set the pRead pointer to the empty buffer space. */
 
-    LogDebug( ( "moved the partial line/data from %p to %p %d",
-                pContext->pPktioReadPtr, pContext->pktioReadBuf, pContext->partialDataRcvdLen ) );
+    LogDebug( ( "moved the partial line/data from %p to %p %u",
+                pContext->pPktioReadPtr, pContext->pktioReadBuf, ( unsigned int ) pContext->partialDataRcvdLen ) );
 
     ( void ) memmove( pContext->pktioReadBuf, pContext->pPktioReadPtr, pContext->partialDataRcvdLen );
     pContext->pktioReadBuf[ pContext->partialDataRcvdLen ] = '\0';
@@ -609,7 +609,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
     if( bufferEmptyLength > 0 )
     {
         ( void ) pContext->pCommIntf->recv( pContext->hPktioCommIntf, ( uint8_t * ) pRead,
-                                            bufferEmptyLength,
+                                            ( uint32_t ) bufferEmptyLength,
                                             CELLULAR_COMM_IF_RECV_TIMEOUT_MS, &bytesRead );
 
         if( bytesRead > 0U )
@@ -617,7 +617,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
             /* Add a NULL after the bytesRead. This is required for further processing. */
             pRead[ bytesRead ] = '\0';
 
-            LogDebug( ( "AT Read %d bytes, data[%p]", bytesRead, pRead ) );
+            LogDebug( ( "AT Read %u bytes, data[%p]", ( unsigned int ) bytesRead, pRead ) );
             /* Set the pBytesRead only when actual bytes read from comm interface. */
             *pBytesRead = bytesRead + partialDataRead;
 
@@ -670,12 +670,12 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         /* There are more bytes after the data. */
         *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
 
-        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %d",
+        LogDebug( ( "_handleData : read buffer buffer %p start %p prefix %d left %d, read total %u",
                     pContext->pktioReadBuf,
                     pStartOfData,
-                    bytesBeforeData,
-                    *pBytesLeft,
-                    bytesRead ) );
+                    ( unsigned int ) bytesBeforeData,
+                    ( unsigned int ) *pBytesLeft,
+                    ( unsigned int ) bytesRead ) );
 
         /* reset the data related variables. */
         pContext->dataLength = 0U;
@@ -886,7 +886,7 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
         {
             /* The input buffer callback returns incorrect buffer length. */
             LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
-                        bufferLength, *pBytesRead ) );
+                        ( unsigned int ) bufferLength, ( unsigned int ) *pBytesRead ) );
 
             /* Clean the read buffer and read pointer. */
             ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
@@ -1026,7 +1026,7 @@ static bool _handleDataResult( CellularContext_t * pContext,
     else
     {
         *pBytesRead = bytesLeft;
-        LogDebug( ( "_handleData okay, keep processing %u bytes %p", bytesLeft, *ppLine ) );
+        LogDebug( ( "_handleData okay, keep processing %u bytes %p", ( unsigned int ) bytesLeft, *ppLine ) );
     }
 
     return keepProcess;
@@ -1427,7 +1427,7 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
                                             dataLen, CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
     }
 
-    LogDebug( ( "PktioSendData sent %d bytes", sentLen ) );
+    LogDebug( ( "PktioSendData sent %u bytes", ( unsigned int ) sentLen ) );
     return sentLen;
 }
 
