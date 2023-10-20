@@ -68,8 +68,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
                                                                          uint32_t timeoutMS );
 static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContext_t * pContext,
                                                                   CellularAtDataReq_t dataReq,
-                                                                  uint32_t timeoutMs,
-                                                                  uint32_t interDelayMS );
+                                                                  uint32_t timeoutMs );
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
 static int _searchCompareFunc( const void * pInputToken,
@@ -267,8 +266,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 
 static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContext_t * pContext,
                                                                   CellularAtDataReq_t dataReq,
-                                                                  uint32_t timeoutMs,
-                                                                  uint32_t interDelayMS )
+                                                                  uint32_t timeoutMs )
 {
     CellularPktStatus_t respCode = CELLULAR_PKT_STATUS_OK;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
@@ -709,7 +707,7 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
                 Platform_Delay( interDelayMS );
             }
 
-            pktStatus = _Cellular_DataSendWithTimeoutDelayRaw( pContext, dataReq, dataTimeoutMS, interDelayMS );
+            pktStatus = _Cellular_DataSendWithTimeoutDelayRaw( pContext, dataReq, dataTimeoutMS );
         }
 
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
@@ -766,7 +764,7 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendSuccessToken( CellularContext_
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            pktStatus = _Cellular_DataSendWithTimeoutDelayRaw( pContext, dataReq, dataTimeoutMS, 0U );
+            pktStatus = _Cellular_DataSendWithTimeoutDelayRaw( pContext, dataReq, dataTimeoutMS );
         }
 
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
