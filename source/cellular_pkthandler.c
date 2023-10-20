@@ -705,7 +705,7 @@ CellularPktStatus_t _Cellular_AtcmdDataSend( CellularContext_t * pContext,
         {
             if( interDelayMS > 0U )
             {
-                /* Some drivers require a minimum delay before sending data. */
+                /* Cellular modem may require a minimum delay before sending data. */
                 Platform_Delay( interDelayMS );
             }
 
