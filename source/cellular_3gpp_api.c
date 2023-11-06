@@ -1589,7 +1589,7 @@ static CellularATError_t parseT3324TimerValue( char * pToken,
         switch( timerUnitIndex )
         {
             case T3324_TIMER_UNIT_2SECONDS:
-                *pTimerValueSeconds = timerValue * 2u;
+                *pTimerValueSeconds = timerValue * 2U;
                 break;
 
             case T3324_TIMER_UNIT_1MINUTE:
@@ -1597,7 +1597,7 @@ static CellularATError_t parseT3324TimerValue( char * pToken,
                 break;
 
             case T3324_TIMER_UNIT_DECIHOURS:
-                *pTimerValueSeconds = timerValue * ( 15U * 60U );
+                *pTimerValueSeconds = timerValue * ( 6U * 60U );
                 break;
 
             case T3324_TIMER_UNIT_DEACTIVATED:
