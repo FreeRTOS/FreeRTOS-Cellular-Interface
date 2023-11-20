@@ -85,8 +85,8 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
                                                   CellularATCommandResponse_t * pResp,
                                                   CellularATCommandType_t atType,
                                                   const char * pRespPrefix );
-static bool urcTokenWoPrefix( const CellularContext_t * pContext,
-                              const char * pLine );
+static bool _checkUrcTokenWoPrefix( const CellularContext_t * pContext,
+                                    const char * pLine );
 static _atRespType_t _getMsgType( CellularContext_t * pContext,
                                   const char * pLine,
                                   const char * pRespPrefix );
@@ -409,20 +409,27 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static bool urcTokenWoPrefix( const CellularContext_t * pContext,
-                              const char * pLine )
+static bool _checkUrcTokenWoPrefix( const CellularContext_t * pContext,
+                                    const char * pLine )
 {
     bool ret = false;
     uint32_t i = 0;
     uint32_t urcTokenTableSize = pContext->tokenTable.cellularUrcTokenWoPrefixTableSize;
     const char * const * const pUrcTokenTable = pContext->tokenTable.pCellularUrcTokenWoPrefixTable;
 
-    for( i = 0; i < urcTokenTableSize; i++ )
+    if( ( pUrcTokenTable == NULL ) || ( urcTokenTableSize == 0 ) )
     {
-        if( strcmp( pLine, pUrcTokenTable[ i ] ) == 0 )
+        ret = false;
+    }
+    else
+    {
+        for( i = 0; i < urcTokenTableSize; i++ )
         {
-            ret = true;
-            break;
+            if( strcmp( pLine, pUrcTokenTable[ i ] ) == 0 )
+            {
+                ret = true;
+                break;
+            }
         }
     }
 
@@ -443,12 +450,7 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
     /* Lock the response mutex when deciding message type. */
     PlatformMutex_Lock( &pContext->PktRespMutex );
 
-    if( pContext->tokenTable.pCellularUrcTokenWoPrefixTable == NULL )
-    {
-        atStatus = CELLULAR_AT_ERROR;
-        atRespType = AT_UNDEFINED;
-    }
-    else if( urcTokenWoPrefix( pContext, pLine ) == true )
+    if( _checkUrcTokenWoPrefix( pContext, pLine ) == true )
     {
         atRespType = AT_UNSOLICITED;
     }
@@ -459,7 +461,7 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
 
         if( ( inputWithPrefix == true ) && ( pRespPrefix != NULL ) )
         {
-            /* Check if SRC prefix exist in pLine. */
+            /* Check if this line contains prefix expected in AT command response. */
             atStatus = Cellular_ATStrStartWith( pLine, pRespPrefix, &inputWithSrcPrefix );
         }
     }
@@ -470,22 +472,33 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
         {
             if( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( inputWithSrcPrefix == true ) )
             {
+                /* Celluar interface is sending AT command and this line contains
+                 * expected prefix in the response. Return AT_SOLICTIED here. */
                 atRespType = AT_SOLICITED;
             }
             else
             {
+                /* Lines with prefix are considered AT_UNSOLICITED unless the prefix
+                 * is expected in AT command response. */
                 atRespType = AT_UNSOLICITED;
             }
         }
         else
         {
-            if( ( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( pRespPrefix == NULL ) ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_DATA_WO_PREFIX ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_MULTI_WITH_PREFIX ) ||
-                ( pContext->PktioAtCmdType == CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE ) )
+            if( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND )
             {
+                /* Cellular interface is waiting for AT command response from
+                 * cellular modem. The token without prefix can be success or error
+                 * token to indicate the AT command status. Return AT_SOLICITED
+                 * here and this line will be parsed in _Cellular_ProcessLine later. */
                 atRespType = AT_SOLICITED;
+            }
+            else
+            {
+                /* This line doesn't contain any prefix and cellular interface is
+                 * not sending AT command. Therefore, this line is unexpected.
+                 * Return AT_UNDEFINED here. */
+                atRespType = AT_UNDEFINED;
             }
         }
     }
@@ -1372,7 +1385,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
         {
             PlatformMutex_Lock( &pContext->PktRespMutex );
 
-            if( pAtRspPrefix != NULL )
+            if( ( pAtRspPrefix != NULL ) && ( atType != CELLULAR_AT_WO_PREFIX ) && ( atType != CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE ) )
             {
                 ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
                 pContext->pRespPrefix = pContext->pktRespPrefixBuf;
