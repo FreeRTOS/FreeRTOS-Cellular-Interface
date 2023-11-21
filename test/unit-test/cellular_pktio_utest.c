@@ -2131,7 +2131,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_STRIN
  * @brief _Cellular_PktioInit - Sending CELLULAR_AT_WITH_PREFIX with empty response prefix.
  *
  * Empty response prefix will be considered invalid string. Verify AT_UNDEFINED type
- * is returnedy in _getMsgType function.
+ * is returned in _getMsgType function.
  *
  * <b>Coverage</b>
  * @code{c}
@@ -2177,6 +2177,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_CELLULAR_AT_WITH_PREFIX_empty
 
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
     /* This command returns an AT_UNDEFINED type, which is unhandled in the test
      * test case. Ensure the context is cleaned. */
     TEST_ASSERT_EQUAL( CELLULAR_AT_NO_COMMAND, context.PktioAtCmdType );
@@ -2655,6 +2656,7 @@ void test__Cellular_PktioInit_Thread_Rx_Data_Event_URC_WO_PREFIX_zero_table_size
 
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
     /* This command returns an AT_UNDEFINED type, which is unhandled in the test
      * test case. Ensure the context is cleaned. */
     TEST_ASSERT_EQUAL( CELLULAR_AT_NO_COMMAND, context.PktioAtCmdType );
