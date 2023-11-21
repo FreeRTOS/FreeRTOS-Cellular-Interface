@@ -2972,22 +2972,22 @@ void test__Cellular_PktioSendAtCmd_Happy_Path_No_Prefix( void )
  * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_WO_PREFIX with prefix.
  *
  * Prefix won't be parsed for CELLULAR_AT_WO_PREFIX type command. pRespPrefix should
- * be set NULL.
+ * be set NULL in _setPrefixByAtCommandType.
  *
  * <b>Coverage</b>
  * @code{c}
- * if( ( pAtRspPrefix != NULL ) && ( atType != CELLULAR_AT_WO_PREFIX ) && ( atType != CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE ) )
- * {
- *     ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
- *     pContext->pRespPrefix = pContext->pktRespPrefixBuf;
- * }
- * else
- * {
- *     pContext->pRespPrefix = NULL;
- * }
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *     switch( atType )
+ *     {
+ *         case CELLULAR_AT_NO_RESULT:
+ *         case CELLULAR_AT_WO_PREFIX:
+ *         case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+ *             pContext->pRespPrefix = NULL;
+ *             break;
+ *         ...
  * @endcode
- * ( pAtRspPrefix != NULL ) is true.
- * ( atType != CELLULAR_AT_WO_PREFIX ) is false.
+ * atType is CELLULAR_AT_WO_PREFIX and pAtRspPrefix is not NULL.
  */
 void test__Cellular_PktioSendAtCmd_CELLULAR_AT_WO_PREFIX_with_prefix( void )
 {
@@ -3024,22 +3024,21 @@ void test__Cellular_PktioSendAtCmd_CELLULAR_AT_WO_PREFIX_with_prefix( void )
  * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE with prefix.
  *
  * Prefix won't be parsed for CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE type command.
- * pRespPrefix should be set NULL.
+ * pRespPrefix should be set NULL in _setPrefixByAtCommandType.
  *
  * <b>Coverage</b>
  * @code{c}
- * if( ( pAtRspPrefix != NULL ) && ( atType != CELLULAR_AT_WO_PREFIX ) && ( atType != CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE ) )
- * {
- *     ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
- *     pContext->pRespPrefix = pContext->pktRespPrefixBuf;
- * }
- * else
- * {
- *     pContext->pRespPrefix = NULL;
- * }
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *     switch( atType )
+ *     {
+ *         case CELLULAR_AT_NO_RESULT:
+ *         case CELLULAR_AT_WO_PREFIX:
+ *         case CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE:
+ *             pContext->pRespPrefix = NULL;
+ *             break;
  * @endcode
- * ( pAtRspPrefix != NULL ) is true.
- * ( atType != CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE ) is false.
+ * atType is CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE and pAtRspPrefix is not NULL.
  */
 void test__Cellular_PktioSendAtCmd_CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE_with_prefix( void )
 {
@@ -3070,6 +3069,221 @@ void test__Cellular_PktioSendAtCmd_CELLULAR_AT_WO_PREFIX_NO_RESULT_CODE_with_pre
     /* Validation. */
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
     TEST_ASSERT_EQUAL( NULL, context.pRespPrefix ); /* The context.PrespPrefix should be set NULL. */
+}
+
+/**
+ * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_WITH_PREFIX with pAtRspPrefix is NULL.
+ *
+ * Sending AT command type CELLULAR_AT_WITH_PREFIX but set pAtRspPrefix to NULL. Verify
+ * CELLULAR_PKT_STATUS_BAD_PARAM is returned.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *         case CELLULAR_AT_WITH_PREFIX:
+ *         case CELLULAR_AT_MULTI_WITH_PREFIX:
+ *         case CELLULAR_AT_WITH_PREFIX_NO_RESULT_CODE:
+ *             if( pAtRspPrefix != NULL )
+ *             {
+ *                 ...
+ *             }
+ *             else
+ *             {
+ *                 LogWarn( ( "_setPrefixByAtCommandType : Sending a AT command type %d but pAtRspPrefix is not set.", atType ) );
+ *                 pContext->pRespPrefix = NULL;
+ *             }
+ *             break;
+ * @endcode
+ * atType is CELLULAR_AT_WITH_PREFIX and pAtRspPrefix is NULL.
+ */
+void test__Cellular_PktioSendAtCmd_CELLULAR_AT_WITH_PREFIX_without_prefix( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    struct _cellularCommContext commInterfaceHandle = { 0 };
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "ATE0",
+        CELLULAR_AT_WITH_PREFIX,
+        NULL,
+        NULL,
+        NULL,
+        0,
+    };
+
+    /* Setup variable. */
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pCommIntf = pCommIntf;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
+
+    /* API call. */
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
+}
+
+/**
+ * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_MULTI_WO_PREFIX with pAtRspPrefix is not NULL.
+ *
+ * Sending AT command type CELLULAR_AT_MULTI_WO_PREFIX but set pAtRspPrefix to NULL. Verify
+ * pRespPrefix is set to pktRespPrefixBuf.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *         case CELLULAR_AT_MULTI_WO_PREFIX:
+ *         case CELLULAR_AT_MULTI_DATA_WO_PREFIX:
+ *             if( pAtRspPrefix != NULL )
+ *             {
+ *                 ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
+ *                 pContext->pRespPrefix = pContext->pktRespPrefixBuf;
+ *             }
+ *             else
+ *             {
+ *                 ...
+ *             }
+ *             break;
+ * @endcode
+ * atType is CELLULAR_AT_MULTI_WO_PREFIX and pAtRspPrefix is not NULL.
+ */
+void test__Cellular_PktioSendAtCmd_CELLULAR_AT_MULTI_WO_PREFIX_with_prefix( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    struct _cellularCommContext commInterfaceHandle = { 0 };
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "ATE0",
+        CELLULAR_AT_MULTI_WO_PREFIX,
+        "QURC",
+        NULL,
+        NULL,
+        0,
+    };
+
+    /* Setup variable. */
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pCommIntf = pCommIntf;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
+
+    /* API call. */
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( &context.pktRespPrefixBuf, context.pRespPrefix );
+}
+
+/**
+ * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_MULTI_WO_PREFIX with pAtRspPrefix is NULL.
+ *
+ * Sending AT command type CELLULAR_AT_MULTI_WO_PREFIX but set pAtRspPrefix to NULL. Verify
+ * pRespPrefix is set to NULL.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *         case CELLULAR_AT_MULTI_WO_PREFIX:
+ *         case CELLULAR_AT_MULTI_DATA_WO_PREFIX:
+ *             if( pAtRspPrefix != NULL )
+ *             {
+ *                 ( void ) strncpy( pContext->pktRespPrefixBuf, pAtRspPrefix, CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH );
+ *                 pContext->pRespPrefix = pContext->pktRespPrefixBuf;
+ *             }
+ *             else
+ *             {
+ *                 pContext->pRespPrefix = NULL;
+ *             }
+ *             break;
+ * @endcode
+ * atType is CELLULAR_AT_MULTI_WO_PREFIX and pAtRspPrefix is NULL.
+ */
+void test__Cellular_PktioSendAtCmd_CELLULAR_AT_MULTI_WO_PREFIX_without_prefix( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    struct _cellularCommContext commInterfaceHandle = { 0 };
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "ATE0",
+        CELLULAR_AT_MULTI_WO_PREFIX,
+        NULL,
+        NULL,
+        NULL,
+        0,
+    };
+
+    /* Setup variable. */
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pCommIntf = pCommIntf;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
+
+    /* API call. */
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+    TEST_ASSERT_EQUAL( NULL, context.pRespPrefix ); /* The context.PrespPrefix should be set NULL. */
+}
+
+/**
+ * @brief _Cellular_PktioSendAtCmd - Sending CELLULAR_AT_NO_COMMAND.
+ *
+ * Sending AT command type CELLULAR_AT_NO_COMMAND. Verify CELLULAR_PKT_STATUS_BAD_PARAM
+ * is returned.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * static CellularPktStatus_t _setPrefixByAtCommandType( ... )
+ * ...
+ *         default:
+ *             LogError( ( "_setPrefixByAtCommandType : Sending invalid AT command type." ) );
+ *             pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+ *             break;
+ * @endcode
+ * atType is CELLULAR_AT_NO_COMMAND.
+ */
+void test__Cellular_PktioSendAtCmd_CELLULAR_AT_NO_COMMAND( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+    struct _cellularCommContext commInterfaceHandle = { 0 };
+    CellularAtReq_t atReqSetRatPriority =
+    {
+        "ATE0",
+        CELLULAR_AT_NO_COMMAND,
+        NULL,
+        NULL,
+        NULL,
+        0,
+    };
+
+    /* Setup variable. */
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    context.pCommIntf = pCommIntf;
+    context.hPktioCommIntf = ( CellularCommInterfaceHandle_t ) &commInterfaceHandle;
+
+    /* API call. */
+    pktStatus = _Cellular_PktioSendAtCmd( &context, atReqSetRatPriority.pAtCmd,
+                                          atReqSetRatPriority.atCmdType,
+                                          atReqSetRatPriority.pAtRspPrefix );
+
+    /* Validation. */
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_BAD_PARAM, pktStatus );
 }
 
 /**
