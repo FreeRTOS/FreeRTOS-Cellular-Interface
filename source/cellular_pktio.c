@@ -473,7 +473,7 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
             if( ( pContext->PktioAtCmdType != CELLULAR_AT_NO_COMMAND ) && ( inputWithSrcPrefix == true ) )
             {
                 /* Celluar interface is sending AT command and this line contains
-                 * expected prefix in the response. Return AT_SOLICTIED here. */
+                 * expected prefix in the response. Return AT_SOLICITED here. */
                 atRespType = AT_SOLICITED;
             }
             else
