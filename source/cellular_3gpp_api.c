@@ -212,10 +212,12 @@ static CellularPktStatus_t _Cellular_RecvFuncGetHplmn( CellularContext_t * pCont
                                                        const CellularATCommandResponse_t * pAtResp,
                                                        void * pData,
                                                        uint16_t dataLen );
-static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pContext,
-                                                       const CellularATCommandResponse_t * pAtResp,
-                                                       void * pData,
-                                                       uint16_t dataLen );
+#if ( CELLULAR_CONFIG_USE_CCID_COMMAND == 1 )
+    static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pContext,
+                                                           const CellularATCommandResponse_t * pAtResp,
+                                                           void * pData,
+                                                           uint16_t dataLen );
+#endif
 static CellularPktStatus_t _Cellular_RecvFuncGetImsi( CellularContext_t * pContext,
                                                       const CellularATCommandResponse_t * pAtResp,
                                                       void * pData,
@@ -2539,60 +2541,62 @@ static CellularPktStatus_t _Cellular_RecvFuncGetHplmn( CellularContext_t * pCont
 
 /*-----------------------------------------------------------*/
 
-static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pContext,
-                                                       const CellularATCommandResponse_t * pAtResp,
-                                                       void * pData,
-                                                       uint16_t dataLen )
-{
-    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
-    char * pRespLine = NULL;
+#if ( CELLULAR_CONFIG_USE_CCID_COMMAND == 1 )
+    static CellularPktStatus_t _Cellular_RecvFuncGetIccid( CellularContext_t * pContext,
+                                                           const CellularATCommandResponse_t * pAtResp,
+                                                           void * pData,
+                                                           uint16_t dataLen )
+    {
+        CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+        CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
+        char * pRespLine = NULL;
 
-    if( pContext == NULL )
-    {
-        LogError( ( "getIccid: pContext is invalid" ) );
-        pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
-    }
-    else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) ||
-             ( pAtResp->pItm->pLine == NULL ) )
-    {
-        LogError( ( "getIccid: Response is invalid" ) );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_ICCID_MAX_SIZE + 1U ) ) )
-    {
-        LogError( ( "getIccid: pData is invalid or dataLen is wrong" ) );
-        pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else
-    {
-        pRespLine = pAtResp->pItm->pLine;
-        atCoreStatus = Cellular_ATRemoveAllWhiteSpaces( pRespLine );
-
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        if( pContext == NULL )
         {
-            /* Removing QCCID Prefix in AT Response. */
-            atCoreStatus = Cellular_ATRemovePrefix( &pRespLine );
+            LogError( ( "getIccid: pContext is invalid" ) );
+            pktStatus = CELLULAR_PKT_STATUS_INVALID_HANDLE;
+        }
+        else if( ( pAtResp == NULL ) || ( pAtResp->pItm == NULL ) ||
+                 ( pAtResp->pItm->pLine == NULL ) )
+        {
+            LogError( ( "getIccid: Response is invalid" ) );
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        }
+        else if( ( pData == NULL ) || ( dataLen != ( CELLULAR_ICCID_MAX_SIZE + 1U ) ) )
+        {
+            LogError( ( "getIccid: pData is invalid or dataLen is wrong" ) );
+            pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
+        }
+        else
+        {
+            pRespLine = pAtResp->pItm->pLine;
+            atCoreStatus = Cellular_ATRemoveAllWhiteSpaces( pRespLine );
+
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                /* Removing QCCID Prefix in AT Response. */
+                atCoreStatus = Cellular_ATRemovePrefix( &pRespLine );
+            }
+
+            if( atCoreStatus == CELLULAR_AT_SUCCESS )
+            {
+                /* Storing the ICCID value in the AT Response. */
+                if( strlen( pRespLine ) < ( ( size_t ) CELLULAR_ICCID_MAX_SIZE + 1U ) )
+                {
+                    ( void ) strncpy( pData, pRespLine, dataLen );
+                }
+                else
+                {
+                    atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
+                }
+            }
+
+            pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
         }
 
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
-        {
-            /* Storing the ICCID value in the AT Response. */
-            if( strlen( pRespLine ) < ( ( size_t ) CELLULAR_ICCID_MAX_SIZE + 1U ) )
-            {
-                ( void ) strncpy( pData, pRespLine, dataLen );
-            }
-            else
-            {
-                atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
-            }
-        }
-
-        pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        return pktStatus;
     }
-
-    return pktStatus;
-}
+#endif /* if ( CELLULAR_CONFIG_USE_CCID_COMMAND == 1 ) */
 
 /*-----------------------------------------------------------*/
 
@@ -2700,16 +2704,20 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularAtReq_t atReqGetIccid = { 0 };
     CellularAtReq_t atReqGetImsi = { 0 };
     CellularAtReq_t atReqGetHplmn = { 0 };
 
+    #if ( CELLULAR_CONFIG_USE_CCID_COMMAND == 1 )
+    CellularAtReq_t atReqGetIccid = { 0 };
+
+    /* Use non-stanard 3GPP AT command "AT+CCID" for ICCID information. */
     atReqGetIccid.pAtCmd = "AT+CCID";
     atReqGetIccid.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetIccid.pAtRspPrefix = "+CCID";
     atReqGetIccid.respCallback = _Cellular_RecvFuncGetIccid;
     atReqGetIccid.pData = pSimCardInfo->iccid;
     atReqGetIccid.dataLen = CELLULAR_ICCID_MAX_SIZE + 1U;
+    #endif
 
     atReqGetImsi.pAtCmd = "AT+CIMI";
     atReqGetImsi.atCmdType = CELLULAR_AT_WO_PREFIX;
@@ -2747,10 +2755,12 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
             pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetHplmn );
         }
 
-        if( pktStatus == CELLULAR_PKT_STATUS_OK )
-        {
-            pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetIccid );
-        }
+        #if ( CELLULAR_CONFIG_USE_CCID_COMMAND == 1 )
+            if( pktStatus == CELLULAR_PKT_STATUS_OK )
+            {
+                pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetIccid );
+            }
+        #endif
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {
