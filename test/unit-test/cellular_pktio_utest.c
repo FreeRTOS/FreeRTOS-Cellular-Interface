@@ -3162,7 +3162,7 @@ void test__Cellular_PktioSendAtCmd_CELLULAR_AT_MULTI_WO_PREFIX_with_prefix( void
     {
         "ATE0",
         CELLULAR_AT_MULTI_WO_PREFIX,
-        "QURC",
+        "+QCFG",
         NULL,
         NULL,
         0,
