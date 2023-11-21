@@ -453,6 +453,18 @@
 #endif
 
 /**
+ * @brief Use AT+CCID command for Integrated Circuit Card ID( ICCID ) information.<br>
+ *
+ * Acquire ICCID with non-standard 3GPP command AT+CCID in Cellular_CommonGetSimCardInfo.<br>
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
+#ifndef CELLULAR_CONFIG_USE_CCID_COMMAND
+    #define CELLULAR_CONFIG_USE_CCID_COMMAND    1
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *
