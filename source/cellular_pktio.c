@@ -921,10 +921,10 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
                                                    &bufferLength );
         PlatformMutex_Unlock( &pContext->PktRespMutex );
 
-        keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
-
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
+            /* Handle the callback result is CELLULAR_PKT_STATUS_OK in this function.
+             * Check the bufferLength returned by callback function here. */
             if( bufferLength > *pBytesRead )
             {
                 /* The input buffer callback returns incorrect buffer length. */
@@ -949,6 +949,10 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
                 /* Calculate remain bytes in the buffer. */
                 *pBytesRead = *pBytesRead - bufferLength;
             }
+        }
+        else
+        {
+            keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
         }
     }
 
