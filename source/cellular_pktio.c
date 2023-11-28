@@ -118,6 +118,10 @@ static bool _getNextLine( CellularContext_t * pContext,
                           uint32_t * pBytesRead,
                           uint32_t currentLineLength,
                           CellularPktStatus_t pktStatus );
+static bool _handleCallbackResult( CellularContext_t * pContext,
+                                   CellularPktStatus_t pktStatus,
+                                   char * pLine,
+                                   uint32_t * pBytesRead );
 static bool _preprocessInputBuffer( CellularContext_t * pContext,
                                     char ** pLine,
                                     uint32_t * pBytesRead );
@@ -855,6 +859,50 @@ static bool _findLineInStream( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
+static bool _handleCallbackResult( CellularContext_t * pContext,
+                                   CellularPktStatus_t pktStatus,
+                                   char * pLine,
+                                   uint32_t * pBytesRead )
+{
+    bool keepProcess;
+
+    if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
+    {
+        /* Input buffer is not handled in the callback. pktio should keep processing
+         * the input buffer. */
+        keepProcess = true;
+    }
+    else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
+    {
+        /* Input buffer is handled in the callback. The callback expects to be called
+         * again with more data received. pktio won't keep process this input buffer. */
+        pContext->pPktioReadPtr = pLine;
+        pContext->partialDataRcvdLen = *pBytesRead;
+        keepProcess = false;
+    }
+    else if( pktStatus != CELLULAR_PKT_STATUS_OK )
+    {
+        /* Modem returns unexpected response. */
+        LogError( ( "Input buffer callback returns error %d. Clean the read buffer.", pktStatus ) );
+
+        /* Clean the read buffer and read pointer. */
+        ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+        pContext->pPktioReadPtr = NULL;
+        pContext->partialDataRcvdLen = 0;
+        keepProcess = false;
+    }
+    else
+    {
+        /* Callback function returns CELLULAR_PKT_STATUS_OK. pktio can keep processing
+         * the input buffer. */
+        keepProcess = true;
+    }
+
+    return keepProcess;
+}
+
+/*-----------------------------------------------------------*/
+
 static bool _preprocessInputBuffer( CellularContext_t * pContext,
                                     char ** pLine,
                                     uint32_t * pBytesRead )
@@ -873,54 +921,38 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
                                                    &bufferLength );
         PlatformMutex_Unlock( &pContext->PktRespMutex );
 
-        if( pktStatus == CELLULAR_PKT_STATUS_PREFIX_MISMATCH )
+        if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
-            /* Input buffer is not handled in the callback. pktio should keep processing
-             * the input buffer. */
-            keepProcess = true;
-        }
-        else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
-        {
-            /* Input buffer is handled in the callback. The callback expects to be called
-             * again with more data received. pktio won't keep process this input buffer. */
-            pContext->pPktioReadPtr = pTempLine;
-            pContext->partialDataRcvdLen = *pBytesRead;
-            keepProcess = false;
-        }
-        else if( pktStatus != CELLULAR_PKT_STATUS_OK )
-        {
-            /* Modem returns unexpected response. */
-            LogError( ( "Input buffer callback returns error %d. Clean the read buffer.", pktStatus ) );
+            /* Handle the callback result is CELLULAR_PKT_STATUS_OK in this function.
+             * Check the bufferLength returned by callback function here. */
+            if( bufferLength > *pBytesRead )
+            {
+                /* The input buffer callback returns incorrect buffer length. */
+                LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
+                            ( unsigned int ) bufferLength, ( unsigned int ) *pBytesRead ) );
 
-            /* Clean the read buffer and read pointer. */
-            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
-            pContext->pPktioReadPtr = NULL;
-            pContext->partialDataRcvdLen = 0;
-            keepProcess = false;
-        }
-        else if( bufferLength > *pBytesRead )
-        {
-            /* The input buffer callback returns incorrect buffer length. */
-            LogError( ( "Input buffer callback returns bufferLength %u. Modem returns length %u. Clean the read buffer.",
-                        ( unsigned int ) bufferLength, ( unsigned int ) *pBytesRead ) );
+                /* Clean the read buffer and read pointer. */
+                ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
+                pContext->pPktioReadPtr = NULL;
+                pContext->partialDataRcvdLen = 0;
+                keepProcess = false;
+            }
+            else
+            {
+                /* The input buffer is handled in the callback successfully. Move
+                 * the read pointer forward. pktio will keep processing the line
+                 * after. */
+                pTempLine = &pTempLine[ bufferLength ];
+                *pLine = pTempLine;
+                pContext->pPktioReadPtr = *pLine;
 
-            /* Clean the read buffer and read pointer. */
-            ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
-            pContext->pPktioReadPtr = NULL;
-            pContext->partialDataRcvdLen = 0;
-            keepProcess = false;
+                /* Calculate remain bytes in the buffer. */
+                *pBytesRead = *pBytesRead - bufferLength;
+            }
         }
         else
         {
-            /* The input buffer is handled in the callback successfully. Move
-             * the read pointer forward. pktio will keep processing the line
-             * after. */
-            pTempLine = &pTempLine[ bufferLength ];
-            *pLine = pTempLine;
-            pContext->pPktioReadPtr = *pLine;
-
-            /* Calculate remain bytes in the buffer. */
-            *pBytesRead = *pBytesRead - bufferLength;
+            keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
         }
     }
 
@@ -968,11 +1000,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
             /* This function may fix the data stream if the data send prefix is not a line. */
             pktStatus = pktDataSendPrefixCB( pDataSendPrefixCBContext, pTempLine, pBytesRead );
 
-            if( pktStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                LogError( ( "pktDataSendPrefixCB returns error %d", pktStatus ) );
-                keepProcess = false;
-            }
+            keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
         }
         else if( pktDataPrefixCB != NULL )
         {
@@ -987,27 +1015,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
                                          pTempLine, *pBytesRead,
                                          ppStartOfData, &pContext->dataLength );
 
-            if( pktStatus == CELLULAR_PKT_STATUS_OK )
-            {
-                /* These members filled by user callback function and need to be demonstrated. */
-                if( pContext->dataLength > 0U )
-                {
-                    configASSERT( ppStartOfData != NULL );
-                }
-            }
-            else if( pktStatus == CELLULAR_PKT_STATUS_SIZE_MISMATCH )
-            {
-                /* The modem driver is waiting for more data to decide. */
-                LogDebug( ( "%p is not a complete line", pTempLine ) );
-                pContext->pPktioReadPtr = pTempLine;
-                pContext->partialDataRcvdLen = *pBytesRead;
-                keepProcess = false;
-            }
-            else
-            {
-                LogError( ( "pktDataPrefixCB returns error %d", pktStatus ) );
-                keepProcess = false;
-            }
+            keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
         }
         else
         {
