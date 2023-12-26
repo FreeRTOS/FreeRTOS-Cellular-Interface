@@ -194,11 +194,23 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                    CellularAtReq_t atReq,
                                                    int cmock_num_calls )
 {
-    cellularOperatorInfo_t * pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
-
+    cellularOperatorInfo_t * pOperatorInfo;
     ( void ) pContext;
-    ( void ) cmock_num_calls;
-    pOperatorInfo->rat = CELLULAR_RAT_INVALID;
+
+    if( cmock_num_calls == 0 )
+    {
+        /* AT+COPS=3,2 call. */
+    }
+    else if( cmock_num_calls == 1 )
+    {
+        /* AT+COPS? call. */
+        pOperatorInfo = ( cellularOperatorInfo_t * ) atReq.pData;
+        pOperatorInfo->rat = CELLULAR_RAT_INVALID;
+    }
+    else
+    {
+        TEST_FAIL_MESSAGE( "Unexpected Mock_AtcmdRequestWithCallback call" );
+    }
 
     return CELLULAR_PKT_STATUS_OK;
 }
@@ -643,34 +655,45 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_RecvFuncUpdateMccMnc
     CellularATCommandResponse_t atResp;
     cellularOperatorInfo_t cellularOperatorInfo;
 
-    ( void ) cmock_num_calls;
     memset( &atResp, 0, sizeof( CellularATCommandResponse_t ) );
     memset( &cellularOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
 
-    if( cbCondition < 3 )
+    if( cmock_num_calls == 0 )
     {
-        pktStatus = handleCommonCallback( pContext, atReq );
+        /* AT+COPS=3,2 call. */
     }
-    else if( cbCondition == 3 )
+    else if( cmock_num_calls == 1 )
     {
-        char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
+        /* AT+COPS? call. */
+        if( cbCondition < 3 )
+        {
+            pktStatus = handleCommonCallback( pContext, atReq );
+        }
+        else if( cbCondition == 3 )
+        {
+            char pLine[] = CELLULAR_SAMPLE_PREFIX_STRING_INPUT;
 
-        _saveData( pLine, &atResp, strlen( pLine ) + 1 );
+            _saveData( pLine, &atResp, strlen( pLine ) + 1 );
 
-        if( parseNetworkNameFailureCase == 2 )
-        {
-            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
-            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            if( parseNetworkNameFailureCase == 2 )
+            {
+                cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_LONG;
+                pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            }
+            else if( parseNetworkNameFailureCase == 3 )
+            {
+                cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
+                pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            }
+            else
+            {
+                pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
+            }
         }
-        else if( parseNetworkNameFailureCase == 3 )
-        {
-            cellularOperatorInfo.operatorNameFormat = OPERATOR_NAME_FORMAT_NUMERIC;
-            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
-        }
-        else
-        {
-            pktStatus = atReq.respCallback( pContext, &atResp, &cellularOperatorInfo, sizeof( cellularOperatorInfo_t ) );
-        }
+    }
+    else
+    {
+        TEST_FAIL_MESSAGE( "Unexpected Mock_AtcmdRequestWithCallback call" );
     }
 
     return pktStatus;
@@ -2014,6 +2037,42 @@ void test_Cellular_CommonGetRegisteredNetwork_No_Memory( void )
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
     TEST_ASSERT_EQUAL( CELLULAR_NO_MEMORY, cellularStatus );
+}
+
+/**
+ * @brief Test that set to numeric format failed.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
+ *                                           cellularOperatorInfo_t * pOperatorInfo )
+ * {
+ *     ...
+ *     atCopsRequest.pAtCmd = "AT+COPS=3,2",
+ *     atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT,
+ *     pktStatus =  _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
+ *
+ *     if( pktStatus == CELLULAR_PKT_STATUS_OK )
+ *     {
+ *         ...
+ *     }
+ * }
+ * @endcode
+ * ( pktStatus == CELLULAR_PKT_STATUS_OK ) is false.
+ */
+void test_Cellular_CommonGetRegisteredNetwork_Set_Numeric_Format_Fail( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularPlmnInfo_t networkInfo;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
 /**

@@ -1416,16 +1416,25 @@ static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus;
-    CellularAtReq_t atReqGetMccMnc = { 0 };
+    CellularAtReq_t atCopsRequest = { 0 };
 
-    atReqGetMccMnc.pAtCmd = "AT+COPS?";
-    atReqGetMccMnc.atCmdType = CELLULAR_AT_WITH_PREFIX;
-    atReqGetMccMnc.pAtRspPrefix = "+COPS";
-    atReqGetMccMnc.respCallback = _Cellular_RecvFuncUpdateMccMnc;
-    atReqGetMccMnc.pData = pOperatorInfo;
-    atReqGetMccMnc.dataLen = ( uint16_t ) sizeof( cellularOperatorInfo_t );
+    /* Set the response to numeric format. */
+    atCopsRequest.pAtCmd = "AT+COPS=3,2",
+    atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT,
+    pktStatus =  _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
 
-    pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetMccMnc );
+    if( pktStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        /* Acquire the MCC and MNC information. */
+        atCopsRequest.pAtCmd = "AT+COPS?";
+        atCopsRequest.atCmdType = CELLULAR_AT_WITH_PREFIX;
+        atCopsRequest.pAtRspPrefix = "+COPS";
+        atCopsRequest.respCallback = _Cellular_RecvFuncUpdateMccMnc;
+        atCopsRequest.pData = pOperatorInfo;
+        atCopsRequest.dataLen = ( uint16_t ) sizeof( cellularOperatorInfo_t );
+        pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
+    }
+
     cellularStatus = _Cellular_TranslatePktStatus( pktStatus );
 
     return cellularStatus;
@@ -1799,6 +1808,7 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
     }
     else
     {
+        memset( pOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
         cellularStatus = atcmdUpdateMccMnc( pContext, pOperatorInfo );
     }
 
