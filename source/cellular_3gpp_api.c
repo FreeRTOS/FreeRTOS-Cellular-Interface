@@ -1421,7 +1421,7 @@ static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
     /* Set the response to numeric format. */
     atCopsRequest.pAtCmd = "AT+COPS=3,2",
     atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT,
-    pktStatus =  _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
+    pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {

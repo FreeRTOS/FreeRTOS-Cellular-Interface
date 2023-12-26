@@ -195,6 +195,7 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback( CellularContext_t * pContext,
                                                    int cmock_num_calls )
 {
     cellularOperatorInfo_t * pOperatorInfo;
+
     ( void ) pContext;
 
     if( cmock_num_calls == 0 )
@@ -2070,7 +2071,9 @@ void test_Cellular_CommonGetRegisteredNetwork_Set_Numeric_Format_Fail( void )
     CellularPlmnInfo_t networkInfo;
 
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
-    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_INTERNAL_FAILURE );
+    _Cellular_AtcmdRequestWithCallback_IgnoreAndReturn( CELLULAR_PKT_STATUS_FAILURE );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_FAILURE, CELLULAR_INTERNAL_FAILURE );
+
     cellularStatus = Cellular_CommonGetRegisteredNetwork( cellularHandle, &networkInfo );
     TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
