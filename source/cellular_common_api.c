@@ -146,25 +146,58 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularContext_t * pContext = NULL;
 
-    /* Init the common library. */
-    cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, pTokenTable );
-
-    /* Init the module. */
-    if( cellularStatus == CELLULAR_SUCCESS )
+    if( pCellularHandle == NULL )
     {
-        pContext = *pCellularHandle;
-        cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModuleContext );
+        LogError( ( "Cellular_CommonInit pCellularHandle is NULL." ) );
+        cellularStatus = CELLULAR_INVALID_HANDLE;
     }
-
-    /* Setup UE, URC and query register status. */
-    if( cellularStatus == CELLULAR_SUCCESS )
+    else if( pCommInterface == NULL )
     {
-        cellularStatus = Cellular_ModuleEnableUE( pContext );
+        LogError( ( "Cellular_CommonInit pCommInterface is NULL." ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
     }
-
-    if( cellularStatus == CELLULAR_SUCCESS )
+    else if( pTokenTable == NULL )
     {
-        cellularStatus = Cellular_ModuleEnableUrc( pContext );
+        LogError( ( "Cellular_CommonInit pTokenTable is NULL." ) );
+        cellularStatus = CELLULAR_BAD_PARAMETER;
+    }
+    else
+    {
+        /* Init the common library. */
+        cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, pTokenTable );
+
+        if( cellularStatus == CELLULAR_SUCCESS )
+        {
+            pContext = ( CellularContext_t * ) ( *pCellularHandle );
+
+            cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModuleContext );
+
+            if( cellularStatus == CELLULAR_SUCCESS )
+            {
+                cellularStatus = Cellular_ModuleEnableUE( pContext );
+
+                if( cellularStatus == CELLULAR_SUCCESS )
+                {
+                    cellularStatus = Cellular_ModuleEnableUrc( pContext );
+                }
+
+                if( cellularStatus != CELLULAR_SUCCESS )
+                {
+                    /* Clean up the resource allocated by cellular module here if
+                     * Cellular_ModuleEnableUE or Cellular_ModuleEnableUrc returns
+                     * error. */
+                    ( void ) Cellular_ModuleCleanUp( pContext );
+                }
+            }
+
+            if( cellularStatus != CELLULAR_SUCCESS )
+            {
+                /* Clean up the resource in cellular common library if any of the
+                 * module port function returns error. Error returned by _Cellular_LibInit
+                 * is already handled in the implementation. */
+                ( void ) _Cellular_LibCleanup( pContext );
+            }
+        }
     }
 
     return cellularStatus;
