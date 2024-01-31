@@ -33,41 +33,64 @@
 /* Include paths for public enums, structures, and macros. */
 #include "cellular_common_portable.h"
 
-CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
-                                     void ** ppModuleContext )
-{
-    CellularError_t ret = nondet_int();
+#if ( CBMC_TEST_CELLULAR_MODULE_RETURN_ERROR == 1 )
 
-    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
-    return ret;
-}
+    CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
+                                         void ** ppModuleContext )
+    {
+        CellularError_t ret = nondet_int();
 
+        __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
+        return ret;
+    }
 
-CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
-{
-    CellularError_t ret = nondet_int();
+    CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
+    {
+        CellularError_t ret = nondet_int();
 
-    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
-    return ret;
-}
+        __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
+        return ret;
+    }
 
+    CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
+    {
+        CellularError_t ret = nondet_int();
 
-CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
-{
-    CellularError_t ret = nondet_int();
+        __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
+        return ret;
+    }
 
-    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
-    return ret;
-}
+    CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
+    {
+        CellularError_t ret = nondet_int();
 
+        __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
+        return ret;
+    }
 
-CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
-{
-    CellularError_t ret = nondet_int();
+#else /* #if ( CBMC_TEST_CELLULAR_MODULE_NO_ERROR == 1 ) */
 
-    __CPROVER_assume( ret >= CELLULAR_SUCCESS && ret <= CELLULAR_UNKNOWN );
-    return ret;
-}
+    CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
+                                         void ** ppModuleContext )
+    {
+        return CELLULAR_SUCCESS;
+    }
 
+    CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
+    {
+        return CELLULAR_SUCCESS;
+    }
+
+    CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
+    {
+        return CELLULAR_SUCCESS;
+    }
+
+    CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
+    {
+        return CELLULAR_SUCCESS;
+    }
+
+#endif /* #if ( CBMC_TEST_CELLULAR_MODULE_NO_ERROR == 1 ) */
 
 /* ========================================================================== */

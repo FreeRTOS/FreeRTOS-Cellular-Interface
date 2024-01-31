@@ -96,5 +96,7 @@ void harness()
     * Initialize the member of Cellular_CommonInit.
     ****************************************************************/
 
-    Cellular_CommonInit( nondet_bool() ? NULL : &pHandle, &CellularCommInterface, &tokenTable );
+    Cellular_CommonInit( nondet_bool() ? NULL : &pHandle,
+                         nondet_bool() ? NULL : &CellularCommInterface,
+                         nondet_bool() ? NULL : &tokenTable );
 }

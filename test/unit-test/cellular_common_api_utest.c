@@ -277,17 +277,218 @@ static CellularCommInterface_t cellularCommInterface =
 /* ========================================================================== */
 
 /**
- * @brief Test that null handler case for Cellular_CommonInit.
+ * @brief Cellular_CommonInit - Test the null pCommInterface parameter.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * if( pCellularHandle == NULL )
+ * {
+ *     LogError( ( "Cellular_CommonInit pCellularHandle is NULL." ) );
+ *     cellularStatus = CELLULAR_INVALID_HANDLE;
+ * }
+ * @endcode
+ * ( pCellularHandle == NULL ) is true.
  */
 void test_Cellular_CommonInit_Null_Handler( void )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
 
-    _Cellular_LibInit_IgnoreAndReturn( CELLULAR_INVALID_HANDLE );
-
+    /* API call. */
     cellularStatus = Cellular_CommonInit( NULL, &cellularCommInterface, &tokenTable );
 
+    /* Verification. */
     TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test the null pCommInterface parameter.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * else if( pCommInterface == NULL )
+ * {
+ *     LogError( ( "Cellular_CommonInit pCommInterface is NULL." ) );
+ *     cellularStatus = CELLULAR_BAD_PARAMETER;
+ * }
+ * @endcode
+ * ( pCommInterface == NULL ) is true.
+ */
+void test_Cellular_CommonInit_Null_Comm_Interface( void )
+{
+    struct CellularContext * pHandler;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pHandler, NULL, &tokenTable );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test the null pTokenTable parameter.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * else if( pTokenTable == NULL )
+ * {
+ *     LogError( ( "Cellular_CommonInit pTokenTable is NULL." ) );
+ *     cellularStatus = CELLULAR_BAD_PARAMETER;
+ * }
+ * @endcode
+ * ( pTokenTable == NULL ) is true.
+ */
+void test_Cellular_CommonInit_Null_Token_Table( void )
+{
+    struct CellularContext * pHandler;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pHandler, &cellularCommInterface, NULL );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_BAD_PARAMETER, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test that _Cellular_LibInit returns error.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * cellularStatus = _Cellular_LibInit( pCellularHandle, pCommInterface, pTokenTable );
+ * ...
+ * if( cellularStatus == CELLULAR_SUCCESS )
+ * {
+ *     ...
+ * }
+ * @endcode
+ * ( cellularStatus == CELLULAR_SUCCESS ) is false.
+ */
+void test_Cellular_CommonInit_Lib_Init_error( void )
+{
+    struct CellularContext * pHandler;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* Expectation. */
+    _Cellular_LibInit_IgnoreAndReturn( CELLULAR_RESOURCE_CREATION_FAIL );
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pHandler, &cellularCommInterface, &tokenTable );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_RESOURCE_CREATION_FAIL, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test that Cellular_ModuleInit returns error.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModuleContext );
+ * ...
+ * if( cellularStatus != CELLULAR_SUCCESS )
+ * {
+ *     ( void ) _Cellular_LibCleanup( pContext );
+ * }
+ * @endcode
+ * ( cellularStatus != CELLULAR_SUCCESS ) is true.
+ */
+void test_Cellular_CommonInit_Module_Init_error( void )
+{
+    struct CellularContext xCellularContext = { 0 };
+    struct CellularContext * pContext;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* Setup. */
+    pContext = &xCellularContext;
+
+    /* Expectation. */
+    _Cellular_LibInit_IgnoreAndReturn( CELLULAR_SUCCESS );
+    Cellular_ModuleInit_ExpectAndReturn( &xCellularContext, &xCellularContext.pModuleContext, CELLULAR_INTERNAL_FAILURE );
+    _Cellular_LibCleanup_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pContext, &cellularCommInterface, &tokenTable );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test that Cellular_ModuleEnableUE returns error.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * cellularStatus = Cellular_ModuleEnableUE( pContext );
+ * if( cellularStatus == CELLULAR_SUCCESS )
+ * {
+ *     cellularStatus = Cellular_ModuleEnableUrc( pContext );
+ * }
+ * @endcode
+ * ( cellularStatus == CELLULAR_SUCCESS ) is false.
+ */
+void test_Cellular_CommonInit_Module_Enable_UE_error( void )
+{
+    struct CellularContext xCellularContext = { 0 };
+    struct CellularContext * pContext;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* Setup. */
+    pContext = &xCellularContext;
+
+    /* Expectation. */
+    _Cellular_LibInit_IgnoreAndReturn( CELLULAR_SUCCESS );
+    Cellular_ModuleInit_ExpectAndReturn( &xCellularContext, &xCellularContext.pModuleContext, CELLULAR_SUCCESS );
+    Cellular_ModuleEnableUE_ExpectAndReturn( &xCellularContext, CELLULAR_INTERNAL_FAILURE );
+
+    Cellular_ModuleCleanUp_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+    _Cellular_LibCleanup_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pContext, &cellularCommInterface, &tokenTable );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
+}
+
+/**
+ * @brief Cellular_CommonInit - Test that Cellular_ModuleEnableUrc returns error.
+ *
+ * <b>Coverage</b>
+ * @code{c}
+ * ...
+ *     cellularStatus = Cellular_ModuleEnableUrc( pContext );
+ * ...
+ * if( cellularStatus != CELLULAR_SUCCESS )
+ * {
+ *     cellularStatus = Cellular_ModuleCleanUp( pContext );
+ * }
+ * @endcode
+ * ( cellularStatus != CELLULAR_SUCCESS ) is true.
+ */
+void test_Cellular_CommonInit_Module_Enable_URC_error( void )
+{
+    struct CellularContext xCellularContext = { 0 };
+    struct CellularContext * pContext;
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+
+    /* Setup. */
+    pContext = &xCellularContext;
+
+    /* Expectation. */
+    _Cellular_LibInit_IgnoreAndReturn( CELLULAR_SUCCESS );
+    Cellular_ModuleInit_ExpectAndReturn( &xCellularContext, &xCellularContext.pModuleContext, CELLULAR_SUCCESS );
+    Cellular_ModuleEnableUE_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+    Cellular_ModuleEnableUrc_ExpectAndReturn( &xCellularContext, CELLULAR_INTERNAL_FAILURE );
+
+    Cellular_ModuleCleanUp_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+    _Cellular_LibCleanup_ExpectAndReturn( &xCellularContext, CELLULAR_SUCCESS );
+
+    /* API call. */
+    cellularStatus = Cellular_CommonInit( &pContext, &cellularCommInterface, &tokenTable );
+
+    /* Verification. */
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
 /**

@@ -24,7 +24,7 @@ HARNESS_ENTRY=harness
 HARNESS_FILE=Cellular_CommonInit_harness
 PROOF_UID = Cellular_CommonInit
 
-DEFINES +=
+DEFINES += -DCBMC_TEST_CELLULAR_MODULE_RETURN_ERROR=1
 INCLUDES +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
@@ -34,5 +34,7 @@ PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_platform.c
 PROOF_SOURCES += $(SRCDIR)/test/cbmc/sources/cellular_modules.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common_api.c
 PROJECT_SOURCES += $(SRCDIR)/source/cellular_common.c
+
+UNWINDSET += __CPROVER_file_local_cellular_common_c_libClose.0:20
 
 include ../Makefile.common
