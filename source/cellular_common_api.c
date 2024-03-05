@@ -471,14 +471,15 @@ CellularError_t Cellular_CommonSocketSetSockOpt( CellularHandle_t cellularHandle
     }
     else
     {
-        if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_IP )
-        {
-            LogError( ( "Cellular_SocketSetSockOpt: Option not supported" ) );
-            cellularStatus = CELLULAR_UNSUPPORTED;
-        }
-        else /* optionLevel CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT. */
+        if( optionLevel == CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT )
         {
             cellularStatus = _socketSetSockOptLevelTransport( option, socketHandle, pOptionValue, optionValueLength );
+        }
+        else
+        {
+            /* Other socket option levels are not supported in common layer. Modem ports
+             * can use their own implementation for these options. */
+            cellularStatus = CELLULAR_UNSUPPORTED;
         }
     }
 
