@@ -1419,8 +1419,8 @@ static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
     CellularAtReq_t atCopsRequest = { 0 };
 
     /* Set the response to numeric format. */
-    atCopsRequest.pAtCmd = "AT+COPS=3,2",
-    atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT,
+    atCopsRequest.pAtCmd = "AT+COPS=3,2";
+    atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT;
     pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
@@ -1808,7 +1808,7 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
     }
     else
     {
-        memset( pOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
+        ( void ) memset( pOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
         cellularStatus = atcmdUpdateMccMnc( pContext, pOperatorInfo );
     }
 
@@ -2667,14 +2667,7 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularAtReq_t atReqGetSimLockStatus = { 0 };
-
-    atReqGetSimLockStatus.pAtCmd = "AT+CPIN?";
-    atReqGetSimLockStatus.atCmdType = CELLULAR_AT_WITH_PREFIX;
-    atReqGetSimLockStatus.pAtRspPrefix = "+CPIN";
-    atReqGetSimLockStatus.respCallback = _Cellular_RecvFuncGetSimLockStatus;
-    atReqGetSimLockStatus.pData = NULL;
-    atReqGetSimLockStatus.dataLen = 0;
+    CellularAtReq_t atReqGetSimLockStatus;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -2693,6 +2686,10 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
         /* Initialize the sim state and the sim lock state. */
         pSimCardStatus->simCardLockState = CELLULAR_SIM_CARD_LOCK_UNKNOWN;
 
+        atReqGetSimLockStatus.pAtCmd = "AT+CPIN?";
+        atReqGetSimLockStatus.atCmdType = CELLULAR_AT_WITH_PREFIX;
+        atReqGetSimLockStatus.pAtRspPrefix = "+CPIN";
+        atReqGetSimLockStatus.respCallback = _Cellular_RecvFuncGetSimLockStatus;
         atReqGetSimLockStatus.pData = &pSimCardStatus->simCardLockState;
         atReqGetSimLockStatus.dataLen = ( uint16_t ) sizeof( CellularSimCardLockState_t );
 

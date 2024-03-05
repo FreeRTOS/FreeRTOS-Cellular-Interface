@@ -106,15 +106,16 @@ struct CellularContext
     const CellularCommInterface_t * pCommIntf; /**<  Communication interface for target specific. */
 
     /* Common library. */
-    bool bLibOpened;                 /**<  CellularLib is currently open. */
-    bool bLibShutdown;               /**<  CellularLib prematurely shut down. */
-    bool bLibClosing;                /**<  Graceful shutdown in progress. */
-    PlatformMutex_t libStatusMutex;  /**<  The mutex for changing lib status. */
-    PlatformMutex_t libAtDataMutex;  /**<  The mutex for AT data in cellular context. */
-    _callbackEvents_t cbEvents;      /**<  Call back functions registered to report events. */
-    cellularAtData_t libAtData;      /**<  Global variables. */
+    CellularATCommandResponse_t * pAtCmdResp; /**<  Solicited response pointer. */
+    bool bLibOpened;                          /**<  CellularLib is currently open. */
+    bool bLibShutdown;                        /**<  CellularLib prematurely shut down. */
+    bool bLibClosing;                         /**<  Graceful shutdown in progress. */
+    PlatformMutex_t libStatusMutex;           /**<  The mutex for changing lib status. */
+    PlatformMutex_t libAtDataMutex;           /**<  The mutex for AT data in cellular context. */
+    _callbackEvents_t cbEvents;               /**<  Call back functions registered to report events. */
+    cellularAtData_t libAtData;               /**<  Global variables. */
 
-    CellularTokenTable_t tokenTable; /**<  Token table to config pkthandler and pktio. */
+    CellularTokenTable_t tokenTable;          /**<  Token table to config pkthandler and pktio. */
 
     /* Packet handler. */
     PlatformMutex_t pktRequestMutex;                               /**<  The mutex for sending request. */

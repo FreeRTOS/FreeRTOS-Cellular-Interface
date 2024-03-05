@@ -109,8 +109,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
                                 CellularATCommandResponse_t ** ppAtResp,
                                 char * pData,
                                 uint32_t bytesInBuffer );
-static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
-                                    CellularATCommandResponse_t ** ppAtResp );
+static uint32_t _handleRxDataEvent( CellularContext_t * pContext );
 static void _pktioReadThread( void * pUserData );
 static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
 static bool _getNextLine( CellularContext_t * pContext,
@@ -424,7 +423,7 @@ static bool _checkUrcTokenWoPrefix( const CellularContext_t * pContext,
     uint32_t urcTokenTableSize = pContext->tokenTable.cellularUrcTokenWoPrefixTableSize;
     const char * const * const pUrcTokenTable = pContext->tokenTable.pCellularUrcTokenWoPrefixTable;
 
-    if( ( pUrcTokenTable == NULL ) || ( urcTokenTableSize == 0 ) )
+    if( ( pUrcTokenTable == NULL ) || ( urcTokenTableSize == 0U ) )
     {
         ret = false;
     }
@@ -1164,8 +1163,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
-                                    CellularATCommandResponse_t ** ppAtResp )
+static uint32_t _handleRxDataEvent( CellularContext_t * pContext )
 {
     char * pLine = NULL;
     uint32_t bytesRead = 0;
@@ -1173,13 +1171,13 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 
     /* Return the first line, may be more lines in buffer. */
     /* Start from pLine there are bytesRead bytes. */
-    pLine = _Cellular_ReadLine( pContext, &bytesRead, *ppAtResp );
+    pLine = _Cellular_ReadLine( pContext, &bytesRead, pContext->pAtCmdResp );
 
     if( bytesRead > 0U )
     {
         if( pContext->dataLength != 0U )
         {
-            ( void ) _handleData( pLine, pContext, *ppAtResp, &pLine, bytesRead, &bytesLeft );
+            ( void ) _handleData( pLine, pContext, pContext->pAtCmdResp, &pLine, bytesRead, &bytesLeft );
         }
         else
         {
@@ -1191,7 +1189,7 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
         {
             /* Add the null terminated char to the end of pLine. */
             pLine[ bytesLeft ] = '\0';
-            _handleAllReceived( pContext, ppAtResp, pLine, bytesLeft );
+            _handleAllReceived( pContext, &pContext->pAtCmdResp, pLine, bytesLeft );
         }
     }
 
@@ -1203,7 +1201,6 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 static void _pktioReadThread( void * pUserData )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
-    CellularATCommandResponse_t * pAtResp = NULL;
     PlatformEventGroup_EventBits uxBits = 0;
     uint32_t bytesRead = 0U;
 
@@ -1227,7 +1224,7 @@ static void _pktioReadThread( void * pUserData )
             if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT ) != 0U )
             {
                 LogDebug( ( "Abort received, cleaning up!" ) );
-                FREE_AT_RESPONSE_AND_SET_NULL( pAtResp );
+                FREE_AT_RESPONSE_AND_SET_NULL( pContext->pAtCmdResp );
                 break;
             }
             else if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ) != 0U )
@@ -1235,7 +1232,7 @@ static void _pktioReadThread( void * pUserData )
                 /* Keep Reading until there is no more bytes in comm interface. */
                 do
                 {
-                    bytesRead = _handleRxDataEvent( pContext, &pAtResp );
+                    bytesRead = _handleRxDataEvent( pContext );
                 } while( ( bytesRead != 0U ) );
             }
             else

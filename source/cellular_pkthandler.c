@@ -71,8 +71,8 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
                                                                   uint32_t timeoutMs );
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
-static int _searchCompareFunc( const void * pInputToken,
-                               const void * pBase );
+static int32_t _searchCompareFunc( const void * pInputToken,
+                                   const void * pBase );
 static int32_t _sortCompareFunc( const void * pElem1Ptr,
                                  const void * pElem2Ptr );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
@@ -152,7 +152,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
              * leading char. ":" is also checked in Cellular_ATIsPrefixPresent. Remove
              * the leading char and split the string into the following substrings :
              * pInputLine = "+" pTokenPtr + ":" + pSavePtr. */
-            pSavePtr = pInputLine + 1;
+            pSavePtr = &( pInputLine[ 1 ] );
             pTokenPtr = strtok_r( pSavePtr, ":", &pSavePtr );
 
             if( pTokenPtr == NULL )
@@ -182,7 +182,7 @@ static CellularPktStatus_t _processUrcPacket( CellularContext_t * pContext,
             {
                 /* inputWithPrefix is true means the string starts with '+'.
                  * Restore string to "+pTokenPtr:pSavePtr" for callback function. */
-                *( pSavePtr - 1 ) = ':';
+                pSavePtr[ -1 ] = ':';
             }
 
             _Cellular_GenericCallback( pContext, pInputLine );
@@ -360,10 +360,10 @@ static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pCon
 
 /*-----------------------------------------------------------*/
 
-static int _searchCompareFunc( const void * pInputToken,
-                               const void * pBase )
+static int32_t _searchCompareFunc( const void * pInputToken,
+                                   const void * pBase )
 {
-    int compareValue = 0;
+    int32_t compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
     uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
@@ -832,8 +832,6 @@ CellularPktStatus_t _Cellular_AtParseInit( const CellularContext_t * pContext )
             pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
             LogError( ( "AtParseFail URC token table is not sorted" ) );
         }
-
-        configASSERT( finit == true );
 
         for( i = 0; i < tokenMapSize; i++ )
         {

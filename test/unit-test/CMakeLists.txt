@@ -29,12 +29,12 @@ list(APPEND mock_define_list
 
 # list the files you would like to test here
 list(APPEND real_source_files
-            ${CELLULAR_COMMON_SOURCE}/cellular_at_core.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_pktio.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_pkthandler.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_common_api.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_3gpp_urc_handler.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_3gpp_api.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_at_core.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_pktio.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_pkthandler.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_common_api.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_3gpp_urc_handler.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_3gpp_api.c
         )
 # list the directories the module under test includes
 list(APPEND real_include_directories
@@ -165,9 +165,9 @@ list(APPEND cellular_common_mock_list
 
 # list the files you would like to test here
 list(APPEND cellular_common_real_source_files
-            ${CELLULAR_COMMON_SOURCE}/cellular_common.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_3gpp_urc_handler.c
-            ${CELLULAR_COMMON_SOURCE}/cellular_3gpp_api.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_common.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_3gpp_urc_handler.c
+            ${CELLULAR_COMMON_SOURCE_DIRS}/cellular_3gpp_api.c
         )
 
 set(cellular_common_mock_name "${project_name}_common_mock")
