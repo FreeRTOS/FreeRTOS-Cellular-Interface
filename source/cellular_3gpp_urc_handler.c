@@ -559,7 +559,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     }
     else
     {
-        pLibAtData = &pContext->libAtData;
+        pLibAtData = &( pContext->libAtData );
 
         if( isUrc == true )
         {

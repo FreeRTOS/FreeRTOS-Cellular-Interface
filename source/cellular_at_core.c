@@ -330,7 +330,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString )
          * when the string length is greater than 2. */
         if( stringLen > 2U )
         {
-            p = &pString[ stringLen ];
+            p = &( pString[ stringLen ] );
 
             do
             {
@@ -571,11 +571,11 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
 
         if( ( tokStrLen < dataStrlen ) && ( ( *ppString )[ tokStrLen + 1U ] != '\0' ) )
         {
-            *ppString = &tok[ strlen( tok ) + 1U ];
+            *ppString = &( tok[ strlen( tok ) + 1U ] );
         }
         else
         {
-            *ppString = &tok[ strlen( tok ) ];
+            *ppString = &( tok[ strlen( tok ) ] );
         }
 
         *ppTokOutput = tok;
@@ -665,7 +665,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
                 ( pHexData )[ i ] = firstNibble | secondNibble;
             }
 
-            p = &p[ 2 ];
+            p = &( p[ 2 ] );
         }
     }
 
