@@ -109,8 +109,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
                                 CellularATCommandResponse_t ** ppAtResp,
                                 char * pData,
                                 uint32_t bytesInBuffer );
-static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
-                                    CellularATCommandResponse_t ** ppAtResp );
+static uint32_t _handleRxDataEvent( CellularContext_t * pContext );
 static void _pktioReadThread( void * pUserData );
 static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext );
 static bool _getNextLine( CellularContext_t * pContext,
@@ -346,7 +345,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
     ( void ) pRespPrefix;
 
     /* Lock the response mutex when processing the input line. */
-    PlatformMutex_Lock( &pContext->PktRespMutex );
+    PlatformMutex_Lock( &( pContext->PktRespMutex ) );
 
     if( ( pContext->tokenTable.pCellularSrcTokenErrorTable != NULL ) &&
         ( pContext->tokenTable.pCellularSrcTokenSuccessTable != NULL ) )
@@ -409,7 +408,7 @@ static CellularPktStatus_t _Cellular_ProcessLine( CellularContext_t * pContext,
                    ( pRespPrefix != NULL ? pRespPrefix : "NULL" ) ) );
     }
 
-    PlatformMutex_Unlock( &pContext->PktRespMutex );
+    PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
     return pkStatus;
 }
@@ -424,7 +423,7 @@ static bool _checkUrcTokenWoPrefix( const CellularContext_t * pContext,
     uint32_t urcTokenTableSize = pContext->tokenTable.cellularUrcTokenWoPrefixTableSize;
     const char * const * const pUrcTokenTable = pContext->tokenTable.pCellularUrcTokenWoPrefixTable;
 
-    if( ( pUrcTokenTable == NULL ) || ( urcTokenTableSize == 0 ) )
+    if( ( pUrcTokenTable == NULL ) || ( urcTokenTableSize == 0U ) )
     {
         ret = false;
     }
@@ -455,7 +454,7 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
     bool inputWithSrcPrefix = false;
 
     /* Lock the response mutex when deciding message type. */
-    PlatformMutex_Lock( &pContext->PktRespMutex );
+    PlatformMutex_Lock( &( pContext->PktRespMutex ) );
 
     if( _checkUrcTokenWoPrefix( pContext, pLine ) == true )
     {
@@ -510,7 +509,7 @@ static _atRespType_t _getMsgType( CellularContext_t * pContext,
         }
     }
 
-    PlatformMutex_Unlock( &pContext->PktRespMutex );
+    PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
     return atRespType;
 }
@@ -572,7 +571,7 @@ static char * _handleLeftoverBuffer( CellularContext_t * pContext )
     ( void ) memmove( pContext->pktioReadBuf, pContext->pPktioReadPtr, pContext->partialDataRcvdLen );
     pContext->pktioReadBuf[ pContext->partialDataRcvdLen ] = '\0';
 
-    pRead = &pContext->pktioReadBuf[ pContext->partialDataRcvdLen ];
+    pRead = &( pContext->pktioReadBuf[ pContext->partialDataRcvdLen ] );
 
     pContext->pPktioReadPtr = pContext->pktioReadBuf;
 
@@ -612,7 +611,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
         if( pContext->pPktioReadPtr != NULL )
         {
             /* There are still valid data before pPktioReadPtr. */
-            pRead = &pContext->pPktioReadPtr[ pContext->partialDataRcvdLen ];
+            pRead = &( pContext->pPktioReadPtr[ pContext->partialDataRcvdLen ] );
             pAtBuf = pContext->pPktioReadPtr;
             bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE -
                                   ( int32_t ) pContext->partialDataRcvdLen - ( int32_t ) _convertCharPtrDistance( pContext->pPktioReadPtr, pContext->pktioReadBuf ) );
@@ -620,7 +619,7 @@ static char * _Cellular_ReadLine( CellularContext_t * pContext,
         else
         {
             /* There are valid data need to be handled with length pContext->partialDataRcvdLen. */
-            pRead = &pContext->pktioReadBuf[ pContext->partialDataRcvdLen ];
+            pRead = &( pContext->pktioReadBuf[ pContext->partialDataRcvdLen ] );
             pAtBuf = pContext->pktioReadBuf;
             bufferEmptyLength = ( ( int32_t ) PKTIO_READ_BUFFER_SIZE - ( int32_t ) pContext->partialDataRcvdLen );
         }
@@ -685,7 +684,7 @@ static CellularPktStatus_t _handleData( char * pStartOfData,
         _saveRawData( pStartOfData, pAtResp, pContext->dataLength );
 
         /* Advance pLine to a point after data. */
-        *ppLine = &pStartOfData[ pContext->dataLength ];
+        *ppLine = &( pStartOfData[ pContext->dataLength ] );
 
         /* There are more bytes after the data. */
         *pBytesLeft = ( bytesDataAndLeft - pContext->dataLength );
@@ -747,10 +746,10 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
         {
             /* Reset the command type. Further response from cellular modem won't be
              * regarded as AT_SOLICITED response. */
-            PlatformMutex_Lock( &pContext->PktRespMutex );
+            PlatformMutex_Lock( &( pContext->PktRespMutex ) );
             pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
             pContext->pRespPrefix = NULL;
-            PlatformMutex_Unlock( &pContext->PktRespMutex );
+            PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
             /* This command is completed. Call the user callback to parse the result. */
             if( pContext->pPktioHandlepktCB != NULL )
@@ -797,10 +796,10 @@ static CellularPktStatus_t _handleMsgType( CellularContext_t * pContext,
                         ( pContext->pCurrentCmd != NULL ? pContext->pCurrentCmd : "NULL" ) ) );
 
             /* Reset the command type. */
-            PlatformMutex_Lock( &pContext->PktRespMutex );
+            PlatformMutex_Lock( &( pContext->PktRespMutex ) );
             pContext->PktioAtCmdType = CELLULAR_AT_NO_COMMAND;
             pContext->pRespPrefix = NULL;
-            PlatformMutex_Unlock( &pContext->PktRespMutex );
+            PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
             /* Clean the read buffer and read pointer. */
             ( void ) memset( pContext->pktioReadBuf, 0, PKTIO_READ_BUFFER_SIZE + 1U );
@@ -914,12 +913,12 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
 
     if( pContext->inputBufferCallback != NULL )
     {
-        PlatformMutex_Lock( &pContext->PktRespMutex );
+        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
         pktStatus = pContext->inputBufferCallback( pContext->pInputBufferCallbackContext,
                                                    pTempLine,
                                                    *pBytesRead,
                                                    &bufferLength );
-        PlatformMutex_Unlock( &pContext->PktRespMutex );
+        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
         if( pktStatus == CELLULAR_PKT_STATUS_OK )
         {
@@ -942,7 +941,7 @@ static bool _preprocessInputBuffer( CellularContext_t * pContext,
                 /* The input buffer is handled in the callback successfully. Move
                  * the read pointer forward. pktio will keep processing the line
                  * after. */
-                pTempLine = &pTempLine[ bufferLength ];
+                pTempLine = &( pTempLine[ bufferLength ] );
                 *pLine = pTempLine;
                 pContext->pPktioReadPtr = *pLine;
 
@@ -976,12 +975,12 @@ static bool _preprocessLine( CellularContext_t * pContext,
     void * pDataSendPrefixCBContext = NULL;
 
     /* Acquire the response lock to keep consistency. */
-    PlatformMutex_Lock( &pContext->PktRespMutex );
+    PlatformMutex_Lock( &( pContext->PktRespMutex ) );
     pktDataPrefixCB = pContext->pktDataPrefixCB;
     pDataPrefixCBContext = pContext->pDataPrefixCBContext;
     pktDataSendPrefixCB = pContext->pktDataSendPrefixCB;
     pDataSendPrefixCBContext = pContext->pDataSendPrefixCBContext;
-    PlatformMutex_Unlock( &pContext->PktRespMutex );
+    PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
     /* The line only has change line. */
     if( *pBytesRead <= 0U )
@@ -1013,7 +1012,7 @@ static bool _preprocessLine( CellularContext_t * pContext,
              * received are in the same line. */
             pktStatus = pktDataPrefixCB( pDataPrefixCBContext,
                                          pTempLine, *pBytesRead,
-                                         ppStartOfData, &pContext->dataLength );
+                                         ppStartOfData, &( pContext->dataLength ) );
 
             keepProcess = _handleCallbackResult( pContext, pktStatus, pTempLine, pBytesRead );
         }
@@ -1164,8 +1163,7 @@ static void _handleAllReceived( CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
-                                    CellularATCommandResponse_t ** ppAtResp )
+static uint32_t _handleRxDataEvent( CellularContext_t * pContext )
 {
     char * pLine = NULL;
     uint32_t bytesRead = 0;
@@ -1173,13 +1171,13 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 
     /* Return the first line, may be more lines in buffer. */
     /* Start from pLine there are bytesRead bytes. */
-    pLine = _Cellular_ReadLine( pContext, &bytesRead, *ppAtResp );
+    pLine = _Cellular_ReadLine( pContext, &bytesRead, pContext->pAtCmdResp );
 
     if( bytesRead > 0U )
     {
         if( pContext->dataLength != 0U )
         {
-            ( void ) _handleData( pLine, pContext, *ppAtResp, &pLine, bytesRead, &bytesLeft );
+            ( void ) _handleData( pLine, pContext, pContext->pAtCmdResp, &pLine, bytesRead, &bytesLeft );
         }
         else
         {
@@ -1191,7 +1189,7 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
         {
             /* Add the null terminated char to the end of pLine. */
             pLine[ bytesLeft ] = '\0';
-            _handleAllReceived( pContext, ppAtResp, pLine, bytesLeft );
+            _handleAllReceived( pContext, &( pContext->pAtCmdResp ), pLine, bytesLeft );
         }
     }
 
@@ -1203,14 +1201,13 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext,
 static void _pktioReadThread( void * pUserData )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
-    CellularATCommandResponse_t * pAtResp = NULL;
     PlatformEventGroup_EventBits uxBits = 0;
     uint32_t bytesRead = 0U;
 
     /* Open main communication port. */
     if( ( pContext->pCommIntf != NULL ) &&
         ( pContext->pCommIntf->open( _Cellular_PktRxCallBack, ( void * ) pContext,
-                                     &pContext->hPktioCommIntf ) == IOT_COMM_INTERFACE_SUCCESS ) )
+                                     &( pContext->hPktioCommIntf ) ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
         /* Send thread started event. */
         ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_STARTED );
@@ -1227,7 +1224,7 @@ static void _pktioReadThread( void * pUserData )
             if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT ) != 0U )
             {
                 LogDebug( ( "Abort received, cleaning up!" ) );
-                FREE_AT_RESPONSE_AND_SET_NULL( pAtResp );
+                FREE_AT_RESPONSE_AND_SET_NULL( pContext->pAtCmdResp );
                 break;
             }
             else if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ) != 0U )
@@ -1235,7 +1232,7 @@ static void _pktioReadThread( void * pUserData )
                 /* Keep Reading until there is no more bytes in comm interface. */
                 do
                 {
-                    bytesRead = _handleRxDataEvent( pContext, &pAtResp );
+                    bytesRead = _handleRxDataEvent( pContext );
                 } while( ( bytesRead != 0U ) );
             }
             else
@@ -1455,7 +1452,7 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
         }
         else
         {
-            PlatformMutex_Lock( &pContext->PktRespMutex );
+            PlatformMutex_Lock( &( pContext->PktRespMutex ) );
 
             pktStatus = _setPrefixByAtCommandType( pContext, atType, pAtRspPrefix );
 
@@ -1468,15 +1465,15 @@ CellularPktStatus_t _Cellular_PktioSendAtCmd( CellularContext_t * pContext,
                 ( void ) strncpy( pContext->pktioSendBuf, pAtCmd, cmdLen );
                 pContext->pktioSendBuf[ cmdLen ] = '\r';
 
-                PlatformMutex_Unlock( &pContext->PktRespMutex );
+                PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
 
                 ( void ) pContext->pCommIntf->send( pContext->hPktioCommIntf,
-                                                    ( const uint8_t * ) &pContext->pktioSendBuf, newCmdLen,
+                                                    ( const uint8_t * ) &( pContext->pktioSendBuf ), newCmdLen,
                                                     CELLULAR_COMM_IF_SEND_TIMEOUT_MS, &sentLen );
             }
             else
             {
-                PlatformMutex_Unlock( &pContext->PktRespMutex );
+                PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
             }
         }
     }

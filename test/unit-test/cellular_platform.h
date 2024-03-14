@@ -69,6 +69,7 @@
 #define pdFALSE                              ( 0x0 )
 #define pdTRUE                               ( 0x1 )
 #define pdPASS                               ( 0x1 )
+#define pdFAIL                               ( 0x0 )
 
 #define PlatformTickType                     uint32_t
 

@@ -983,7 +983,7 @@ static bool _parseCopsNetworkNameToken( const char * pToken,
             {
                 ( void ) strncpy( pOperatorInfo->plmnInfo.mcc, pToken, CELLULAR_MCC_MAX_SIZE );
                 pOperatorInfo->plmnInfo.mcc[ CELLULAR_MCC_MAX_SIZE ] = '\0';
-                ( void ) strncpy( pOperatorInfo->plmnInfo.mnc, &pToken[ CELLULAR_MCC_MAX_SIZE ],
+                ( void ) strncpy( pOperatorInfo->plmnInfo.mnc, &( pToken[ CELLULAR_MCC_MAX_SIZE ] ),
                                   ( uint32_t ) ( mccMncLen - CELLULAR_MCC_MAX_SIZE + 1u ) );
                 pOperatorInfo->plmnInfo.mnc[ CELLULAR_MNC_MAX_SIZE ] = '\0';
             }
@@ -1419,8 +1419,8 @@ static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
     CellularAtReq_t atCopsRequest = { 0 };
 
     /* Set the response to numeric format. */
-    atCopsRequest.pAtCmd = "AT+COPS=3,2",
-    atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT,
+    atCopsRequest.pAtCmd = "AT+COPS=3,2";
+    atCopsRequest.atCmdType = CELLULAR_AT_NO_RESULT;
     pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
@@ -1482,7 +1482,7 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     /* Get the service status from lib AT data. */
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        pLibAtData = &pContext->libAtData;
+        pLibAtData = &( pContext->libAtData );
         _Cellular_LockAtDataMutex( pContext );
         pServiceStatus->rat = pLibAtData->rat;
         pServiceStatus->csRegistrationStatus = pLibAtData->csRegStatus;
@@ -1808,7 +1808,7 @@ CellularError_t Cellular_CommonGetRegisteredNetwork( CellularHandle_t cellularHa
     }
     else
     {
-        memset( pOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
+        ( void ) memset( pOperatorInfo, 0, sizeof( cellularOperatorInfo_t ) );
         cellularStatus = atcmdUpdateMccMnc( pContext, pOperatorInfo );
     }
 
@@ -2080,7 +2080,7 @@ void _Cellular_DestroyAtDataMutex( CellularContext_t * pContext )
 {
     configASSERT( pContext != NULL );
 
-    PlatformMutex_Destroy( &pContext->libAtDataMutex );
+    PlatformMutex_Destroy( &( pContext->libAtDataMutex ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -2091,7 +2091,7 @@ bool _Cellular_CreateAtDataMutex( CellularContext_t * pContext )
 
     configASSERT( pContext != NULL );
 
-    status = PlatformMutex_Create( &pContext->libAtDataMutex, false );
+    status = PlatformMutex_Create( &( pContext->libAtDataMutex ), false );
 
     return status;
 }
@@ -2102,7 +2102,7 @@ void _Cellular_LockAtDataMutex( CellularContext_t * pContext )
 {
     configASSERT( pContext != NULL );
 
-    PlatformMutex_Lock( &pContext->libAtDataMutex );
+    PlatformMutex_Lock( &( pContext->libAtDataMutex ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -2111,7 +2111,7 @@ void _Cellular_UnlockAtDataMutex( CellularContext_t * pContext )
 {
     configASSERT( pContext != NULL );
 
-    PlatformMutex_Unlock( &pContext->libAtDataMutex );
+    PlatformMutex_Unlock( &( pContext->libAtDataMutex ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -2125,7 +2125,7 @@ void _Cellular_InitAtData( CellularContext_t * pContext,
 
     configASSERT( pContext != NULL );
 
-    pLibAtData = &pContext->libAtData;
+    pLibAtData = &( pContext->libAtData );
 
     if( mode == 0u )
     {
@@ -2667,14 +2667,7 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
     CellularContext_t * pContext = ( CellularContext_t * ) cellularHandle;
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    CellularAtReq_t atReqGetSimLockStatus = { 0 };
-
-    atReqGetSimLockStatus.pAtCmd = "AT+CPIN?";
-    atReqGetSimLockStatus.atCmdType = CELLULAR_AT_WITH_PREFIX;
-    atReqGetSimLockStatus.pAtRspPrefix = "+CPIN";
-    atReqGetSimLockStatus.respCallback = _Cellular_RecvFuncGetSimLockStatus;
-    atReqGetSimLockStatus.pData = NULL;
-    atReqGetSimLockStatus.dataLen = 0;
+    CellularAtReq_t atReqGetSimLockStatus;
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
@@ -2693,7 +2686,11 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
         /* Initialize the sim state and the sim lock state. */
         pSimCardStatus->simCardLockState = CELLULAR_SIM_CARD_LOCK_UNKNOWN;
 
-        atReqGetSimLockStatus.pData = &pSimCardStatus->simCardLockState;
+        atReqGetSimLockStatus.pAtCmd = "AT+CPIN?";
+        atReqGetSimLockStatus.atCmdType = CELLULAR_AT_WITH_PREFIX;
+        atReqGetSimLockStatus.pAtRspPrefix = "+CPIN";
+        atReqGetSimLockStatus.respCallback = _Cellular_RecvFuncGetSimLockStatus;
+        atReqGetSimLockStatus.pData = &( pSimCardStatus->simCardLockState );
         atReqGetSimLockStatus.dataLen = ( uint16_t ) sizeof( CellularSimCardLockState_t );
 
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atReqGetSimLockStatus );
@@ -2740,7 +2737,7 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
     atReqGetHplmn.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetHplmn.pAtRspPrefix = "+CRSM";
     atReqGetHplmn.respCallback = _Cellular_RecvFuncGetHplmn;
-    atReqGetHplmn.pData = &pSimCardInfo->plmn;
+    atReqGetHplmn.pData = &( pSimCardInfo->plmn );
     atReqGetHplmn.dataLen = ( uint16_t ) sizeof( CellularPlmnInfo_t );
 
     /* pContext is checked in _Cellular_CheckLibraryStatus function. */
@@ -2856,13 +2853,13 @@ CellularError_t Cellular_CommonSetPsmSettings( CellularHandle_t cellularHandle,
         /* coverity[misra_c_2012_rule_21_6_violation]. */
         ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_MAX_SIZE, "AT+CPSMS=%d,", pPsmSettings->mode );
         cmdBufLen = ( uint32_t ) strlen( cmdBuf );
-        cmdBufLen = cmdBufLen + appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
+        cmdBufLen = cmdBufLen + appendBinaryPattern( &( cmdBuf[ cmdBufLen ] ), ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                                      pPsmSettings->periodicRauValue, false );
-        cmdBufLen = cmdBufLen + appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
+        cmdBufLen = cmdBufLen + appendBinaryPattern( &( cmdBuf[ cmdBufLen ] ), ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                                      pPsmSettings->gprsReadyTimer, false );
-        cmdBufLen = cmdBufLen + appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
+        cmdBufLen = cmdBufLen + appendBinaryPattern( &( cmdBuf[ cmdBufLen ] ), ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                                      pPsmSettings->periodicTauValue, false );
-        ( void ) appendBinaryPattern( &cmdBuf[ cmdBufLen ], ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
+        ( void ) appendBinaryPattern( &( cmdBuf[ cmdBufLen ] ), ( CELLULAR_AT_CMD_MAX_SIZE - cmdBufLen ),
                                       pPsmSettings->activeTimeValue, true );
 
         LogDebug( ( "PSM setting: %s ", cmdBuf ) );
@@ -2919,19 +2916,19 @@ static CellularATError_t parseGetPsmToken( char * pToken,
             break;
 
         case CPSMS_POS_RAU:
-            atCoreStatus = parseT3412TimerValue( pToken, &pPsmSettings->periodicRauValue );
+            atCoreStatus = parseT3412TimerValue( pToken, &( pPsmSettings->periodicRauValue ) );
             break;
 
         case CPSMS_POS_RDY_TIMER:
-            atCoreStatus = parseT3324TimerValue( pToken, &pPsmSettings->gprsReadyTimer );
+            atCoreStatus = parseT3324TimerValue( pToken, &( pPsmSettings->gprsReadyTimer ) );
             break;
 
         case CPSMS_POS_TAU:
-            atCoreStatus = parseT3412TimerValue( pToken, &pPsmSettings->periodicTauValue );
+            atCoreStatus = parseT3412TimerValue( pToken, &( pPsmSettings->periodicTauValue ) );
             break;
 
         case CPSMS_POS_ACTIVE_TIME:
-            atCoreStatus = parseT3324TimerValue( pToken, &pPsmSettings->activeTimeValue );
+            atCoreStatus = parseT3324TimerValue( pToken, &( pPsmSettings->activeTimeValue ) );
             break;
 
         default:

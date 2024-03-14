@@ -5,7 +5,7 @@ To that end, this directory provides a [configuration file](https://github.com/F
 building a binary for the tool to analyze.
 
 > **Note**
-For generating the report as outlined below, we have used Coverity version 2018.09.
+For generating the report as outlined below, we have used Coverity version 2023.6.1.
 
 For details regarding the suppressed violations in the report (which can be generated using the instructions described below), please
 see the [MISRA.md](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md) file.

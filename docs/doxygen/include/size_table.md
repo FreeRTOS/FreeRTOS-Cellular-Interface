@@ -9,7 +9,7 @@
     </tr>
     <tr>
         <td>cellular_3gpp_api.c</td>
-        <td><center>6.5K</center></td>
+        <td><center>6.4K</center></td>
         <td><center>5.9K</center></td>
     </tr>
     <tr>
@@ -39,12 +39,12 @@
     </tr>
     <tr>
         <td>cellular_pktio.c</td>
-        <td><center>2.2K</center></td>
-        <td><center>1.9K</center></td>
+        <td><center>2.3K</center></td>
+        <td><center>2.0K</center></td>
     </tr>
     <tr>
         <td><b>Total estimates</b></td>
         <td><b><center>15.1K</center></b></td>
-        <td><b><center>13.7K</center></b></td>
+        <td><b><center>13.8K</center></b></td>
     </tr>
 </table>
