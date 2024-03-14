@@ -170,7 +170,7 @@ CellularError_t Cellular_CommonInit( CellularHandle_t * pCellularHandle,
         {
             pContext = ( CellularContext_t * ) ( *pCellularHandle );
 
-            cellularStatus = Cellular_ModuleInit( pContext, &( pContext->pModuleContext ) );
+            cellularStatus = Cellular_ModuleInit( pContext, &pContext->pModuleContext );
 
             if( cellularStatus == CELLULAR_SUCCESS )
             {
@@ -241,10 +241,10 @@ CellularError_t Cellular_CommonRegisterUrcNetworkRegistrationEventCallback( Cell
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->cbEvents.networkRegistrationCallback = networkRegistrationCallback;
         pContext->cbEvents.pNetworkRegistrationCallbackContext = pCallbackContext;
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
@@ -268,10 +268,10 @@ CellularError_t Cellular_CommonRegisterUrcPdnEventCallback( CellularHandle_t cel
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->cbEvents.pdnEventCallback = pdnEventCallback;
         pContext->cbEvents.pPdnEventCallbackContext = pCallbackContext;
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
@@ -295,10 +295,10 @@ CellularError_t Cellular_CommonRegisterUrcSignalStrengthChangedCallback( Cellula
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->cbEvents.signalStrengthChangedCallback = signalStrengthChangedCallback;
         pContext->cbEvents.pSignalStrengthChangedCallbackContext = pCallbackContext;
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
@@ -322,10 +322,10 @@ CellularError_t Cellular_CommonRegisterUrcGenericCallback( CellularHandle_t cell
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->cbEvents.genericCallback = genericCallback;
         pContext->cbEvents.pGenericCallbackContext = pCallbackContext;
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
@@ -349,10 +349,10 @@ CellularError_t Cellular_CommonRegisterModemEventCallback( CellularHandle_t cell
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->cbEvents.modemEventCallback = modemEventCallback;
         pContext->cbEvents.pModemEventCallbackContext = pCallbackContext;
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;

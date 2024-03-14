@@ -126,7 +126,7 @@ static CellularContext_t * _Cellular_AllocContext( void )
         {
             #if ( CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT == 1 )
             {
-                pContext = &( cellularStaticContextTable[ i ] );
+                pContext = &cellularStaticContextTable[ i ];
             }
             #else
             {
@@ -190,7 +190,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
 
     configASSERT( pContext != NULL );
 
-    PlatformMutex_Lock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Lock( &pContext->libStatusMutex );
 
     ( CellularPktStatus_t ) _Cellular_AtParseInit( pContext );
     _Cellular_LockAtDataMutex( pContext );
@@ -223,7 +223,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
         pContext->bLibShutdown = false;
     }
 
-    PlatformMutex_Unlock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
 
     return cellularStatus;
 }
@@ -237,12 +237,12 @@ static void libClose( CellularContext_t * pContext )
 
     configASSERT( pContext != NULL );
 
-    PlatformMutex_Lock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Lock( &pContext->libStatusMutex );
     bOpened = pContext->bLibOpened;
 
     /* Indicate that CellularLib is in the process of closing. */
     pContext->bLibClosing = true;
-    PlatformMutex_Unlock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
 
     if( bOpened == true )
     {
@@ -251,7 +251,7 @@ static void libClose( CellularContext_t * pContext )
         _Cellular_PktHandlerCleanup( pContext );
     }
 
-    PlatformMutex_Lock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Lock( &pContext->libStatusMutex );
     pContext->bLibShutdown = false;
     pContext->bLibOpened = false;
     pContext->bLibClosing = false;
@@ -270,7 +270,7 @@ static void libClose( CellularContext_t * pContext )
         }
     }
 
-    PlatformMutex_Unlock( &( pContext->libStatusMutex ) );
+    PlatformMutex_Unlock( &pContext->libStatusMutex );
     LogDebug( ( "CELLULARLib closed" ) );
 }
 
@@ -280,7 +280,7 @@ static bool _Cellular_CreateLibStatusMutex( CellularContext_t * pContext )
 {
     bool status = false;
 
-    status = PlatformMutex_Create( &( pContext->libStatusMutex ), false );
+    status = PlatformMutex_Create( &pContext->libStatusMutex, false );
 
     return status;
 }
@@ -289,7 +289,7 @@ static bool _Cellular_CreateLibStatusMutex( CellularContext_t * pContext )
 
 static void _Cellular_DestroyLibStatusMutex( CellularContext_t * pContext )
 {
-    PlatformMutex_Destroy( &( pContext->libStatusMutex ) );
+    PlatformMutex_Destroy( &pContext->libStatusMutex );
 }
 
 /*-----------------------------------------------------------*/
@@ -440,19 +440,19 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
     }
     else
     {
-        PlatformMutex_Lock( &( pContext->libStatusMutex ) );
+        PlatformMutex_Lock( &pContext->libStatusMutex );
 
         if( pContext->bLibOpened == false )
         {
             cellularStatus = CELLULAR_LIBRARY_NOT_OPEN;
         }
 
-        PlatformMutex_Unlock( &( pContext->libStatusMutex ) );
+        PlatformMutex_Unlock( &pContext->libStatusMutex );
     }
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        PlatformMutex_Lock( &( pContext->libStatusMutex ) );
+        PlatformMutex_Lock( &pContext->libStatusMutex );
 
         if( ( pContext->bLibShutdown == true ) || ( pContext->bLibClosing == true ) )
         {
@@ -460,7 +460,7 @@ CellularError_t _Cellular_CheckLibraryStatus( CellularContext_t * pContext )
             cellularStatus = CELLULAR_INTERNAL_FAILURE;
         }
 
-        PlatformMutex_Unlock( &( pContext->libStatusMutex ) );
+        PlatformMutex_Unlock( &pContext->libStatusMutex );
     }
 
     return cellularStatus;
@@ -546,7 +546,7 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
         {
             #if ( CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION == 1 )
             {
-                pSocketData = &( cellularStaticSocketDataTable[ socketId ] );
+                pSocketData = &cellularStaticSocketDataTable[ socketId ];
             }
             #else
             {
@@ -961,7 +961,7 @@ CellularError_t _Cellular_LibInit( CellularHandle_t * pCellularHandle,
             pContext->pCommIntf = pCommInterface;
 
             /* copy the token table. */
-            ( void ) memcpy( &( pContext->tokenTable ), pTokenTable, sizeof( CellularTokenTable_t ) );
+            ( void ) memcpy( &pContext->tokenTable, pTokenTable, sizeof( CellularTokenTable_t ) );
         }
     }
 
@@ -1118,7 +1118,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
     else
     {
         /* undefinedRespCallback can be set to NULL to unregister the callback. */
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->undefinedRespCallback = undefinedRespCallback;
 
         if( pContext->undefinedRespCallback != NULL )
@@ -1130,7 +1130,7 @@ CellularError_t _Cellular_RegisterUndefinedRespCallback( CellularContext_t * pCo
             pContext->pUndefinedRespCBContext = NULL;
         }
 
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
@@ -1152,7 +1152,7 @@ CellularError_t _Cellular_RegisterInputBufferCallback( CellularContext_t * pCont
     else
     {
         /* inputBufferCallback can be set to NULL to unregister the callback. */
-        PlatformMutex_Lock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Lock( &pContext->PktRespMutex );
         pContext->inputBufferCallback = inputBufferCallback;
 
         if( pContext->inputBufferCallback != NULL )
@@ -1164,7 +1164,7 @@ CellularError_t _Cellular_RegisterInputBufferCallback( CellularContext_t * pCont
             pContext->pInputBufferCallbackContext = NULL;
         }
 
-        PlatformMutex_Unlock( &( pContext->PktRespMutex ) );
+        PlatformMutex_Unlock( &pContext->PktRespMutex );
     }
 
     return cellularStatus;
