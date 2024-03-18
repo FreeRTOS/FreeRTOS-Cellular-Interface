@@ -117,12 +117,23 @@ typedef enum CellularSocketState
 
 /**
  * @ingroup cellular_common_datatypes_paramstructs
+ * @brief the ssl mapping structure.
+ */
+typedef struct CellularSocketSslConfig
+{
+    uint8_t useSsl;
+    uint8_t sslContextId;
+} CellularSocketSslConfig_t;
+
+/**
+ * @ingroup cellular_common_datatypes_paramstructs
  * @brief Parameters involved in sending/receiving data through sockets.
  */
 typedef struct CellularSocketContext
 {
     uint8_t contextId;                       /**< PDN context ID on which this socket exists. */
     uint32_t socketId;                       /**< Socket ID of this socket. */
+    CellularSocketSslConfig_t sslConfig;     /**< SSL context ID on which this socket exists. */
     CellularSocketState_t socketState;       /**< State of the socket, Allocated, Free etc. */
     CellularSocketType_t socketType;         /**< Type of socket, DGRAM or STREAM. */
     CellularSocketDomain_t socketDomain;     /**< Socket domain, IPV4 or V6. */
