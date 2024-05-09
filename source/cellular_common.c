@@ -118,8 +118,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
     CellularContext_t * pContext = NULL;
     uint8_t i = 0;
 
-    taskENTER_CRITICAL();
-
     for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
     {
         if( cellularContextTable[ i ] == NULL )
@@ -144,8 +142,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
         }
     }
 
-    taskEXIT_CRITICAL();
-
     return pContext;
 }
 
@@ -154,8 +150,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
 static void _Cellular_FreeContext( CellularContext_t * pContext )
 {
     uint8_t i = 0;
-
-    taskENTER_CRITICAL();
 
     for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
     {
@@ -170,8 +164,6 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
             break;
         }
     }
-
-    taskEXIT_CRITICAL();
 }
 
 /*-----------------------------------------------------------*/
@@ -538,8 +530,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     CellularSocketContext_t * pSocketData = NULL;
     uint8_t socketId = 0;
 
-    taskENTER_CRITICAL();
-
     for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
     {
         if( pContext->pSocketData[ socketId ] == NULL )
@@ -569,8 +559,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
             break;
         }
     }
-
-    taskEXIT_CRITICAL();
 
     if( cellularStatus == CELLULAR_NO_MEMORY )
     {
