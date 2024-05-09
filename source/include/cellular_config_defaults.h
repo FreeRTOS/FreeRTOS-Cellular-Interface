@@ -471,13 +471,13 @@
  * <b>Default value (if undefined):</b> configASSERT
  */
 #ifndef CELLULAR_CONFIG_ASSERT
-    #define CELLULAR_CONFIG_ASSERT( X ) configASSERT( X )
+    #define CELLULAR_CONFIG_ASSERT( X )    configASSERT( X )
 #endif
 
 /**
  * @brief Use FreeRTOS platform function for backward compatibility.<br>
  *
- * Define FreeRTOS platform function for cellular interface backward compatibility with versoin eariler
+ * Define FreeRTOS platform function for cellular interface backward compatibility with version earlier
  * than v1.4.0.
  *
  * <b>Possible values:</b>`0 or 1`<br>
