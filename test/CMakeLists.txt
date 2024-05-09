@@ -44,6 +44,7 @@ set( CELLULAR_COMMON_INCLUDE_DIRS ${CELLULAR_INCLUDE_DIRS}/common )
 set( CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS ${CELLULAR_INCLUDE_DIRS}/private )
 set( CELLULAR_INTERFACE_INCLUDE_DIRS ${CELLULAR_COMMON_SOURCE_DIRS}/interface )
 set( CELLULAR_TEST_DIRS ${MODULE_ROOT_DIR}/test/unit-test )
+set( CELLULAR_COVERITY_DIRS ${MODULE_ROOT_DIR}/test/coverity )
 
 if( COV_ANALYSIS )
     # Target for Coverity analysis that builds the library.
@@ -60,7 +61,7 @@ if( COV_ANALYSIS )
     target_compile_definitions( coverity_analysis PUBLIC CELLULAR_DO_NOT_USE_CUSTOM_CONFIG=1 )
 
     # Cellular include path.
-    target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} ${CELLULAR_INTERFACE_INCLUDE_DIRS} ${CELLULAR_TEST_DIRS} )
+    target_include_directories( coverity_analysis PUBLIC ${CELLULAR_COMMON_INCLUDE_DIRS} ${CELLULAR_INCLUDE_DIRS} ${CELLULAR_INTERFACE_INCLUDE_DIRS} ${CELLULAR_COVERITY_DIRS} )
 
     # Cellular private include path.
     target_include_directories( coverity_analysis PRIVATE ${CELLULAR_COMMON_INCLUDE_PRIVATE_DIRS} )
@@ -73,7 +74,7 @@ if( COV_ANALYSIS )
     add_custom_target( fix_source ALL
                        COMMAND sed -i -b -e 's/pdFALSE/pdFAIL/g' -e 's/pdTRUE/pdPASS/g' ${CELLULAR_COMMON_SOURCE})
 
-    add_dependencies( coverity_analysis fix_source )
+    # add_dependencies( coverity_analysis fix_source )
 endif()
 
 #  ====================================  Test Configuration ========================================

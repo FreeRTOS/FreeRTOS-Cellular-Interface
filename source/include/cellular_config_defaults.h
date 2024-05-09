@@ -465,6 +465,35 @@
 #endif
 
 /**
+ * @brief Use FreeRTOS platform function for backward compatibility.<br>
+ *
+ * Define FreeRTOS platform function for cellular interface backward compatibility with versoin eariler
+ * than v1.4.0.
+ *
+ * <b>Possible values:</b>`0 or 1`<br>
+ * <b>Default value (if undefined):</b> 1
+ */
+#ifndef CELLULAR_CONFIG_PLATFORM_FREERTOS
+    #define CELLULAR_CONFIG_PLATFORM_FREERTOS    1
+#endif
+
+#if CELLULAR_CONFIG_PLATFORM_FREERTOS
+    #define PlatformQueueHandle_t    QueueHandle_t
+    #define PlatformEventBits_t      EventBits_t
+    #define PlatformBaseType_t       BaseType_t
+    #define PlatformTickType_t       TickType_t
+    #define platformTRUE             pdTRUE
+    #define platformFALSE            pdFALSE
+    #define platformPASS             pdPASS
+    #define platformFAIL             pdFAIL
+    #define platformMAX_DELAY        portMAX_DELAY
+    #define PlatformQueue_Create     xQueueCreate
+    #define PlatformQueue_Send       xQueueSend
+    #define PlatformQueue_Receive    xQueueReceive
+    #define PlatformQueue_Delete     vQueueDelete
+#endif /* if CELLULAR_CONFIG_PLATFORM_FREERTOS */
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *

@@ -107,7 +107,7 @@ static CellularPktStatus_t _convertAndQueueRespPacket( CellularContext_t * pCont
     }
 
     /* Notify calling thread, Not blocking immediately comes back if the queue is full. */
-    if( xQueueSend( pContext->pktRespQueue, ( void * ) &pktStatus, ( TickType_t ) 0 ) != pdPASS )
+    if( PlatformQueue_Send( pContext->pktRespQueue, ( void * ) &pktStatus, ( PlatformTickType_t ) 0 ) != platformPASS )
     {
         pktStatus = CELLULAR_PKT_STATUS_FAILURE;
         LogError( ( "_convertAndQueueRespPacket: Got a response when the Resp Q is full!!" ) );
@@ -203,7 +203,7 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
 {
     CellularPktStatus_t respCode = CELLULAR_PKT_STATUS_OK;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    BaseType_t qRet = pdFALSE;
+    PlatformBaseType_t qRet = platformFALSE;
 
     if( atReq.pAtCmd == NULL )
     {
@@ -231,9 +231,9 @@ static CellularPktStatus_t _Cellular_AtcmdRequestTimeoutWithCallbackRaw( Cellula
         else
         {
             /* Wait for a response. */
-            qRet = xQueueReceive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMS ) );
+            qRet = PlatformQueue_Receive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMS ) );
 
-            if( qRet == pdTRUE )
+            if( qRet == platformTRUE )
             {
                 pktStatus = ( CellularPktStatus_t ) respCode;
 
@@ -270,7 +270,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 {
     CellularPktStatus_t respCode = CELLULAR_PKT_STATUS_OK;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
-    BaseType_t qStatus = pdFALSE;
+    PlatformBaseType_t qStatus = platformFALSE;
     uint32_t sendEndPatternLen = 0U;
 
     if( ( dataReq.pData == NULL ) || ( dataReq.pSentDataLength == NULL ) )
@@ -312,9 +312,9 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
     /* Wait for a response. */
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        qStatus = xQueueReceive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMs ) );
+        qStatus = PlatformQueue_Receive( pContext->pktRespQueue, &respCode, pdMS_TO_TICKS( timeoutMs ) );
 
-        if( qStatus == pdTRUE )
+        if( qStatus == platformTRUE )
         {
             pktStatus = ( CellularPktStatus_t ) respCode;
 
@@ -509,7 +509,7 @@ void _Cellular_PktHandlerCleanup( CellularContext_t * pContext )
         _Cellular_PktHandlerAcquirePktRequestMutex( pContext );
         /* This is platform dependent api. */
 
-        ( void ) vQueueDelete( pContext->pktRespQueue );
+        ( void ) PlatformQueue_Delete( pContext->pktRespQueue );
         pContext->pktRespQueue = NULL;
         _Cellular_PktHandlerReleasePktRequestMutex( pContext );
     }
@@ -782,7 +782,7 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext )
     if( pContext != NULL )
     {
         /* Create the response queue which is used to post responses to the sender. */
-        pContext->pktRespQueue = xQueueCreate( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
+        pContext->pktRespQueue = PlatformQueue_Create( 1, ( uint32_t ) sizeof( CellularPktStatus_t ) );
 
         if( pContext->pktRespQueue == NULL )
         {
