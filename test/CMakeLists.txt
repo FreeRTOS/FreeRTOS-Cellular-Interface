@@ -67,13 +67,6 @@ if( COV_ANALYSIS )
 
     # Build without debug enabled when performing static analysis
     target_compile_options( coverity_analysis PUBLIC -DNDEBUG )
-
-    file( GLOB CELLULAR_COMMON_SOURCE ${CELLULAR_COMMON_SOURCE_DIRS}/*.c )
-
-    add_custom_target( fix_source ALL
-                       COMMAND sed -i -b -e 's/pdFALSE/pdFAIL/g' -e 's/pdTRUE/pdPASS/g' ${CELLULAR_COMMON_SOURCE})
-
-    # add_dependencies( coverity_analysis fix_source )
 endif()
 
 #  ====================================  Test Configuration ========================================
