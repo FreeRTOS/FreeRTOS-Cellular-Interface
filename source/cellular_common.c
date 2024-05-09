@@ -180,7 +180,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &( pContext->libStatusMutex ) );
 
@@ -227,7 +227,7 @@ static void libClose( CellularContext_t * pContext )
     bool bOpened = false;
     uint8_t i = 0;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &( pContext->libStatusMutex ) );
     bOpened = pContext->bLibOpened;

@@ -465,6 +465,16 @@
 #endif
 
 /**
+ * @brief Assert function for cellular interface.
+ *
+ * <b>Possible values:</b>`any assert function`<br>
+ * <b>Default value (if undefined):</b> configASSERT
+ */
+#ifndef CELLULAR_CONFIG_ASSERT
+    #define CELLULAR_CONFIG_ASSERT( X ) configASSERT( X )
+#endif
+
+/**
  * @brief Use FreeRTOS platform function for backward compatibility.<br>
  *
  * Define FreeRTOS platform function for cellular interface backward compatibility with versoin eariler

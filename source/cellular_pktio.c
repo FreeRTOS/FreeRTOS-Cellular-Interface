@@ -151,7 +151,7 @@ static void _saveData( char * pLine,
     LogDebug( ( "_saveData : Save data %p with length %u", pLine, ( unsigned int ) dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
-    configASSERT( ( pNew != NULL ) );
+    CELLULAR_CONFIG_ASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
     pNew->pLine = pLine;
@@ -287,7 +287,7 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
     CellularATCommandResponse_t * pNew = NULL;
 
     pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
-    configASSERT( ( pNew != NULL ) );
+    CELLULAR_CONFIG_ASSERT( ( pNew != NULL ) );
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
 
