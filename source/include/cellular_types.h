@@ -681,11 +681,11 @@ typedef struct CellularIPAddress
  */
 typedef struct CellularPdnConfig
 {
-    CellularPdnContextType_t pdnContextType;                   /**< PDN Context type. */
-    CellularPdnAuthType_t pdnAuthType;                         /**< PDN Authentication type. */
-    const char apnName[ CELLULAR_APN_MAX_SIZE + 1 ];           /**< APN name. */
-    const char username[ CELLULAR_PDN_USERNAME_MAX_SIZE + 1 ]; /**< Username. */
-    const char password[ CELLULAR_PDN_PASSWORD_MAX_SIZE + 1 ]; /**< Password. */
+    CellularPdnContextType_t pdnContextType;             /**< PDN Context type. */
+    CellularPdnAuthType_t pdnAuthType;                   /**< PDN Authentication type. */
+    char apnName[ CELLULAR_APN_MAX_SIZE + 1 ];           /**< APN name. */
+    char username[ CELLULAR_PDN_USERNAME_MAX_SIZE + 1 ]; /**< Username. */
+    char password[ CELLULAR_PDN_PASSWORD_MAX_SIZE + 1 ]; /**< Password. */
 } CellularPdnConfig_t;
 
 /**
