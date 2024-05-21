@@ -151,7 +151,7 @@ static void _saveData( char * pLine,
     LogDebug( ( "_saveData : Save data %p with length %u", pLine, ( unsigned int ) dataLen ) );
 
     pNew = ( CellularATCommandLine_t * ) Platform_Malloc( sizeof( CellularATCommandLine_t ) );
-    configASSERT( ( pNew != NULL ) );
+    CELLULAR_CONFIG_ASSERT( ( pNew != NULL ) );
 
     /* Reuse the pktio buffer instead of allocate. */
     pNew->pLine = pLine;
@@ -287,7 +287,7 @@ static CellularATCommandResponse_t * _Cellular_AtResponseNew( void )
     CellularATCommandResponse_t * pNew = NULL;
 
     pNew = ( CellularATCommandResponse_t * ) Platform_Malloc( sizeof( CellularATCommandResponse_t ) );
-    configASSERT( ( pNew != NULL ) );
+    CELLULAR_CONFIG_ASSERT( ( pNew != NULL ) );
 
     ( void ) memset( ( void * ) pNew, 0, sizeof( CellularATCommandResponse_t ) );
 
@@ -520,7 +520,7 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
                                                              CellularCommInterfaceHandle_t commInterfaceHandle )
 {
     const CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE, xResult = pdFALSE;
+    PlatformBaseType_t xHigherPriorityTaskWoken = platformFALSE, xResult = platformFALSE;
     CellularCommInterfaceError_t retComm = IOT_COMM_INTERFACE_SUCCESS;
 
     ( void ) commInterfaceHandle; /* Comm if is not used in this function. */
@@ -532,13 +532,13 @@ static CellularCommInterfaceError_t _Cellular_PktRxCallBack( void * pUserData,
     }
     else
     {
-        xResult = ( BaseType_t ) PlatformEventGroup_SetBitsFromISR( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
-                                                                    ( EventBits_t ) PKTIO_EVT_MASK_RX_DATA,
-                                                                    &xHigherPriorityTaskWoken );
+        xResult = PlatformEventGroup_SetBitsFromISR( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                     ( PlatformEventBits_t ) PKTIO_EVT_MASK_RX_DATA,
+                                                     &xHigherPriorityTaskWoken );
 
-        if( xResult == pdPASS )
+        if( xResult == platformPASS )
         {
-            if( xHigherPriorityTaskWoken == pdTRUE )
+            if( xHigherPriorityTaskWoken == platformTRUE )
             {
                 retComm = IOT_COMM_INTERFACE_SUCCESS;
             }
@@ -1201,7 +1201,7 @@ static uint32_t _handleRxDataEvent( CellularContext_t * pContext )
 static void _pktioReadThread( void * pUserData )
 {
     CellularContext_t * pContext = ( CellularContext_t * ) pUserData;
-    PlatformEventGroup_EventBits uxBits = 0;
+    PlatformEventBits_t uxBits = 0;
     uint32_t bytesRead = 0U;
 
     /* Open main communication port. */
@@ -1210,24 +1210,24 @@ static void _pktioReadThread( void * pUserData )
                                      &( pContext->hPktioCommIntf ) ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
         /* Send thread started event. */
-        ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_STARTED );
+        ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( PlatformEventBits_t ) PKTIO_EVT_MASK_STARTED );
 
         do
         {
             /* Wait events for abort thread or rx data available. */
-            uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
-                                                                                   ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ),
-                                                                                   pdTRUE,
-                                                                                   pdFALSE,
-                                                                                   portMAX_DELAY );
+            uxBits = PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                  ( ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORT | ( PlatformEventBits_t ) PKTIO_EVT_MASK_RX_DATA ),
+                                                  platformTRUE,
+                                                  platformFALSE,
+                                                  platformMAX_DELAY );
 
-            if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORT ) != 0U )
+            if( ( uxBits & ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORT ) != 0U )
             {
                 LogDebug( ( "Abort received, cleaning up!" ) );
                 FREE_AT_RESPONSE_AND_SET_NULL( pContext->pAtCmdResp );
                 break;
             }
-            else if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_RX_DATA ) != 0U )
+            else if( ( uxBits & ( PlatformEventBits_t ) PKTIO_EVT_MASK_RX_DATA ) != 0U )
             {
                 /* Keep Reading until there is no more bytes in comm interface. */
                 do
@@ -1250,7 +1250,7 @@ static void _pktioReadThread( void * pUserData )
         LogError( ( "Comm port open failed" ) );
     }
 
-    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORTED );
+    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED );
 
     /* Call the shutdown callback if it is defined. */
     if( pContext->pPktioShutdownCB != NULL )
@@ -1263,15 +1263,15 @@ static void _pktioReadThread( void * pUserData )
 
 static void _PktioInitProcessReadThreadStatus( CellularContext_t * pContext )
 {
-    PlatformEventGroup_EventBits uxBits = 0;
+    PlatformEventBits_t uxBits = 0;
 
-    uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
-                                                                           ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_STARTED | ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ),
-                                                                           pdTRUE,
-                                                                           pdFALSE,
-                                                                           ( ( PlatformTickType ) ~( 0UL ) ) );
+    uxBits = ( PlatformEventBits_t ) PlatformEventGroup_WaitBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
+                                                                  ( ( PlatformEventBits_t ) PKTIO_EVT_MASK_STARTED | ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED ),
+                                                                  platformTRUE,
+                                                                  platformFALSE,
+                                                                  ( ( PlatformTickType_t ) ~( 0UL ) ) );
 
-    if( ( uxBits & ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ABORTED )
+    if( ( uxBits & ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED )
     {
         pContext->bPktioUp = true;
     }
@@ -1367,7 +1367,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
     {
         pContext->pPktioHandlepktCB = handlePacketCb;
         ( void ) PlatformEventGroup_ClearBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent,
-                                               ( ( PlatformEventGroup_EventBits ) PKTIO_EVT_MASK_ALL_EVENTS ) );
+                                               ( ( PlatformEventBits_t ) PKTIO_EVT_MASK_ALL_EVENTS ) );
 
         /* Create the Read thread. */
         status = Platform_CreateDetachedThread( _pktioReadThread,
@@ -1516,19 +1516,19 @@ uint32_t _Cellular_PktioSendData( CellularContext_t * pContext,
 
 void _Cellular_PktioShutdown( CellularContext_t * pContext )
 {
-    PlatformEventGroup_EventBits uxBits = 0;
+    PlatformEventBits_t uxBits = 0;
 
     if( ( pContext != NULL ) && ( pContext->bPktioUp ) )
     {
         if( pContext->pPktioCommEvent != NULL )
         {
-            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( EventBits_t ) PKTIO_EVT_MASK_ABORT );
-            uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
+            ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORT );
+            uxBits = ( PlatformEventBits_t ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
 
-            while( ( PlatformEventGroup_EventBits ) ( uxBits & PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventGroup_EventBits ) ( PKTIO_EVT_MASK_ABORTED ) )
+            while( ( PlatformEventBits_t ) ( uxBits & PKTIO_EVT_MASK_ABORTED ) != ( PlatformEventBits_t ) ( PKTIO_EVT_MASK_ABORTED ) )
             {
                 Platform_Delay( PKTIO_SHUTDOWN_WAIT_INTERVAL_MS );
-                uxBits = ( PlatformEventGroup_EventBits ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
+                uxBits = ( PlatformEventBits_t ) PlatformEventGroup_GetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent );
             }
 
             ( void ) PlatformEventGroup_Delete( pContext->pPktioCommEvent );

@@ -118,8 +118,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
     CellularContext_t * pContext = NULL;
     uint8_t i = 0;
 
-    taskENTER_CRITICAL();
-
     for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
     {
         if( cellularContextTable[ i ] == NULL )
@@ -144,8 +142,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
         }
     }
 
-    taskEXIT_CRITICAL();
-
     return pContext;
 }
 
@@ -154,8 +150,6 @@ static CellularContext_t * _Cellular_AllocContext( void )
 static void _Cellular_FreeContext( CellularContext_t * pContext )
 {
     uint8_t i = 0;
-
-    taskENTER_CRITICAL();
 
     for( i = 0; i < CELLULAR_CONTEXT_MAX; i++ )
     {
@@ -170,8 +164,6 @@ static void _Cellular_FreeContext( CellularContext_t * pContext )
             break;
         }
     }
-
-    taskEXIT_CRITICAL();
 }
 
 /*-----------------------------------------------------------*/
@@ -188,7 +180,7 @@ static CellularError_t libOpen( CellularContext_t * pContext )
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &( pContext->libStatusMutex ) );
 
@@ -235,7 +227,7 @@ static void libClose( CellularContext_t * pContext )
     bool bOpened = false;
     uint8_t i = 0;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &( pContext->libStatusMutex ) );
     bOpened = pContext->bLibOpened;
@@ -538,8 +530,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
     CellularSocketContext_t * pSocketData = NULL;
     uint8_t socketId = 0;
 
-    taskENTER_CRITICAL();
-
     for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
     {
         if( pContext->pSocketData[ socketId ] == NULL )
@@ -569,8 +559,6 @@ CellularError_t _Cellular_CreateSocketData( CellularContext_t * pContext,
             break;
         }
     }
-
-    taskEXIT_CRITICAL();
 
     if( cellularStatus == CELLULAR_NO_MEMORY )
     {

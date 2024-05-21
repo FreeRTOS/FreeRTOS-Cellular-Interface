@@ -30,7 +30,7 @@
     <tr>
         <td>cellular_common.c</td>
         <td><center>1.7K</center></td>
-        <td><center>1.6K</center></td>
+        <td><center>1.5K</center></td>
     </tr>
     <tr>
         <td>cellular_pkthandler.c</td>
@@ -45,6 +45,6 @@
     <tr>
         <td><b>Total estimates</b></td>
         <td><b><center>15.1K</center></b></td>
-        <td><b><center>13.8K</center></b></td>
+        <td><b><center>13.7K</center></b></td>
     </tr>
 </table>

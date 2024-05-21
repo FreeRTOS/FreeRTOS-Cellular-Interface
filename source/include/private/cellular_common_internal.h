@@ -35,7 +35,13 @@
 /* *INDENT-ON* */
 
 /* Cellular includes. */
+
 #include "cellular_platform.h"
+#ifndef CELLULAR_DO_NOT_USE_CUSTOM_CONFIG
+    /* Include custom config file before other headers. */
+    #include "cellular_config.h"
+#endif
+#include "cellular_config_defaults.h"
 #include "cellular_pkthandler_internal.h"
 #include "cellular_at_core.h"
 #include "cellular_pktio_internal.h"
@@ -119,7 +125,7 @@ struct CellularContext
     /* Packet handler. */
     PlatformMutex_t pktRequestMutex;                               /**<  The mutex for sending request. */
     PlatformMutex_t PktRespMutex;                                  /**<  The mutex for parsing the response from modem. */
-    QueueHandle_t pktRespQueue;                                    /**<  Message queue to send/receive response. */
+    PlatformQueueHandle_t pktRespQueue;                            /**<  Message queue to send/receive response. */
     CellularATCommandResponseReceivedCallback_t pktRespCB;         /**<  Callback used to inform about the response of an AT command sent using Cellular_ATCommandRaw API. */
     CellularATCommandDataPrefixCallback_t pktDataPrefixCB;         /**<  Data prefix callback function for socket receive function. */
     void * pDataPrefixCBContext;                                   /**<  The pCallbackContext passed to CellularATCommandDataPrefixCallback_t. */

@@ -863,7 +863,7 @@ static CellularError_t queryNetworkStatus( CellularContext_t * pContext,
     CellularNetworkRegType_t recvRegType = regType;
     CellularAtReq_t atReqGetResult = { 0 };
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
     atReqGetResult.pAtCmd = pCommand;
     atReqGetResult.atCmdType = CELLULAR_AT_MULTI_WITH_PREFIX;
     atReqGetResult.pAtRspPrefix = pPrefix;
@@ -1449,7 +1449,7 @@ static CellularError_t atcmdQueryRegStatus( CellularContext_t * pContext,
     const cellularAtData_t * pLibAtData = NULL;
     CellularNetworkRegistrationStatus_t psRegStatus = REGISTRATION_STATUS_UNKNOWN;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     cellularStatus = queryNetworkStatus( pContext, "AT+CREG?", "+CREG", CELLULAR_REG_TYPE_CREG );
 
@@ -2078,7 +2078,7 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
 
 void _Cellular_DestroyAtDataMutex( CellularContext_t * pContext )
 {
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Destroy( &( pContext->libAtDataMutex ) );
 }
@@ -2089,7 +2089,7 @@ bool _Cellular_CreateAtDataMutex( CellularContext_t * pContext )
 {
     bool status = false;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     status = PlatformMutex_Create( &( pContext->libAtDataMutex ), false );
 
@@ -2100,7 +2100,7 @@ bool _Cellular_CreateAtDataMutex( CellularContext_t * pContext )
 
 void _Cellular_LockAtDataMutex( CellularContext_t * pContext )
 {
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Lock( &( pContext->libAtDataMutex ) );
 }
@@ -2109,7 +2109,7 @@ void _Cellular_LockAtDataMutex( CellularContext_t * pContext )
 
 void _Cellular_UnlockAtDataMutex( CellularContext_t * pContext )
 {
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     PlatformMutex_Unlock( &( pContext->libAtDataMutex ) );
 }
@@ -2123,7 +2123,7 @@ void _Cellular_InitAtData( CellularContext_t * pContext,
 {
     cellularAtData_t * pLibAtData = NULL;
 
-    configASSERT( pContext != NULL );
+    CELLULAR_CONFIG_ASSERT( pContext != NULL );
 
     pLibAtData = &( pContext->libAtData );
 
