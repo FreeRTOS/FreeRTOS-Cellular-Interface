@@ -68,6 +68,7 @@ static int32_t pktRespCBReturn = 0;
 static bool passCompareString = false;
 static char * pCompareString = NULL;
 static int32_t undefinedCallbackContext = 0;
+static uint32_t lastDelayTimeMs = 0U;
 
 void cellularAtParseTokenHandler( CellularContext_t * pContext,
                                   char * pInputStr );
@@ -181,6 +182,7 @@ void setUp()
     queueData = 0;
     queueReturnFail = 0;
     pktRespCBReturn = 0;
+    lastDelayTimeMs = 0U;
 }
 
 /* Called after each test method. */
@@ -203,7 +205,7 @@ int suiteTearDown( int numFailures )
 
 void dummyDelay( uint32_t milliseconds )
 {
-    ( void ) milliseconds;
+    lastDelayTimeMs = milliseconds;
 }
 
 void * mock_malloc( size_t size )
@@ -1113,6 +1115,47 @@ void test__Cellular_AtcmdDataSend_Happy_Path( void )
     _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
     queueData = CELLULAR_PKT_STATUS_OK;
     pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 0 );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that happy path case for _Cellular_AtcmdDataSend.
+ */
+void test__Cellular_AtcmdDataSend_data_send_delay( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    char dataBuf[ CELLULAR_AT_CMD_TYPICAL_MAX_SIZE ] = { '\0' };
+    uint32_t sentDataLength = 0;
+    CellularAtDataReq_t atDataReq =
+    {
+        ( const uint8_t * ) dataBuf,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+        &sentDataLength,
+        NULL,
+        CELLULAR_AT_CMD_TYPICAL_MAX_SIZE
+    };
+
+    CellularAtReq_t atReq =
+    {
+        "AT+COPS?",
+        CELLULAR_AT_WITH_PREFIX,
+        "+COPS",
+        NULL,
+        NULL,
+        sizeof( int32_t ),
+    };
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    _Cellular_PktioSendAtCmd_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+
+    /* xQueueReceive true, and the data is CELLULAR_PKT_STATUS_OK. */
+    _Cellular_PktioSendData_IgnoreAndReturn( CELLULAR_AT_CMD_TYPICAL_MAX_SIZE );
+    queueData = CELLULAR_PKT_STATUS_OK;
+
+    /* Send data with data send delay 100ms. */
+    pktStatus = _Cellular_AtcmdDataSend( &context, atReq, atDataReq, NULL, NULL, 0, 0, 100U );
+    TEST_ASSERT_EQUAL( 100U, lastDelayTimeMs );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
 }
 
