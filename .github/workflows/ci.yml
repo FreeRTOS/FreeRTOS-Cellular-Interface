@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone This Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - env:
           stepName: Build Unit Tests
         run: |
@@ -57,11 +57,13 @@ jobs:
         uses: FreeRTOS/CI-CD-Github-Actions/coverage-cop@main
         with:
           coverage-file: ./build/coverage.info
+          branch-coverage-min: 100
+          line-coverage-min: 100
 
   complexity:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check complexity - Common
         uses: FreeRTOS/CI-CD-Github-Actions/complexity@main
         with:
@@ -70,7 +72,7 @@ jobs:
   doxygen:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run doxygen build
         uses: FreeRTOS/CI-CD-Github-Actions/doxygen@main
         with:
@@ -80,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone This Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run spellings check
         uses: FreeRTOS/CI-CD-Github-Actions/spellings@main
         with:
@@ -89,7 +91,7 @@ jobs:
   formatting:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check formatting
         uses: FreeRTOS/CI-CD-Github-Actions/formatting@main
         with:
@@ -98,9 +100,9 @@ jobs:
   git-secrets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Checkout awslabs/git-secrets
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: awslabs/git-secrets
           ref: master
@@ -115,11 +117,11 @@ jobs:
   memory_statistics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
       - name: Install Python3
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11.0"
       - name: Measure sizes
@@ -131,7 +133,7 @@ jobs:
   link-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check Links
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,17 +142,23 @@ jobs:
   verify-manifest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
+
+      # At time of writing the gitmodules are set not to pull
+      # Even when using fetch submodules. Need to run this command
+      # To force it to grab them.
+      - name: Perform Recursive Clone
+        shell: bash
+        run: git submodule update --checkout --init --recursive
 
       - name: Run manifest verifier
         uses: FreeRTOS/CI-CD-GitHub-Actions/manifest-verifier@main
         with:
           path: ./
           fail-on-incorrect-version: true
-
 
   proof_ci:
     if: ${{ github.event.pull_request }}
