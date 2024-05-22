@@ -220,10 +220,12 @@ The URC callback function, @ref CellularAtParseTokenHandler_t, will be called wi
 @page cellular_prefix_string_customize_config Customization config for prefix string.
 @brief The config can be redefined in cellular_config.h to support different modem prefix string format. <br>
 
-@section CELLULAR_CHECK_IS_PREFIX_CHAR
+@section check_is_prefix_char_config
+<b>CELLULAR_CHECK_IS_PREFIX_CHAR</b>
 @copydoc CELLULAR_CHECK_IS_PREFIX_CHAR
 
-@section CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
+@section check_is_prefix_leading_char_config
+<b>CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR</b>
 @copydoc CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR
 */
 
