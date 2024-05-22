@@ -175,6 +175,31 @@ Some configuration settings are C pre-processor constants, and some are function
 @section CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
 @copydoc CELLULAR_CONFIG_STATIC_SOCKET_CONTEXT_ALLOCATION
 
+@section CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS
+@copydoc CELLULAR_COMMON_AT_COMMAND_TIMEOUT_MS
+
+@section CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS
+@copydoc CELLULAR_AT_COMMAND_RAW_TIMEOUT_MS
+
+@section CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH
+@copydoc CELLULAR_CONFIG_MAX_PREFIX_STRING_LENGTH
+
+@section CELLULAR_AT_MAX_STRING_SIZE
+@copydoc CELLULAR_AT_MAX_STRING_SIZE
+
+@section CELLULAR_CONFIG_USE_CCID_COMMAND
+@copydoc CELLULAR_CONFIG_USE_CCID_COMMAND
+
+@section CELLULAR_CONFIG_ASSERT
+@copydoc CELLULAR_CONFIG_ASSERT
+
+@section CELLULAR_CONFIG_PLATFORM_FREERTOS
+@copydoc CELLULAR_CONFIG_PLATFORM_FREERTOS
+
+@section CELLULAR_MODEM_NO_EPS_NETWORK
+@brief Macro to disable querying evolved packet system (EPS) network registration status in Cellular_CommonGetServiceStatus.<br>
+@note Cellular modem porting can define this macro in cellular_config.h to disable this function.<br>
+
 @section cellular_logerror LogError
 @copydoc LogError
 
@@ -186,10 +211,6 @@ Some configuration settings are C pre-processor constants, and some are function
 
 @section cellular_logdebug LogDebug
 @copydoc LogDebug
-
-@section CELLULAR_MODEM_NO_EPS_NETWORK
-@brief Macro to disable querying evolved packet system (EPS) network registration status in Cellular_CommonGetServiceStatus.<br>
-@note Cellular modem porting can define this macro in cellular_config.h to disable this function.<br>
 
 <b>Default value:</b> undefined
 
@@ -305,10 +326,19 @@ Reference the document page for prototype.
 FreeRTOS Cellular Library makes use of the following OS platform functions.<br>
 <b>"cellular_platform.h"</b> is referenced during FreeRTOS Cellular Library compilation.<br>
 User of FreeRTOS Cellular Library should provide these APIs and data structures in "cellular_platform.h".<br>
-A default implementation with FreeRTOS is provided in FreeRTOS Labs cellular demo.
- - <b>Threads</b><br>The following APIs and macros should be provided in cellular_platform.h
+A default implementation with FreeRTOS <a href="https://github.com/FreeRTOS/FreeRTOS/blob/main/FreeRTOS-Plus/Demo/FreeRTOS_Cellular_Interface_Windows_Simulator/Common/cellular_platform.h">cellular_platform.h</a> is provided in FreeRTOS repository.
+ - <b>Basic data types and macros </b><br>The following data types and macros should be provided in cellular_platform.h.
+ ```
+    #define PlatformBaseType_t       BaseType_t
+    #define PlatformTickType_t       TickType_t
+    #define platformTRUE             pdTRUE
+    #define platformFALSE            pdFALSE
+    #define platformPASS             pdPASS
+    #define platformFAIL             pdFAIL
+    #define platformMAX_DELAY        portMAX_DELAY
 ```
-
+ - <b>Threads</b><br>The following APIs and macros should be provided in cellular_platform.h.
+```
 bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * ),
                                     void * pArgument,
                                     int32_t priority,
@@ -344,6 +374,7 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 ```
 // Example implementation of FreeRTOS EvengGroup
 #define PlatformEventGroupHandle_t           EventGroupHandle_t
+#define PlatformEventBits_t                  EventBits_t
 #define PlatformEventGroup_Delete            vEventGroupDelete
 #define PlatformEventGroup_ClearBits         xEventGroupClearBits
 #define PlatformEventGroup_Create            xEventGroupCreate
@@ -351,7 +382,16 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 #define PlatformEventGroup_SetBits           xEventGroupSetBits
 #define PlatformEventGroup_SetBitsFromISR    xEventGroupSetBitsFromISR
 #define PlatformEventGroup_WaitBits          xEventGroupWaitBits
-
+```
+ - <b>Queue</b><br>The following APIs and handle should be provided in cellular_platform.h.<br>
+ Please reference <a href="https://freertos.org/a00018.html">FreeRTOS Queue function prototypes</a>.
+```
+// Example implementation of FreeRTOS Queue
+#define PlatformQueueHandle_t    QueueHandle_t
+#define PlatformQueue_Create     xQueueCreate
+#define PlatformQueue_Send       xQueueSend
+#define PlatformQueue_Receive    xQueueReceive
+#define PlatformQueue_Delete     vQueueDelete
 ```
  - <b>Delay</b><br>The following API should be provided in cellular_platform.h.<br>
  Please reference <a href="https://www.freertos.org/a00127.html">FreeRTOS Task Control function prototypes</a>.
