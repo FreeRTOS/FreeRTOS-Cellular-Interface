@@ -1,5 +1,56 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.4.0 (May 2024)
+
+### Updates
+
+- [#171](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/171)
+Update doxygen to 1.9.6.
+- [#166](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/166)
+Update cellular platform header APIs.
+- [#168](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/168)
+Remove const qualifier in CellularPdnConfig_t.
+- [#164](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/164)
+Fix MISRA C 2012 deviations.
+- [#163](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/163)
+Update Cellular_CommonInit error handling.
+- [#161](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/161)
+Set to numeric format in atcmdUpdateMccMnc.
+- [#160](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/160)
+Add generic callback result handle function.
+- [#159](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/159)
+Update _getMsgType for input line without prefix.
+- [#158](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/158)
+Add CELLULAR_CONFIG_USE_CCID_COMMAND config.
+- [#157](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/157)
+Fix decihours to 6 minutes and UT.
+- [#155](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/155)
+Fix interDelayMS in _Cellular_AtcmdDataSend.
+- [#154](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/154)
+Fix log print format for GNU arm compiler.
+- [#142](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/142)
+Return IP address list in Cellular_CommonGetIPAddress.
+- [#140](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/140)
+Make CELLULAR_AT_MAX_STRING_SIZE configurable.
+- [#138](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/138)
+Support AT command with no success result code.
+- [#139](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/139)
+Add binary data send and receive document.
+- [#137](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/137)
+Adding _Cellular_RegisterInputBufferCallback in common layer.
+- [#131](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/131)
+Update _processUrcPacket to manipulate string in function scope.
+- [#117](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/117)
+Add CELLULAR_CHECK_IS_PREFIX_LEADING_CHAR config.
+- [#116](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/116)
+Adding SPDX identifier.
+- [#112](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/112)
+Move modules to independent repositories.
+- [#111](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/111)
+Reset the AT command type before calling callback.
+- [#110](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/110)
+Handle undefined message when sending AT command.
+
 ## v1.3.0 (October 2022)
 
 ### Updates
