@@ -196,6 +196,9 @@ Some configuration settings are C pre-processor constants, and some are function
 @section CELLULAR_CONFIG_PLATFORM_FREERTOS
 @copydoc CELLULAR_CONFIG_PLATFORM_FREERTOS
 
+@section CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE
+@copydoc CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE
+
 @section CELLULAR_MODEM_NO_EPS_NETWORK
 @brief Macro to disable querying evolved packet system (EPS) network registration status in Cellular_CommonGetServiceStatus.<br>
 @note Cellular modem porting can define this macro in cellular_config.h to disable this function.<br>
