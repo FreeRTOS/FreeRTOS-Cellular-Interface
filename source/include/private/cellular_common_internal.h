@@ -48,7 +48,7 @@
 
 /*-----------------------------------------------------------*/
 
-#define PKTIO_READ_BUFFER_SIZE     ( 1600U )      /* This should be larger than TCP packet size. */
+#define PKTIO_READ_BUFFER_SIZE     ( CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE )
 #define PKTIO_WRITE_BUFFER_SIZE    ( CELLULAR_AT_CMD_MAX_SIZE )
 
 /*-----------------------------------------------------------*/

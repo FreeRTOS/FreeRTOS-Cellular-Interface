@@ -504,6 +504,19 @@
 #endif /* if CELLULAR_CONFIG_PLATFORM_FREERTOS */
 
 /**
+ * @brief Pktio read buffer size.
+ *
+ * The pktio read buffer size should be configured to greater than the maximum AT command
+ * response size, which is typically the TCP socket receive command response packet size.
+ *
+ * <b>Possible values:</b>`Any positive integer`<br>
+ * <b>Default value (if undefined):</b> 1600
+ */
+#ifndef CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE
+    #define CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE    1600U
+#endif
+
+/**
  * @brief Macro that is called in the cellular library for logging "Error" level
  * messages.
  *
