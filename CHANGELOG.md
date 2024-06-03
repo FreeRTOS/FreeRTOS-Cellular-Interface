@@ -4,6 +4,8 @@
 
 ### Updates
 
+- [#173](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/171)
+Add CELLULAR_CONFIG_PKTIO_READ_BUFFER_SIZE config.
 - [#171](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/171)
 Update doxygen to 1.9.6.
 - [#166](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/166)
