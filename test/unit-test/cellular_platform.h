@@ -78,7 +78,7 @@
  *
  * Cellular library use platform memory allocation APIs to allocate memory dynamically.
  * The FreeRTOS memory management document can be referenced for these APIs.
- * https://www.freertos.org/a00111.html
+ * https://freertos.org/Documentation/02-Kernel/02-Kernel-features/09-Memory-management/01-Memory-management
  *
  */
 
@@ -205,7 +205,7 @@ bool Platform_CreateDetachedThread( void ( * threadRoutine )( void * pArgument )
  * Cellular library use platform event group for process synchronization.
  *
  * The EventGroup functions in the following link can be referenced as function prototype.
- * https://www.freertos.org/event-groups-API.html
+ * https://freertos.org/Documentation/02-Kernel/04-API-references/12-Event-groups-or-flags/00-Event-groups
  *
  */
 bool PlatformMutex_Create( PlatformMutex_t * pNewMutex,
