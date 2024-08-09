@@ -37,10 +37,10 @@ written in compliance of the following code quality criteria:
 - MISRA coding standard. Any deviations from the MISRA C:2012 guidelines are
   documented in source code comments marked by "`coverity`".
 
-**FreeRTOS Cellular Interface v1.3.0
-[Source Code](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/v1.3.0/source)
+**FreeRTOS Cellular Interface v1.4.0
+[Source Code](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/tree/v1.4.0/source)
 is part of the
-[FreeRTOS 202210.00 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202210.00-LTS)
+[FreeRTOS 202406.00 LTS](https://github.com/FreeRTOS/FreeRTOS-LTS/tree/202406.00-LTS)
 release.**
 
 ## Getting Started
