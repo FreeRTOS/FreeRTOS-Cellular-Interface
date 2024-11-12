@@ -75,21 +75,27 @@ jobs:
           cd FreeRTOS-Cellular-Interface
           git submodule update --init --checkout --recursive
       - name: Create ZIP
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         run: |
-          zip -r FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip FreeRTOS-Cellular-Interface -x "*.git*"
+          zip -r FreeRTOS-Cellular-Interface-"$VERSION_NUMBER".zip FreeRTOS-Cellular-Interface -x "*.git*"
           ls ./
       - name: Validate created ZIP
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         run: |
           mkdir zip-check
-          mv FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip zip-check
+          mv FreeRTOS-Cellular-Interface-"$VERSION_NUMBER".zip zip-check
           cd zip-check
-          unzip FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}.zip -d FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}
-          ls FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}
-          diff -r -x "*.git*" FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}/FreeRTOS-Cellular-Interface/ ../FreeRTOS-Cellular-Interface/
+          unzip FreeRTOS-Cellular-Interface-"$VERSION_NUMBER".zip -d FreeRTOS-Cellular-Interface-"$VERSION_NUMBER"
+          ls FreeRTOS-Cellular-Interface-"$VERSION_NUMBER"
+          diff -r -x "*.git*" FreeRTOS-Cellular-Interface-"$VERSION_NUMBER"/FreeRTOS-Cellular-Interface/ ../FreeRTOS-Cellular-Interface/
           cd ../
       - name: Build
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         run: |
-          cd zip-check/FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}/FreeRTOS-Cellular-Interface
+          cd zip-check/FreeRTOS-Cellular-Interface-"$VERSION_NUMBER"/FreeRTOS-Cellular-Interface
           sudo apt-get install -y lcov
           cmake -S test -B build/ \
           -G "Unix Makefiles" \
@@ -98,8 +104,10 @@ jobs:
           -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG'
           make -C build/ all
       - name: Test
+        env:
+          VERSION_NUMBER: ${{ github.event.inputs.version_number }}
         run: |
-          cd zip-check/FreeRTOS-Cellular-Interface-${{ github.event.inputs.version_number }}/FreeRTOS-Cellular-Interface/build/
+          cd zip-check/FreeRTOS-Cellular-Interface-"$VERSION_NUMBER"/FreeRTOS-Cellular-Interface/build/
           ctest -E system --output-on-failure
           cd ..
       - name: Create artifact of ZIP
