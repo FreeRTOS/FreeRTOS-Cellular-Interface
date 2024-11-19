@@ -60,6 +60,14 @@
 #define CELLULAR_REG_POS_RAC          ( 8U )
 
 /*-----------------------------------------------------------*/
+
+/* Function pointer prototype to point to corresponding function for CREG/CEREG/CGREG. */
+typedef CellularPktStatus_t ( * RegStatusSwitchParsingFunc_t )( CellularContext_t * pContext,
+                                                                uint8_t i,
+                                                                const char * pToken,
+                                                                cellularAtData_t * pLibAtData );
+
+/*-----------------------------------------------------------*/
 static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t * pContext,
                                                               CellularNetworkRegType_t regType,
                                                               const char * pToken,
@@ -699,6 +707,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularNetworkRegistrationStatus_t prevCsRegStatus = REGISTRATION_STATUS_UNKNOWN;
     CellularNetworkRegistrationStatus_t prevPsRegStatus = REGISTRATION_STATUS_UNKNOWN;
+    RegStatusSwitchParsingFunc_t pRegStatusParsingFunc = NULL;
 
     if( pContext == NULL )
     {
@@ -733,6 +742,29 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
+            switch( regType )
+            {
+                case CELLULAR_REG_TYPE_CREG:
+                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCreg;
+                    break;
+
+                case CELLULAR_REG_TYPE_CGREG:
+                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCgreg;
+                    break;
+
+                case CELLULAR_REG_TYPE_CEREG:
+                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCereg;
+                    break;
+
+                default:
+                    LogDebug( ( "Unknown Registration Type %d", regType ) );
+                    atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
+                    break;
+            }
+        }
+
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        {
             /* Backup the previous regStatus. */
             prevCsRegStatus = pLibAtData->csRegStatus;
             prevPsRegStatus = pLibAtData->psRegStatus;
@@ -741,25 +773,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
             {
                 i++;
 
-                switch( regType )
-                {
-                    case CELLULAR_REG_TYPE_CREG:
-                        packetStatus = _regStatusSwitchParsingFuncCreg( pContext, i, pToken, pLibAtData );
-                        break;
-
-                    case CELLULAR_REG_TYPE_CGREG:
-                        packetStatus = _regStatusSwitchParsingFuncCgreg( pContext, i, pToken, pLibAtData );
-                        break;
-
-                    case CELLULAR_REG_TYPE_CEREG:
-                        packetStatus = _regStatusSwitchParsingFuncCereg( pContext, i, pToken, pLibAtData );
-                        break;
-
-                    default:
-                        LogDebug( ( "Unknown Registration Type %d", regType ) );
-                        packetStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
-                        break;
-                }
+                packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
 
                 if( packetStatus != CELLULAR_PKT_STATUS_OK )
                 {
