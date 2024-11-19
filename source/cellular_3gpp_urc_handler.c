@@ -511,7 +511,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCreg( CellularContext_t * 
          * +CREG URC response format:
          *  - +CREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>][,<cause_type>,<reject_cause>]]
          */
-        LogDebug( ( "Ignore unknown +CREG parameter at position(%u) in registration URC.", i ) );
+        LogDebug( ( "Ignore unknown +CREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
     }
     else
     {
@@ -554,7 +554,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCgreg( CellularContext_t *
          *
          * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
          */
-        LogDebug( ( "Ignore unknown +CGREG parameter at position(%u) in registration URC.", i ) );
+        LogDebug( ( "Ignore unknown +CGREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
     }
     else
     {
@@ -596,7 +596,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCereg( CellularContext_t *
          *
          * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
          */
-        LogDebug( ( "Ignore unknown +CEREG parameter at position(%u) in registration URC.", i ) );
+        LogDebug( ( "Ignore unknown +CEREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
     }
     else
     {
