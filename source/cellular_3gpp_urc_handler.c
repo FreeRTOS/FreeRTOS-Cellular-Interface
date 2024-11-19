@@ -213,14 +213,12 @@ static CellularPktStatus_t _parseLacTacInRegStatus( CellularNetworkRegType_t reg
         {
             pLibAtData->lac = ( uint16_t ) var;
         }
-        /* Parsing Tracking area code for CEREG. */
-        else if( regType == CELLULAR_REG_TYPE_CEREG )
-        {
-            pLibAtData->tac = ( uint16_t ) var;
-        }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CEREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            pLibAtData->tac = ( uint16_t ) var;
         }
     }
 
@@ -269,7 +267,7 @@ static CellularPktStatus_t _parseRatInfoInRegStatus( const char * pToken,
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( var >= ( int32_t ) CELLULAR_RAT_MAX )
+        if( ( var >= ( int32_t ) CELLULAR_RAT_MAX ) || ( var < 0 ) )
         {
             atCoreStatus = CELLULAR_AT_ERROR;
             LogError( ( "Error in processing RAT. Token %s", pToken ) );
@@ -324,24 +322,23 @@ static CellularPktStatus_t _parseRejectTypeInRegStatus( CellularNetworkRegType_t
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( regType == CELLULAR_REG_TYPE_CREG )
-        {
-            /* Reject Type is only stored if the registration status is denied. */
-            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
-            {
-                pLibAtData->csRejectType = rejType;
-            }
-        }
-        else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
+        if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
             if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejectType = rejType;
             }
         }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            /* Reject Type is only stored if the registration status is denied. */
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
+            {
+                pLibAtData->csRejectType = rejType;
+            }
         }
     }
 
@@ -376,23 +373,22 @@ static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( regType == CELLULAR_REG_TYPE_CREG )
-        {
-            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
-            {
-                pLibAtData->csRejCause = rejCause;
-            }
-        }
-        else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
+        if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
             if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejCause = rejCause;
             }
         }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
+            {
+                pLibAtData->csRejCause = rejCause;
+            }
         }
     }
 
@@ -437,20 +433,15 @@ static CellularPktStatus_t _parseRoutingAreaCodeInRegStatus( const char * pToken
 /*-----------------------------------------------------------*/
 
 static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pContext,
-                                                        uint8_t i,
+                                                        uint8_t regPos,
                                                         CellularNetworkRegType_t regType,
                                                         const char * pToken,
                                                         cellularAtData_t * pLibAtData )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
 
-    switch( i )
+    switch( regPos )
     {
-        /* Parsing network Registration status in CREG or CGREG or CEREG response. */
-        case CELLULAR_REG_POS_NET_REG:
-            LogDebug( ( "Do nothing for network registration unsolicited result code" ) );
-            break;
-
         case CELLULAR_REG_POS_STAT:
             packetStatus = _parseRegStatusInRegStatusParsing( pContext, regType, pToken, pLibAtData );
             break;
@@ -484,6 +475,8 @@ static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pCon
             packetStatus = _parseRoutingAreaCodeInRegStatus( pToken, pLibAtData );
             break;
 
+        /* Ignore network Registration status in CREG or CGREG or CEREG response. */
+        case CELLULAR_REG_POS_NET_REG:
         default:
             LogDebug( ( "Unknown Parameter Position in Registration URC" ) );
             break;
@@ -514,7 +507,11 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCreg( CellularContext_t * 
 
     if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
     {
-        LogDebug( ( "Unknown Parameter Position(%u) in Registration URC", i ) );
+        /**
+         * +CREG URC response format:
+         *  - +CREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>][,<cause_type>,<reject_cause>]]
+         */
+        LogDebug( ( "Ignore unknown +CREG parameter at position(%u) in registration URC.", i ) );
     }
     else
     {
@@ -548,7 +545,16 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCgreg( CellularContext_t *
 
     if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
     {
-        LogDebug( ( "Unknown Parameter Position(%u) in Registration URC", i ) );
+        /**
+         * In +CGREG, there are two possible formats:
+         *  - when <n> is in range of 0~3:
+         *    - +CGREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>],[<rac>][,<cause_type>,<reject_cause>]]
+         *  - when <n> is in range of 4~5:
+         *    - +CGREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>],[<rac>][,[<cause_type>],[<reject_cause>][,[<Active-Time>],[<Periodic-RAU>],[<GPRS-READY-timer>]]]]
+         *
+         * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
+         */
+        LogDebug( ( "Ignore unknown +CGREG parameter at position(%u) in registration URC.", i ) );
     }
     else
     {
@@ -581,7 +587,16 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCereg( CellularContext_t *
 
     if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
     {
-        LogDebug( ( "Unknown Parameter Position(%u) in Registration URC", i ) );
+        /**
+         * In +CEREG, there are two possible formats:
+         *  - when <n> is in range of 0~3:
+         *    - +CEREG: <n>,<stat>[,[<tac>],[<ci>],[<AcT>[,<cause_type>,<reject_cause>]]]
+         *  - when <n> is in range of 4~5:
+         *    - +CEREG: <n>,<stat>[,[<tac>],[<ci>],[<AcT>][,[<cause_type>],[<reject_cause>][,[<Active-Time>],[<Periodic-TAU>]]]]
+         *
+         * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
+         */
+        LogDebug( ( "Ignore unknown +CEREG parameter at position(%u) in registration URC.", i ) );
     }
     else
     {
