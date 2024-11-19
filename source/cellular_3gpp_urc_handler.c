@@ -734,16 +734,47 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     }
     else
     {
-        pLibAtData = &( pContext->libAtData );
+        /* Empty else MISRA 15.7 */
+    }
 
-        if( isUrc == true )
-        {
-            i++;
-        }
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        pLibAtData = &( pContext->libAtData );
 
         pRegStr = pRegPayload;
 
-        atCoreStatus = Cellular_ATRemoveAllDoubleQuote( pRegStr );
+        switch( regType )
+        {
+            case CELLULAR_REG_TYPE_CREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCreg;
+                break;
+
+            case CELLULAR_REG_TYPE_CGREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCgreg;
+                break;
+
+            case CELLULAR_REG_TYPE_CEREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCereg;
+                break;
+
+            default:
+                LogDebug( ( "Unknown Registration Type %d", regType ) );
+                atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
+                break;
+        }
+
+        if( atCoreStatus != CELLULAR_AT_SUCCESS )
+        {
+            packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        }
+    }
+
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        {
+            atCoreStatus = Cellular_ATRemoveAllDoubleQuote( pRegStr );
+        }
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
@@ -755,51 +786,38 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
             atCoreStatus = Cellular_ATGetNextTok( &pRegStr, &pToken );
         }
 
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        if( atCoreStatus != CELLULAR_AT_SUCCESS )
         {
-            switch( regType )
-            {
-                case CELLULAR_REG_TYPE_CREG:
-                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCreg;
-                    break;
+            packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        }
+    }
 
-                case CELLULAR_REG_TYPE_CGREG:
-                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCgreg;
-                    break;
-
-                case CELLULAR_REG_TYPE_CEREG:
-                    pRegStatusParsingFunc = _regStatusSwitchParsingFuncCereg;
-                    break;
-
-                default:
-                    LogDebug( ( "Unknown Registration Type %d", regType ) );
-                    atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
-                    break;
-            }
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        if( isUrc == true )
+        {
+            i++;
         }
 
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        /* Backup the previous regStatus. */
+        prevCsRegStatus = pLibAtData->csRegStatus;
+        prevPsRegStatus = pLibAtData->psRegStatus;
+
+        while( pToken != NULL )
         {
-            /* Backup the previous regStatus. */
-            prevCsRegStatus = pLibAtData->csRegStatus;
-            prevPsRegStatus = pLibAtData->psRegStatus;
+            i++;
 
-            while( pToken != NULL )
+            packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
+
+            if( packetStatus != CELLULAR_PKT_STATUS_OK )
             {
-                i++;
+                break;
+            }
 
-                packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
-
-                if( packetStatus != CELLULAR_PKT_STATUS_OK )
-                {
-                    break;
-                }
-
-                /* Getting next token to parse. */
-                if( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS )
-                {
-                    break;
-                }
+            /* Getting next token to parse. */
+            if( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS )
+            {
+                break;
             }
         }
 

@@ -1073,7 +1073,7 @@ void test_Cellular_ParseRegStatus_Regs_TooManyParametersInCgreg( void )
 }
 
 /**
- * @brief Test that more paremeters in +CEEG response.
+ * @brief Test that more paremeters in +CEREG response.
  */
 void test_Cellular_ParseRegStatus_Regs_TooManyParametersInCereg( void )
 {
