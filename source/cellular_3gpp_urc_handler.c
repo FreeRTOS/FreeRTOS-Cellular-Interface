@@ -493,7 +493,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCreg( CellularContext_t * 
                                                             cellularAtData_t * pLibAtData )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
-    uint8_t parsingTable[] =
+    const uint8_t parsingTable[] =
     {
         CELLULAR_REG_POS_NONE,
         CELLULAR_REG_POS_NET_REG,
@@ -530,7 +530,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCgreg( CellularContext_t *
                                                              cellularAtData_t * pLibAtData )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
-    uint8_t parsingTable[] =
+    const uint8_t parsingTable[] =
     {
         CELLULAR_REG_POS_NONE,
         CELLULAR_REG_POS_NET_REG,
@@ -573,7 +573,7 @@ static CellularPktStatus_t _regStatusSwitchParsingFuncCereg( CellularContext_t *
                                                              cellularAtData_t * pLibAtData )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
-    uint8_t parsingTable[] =
+    const uint8_t parsingTable[] =
     {
         CELLULAR_REG_POS_NONE,
         CELLULAR_REG_POS_NET_REG,
