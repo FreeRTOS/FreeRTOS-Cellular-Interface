@@ -49,12 +49,23 @@
 
 /*-----------------------------------------------------------*/
 
+#define CELLULAR_REG_POS_NONE         ( 0U )
+#define CELLULAR_REG_POS_NET_REG      ( 1U )
 #define CELLULAR_REG_POS_STAT         ( 2U )
 #define CELLULAR_REG_POS_LAC_TAC      ( 3U )
 #define CELLULAR_REG_POS_CELL_ID      ( 4U )
 #define CELLULAR_REG_POS_RAT          ( 5U )
 #define CELLULAR_REG_POS_REJ_TYPE     ( 6U )
 #define CELLULAR_REG_POS_REJ_CAUSE    ( 7U )
+#define CELLULAR_REG_POS_RAC          ( 8U )
+
+/*-----------------------------------------------------------*/
+
+/* Function pointer prototype to point to corresponding function for CREG/CEREG/CGREG. */
+typedef CellularPktStatus_t ( * RegStatusSwitchParsingFunc_t )( CellularContext_t * pContext,
+                                                                uint8_t i,
+                                                                const char * pToken,
+                                                                cellularAtData_t * pLibAtData );
 
 /*-----------------------------------------------------------*/
 static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t * pContext,
@@ -74,11 +85,25 @@ static CellularPktStatus_t _parseRejectTypeInRegStatus( CellularNetworkRegType_t
 static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_t regType,
                                                          const char * pToken,
                                                          cellularAtData_t * pLibAtData );
+static CellularPktStatus_t _parseRoutingAreaCodeInRegStatus( const char * pToken,
+                                                             cellularAtData_t * pLibAtData );
 static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pContext,
                                                         uint8_t i,
                                                         CellularNetworkRegType_t regType,
                                                         const char * pToken,
                                                         cellularAtData_t * pLibAtData );
+static CellularPktStatus_t _regStatusSwitchParsingFuncCreg( CellularContext_t * pContext,
+                                                            uint8_t i,
+                                                            const char * pToken,
+                                                            cellularAtData_t * pLibAtData );
+static CellularPktStatus_t _regStatusSwitchParsingFuncCereg( CellularContext_t * pContext,
+                                                             uint8_t i,
+                                                             const char * pToken,
+                                                             cellularAtData_t * pLibAtData );
+static CellularPktStatus_t _regStatusSwitchParsingFuncCgreg( CellularContext_t * pContext,
+                                                             uint8_t i,
+                                                             const char * pToken,
+                                                             cellularAtData_t * pLibAtData );
 static void _regStatusGenerateLog( char * pRegPayload,
                                    CellularNetworkRegType_t regType );
 static void _regStatusGenerateEvent( const CellularContext_t * pContext,
@@ -101,32 +126,24 @@ static CellularPktStatus_t _parseRegStatusInRegStatusParsing( CellularContext_t 
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
     CellularNetworkRegistrationStatus_t regStatus = REGISTRATION_STATUS_UNKNOWN;
 
-    if( ( regType != CELLULAR_REG_TYPE_CREG ) && ( regType != CELLULAR_REG_TYPE_CEREG ) &&
-        ( regType != CELLULAR_REG_TYPE_CGREG ) )
-    {
-        packetStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
-    }
-    else
-    {
-        atCoreStatus = Cellular_ATStrtoi( pToken, 10, &tempValue );
+    atCoreStatus = Cellular_ATStrtoi( pToken, 10, &tempValue );
 
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( ( tempValue >= 0 ) && ( tempValue < ( int32_t ) REGISTRATION_STATUS_MAX ) )
         {
-            if( ( tempValue >= 0 ) && ( tempValue < ( int32_t ) REGISTRATION_STATUS_MAX ) )
-            {
-                /* MISRA Ref 10.5.1 [Essential type casting] */
-                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-105 */
-                /* coverity[misra_c_2012_rule_10_5_violation] */
-                regStatus = ( CellularNetworkRegistrationStatus_t ) tempValue;
-            }
-            else
-            {
-                atCoreStatus = CELLULAR_AT_ERROR;
-            }
+            /* MISRA Ref 10.5.1 [Essential type casting] */
+            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#rule-105 */
+            /* coverity[misra_c_2012_rule_10_5_violation] */
+            regStatus = ( CellularNetworkRegistrationStatus_t ) tempValue;
         }
-
-        packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        else
+        {
+            atCoreStatus = CELLULAR_AT_ERROR;
+        }
     }
+
+    packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
 
     if( packetStatus == CELLULAR_PKT_STATUS_OK )
     {
@@ -196,14 +213,12 @@ static CellularPktStatus_t _parseLacTacInRegStatus( CellularNetworkRegType_t reg
         {
             pLibAtData->lac = ( uint16_t ) var;
         }
-        /* Parsing Tracking area code for CEREG. */
-        else if( regType == CELLULAR_REG_TYPE_CEREG )
-        {
-            pLibAtData->tac = ( uint16_t ) var;
-        }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CEREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            pLibAtData->tac = ( uint16_t ) var;
         }
     }
 
@@ -252,7 +267,7 @@ static CellularPktStatus_t _parseRatInfoInRegStatus( const char * pToken,
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( var >= ( int32_t ) CELLULAR_RAT_MAX )
+        if( ( var >= ( int32_t ) CELLULAR_RAT_MAX ) || ( var < 0 ) )
         {
             atCoreStatus = CELLULAR_AT_ERROR;
             LogError( ( "Error in processing RAT. Token %s", pToken ) );
@@ -307,24 +322,23 @@ static CellularPktStatus_t _parseRejectTypeInRegStatus( CellularNetworkRegType_t
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( regType == CELLULAR_REG_TYPE_CREG )
-        {
-            /* Reject Type is only stored if the registration status is denied. */
-            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
-            {
-                pLibAtData->csRejectType = rejType;
-            }
-        }
-        else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
+        if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
             if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejectType = rejType;
             }
         }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            /* Reject Type is only stored if the registration status is denied. */
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
+            {
+                pLibAtData->csRejectType = rejType;
+            }
         }
     }
 
@@ -359,23 +373,22 @@ static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_
 
     if( atCoreStatus == CELLULAR_AT_SUCCESS )
     {
-        if( regType == CELLULAR_REG_TYPE_CREG )
-        {
-            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
-            {
-                pLibAtData->csRejCause = rejCause;
-            }
-        }
-        else if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
+        if( ( regType == CELLULAR_REG_TYPE_CGREG ) || ( regType == CELLULAR_REG_TYPE_CEREG ) )
         {
             if( pLibAtData->psRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
             {
                 pLibAtData->psRejCause = rejCause;
             }
         }
+
+        /* regType has been checked in _Cellular_ParseRegStatus.
+         * The only possible value of else here is CREG. */
         else
         {
-            /* Empty else MISRA 15.7 */
+            if( pLibAtData->csRegStatus == REGISTRATION_STATUS_REGISTRATION_DENIED )
+            {
+                pLibAtData->csRejCause = rejCause;
+            }
         }
     }
 
@@ -386,17 +399,49 @@ static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_
 
 /*-----------------------------------------------------------*/
 
+static CellularPktStatus_t _parseRoutingAreaCodeInRegStatus( const char * pToken,
+                                                             cellularAtData_t * pLibAtData )
+{
+    int32_t tempValue = 0;
+    uint8_t rac = 0;
+    CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
+    CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
+
+    atCoreStatus = Cellular_ATStrtoi( pToken, 16, &tempValue );
+
+    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    {
+        if( ( tempValue >= 0 ) && ( tempValue <= ( int32_t ) UINT8_MAX ) )
+        {
+            rac = ( uint8_t ) tempValue;
+        }
+        else
+        {
+            atCoreStatus = CELLULAR_AT_ERROR;
+        }
+    }
+
+    if( atCoreStatus == CELLULAR_AT_SUCCESS )
+    {
+        pLibAtData->rac = rac;
+    }
+
+    packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+    return packetStatus;
+}
+
+/*-----------------------------------------------------------*/
+
 static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pContext,
-                                                        uint8_t i,
+                                                        uint8_t regPos,
                                                         CellularNetworkRegType_t regType,
                                                         const char * pToken,
                                                         cellularAtData_t * pLibAtData )
 {
     CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
 
-    switch( i )
+    switch( regPos )
     {
-        /* Parsing network Registration status in CREG or CGREG or CEREG response. */
         case CELLULAR_REG_POS_STAT:
             packetStatus = _parseRegStatusInRegStatusParsing( pContext, regType, pToken, pLibAtData );
             break;
@@ -425,9 +470,138 @@ static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pCon
             packetStatus = _parseRejectCauseInRegStatus( regType, pToken, pLibAtData );
             break;
 
+        /* Parsing the routing area code */
+        case CELLULAR_REG_POS_RAC:
+            packetStatus = _parseRoutingAreaCodeInRegStatus( pToken, pLibAtData );
+            break;
+
+        /* Ignore network Registration status in CREG or CGREG or CEREG response. */
+        case CELLULAR_REG_POS_NET_REG:
         default:
             LogDebug( ( "Unknown Parameter Position in Registration URC" ) );
             break;
+    }
+
+    return packetStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularPktStatus_t _regStatusSwitchParsingFuncCreg( CellularContext_t * pContext,
+                                                            uint8_t i,
+                                                            const char * pToken,
+                                                            cellularAtData_t * pLibAtData )
+{
+    CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
+    const uint8_t parsingTable[] =
+    {
+        CELLULAR_REG_POS_NONE,
+        CELLULAR_REG_POS_NET_REG,
+        CELLULAR_REG_POS_STAT,
+        CELLULAR_REG_POS_LAC_TAC,
+        CELLULAR_REG_POS_CELL_ID,
+        CELLULAR_REG_POS_RAT,
+        CELLULAR_REG_POS_REJ_TYPE,
+        CELLULAR_REG_POS_REJ_CAUSE
+    };
+
+    if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
+    {
+        /**
+         * +CREG URC response format:
+         *  - +CREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>][,<cause_type>,<reject_cause>]]
+         */
+        LogDebug( ( "Ignore unknown +CREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
+    }
+    else
+    {
+        packetStatus = _regStatusSwitchParsingFunc( pContext, parsingTable[ i ], CELLULAR_REG_TYPE_CREG,
+                                                    pToken, pLibAtData );
+    }
+
+    return packetStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularPktStatus_t _regStatusSwitchParsingFuncCgreg( CellularContext_t * pContext,
+                                                             uint8_t i,
+                                                             const char * pToken,
+                                                             cellularAtData_t * pLibAtData )
+{
+    CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
+    const uint8_t parsingTable[] =
+    {
+        CELLULAR_REG_POS_NONE,
+        CELLULAR_REG_POS_NET_REG,
+        CELLULAR_REG_POS_STAT,
+        CELLULAR_REG_POS_LAC_TAC,
+        CELLULAR_REG_POS_CELL_ID,
+        CELLULAR_REG_POS_RAT,
+        CELLULAR_REG_POS_RAC,
+        CELLULAR_REG_POS_REJ_TYPE,
+        CELLULAR_REG_POS_REJ_CAUSE
+    };
+
+    if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
+    {
+        /**
+         * In +CGREG, there are two possible formats:
+         *  - when <n> is in range of 0~3:
+         *    - +CGREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>],[<rac>][,<cause_type>,<reject_cause>]]
+         *  - when <n> is in range of 4~5:
+         *    - +CGREG: <n>,<stat>[,[<lac>],[<ci>],[<AcT>],[<rac>][,[<cause_type>],[<reject_cause>][,[<Active-Time>],[<Periodic-RAU>],[<GPRS-READY-timer>]]]]
+         *
+         * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
+         */
+        LogDebug( ( "Ignore unknown +CGREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
+    }
+    else
+    {
+        packetStatus = _regStatusSwitchParsingFunc( pContext, parsingTable[ i ], CELLULAR_REG_TYPE_CGREG,
+                                                    pToken, pLibAtData );
+    }
+
+    return packetStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+static CellularPktStatus_t _regStatusSwitchParsingFuncCereg( CellularContext_t * pContext,
+                                                             uint8_t i,
+                                                             const char * pToken,
+                                                             cellularAtData_t * pLibAtData )
+{
+    CellularPktStatus_t packetStatus = CELLULAR_PKT_STATUS_OK;
+    const uint8_t parsingTable[] =
+    {
+        CELLULAR_REG_POS_NONE,
+        CELLULAR_REG_POS_NET_REG,
+        CELLULAR_REG_POS_STAT,
+        CELLULAR_REG_POS_LAC_TAC,
+        CELLULAR_REG_POS_CELL_ID,
+        CELLULAR_REG_POS_RAT,
+        CELLULAR_REG_POS_REJ_TYPE,
+        CELLULAR_REG_POS_REJ_CAUSE
+    };
+
+    if( i >= ( sizeof( parsingTable ) / sizeof( parsingTable[ 0 ] ) ) )
+    {
+        /**
+         * In +CEREG, there are two possible formats:
+         *  - when <n> is in range of 0~3:
+         *    - +CEREG: <n>,<stat>[,[<tac>],[<ci>],[<AcT>[,<cause_type>,<reject_cause>]]]
+         *  - when <n> is in range of 4~5:
+         *    - +CEREG: <n>,<stat>[,[<tac>],[<ci>],[<AcT>][,[<cause_type>],[<reject_cause>][,[<Active-Time>],[<Periodic-TAU>]]]]
+         *
+         * For now we only handle the format for 0~3, And ignores additional parameters for <n> in range 4-5.
+         */
+        LogDebug( ( "Ignore unknown +CEREG parameter at position(%u) in registration URC. Token %s.", i, pToken ) );
+    }
+    else
+    {
+        packetStatus = _regStatusSwitchParsingFunc( pContext, parsingTable[ i ], CELLULAR_REG_TYPE_CEREG,
+                                                    pToken, pLibAtData );
     }
 
     return packetStatus;
@@ -548,6 +722,7 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     CellularNetworkRegistrationStatus_t prevCsRegStatus = REGISTRATION_STATUS_UNKNOWN;
     CellularNetworkRegistrationStatus_t prevPsRegStatus = REGISTRATION_STATUS_UNKNOWN;
+    RegStatusSwitchParsingFunc_t pRegStatusParsingFunc = NULL;
 
     if( pContext == NULL )
     {
@@ -559,16 +734,47 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
     }
     else
     {
-        pLibAtData = &( pContext->libAtData );
+        /* Empty else MISRA 15.7 */
+    }
 
-        if( isUrc == true )
-        {
-            i++;
-        }
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        pLibAtData = &( pContext->libAtData );
 
         pRegStr = pRegPayload;
 
-        atCoreStatus = Cellular_ATRemoveAllDoubleQuote( pRegStr );
+        switch( regType )
+        {
+            case CELLULAR_REG_TYPE_CREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCreg;
+                break;
+
+            case CELLULAR_REG_TYPE_CGREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCgreg;
+                break;
+
+            case CELLULAR_REG_TYPE_CEREG:
+                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCereg;
+                break;
+
+            default:
+                LogDebug( ( "Unknown Registration Type %d", regType ) );
+                atCoreStatus = CELLULAR_AT_BAD_PARAMETER;
+                break;
+        }
+
+        if( atCoreStatus != CELLULAR_AT_SUCCESS )
+        {
+            packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        }
+    }
+
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        {
+            atCoreStatus = Cellular_ATRemoveAllDoubleQuote( pRegStr );
+        }
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
@@ -580,23 +786,38 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
             atCoreStatus = Cellular_ATGetNextTok( &pRegStr, &pToken );
         }
 
-        if( atCoreStatus == CELLULAR_AT_SUCCESS )
+        if( atCoreStatus != CELLULAR_AT_SUCCESS )
         {
-            /* Backup the previous regStatus. */
-            prevCsRegStatus = pLibAtData->csRegStatus;
-            prevPsRegStatus = pLibAtData->psRegStatus;
+            packetStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
+        }
+    }
 
-            while( pToken != NULL )
+    if( packetStatus == CELLULAR_PKT_STATUS_OK )
+    {
+        if( isUrc == true )
+        {
+            i++;
+        }
+
+        /* Backup the previous regStatus. */
+        prevCsRegStatus = pLibAtData->csRegStatus;
+        prevPsRegStatus = pLibAtData->psRegStatus;
+
+        while( pToken != NULL )
+        {
+            i++;
+
+            packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
+
+            if( packetStatus != CELLULAR_PKT_STATUS_OK )
             {
-                i++;
-                packetStatus = _regStatusSwitchParsingFunc( pContext, i, regType,
-                                                            pToken, pLibAtData );
+                break;
+            }
 
-                /* Getting next token to parse. */
-                if( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS )
-                {
-                    break;
-                }
+            /* Getting next token to parse. */
+            if( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS )
+            {
+                break;
             }
         }
 
