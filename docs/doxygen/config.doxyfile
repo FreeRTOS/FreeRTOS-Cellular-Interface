@@ -299,7 +299,7 @@ ALIASES                = "dependencies_section{1}=@section \1_dependencies Depen
                          "enums_brief{1}=@brief Enumerated types of the \1." \
                          "functionpointers_group{2}=@defgroup \1_datatypes_functionpointers \2 Function pointer types" \
                          "functionpointers_brief{1}=@brief Function pointer types of the \1." \
-                         "structs_group{21}=@defgroup \1_datatypes_structs \2 Structured types" \
+                         "structs_group{2}=@defgroup \1_datatypes_structs \2 Structured types" \
                          "structs_brief{1}=@brief Structured types of the \1." \
                          "paramstructs_group{2}=@defgroup \1_datatypes_paramstructs \2 Parameter structures" \
                          "paramstructs_brief{2}=@brief Structures passed as parameters to [\2 functions](@ref \1_functions)<br>These structures are passed as parameters to library functions. Documentation for these structures will state the functions associated with each parameter structure and the purpose of each member." \
@@ -478,7 +478,7 @@ INLINE_SIMPLE_STRUCTS  = NO
 # types are typedef'ed and only the typedef is referenced, never the tag name.
 # The default value is: NO.
 
-TYPEDEF_HIDES_STRUCT   = YES
+TYPEDEF_HIDES_STRUCT   = NO
 
 # The size of the symbol lookup cache can be set using LOOKUP_CACHE_SIZE. This
 # cache is used to resolve symbols given their name and scope. Since this can be

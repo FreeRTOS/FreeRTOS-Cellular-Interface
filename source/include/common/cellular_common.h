@@ -55,7 +55,7 @@
 /*-----------------------------------------------------------*/
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
+ * @ingroup cellular_datatypes_paramstructs
  * @brief The AT command request structure.
  */
 typedef struct CellularAtReq
@@ -69,7 +69,7 @@ typedef struct CellularAtReq
 } CellularAtReq_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
+ * @ingroup cellular_datatypes_paramstructs
  * @brief The data command request structure.
  */
 typedef struct CellularAtDataReq
@@ -94,7 +94,7 @@ typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
                                                   char * pInputStr );
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
+ * @ingroup cellular_datatypes_paramstructs
  * @brief the URC token and URC handler mapping structure used by pkthandler.
  */
 typedef struct CellularAtParseTokenMap
@@ -116,7 +116,7 @@ typedef enum CellularSocketState
 } CellularSocketState_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
+ * @ingroup cellular_datatypes_paramstructs
  * @brief Parameters involved in sending/receiving data through sockets.
  */
 typedef struct CellularSocketContext
@@ -151,7 +151,7 @@ typedef struct CellularSocketContext
 } CellularSocketContext_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
+ * @ingroup cellular_datatypes_paramstructs
  * @brief Parameters to setup pktio and pkthandler token tables.
  */
 typedef struct CellularTokenTable
