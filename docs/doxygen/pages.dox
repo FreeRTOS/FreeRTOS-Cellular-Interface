@@ -405,6 +405,11 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 */
 
 /**
+ * @structs_group{cellular,Cellular}
+ * @structs_brief{cellular,cellular}
+ */
+
+/**
  * @paramstructs_group{cellular,Cellular}
  * @paramstructs_brief{cellular,cellular}
  */
@@ -422,4 +427,9 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 /**
  * @enums_group{cellular,Cellular}
  * @enums_brief{cellular library}
+ */
+
+/**
+ * @common_datatypes_paramstructs_group{cellular,Cellular}
+ * @common_datatypes_paramstructs_brief{cellular library}
  */

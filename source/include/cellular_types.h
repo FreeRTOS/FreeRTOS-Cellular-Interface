@@ -54,10 +54,6 @@
  */
 #define CELLULAR_INVALID_SIGNAL_BAR_VALUE    ( 0xFFU )
 
-/**
- * @ingroup cellular_datatypes_handles
- * @brief Opaque Cellular context structure.
- */
 struct CellularContext;
 
 /**

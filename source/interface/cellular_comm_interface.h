@@ -151,6 +151,7 @@ typedef CellularCommInterfaceError_t ( * CellularCommInterfaceRecv_t )( Cellular
 typedef CellularCommInterfaceError_t ( * CellularCommInterfaceClose_t )( CellularCommInterfaceHandle_t commInterfaceHandle );
 
 /**
+ * @ingroup cellular_datatypes_paramstructs
  * @brief Represents the functions of a comm interface.
  *
  * Functions of these signature should be implemented against a comm interface
