@@ -366,14 +366,14 @@ bool PlatformMutex_TryLock( PlatformMutex_t * pMutex );
 void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 ```
  - <b>Memory</b><br>The following malloc/free style APIs should be provided in cellular_platform.h.<br>
- The <a href="https://www.freertos.org/a00111.html">FreeRTOS memory management document</a> can be referenced for these APIs.
+ The <a href="https://freertos.org/Documentation/02-Kernel/02-Kernel-features/09-Memory-management/01-Memory-management">FreeRTOS memory management document</a> can be referenced for these APIs.
 ```
 // Example implementation of FreeRTOS malloc/free
 #define Platform_Malloc    pvPortMalloc
 #define Platform_Free      vPortFree
 ```
  - <b>EventGroup</b><br>The following APIs and handle should be provided in cellular_platform.h.<br>
- Please reference <a href="https://www.freertos.org/event-groups-API.html">FreeRTOS EvengGroup function prototypes</a>.
+ Please reference <a href="https://freertos.org/Documentation/02-Kernel/04-API-references/12-Event-groups-or-flags/00-Event-groups">FreeRTOS EvengGroup function prototypes</a>.
 ```
 // Example implementation of FreeRTOS EvengGroup
 #define PlatformEventGroupHandle_t           EventGroupHandle_t
@@ -387,7 +387,7 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 #define PlatformEventGroup_WaitBits          xEventGroupWaitBits
 ```
  - <b>Queue</b><br>The following APIs and handle should be provided in cellular_platform.h.<br>
- Please reference <a href="https://freertos.org/a00018.html">FreeRTOS Queue function prototypes</a>.
+ Please reference <a href="https://freertos.org/Documentation/02-Kernel/04-API-references/06-Queues/00-QueueManagement">FreeRTOS Queue function prototypes</a>.
 ```
 // Example implementation of FreeRTOS Queue
 #define PlatformQueueHandle_t    QueueHandle_t
@@ -397,12 +397,17 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 #define PlatformQueue_Delete     vQueueDelete
 ```
  - <b>Delay</b><br>The following API should be provided in cellular_platform.h.<br>
- Please reference <a href="https://www.freertos.org/a00127.html">FreeRTOS Task Control function prototypes</a>.
+ Please reference <a href="https://freertos.org/Documentation/02-Kernel/04-API-references/02-Task-control/00-Task-control">FreeRTOS Task Control function prototypes</a>.
 ```
 // Example implementation of FreeRTOS Task Control
 #define Platform_Delay( delayMs )           vTaskDelay( pdMS_TO_TICKS( delayMs ) )
 ```
 */
+
+/**
+ * @structs_group{cellular,Cellular}
+ * @structs_brief{cellular,cellular}
+ */
 
 /**
  * @paramstructs_group{cellular,Cellular}
@@ -422,4 +427,9 @@ void PlatformMutex_Unlock( PlatformMutex_t * pMutex );
 /**
  * @enums_group{cellular,Cellular}
  * @enums_brief{cellular library}
+ */
+
+/**
+ * @common_datatypes_paramstructs_group{cellular,Cellular}
+ * @common_datatypes_paramstructs_brief{cellular library}
  */
