@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['networkregistrationcallback_0',['networkRegistrationCallback',['../struct__callback_events__t.html#a00b3b119a4f2401e2422a1bbfa3651cd',1,'_callbackEvents_t']]],
-  ['networkregistrationmode_1',['networkRegistrationMode',['../struct_cellular_service_status__t.html#af65efc1b00948606ff96d7faa6a60739',1,'CellularServiceStatus_t']]],
-  ['networkregmode_2',['networkRegMode',['../structcellular_operator_info__t.html#a79286097acaec5b290380cb8335afdf0',1,'cellularOperatorInfo_t']]],
-  ['nwprovidededrxvalue_3',['nwProvidedEdrxValue',['../struct_cellular_eidrx_settings__t.html#a220812cf5130d580c028ee67829fe589',1,'CellularEidrxSettings_t']]]
+  ['networkregistrationcallback_0',['networkRegistrationCallback',['../struct__callback_events.html#a38de0d807ccfdf4e3254a13b02ee9cd1',1,'_callbackEvents']]],
+  ['networkregistrationmode_1',['networkRegistrationMode',['../struct_cellular_service_status.html#a8a0c36f450970592a6120b44f6ee9230',1,'CellularServiceStatus']]],
+  ['networkregmode_2',['networkRegMode',['../structcellular_operator_info.html#a81abc215bb38147af5934ef0c995d2fd',1,'cellularOperatorInfo']]],
+  ['nwprovidededrxvalue_3',['nwProvidedEdrxValue',['../struct_cellular_eidrx_settings.html#ab87e9b9415dca645c613117d947c9971',1,'CellularEidrxSettings']]]
 ];

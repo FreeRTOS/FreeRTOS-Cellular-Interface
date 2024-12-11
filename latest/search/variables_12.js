@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['year_0',['year',['../struct_cellular_time__t.html#ac5179e1cc8525ac56829a0d7b1301209',1,'CellularTime_t']]]
+  ['year_0',['year',['../struct_cellular_time.html#a8f3e5be3545a29dbe8e9eaa085a924b4',1,'CellularTime']]]
 ];
