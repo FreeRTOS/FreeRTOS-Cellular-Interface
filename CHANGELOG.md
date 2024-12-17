@@ -1,5 +1,16 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.4.1 (December 2024)
+
+### Updates
+
+- [#177](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/177)
+Fix freertos.org link in the source and doxygen files
+- [#180](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/180)
+Replace Synopsys link with blackduck one to solve link error.
+- [#185](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/185)
+Enable typedef to make docs able to link *_t structs.
+
 ## v1.4.0 (May 2024)
 
 ### Updates
