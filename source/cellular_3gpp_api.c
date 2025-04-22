@@ -867,7 +867,7 @@ static CellularError_t queryNetworkStatus( CellularContext_t * pContext,
     atReqGetResult.pAtCmd = pCommand;
     atReqGetResult.atCmdType = CELLULAR_AT_MULTI_WITH_PREFIX;
     atReqGetResult.pAtRspPrefix = pPrefix;
-    atReqGetResult.respCallback = _Cellular_RecvFuncGetNetworkReg;
+    atReqGetResult.respCallback = &_Cellular_RecvFuncGetNetworkReg;
     atReqGetResult.pData = &recvRegType;
     atReqGetResult.dataLen = ( uint16_t ) sizeof( CellularNetworkRegType_t );
 
@@ -1429,7 +1429,7 @@ static CellularError_t atcmdUpdateMccMnc( CellularContext_t * pContext,
         atCopsRequest.pAtCmd = "AT+COPS?";
         atCopsRequest.atCmdType = CELLULAR_AT_WITH_PREFIX;
         atCopsRequest.pAtRspPrefix = "+COPS";
-        atCopsRequest.respCallback = _Cellular_RecvFuncUpdateMccMnc;
+        atCopsRequest.respCallback = &_Cellular_RecvFuncUpdateMccMnc;
         atCopsRequest.pData = pOperatorInfo;
         atCopsRequest.dataLen = ( uint16_t ) sizeof( cellularOperatorInfo_t );
         pktStatus = _Cellular_AtcmdRequestWithCallback( pContext, atCopsRequest );
@@ -1638,7 +1638,7 @@ CellularError_t Cellular_CommonGetEidrxSettings( CellularHandle_t cellularHandle
     atReqGetEidrx.pAtCmd = "AT+CEDRXS?";
     atReqGetEidrx.atCmdType = CELLULAR_AT_MULTI_WITH_PREFIX;
     atReqGetEidrx.pAtRspPrefix = "+CEDRXS";
-    atReqGetEidrx.respCallback = _Cellular_RecvFuncGetEidrxSettings;
+    atReqGetEidrx.respCallback = &_Cellular_RecvFuncGetEidrxSettings;
     atReqGetEidrx.pData = pEidrxSettingsList;
     atReqGetEidrx.dataLen = CELLULAR_EDRX_LIST_MAX_SIZE;
 
@@ -1898,7 +1898,7 @@ CellularError_t Cellular_CommonGetNetworkTime( CellularHandle_t cellularHandle,
     atReqGetNetworkTime.pAtCmd = "AT+CCLK?";
     atReqGetNetworkTime.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetNetworkTime.pAtRspPrefix = "+CCLK";
-    atReqGetNetworkTime.respCallback = _Cellular_RecvFuncGetNetworkTime;
+    atReqGetNetworkTime.respCallback = &_Cellular_RecvFuncGetNetworkTime;
     atReqGetNetworkTime.pData = pNetworkTime;
     atReqGetNetworkTime.dataLen = ( uint16_t ) sizeof( CellularTime_t );
 
@@ -1943,28 +1943,28 @@ CellularError_t Cellular_CommonGetModemInfo( CellularHandle_t cellularHandle,
     atReqGetFirmwareVersion.pAtCmd = "AT+CGMR";
     atReqGetFirmwareVersion.atCmdType = CELLULAR_AT_WO_PREFIX;
     atReqGetFirmwareVersion.pAtRspPrefix = NULL;
-    atReqGetFirmwareVersion.respCallback = _Cellular_RecvFuncGetFirmwareVersion;
+    atReqGetFirmwareVersion.respCallback = &_Cellular_RecvFuncGetFirmwareVersion;
     atReqGetFirmwareVersion.pData = pModemInfo->firmwareVersion;
     atReqGetFirmwareVersion.dataLen = CELLULAR_FW_VERSION_MAX_SIZE + 1U;
 
     atReqGetImei.pAtCmd = "AT+CGSN";
     atReqGetImei.atCmdType = CELLULAR_AT_WO_PREFIX;
     atReqGetImei.pAtRspPrefix = NULL;
-    atReqGetImei.respCallback = _Cellular_RecvFuncGetImei;
+    atReqGetImei.respCallback = &_Cellular_RecvFuncGetImei;
     atReqGetImei.pData = pModemInfo->imei;
     atReqGetImei.dataLen = CELLULAR_IMEI_MAX_SIZE + 1U;
 
     atReqGetModelId.pAtCmd = "AT+CGMM";
     atReqGetModelId.atCmdType = CELLULAR_AT_WO_PREFIX;
     atReqGetModelId.pAtRspPrefix = NULL;
-    atReqGetModelId.respCallback = _Cellular_RecvFuncGetModelId;
+    atReqGetModelId.respCallback = &_Cellular_RecvFuncGetModelId;
     atReqGetModelId.pData = pModemInfo->modelId;
     atReqGetModelId.dataLen = CELLULAR_MODEL_ID_MAX_SIZE + 1U;
 
     atReqGetManufactureId.pAtCmd = "AT+CGMI";
     atReqGetManufactureId.atCmdType = CELLULAR_AT_WO_PREFIX;
     atReqGetManufactureId.pAtRspPrefix = NULL;
-    atReqGetManufactureId.respCallback = _Cellular_RecvFuncGetManufactureId;
+    atReqGetManufactureId.respCallback = &_Cellular_RecvFuncGetManufactureId;
     atReqGetManufactureId.pData = pModemInfo->manufactureId;
     atReqGetManufactureId.dataLen = CELLULAR_MANUFACTURE_ID_MAX_SIZE + 1U;
 
@@ -2031,7 +2031,7 @@ CellularError_t Cellular_CommonGetIPAddress( CellularHandle_t cellularHandle,
     atReqGetIp.pAtCmd = cmdBuf;
     atReqGetIp.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetIp.pAtRspPrefix = "+CGPADDR";
-    atReqGetIp.respCallback = _Cellular_RecvFuncIpAddress;
+    atReqGetIp.respCallback = &_Cellular_RecvFuncIpAddress;
     atReqGetIp.pData = pBuffer;
     atReqGetIp.dataLen = ( uint16_t ) bufferLength;
 
@@ -2689,7 +2689,7 @@ CellularError_t Cellular_CommonGetSimCardLockStatus( CellularHandle_t cellularHa
         atReqGetSimLockStatus.pAtCmd = "AT+CPIN?";
         atReqGetSimLockStatus.atCmdType = CELLULAR_AT_WITH_PREFIX;
         atReqGetSimLockStatus.pAtRspPrefix = "+CPIN";
-        atReqGetSimLockStatus.respCallback = _Cellular_RecvFuncGetSimLockStatus;
+        atReqGetSimLockStatus.respCallback = &_Cellular_RecvFuncGetSimLockStatus;
         atReqGetSimLockStatus.pData = &( pSimCardStatus->simCardLockState );
         atReqGetSimLockStatus.dataLen = ( uint16_t ) sizeof( CellularSimCardLockState_t );
 
@@ -2721,7 +2721,7 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
     atReqGetIccid.pAtCmd = "AT+CCID";
     atReqGetIccid.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetIccid.pAtRspPrefix = "+CCID";
-    atReqGetIccid.respCallback = _Cellular_RecvFuncGetIccid;
+    atReqGetIccid.respCallback = &_Cellular_RecvFuncGetIccid;
     atReqGetIccid.pData = pSimCardInfo->iccid;
     atReqGetIccid.dataLen = CELLULAR_ICCID_MAX_SIZE + 1U;
     #endif
@@ -2729,14 +2729,14 @@ CellularError_t Cellular_CommonGetSimCardInfo( CellularHandle_t cellularHandle,
     atReqGetImsi.pAtCmd = "AT+CIMI";
     atReqGetImsi.atCmdType = CELLULAR_AT_WO_PREFIX;
     atReqGetImsi.pAtRspPrefix = NULL;
-    atReqGetImsi.respCallback = _Cellular_RecvFuncGetImsi;
+    atReqGetImsi.respCallback = &_Cellular_RecvFuncGetImsi;
     atReqGetImsi.pData = pSimCardInfo->imsi;
     atReqGetImsi.dataLen = CELLULAR_IMSI_MAX_SIZE + 1U;
 
     atReqGetHplmn.pAtCmd = "AT+CRSM=176,28514,0,0,0"; /* READ BINARY command. HPLMN Selector with Access Technology( 6F62 ). */
     atReqGetHplmn.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetHplmn.pAtRspPrefix = "+CRSM";
-    atReqGetHplmn.respCallback = _Cellular_RecvFuncGetHplmn;
+    atReqGetHplmn.respCallback = &_Cellular_RecvFuncGetHplmn;
     atReqGetHplmn.pData = &( pSimCardInfo->plmn );
     atReqGetHplmn.dataLen = ( uint16_t ) sizeof( CellularPlmnInfo_t );
 
@@ -3025,7 +3025,7 @@ CellularError_t Cellular_CommonGetPsmSettings( CellularHandle_t cellularHandle,
     atReqGetPsm.pAtCmd = "AT+CPSMS?";
     atReqGetPsm.atCmdType = CELLULAR_AT_WITH_PREFIX;
     atReqGetPsm.pAtRspPrefix = "+CPSMS";
-    atReqGetPsm.respCallback = _Cellular_RecvFuncGetPsmSettings;
+    atReqGetPsm.respCallback = &_Cellular_RecvFuncGetPsmSettings;
     atReqGetPsm.pData = pPsmSettings;
     atReqGetPsm.dataLen = ( uint16_t ) sizeof( CellularPsmSettings_t );
 

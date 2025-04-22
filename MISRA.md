@@ -29,6 +29,14 @@ _Ref 4.6.1_
   We do not have control over these functions so we are suppressing these
   violations.
 
+_Ref 4.6.2_
+
+- MISRA C-2012 Directive 4.6 warns against using types that do not contain size
+  and sign information. However, in this case, the search function requires a
+  comparison function pointer that returns a value of type int. To maintain
+  compatibility with the search function's expected prototype, the comparison
+  function must return an int type value despite the MISRA guidance.
+
 #### Directive 4.7
 
 _Ref 4.7.1_

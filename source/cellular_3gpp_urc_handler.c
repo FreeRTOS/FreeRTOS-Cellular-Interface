@@ -88,7 +88,7 @@ static CellularPktStatus_t _parseRejectCauseInRegStatus( CellularNetworkRegType_
 static CellularPktStatus_t _parseRoutingAreaCodeInRegStatus( const char * pToken,
                                                              cellularAtData_t * pLibAtData );
 static CellularPktStatus_t _regStatusSwitchParsingFunc( CellularContext_t * pContext,
-                                                        uint8_t i,
+                                                        uint8_t regPos,
                                                         CellularNetworkRegType_t regType,
                                                         const char * pToken,
                                                         cellularAtData_t * pLibAtData );
@@ -746,15 +746,15 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         switch( regType )
         {
             case CELLULAR_REG_TYPE_CREG:
-                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCreg;
+                pRegStatusParsingFunc = &_regStatusSwitchParsingFuncCreg;
                 break;
 
             case CELLULAR_REG_TYPE_CGREG:
-                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCgreg;
+                pRegStatusParsingFunc = &_regStatusSwitchParsingFuncCgreg;
                 break;
 
             case CELLULAR_REG_TYPE_CEREG:
-                pRegStatusParsingFunc = _regStatusSwitchParsingFuncCereg;
+                pRegStatusParsingFunc = &_regStatusSwitchParsingFuncCereg;
                 break;
 
             default:
@@ -806,16 +806,12 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         while( pToken != NULL )
         {
             i++;
-
+        
             packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
-
-            if( packetStatus != CELLULAR_PKT_STATUS_OK )
-            {
-                break;
-            }
-
-            /* Getting next token to parse. */
-            if( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS )
+        
+            /* Continue only if status is OK and we can get the next token */
+            if( (packetStatus != CELLULAR_PKT_STATUS_OK) || 
+                (Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS) )
             {
                 break;
             }
