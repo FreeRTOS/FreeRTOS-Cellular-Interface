@@ -806,12 +806,12 @@ CellularPktStatus_t _Cellular_ParseRegStatus( CellularContext_t * pContext,
         while( pToken != NULL )
         {
             i++;
-        
+
             packetStatus = pRegStatusParsingFunc( pContext, i, pToken, pLibAtData );
-        
+
             /* Continue only if status is OK and we can get the next token */
-            if( (packetStatus != CELLULAR_PKT_STATUS_OK) || 
-                (Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS) )
+            if( ( packetStatus != CELLULAR_PKT_STATUS_OK ) ||
+                ( Cellular_ATGetNextTok( &pRegStr, &pToken ) != CELLULAR_AT_SUCCESS ) )
             {
                 break;
             }
