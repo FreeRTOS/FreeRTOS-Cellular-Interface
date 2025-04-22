@@ -72,7 +72,7 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
 static int _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase );
+                               const void * pBase );
 static int32_t _sortCompareFunc( const void * pElem1Ptr,
                                  const void * pElem2Ptr );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
@@ -364,7 +364,7 @@ static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pCon
 /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
 /* coverity[misra_c_2012_directive_4_6_violation] */
 static int _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase )
+                               const void * pBase )
 {
     /* MISRA Ref 4.6.  [Basic numerical type] */
     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
