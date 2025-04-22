@@ -1206,7 +1206,7 @@ static void _pktioReadThread( void * pUserData )
 
     /* Open main communication port. */
     if( ( pContext->pCommIntf != NULL ) &&
-        ( pContext->pCommIntf->open( _Cellular_PktRxCallBack, ( void * ) pContext,
+        ( pContext->pCommIntf->open( &_Cellular_PktRxCallBack, ( void * ) pContext,
                                      &( pContext->hPktioCommIntf ) ) == IOT_COMM_INTERFACE_SUCCESS ) )
     {
         /* Send thread started event. */
@@ -1370,7 +1370,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
                                                ( ( PlatformEventBits_t ) PKTIO_EVT_MASK_ALL_EVENTS ) );
 
         /* Create the Read thread. */
-        status = Platform_CreateDetachedThread( _pktioReadThread,
+        status = Platform_CreateDetachedThread( &_pktioReadThread,
                                                 ( void * ) pContext,
                                                 PLATFORM_THREAD_DEFAULT_PRIORITY,
                                                 PLATFORM_THREAD_DEFAULT_STACK_SIZE );

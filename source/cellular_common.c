@@ -188,12 +188,12 @@ static CellularError_t libOpen( CellularContext_t * pContext )
     _Cellular_LockAtDataMutex( pContext );
     _Cellular_InitAtData( pContext, 0 );
     _Cellular_UnlockAtDataMutex( pContext );
-    _Cellular_SetShutdownCallback( pContext, _shutdownCallback );
+    _Cellular_SetShutdownCallback( pContext, &_shutdownCallback );
     pktStatus = _Cellular_PktHandlerInit( pContext );
 
     if( pktStatus == CELLULAR_PKT_STATUS_OK )
     {
-        pktStatus = _Cellular_PktioInit( pContext, _Cellular_HandlePacket );
+        pktStatus = _Cellular_PktioInit( pContext, &_Cellular_HandlePacket );
 
         if( pktStatus != CELLULAR_PKT_STATUS_OK )
         {

@@ -31,7 +31,7 @@ Go to the root directory of the library and run the following commands in termin
   ~~~
 2. Create the build files using CMake in a `build` directory
   ~~~
-  cmake -B build -S test
+  cmake -B build -S test -DCOV_ANALYSIS=ON
   ~~~
 3. Go to the build directory and copy the coverity configuration file
   ~~~
@@ -62,7 +62,7 @@ Go to the root directory of the library and run the following commands in termin
 For your convenience the commands above are below to be copy/pasted into a UNIX command friendly terminal.
  ~~~
  cov-configure --force --compiler cc --comptype gcc;
- cmake -B build -S test;
+ cmake -B build -S test -DCOV_ANALYSIS=ON;
  cd build/;
  cov-build --emit-complementary-info --dir cov-out make coverity_analysis;
  cd cov-out/

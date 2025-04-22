@@ -71,8 +71,8 @@ static CellularPktStatus_t _Cellular_DataSendWithTimeoutDelayRaw( CellularContex
                                                                   uint32_t timeoutMs );
 static void _Cellular_PktHandlerAcquirePktRequestMutex( CellularContext_t * pContext );
 static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pContext );
-static int32_t _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase );
+static int _searchCompareFunc( const void * pInputToken,
+                               const void * pBase );
 static int32_t _sortCompareFunc( const void * pElem1Ptr,
                                  const void * pElem2Ptr );
 static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
@@ -360,10 +360,16 @@ static void _Cellular_PktHandlerReleasePktRequestMutex( CellularContext_t * pCon
 
 /*-----------------------------------------------------------*/
 
-static int32_t _searchCompareFunc( const void * pInputToken,
-                                   const void * pBase )
+/* MISRA Ref 4.6.  [Basic numerical type] */
+/* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+/* coverity[misra_c_2012_directive_4_6_violation] */
+static int _searchCompareFunc( const void * pInputToken,
+                               const void * pBase )
 {
-    int32_t compareValue = 0;
+    /* MISRA Ref 4.6.  [Basic numerical type] */
+    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/blob/main/MISRA.md#directive-46 */
+    /* coverity[misra_c_2012_directive_4_6_violation] */
+    int compareValue = 0;
     const char * pToken = ( const char * ) pInputToken;
     const CellularAtParseTokenMap_t * pBasePtr = ( const CellularAtParseTokenMap_t * ) pBase;
     uint32_t tokenLen = ( uint32_t ) strlen( pInputToken );
@@ -441,7 +447,7 @@ static CellularPktStatus_t _atParseGetHandler( CellularContext_t * pContext,
                                                            ( const void * ) pTokenMap,
                                                            tokenMapSize,
                                                            sizeof( CellularAtParseTokenMap_t ),
-                                                           _searchCompareFunc );
+                                                           &_searchCompareFunc );
 
     if( pElementPtr != NULL )
     {
