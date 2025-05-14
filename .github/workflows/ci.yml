@@ -167,9 +167,7 @@ jobs:
       - name: Set up CBMC runner
         uses: FreeRTOS/CI-CD-Github-Actions/set_up_cbmc_runner@main
         with:
-          cbmc_version: "5.95.1"
-          cbmc_viewer_version: "latest"
-          kissat_tag: latest
+          cbmc_version: "6.1.1"
       - run: |
           git submodule update --init --checkout --recursive
           sudo apt-get update
