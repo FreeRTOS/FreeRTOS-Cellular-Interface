@@ -4,7 +4,7 @@ description: |
   "FreeRTOS Cellular Interface implementation of the 3GPP TS v27.007 standard..\n"
 license: "MIT"
 
-dependencies:
+testDependencies:
   - name: "CMock"
     version: "v2.5.3"
     license: "MIT"
