@@ -1,5 +1,5 @@
 /*
- * FreeRTOS-Cellular-Interface <DEVELOPMENT BRANCH>
+ * FreeRTOS-Cellular-Interface
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
