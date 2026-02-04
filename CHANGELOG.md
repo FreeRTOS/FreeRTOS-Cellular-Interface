@@ -1,5 +1,14 @@
 # Change Log for FreeRTOS Cellular Interface Library
 
+## v1.4.2 (February 2026)
+
+### Updates
+
+- [#190](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/190)
+Fix MISRA deviations
+- [#189](https://github.com/FreeRTOS/FreeRTOS-Cellular-Interface/pull/177)
+Remove redundant file
+
 ## v1.4.1 (December 2024)
 
 ### Updates
