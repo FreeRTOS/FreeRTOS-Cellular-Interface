@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['second_0',['second',['../struct_cellular_time.html#a845753fa99851040b2364c9625a132a3',1,'CellularTime']]],
+  ['send_1',['send',['../struct_cellular_comm_interface.html#a817babf53d68cc5b029727dae570e633',1,'CellularCommInterface']]],
+  ['sending_20binary_20data_20with_20cellular_20common_20apis_2',['Sending binary data with Cellular Common APIs',['../cellular_sending_binary_data.html',1,'porting_cellular_module']]],
+  ['sendtimeoutms_3',['sendTimeoutMs',['../struct_cellular_socket_context.html#a8f5048c7e4041d8e6dfa4127be8fac64',1,'CellularSocketContext']]],
+  ['serialnumber_4',['serialNumber',['../struct_cellular_modem_info.html#a1c3f5732e471fd93eabcc0c337800905',1,'CellularModemInfo']]],
+  ['signalbarstable_5',['signalBarsTable',['../structsignal_bars_table.html',1,'']]],
+  ['signalbarstable_5ft_6',['signalBarsTable_t',['../group__cellular__datatypes__structs.html#gaf36d42023ef994d69e8720a1b6fb1334',1,'cellular_common.c']]],
+  ['signalstrengthchangedcallback_7',['signalStrengthChangedCallback',['../struct__callback_events.html#a497eb5a948640025c3f6d96369337b9b',1,'_callbackEvents']]],
+  ['simcardlockstate_8',['simCardLockState',['../struct_cellular_sim_card_status.html#abb9b17b653e876c5d9fd25eafc0d0db9',1,'CellularSimCardStatus']]],
+  ['simcardstate_9',['simCardState',['../struct_cellular_sim_card_status.html#a97038fe41545d37eabdfa5dcb0cfffe4',1,'CellularSimCardStatus']]],
+  ['sinr_10',['sinr',['../struct_cellular_signal_info.html#a8076ad682c23f034d4bc20fefb435a40',1,'CellularSignalInfo']]],
+  ['socketdomain_11',['socketDomain',['../struct_cellular_socket_context.html#a1c58ac2978a1d5b01b154ce2c221ef6a',1,'CellularSocketContext']]],
+  ['socketid_12',['socketId',['../struct_cellular_socket_context.html#aaaaa79c29b32f4cbcf551594a1d7d487',1,'CellularSocketContext']]],
+  ['socketprotocol_13',['socketProtocol',['../struct_cellular_socket_context.html#af998d36269c17332f10911dbf1c210af',1,'CellularSocketContext']]],
+  ['socketstate_14',['socketState',['../struct_cellular_socket_context.html#abae5cdf12738aa05c3ffe892dd9e1ef7',1,'CellularSocketContext']]],
+  ['socketstate_5fallocated_15',['SOCKETSTATE_ALLOCATED',['../cellular__common_8h.html#ab7160cf87a9a9e7dde7aef51dd733e94adb6f0c2359e1183751b74e5aa74f68b5',1,'cellular_common.h']]],
+  ['socketstate_5fconnected_16',['SOCKETSTATE_CONNECTED',['../cellular__common_8h.html#ab7160cf87a9a9e7dde7aef51dd733e94a8e58311ac8755d916ff1c788594a0ca3',1,'cellular_common.h']]],
+  ['socketstate_5fconnecting_17',['SOCKETSTATE_CONNECTING',['../cellular__common_8h.html#ab7160cf87a9a9e7dde7aef51dd733e94a3fda0e54a2dd3b85fdcc156264e4d44f',1,'cellular_common.h']]],
+  ['socketstate_5fdisconnected_18',['SOCKETSTATE_DISCONNECTED',['../cellular__common_8h.html#ab7160cf87a9a9e7dde7aef51dd733e94a412aaae49eeed481cc4d467215ea1114',1,'cellular_common.h']]],
+  ['sockettype_19',['socketType',['../struct_cellular_socket_context.html#a1d5d85f3805fe5ab5695a6bcb36cea91',1,'CellularSocketContext']]],
+  ['state_20',['state',['../struct_cellular_pdn_status.html#a3ab406c542e9ff901e3ec900acc3b984',1,'CellularPdnStatus']]],
+  ['status_21',['status',['../struct_cellular_a_t_command_response.html#af78688583d0d1ae4424cf546840c8419',1,'CellularATCommandResponse']]]
+];
