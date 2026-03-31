@@ -86,7 +86,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "RDY",               cellularAtParseTokenHandler },
     { "RDY",               cellularAtParseTokenHandler }
 };
-const uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
+#define CellularUrcHandlerTableSize    ( sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t ) )
 
 CellularAtParseTokenMap_t CellularUrcHandlerTableWoParseFunc[] =
 {
@@ -101,7 +101,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTableWoParseFunc[] =
     { "QSIMSTAT",          NULL },
     { "RDY",               NULL }
 };
-const uint32_t CellularUrcHandlerTableWoParseFuncSize = sizeof( CellularUrcHandlerTableWoParseFunc ) / sizeof( CellularAtParseTokenMap_t );
+#define CellularUrcHandlerTableWoParseFuncSize    ( sizeof( CellularUrcHandlerTableWoParseFunc ) / sizeof( CellularAtParseTokenMap_t ) )
 
 CellularAtParseTokenMap_t CellularUrcHandlerTableSortFailCase[] =
 {
@@ -116,7 +116,7 @@ CellularAtParseTokenMap_t CellularUrcHandlerTableSortFailCase[] =
     { "QSIMSTAT",          NULL },
     { "RDY",               NULL }
 };
-const uint32_t CellularUrcHandlerTableSortFailCaseSize = sizeof( CellularUrcHandlerTableSortFailCase ) / sizeof( CellularAtParseTokenMap_t );
+#define CellularUrcHandlerTableSortFailCaseSize    ( sizeof( CellularUrcHandlerTableSortFailCase ) / sizeof( CellularAtParseTokenMap_t ) )
 
 CellularTokenTable_t tokenTable =
 {

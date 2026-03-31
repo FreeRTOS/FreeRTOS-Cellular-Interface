@@ -75,15 +75,6 @@ _Ref 10.8.1_
   and isdigit. We do not have control over these so we are suppressing these
   violations.
 
-#### Rule 11.3
-
-_Ref 11.3.1_
-
-- MISRA C-2012 Rule 11.3 does not allow casting of a pointer to different object
-  types. We are passing in a length variable which is then checked to determine
-  what to cast this value to. As such we are not worried about the chance of
-  misaligned access when using the cast variable.
-
 #### Rule 21.6
 
 _Ref 21.6.1_
