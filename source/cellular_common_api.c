@@ -67,7 +67,6 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
                                                         uint32_t optionValueLength )
 {
     CellularError_t cellularStatus = CELLULAR_SUCCESS;
-    const uint32_t * pTimeoutMs = NULL;
 
     if( option == CELLULAR_SOCKET_OPTION_SEND_TIMEOUT )
     {
@@ -85,7 +84,6 @@ static CellularError_t _socketSetSockOptLevelTransport( CellularSocketOption_t o
         if( optionValueLength == sizeof( uint32_t ) )
         {
             ( void ) memcpy( &( socketHandle->recvTimeoutMs ), pOptionValue, sizeof( uint32_t ) );
-
         }
         else
         {
