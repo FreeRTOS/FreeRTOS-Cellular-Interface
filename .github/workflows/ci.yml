@@ -138,6 +138,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: FreeRTOS/CI-CD-Github-Actions/link-verifier@main
+        with:
+          allowlist-file: '.github/allowed_urls.txt'
 
   verify-manifest:
     runs-on: ubuntu-latest
