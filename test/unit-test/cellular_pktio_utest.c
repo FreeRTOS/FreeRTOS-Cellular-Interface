@@ -162,25 +162,25 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "QSIMSTAT",          NULL },
     { "RDY",               NULL }
 };
-const uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
+#define CellularUrcHandlerTableSize    ( sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t ) )
 
 const char * CellularSrcTokenErrorTable[] =
 { "ERROR", "BUSY", "NO CARRIER", "NO ANSWER", "NO DIALTONE", "ABORTED", "+CMS ERROR", "+CME ERROR", "SEND FAIL" };
-const uint32_t CellularSrcTokenErrorTableSize = sizeof( CellularSrcTokenErrorTable ) / sizeof( char * );
+#define CellularSrcTokenErrorTableSize    ( sizeof( CellularSrcTokenErrorTable ) / sizeof( char * ) )
 
 const char * CellularSrcTokenSuccessTable[] =
 { "OK", "CONNECT", "SEND OK", ">" };
-const uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * );
+#define CellularSrcTokenSuccessTableSize    ( sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * ) )
 
 const char * CellularUrcTokenWoPrefixTable[] =
 { "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
 
-const uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
+#define CellularUrcTokenWoPrefixTableSize    ( sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * ) )
 
 const char * CellularSrcExtraTokenSuccessTable[] =
 { "EXTRA_TOKEN_1", "EXTRA_TOKEN_2", "EXTRA_TOKEN_3" };
 
-const uint32_t CellularSrcExtraTokenSuccessTableSize = sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * );
+#define CellularSrcExtraTokenSuccessTableSize    ( sizeof( CellularSrcExtraTokenSuccessTable ) / sizeof( char * ) )
 
 CellularTokenTable_t tokenTable =
 {
