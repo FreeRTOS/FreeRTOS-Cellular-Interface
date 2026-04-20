@@ -1390,7 +1390,7 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
             {
                 LogDebug( ( "GetEidrx: empty EDRXS setting %s", pInputLine ) );
             }
-            else
+            else if( count < CELLULAR_EDRX_LIST_MAX_SIZE )
             {
                 atCoreStatus = parseEidrxLine( pInputLine, count, pEidrxSettingsList );
                 pktStatus = _Cellular_TranslateAtCoreStatus( atCoreStatus );
@@ -1399,6 +1399,11 @@ static CellularPktStatus_t _Cellular_RecvFuncGetEidrxSettings( CellularContext_t
                 {
                     count++;
                 }
+            }
+            else
+            {
+                LogError( ( "GetEidrx: eidrxList is full, CELLULAR_EDRX_LIST_MAX_SIZE=%u", CELLULAR_EDRX_LIST_MAX_SIZE ) );
+                pktStatus = CELLULAR_PKT_STATUS_SIZE_MISMATCH;
             }
 
             pCommnadItem = pCommnadItem->pNext;

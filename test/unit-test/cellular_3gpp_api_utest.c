@@ -732,6 +732,22 @@ CellularPktStatus_t Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGet
         _saveData( pLine2, &atResp, sizeof( pLine2 ) );
         pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, sizeof( CELLULAR_EDRX_LIST_MAX_SIZE ) );
     }
+    else if( cbCondition == 5 )
+    {
+        /* Create CELLULAR_EDRX_LIST_MAX_SIZE + 1 parseable lines to exercise the
+         * bounds check.  The callback must cap count at CELLULAR_EDRX_LIST_MAX_SIZE
+         * and not write past the end of the eidrxList array. */
+        char pLines[ CELLULAR_EDRX_LIST_MAX_SIZE + 1 ][ sizeof( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) ];
+        uint8_t i;
+
+        for( i = 0; i < CELLULAR_EDRX_LIST_MAX_SIZE + 1; i++ )
+        {
+            memcpy( pLines[ i ], CELLULAR_SAMPLE_PREFIX_STRING_INPUT, sizeof( CELLULAR_SAMPLE_PREFIX_STRING_INPUT ) );
+            _saveData( pLines[ i ], &atResp, sizeof( pLines[ i ] ) );
+        }
+
+        pktStatus = atReq.respCallback( pContext, &atResp, &cellularEidrxSettingsList, CELLULAR_EDRX_LIST_MAX_SIZE );
+    }
 
     return pktStatus;
 }
@@ -1842,6 +1858,36 @@ void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_H
     _Cellular_TranslatePktStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
     cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+}
+
+/**
+ * @brief Test that _Cellular_RecvFuncGetEidrxSettings returns an error and does
+ * not write past eidrxList when the modem returns more than
+ * CELLULAR_EDRX_LIST_MAX_SIZE +CEDRXS lines.
+ */
+void test_Cellular_CommonGetEidrxSettings_Cb_Cellular_RecvFuncGetEidrxSettings_Overflow_Capped( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    CellularHandle_t cellularHandle = &context;
+    CellularEidrxSettingsList_t eidrxSettingsList;
+
+    memset( &eidrxSettingsList, 0, sizeof( CellularEidrxSettingsList_t ) );
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+    _Cellular_IsValidPdn_IgnoreAndReturn( CELLULAR_SUCCESS );
+    cbCondition = 5;
+    _Cellular_AtcmdRequestWithCallback_StubWithCallback( Mock_AtcmdRequestWithCallback__Cellular_Cellular_RecvFuncGetEidrxSettings );
+    Cellular_ATRemovePrefix_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATRemoveAllDoubleQuote_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    Cellular_ATGetNextTok_StubWithCallback( Mock_Cellular_ATGetNextTok_Calback );
+    Cellular_ATStrtoi_IgnoreAndReturn( CELLULAR_AT_SUCCESS );
+    _Cellular_TranslateAtCoreStatus_IgnoreAndReturn( CELLULAR_PKT_STATUS_OK );
+    _Cellular_TranslatePktStatus_ExpectAndReturn( CELLULAR_PKT_STATUS_SIZE_MISMATCH, CELLULAR_INTERNAL_FAILURE );
+    cellularStatus = Cellular_CommonGetEidrxSettings( cellularHandle, &eidrxSettingsList );
+    TEST_ASSERT_EQUAL( CELLULAR_INTERNAL_FAILURE, cellularStatus );
 }
 
 /**
