@@ -1300,7 +1300,7 @@ static CellularATError_t parseEidrxLine( char * pInputLine,
     char * pLocalInputLine = pInputLine;
     CellularATError_t atCoreStatus = CELLULAR_AT_SUCCESS;
     uint8_t tokenIndex = 0;
-    
+
     CELLULAR_CONFIG_ASSERT( count < CELLULAR_EDRX_LIST_MAX_SIZE );
 
     atCoreStatus = Cellular_ATRemovePrefix( &pLocalInputLine );
