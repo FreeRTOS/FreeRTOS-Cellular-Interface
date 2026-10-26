@@ -157,6 +157,14 @@ int suiteTearDown( int numFailures )
 
 /* ========================================================================== */
 
+void dummyTaskENTER_CRITICAL( void )
+{
+}
+
+void dummyTaskEXIT_CRITICAL( void )
+{
+}
+
 void MockPlatformMutex_Unlock( PlatformMutex_t * pMutex )
 {
     ( void ) pMutex;
@@ -1132,6 +1140,10 @@ void test_Cellular_CommonSocketRegisterDataReadyCallback_Happy_Path( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
+    /* The callback setter only writes through a handle which is still in the
+     * socket table. Place the handle in the table to represent a live socket. */
+    context.pSocketData[ 0 ] = &socketHandle;
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterDataReadyCallback( &context, &socketHandle,
@@ -1141,6 +1153,73 @@ void test_Cellular_CommonSocketRegisterDataReadyCallback_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( socketHandle.dataReadyCallback, cellularSocketDataReadyCallback );
     TEST_ASSERT_EQUAL( socketHandle.pDataReadyCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a handle held in the last socket table slot is accepted by
+ * Cellular_CommonSocketRegisterDataReadyCallback.
+ *
+ * This walks the whole socket table before the match, which exercises the
+ * liveness scan beyond its first iteration.
+ */
+void test_Cellular_CommonSocketRegisterDataReadyCallback_Last_Socket_Slot_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    context.pSocketData[ CELLULAR_NUM_SOCKET_MAX - 1 ] = &socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterDataReadyCallback( &context, &socketHandle,
+                                                                     cellularSocketDataReadyCallback,
+                                                                     testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( socketHandle.dataReadyCallback, cellularSocketDataReadyCallback );
+    TEST_ASSERT_EQUAL( socketHandle.pDataReadyCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a socket handle which is no longer in the socket table is
+ * rejected by Cellular_CommonSocketRegisterDataReadyCallback.
+ *
+ * _Cellular_RemoveSocketData clears the socket's slot in pSocketData before
+ * freeing it, so a handle which is absent from the table is either stale or
+ * never belonged to this context. The setter must return
+ * CELLULAR_INVALID_HANDLE and must not write through the handle.
+ */
+void test_Cellular_CommonSocketRegisterDataReadyCallback_Stale_socketHandle( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+    uint8_t socketId;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext liveSocketHandle;
+
+    memset( &socketHandle, 0, sizeof( struct CellularSocketContext ) );
+
+    /* Populate every slot with a different live socket so that the scan has to
+     * reject the handle on table membership rather than on an empty table. */
+    for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+    {
+        context.pSocketData[ socketId ] = &liveSocketHandle;
+    }
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterDataReadyCallback( &context, &socketHandle,
+                                                                     cellularSocketDataReadyCallback,
+                                                                     testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.dataReadyCallback );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.pDataReadyCallbackContext );
 }
 
 /**
@@ -1187,6 +1266,10 @@ void test_Cellular_CommonSocketRegisterSocketOpenCallback_Happy_Path( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
+    /* The callback setter only writes through a handle which is still in the
+     * socket table. Place the handle in the table to represent a live socket. */
+    context.pSocketData[ 0 ] = &socketHandle;
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterSocketOpenCallback( &context, &socketHandle,
@@ -1196,6 +1279,73 @@ void test_Cellular_CommonSocketRegisterSocketOpenCallback_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( socketHandle.openCallback, cellularSocketOpenCallback );
     TEST_ASSERT_EQUAL( socketHandle.pOpenCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a handle held in the last socket table slot is accepted by
+ * Cellular_CommonSocketRegisterSocketOpenCallback.
+ *
+ * This walks the whole socket table before the match, which exercises the
+ * liveness scan beyond its first iteration.
+ */
+void test_Cellular_CommonSocketRegisterSocketOpenCallback_Last_Socket_Slot_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    context.pSocketData[ CELLULAR_NUM_SOCKET_MAX - 1 ] = &socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterSocketOpenCallback( &context, &socketHandle,
+                                                                      cellularSocketOpenCallback,
+                                                                      testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( socketHandle.openCallback, cellularSocketOpenCallback );
+    TEST_ASSERT_EQUAL( socketHandle.pOpenCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a socket handle which is no longer in the socket table is
+ * rejected by Cellular_CommonSocketRegisterSocketOpenCallback.
+ *
+ * _Cellular_RemoveSocketData clears the socket's slot in pSocketData before
+ * freeing it, so a handle which is absent from the table is either stale or
+ * never belonged to this context. The setter must return
+ * CELLULAR_INVALID_HANDLE and must not write through the handle.
+ */
+void test_Cellular_CommonSocketRegisterSocketOpenCallback_Stale_socketHandle( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+    uint8_t socketId;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext liveSocketHandle;
+
+    memset( &socketHandle, 0, sizeof( struct CellularSocketContext ) );
+
+    /* Populate every slot with a different live socket so that the scan has to
+     * reject the handle on table membership rather than on an empty table. */
+    for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+    {
+        context.pSocketData[ socketId ] = &liveSocketHandle;
+    }
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterSocketOpenCallback( &context, &socketHandle,
+                                                                      cellularSocketOpenCallback,
+                                                                      testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.openCallback );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.pOpenCallbackContext );
 }
 
 /**
@@ -1242,6 +1392,10 @@ void test_Cellular_CommonSocketRegisterClosedCallback_Happy_Path( void )
     memset( &context, 0, sizeof( CellularContext_t ) );
     struct CellularSocketContext socketHandle;
 
+    /* The callback setter only writes through a handle which is still in the
+     * socket table. Place the handle in the table to represent a live socket. */
+    context.pSocketData[ 0 ] = &socketHandle;
+
     _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
 
     cellularStatus = Cellular_CommonSocketRegisterClosedCallback( &context, &socketHandle,
@@ -1251,6 +1405,73 @@ void test_Cellular_CommonSocketRegisterClosedCallback_Happy_Path( void )
     TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
     TEST_ASSERT_EQUAL( socketHandle.closedCallback, cellularSocketClosedCallback );
     TEST_ASSERT_EQUAL( socketHandle.pClosedCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a handle held in the last socket table slot is accepted by
+ * Cellular_CommonSocketRegisterClosedCallback.
+ *
+ * This walks the whole socket table before the match, which exercises the
+ * liveness scan beyond its first iteration.
+ */
+void test_Cellular_CommonSocketRegisterClosedCallback_Last_Socket_Slot_Happy_Path( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+
+    context.pSocketData[ CELLULAR_NUM_SOCKET_MAX - 1 ] = &socketHandle;
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterClosedCallback( &context, &socketHandle,
+                                                                  cellularSocketClosedCallback,
+                                                                  testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_SUCCESS, cellularStatus );
+    TEST_ASSERT_EQUAL( socketHandle.closedCallback, cellularSocketClosedCallback );
+    TEST_ASSERT_EQUAL( socketHandle.pClosedCallbackContext, testCallback );
+}
+
+/**
+ * @brief Test that a socket handle which is no longer in the socket table is
+ * rejected by Cellular_CommonSocketRegisterClosedCallback.
+ *
+ * _Cellular_RemoveSocketData clears the socket's slot in pSocketData before
+ * freeing it, so a handle which is absent from the table is either stale or
+ * never belonged to this context. The setter must return
+ * CELLULAR_INVALID_HANDLE and must not write through the handle.
+ */
+void test_Cellular_CommonSocketRegisterClosedCallback_Stale_socketHandle( void )
+{
+    CellularError_t cellularStatus = CELLULAR_SUCCESS;
+    CellularContext_t context;
+    uint8_t socketId;
+
+    memset( &context, 0, sizeof( CellularContext_t ) );
+    struct CellularSocketContext socketHandle;
+    struct CellularSocketContext liveSocketHandle;
+
+    memset( &socketHandle, 0, sizeof( struct CellularSocketContext ) );
+
+    /* Populate every slot with a different live socket so that the scan has to
+     * reject the handle on table membership rather than on an empty table. */
+    for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+    {
+        context.pSocketData[ socketId ] = &liveSocketHandle;
+    }
+
+    _Cellular_CheckLibraryStatus_IgnoreAndReturn( CELLULAR_SUCCESS );
+
+    cellularStatus = Cellular_CommonSocketRegisterClosedCallback( &context, &socketHandle,
+                                                                  cellularSocketClosedCallback,
+                                                                  testCallback );
+
+    TEST_ASSERT_EQUAL( CELLULAR_INVALID_HANDLE, cellularStatus );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.closedCallback );
+    TEST_ASSERT_EQUAL( NULL, socketHandle.pClosedCallbackContext );
 }
 
 /**

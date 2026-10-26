@@ -496,8 +496,24 @@ CellularError_t Cellular_CommonSocketRegisterDataReadyCallback( CellularHandle_t
     }
     else
     {
-        socketHandle->dataReadyCallback = dataReadyCallback;
-        socketHandle->pDataReadyCallbackContext = pCallbackContext;
+        uint8_t socketId;
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+
+        taskENTER_CRITICAL();
+
+        /* Verify the socket handle is still alive. */
+        for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+        {
+            if( pContext->pSocketData[ socketId ] == socketHandle )
+            {
+                socketHandle->dataReadyCallback = dataReadyCallback;
+                socketHandle->pDataReadyCallbackContext = pCallbackContext;
+                cellularStatus = CELLULAR_SUCCESS;
+                break;
+            }
+        }
+
+        taskEXIT_CRITICAL();
     }
 
     return cellularStatus;
@@ -526,8 +542,24 @@ CellularError_t Cellular_CommonSocketRegisterSocketOpenCallback( CellularHandle_
     }
     else
     {
-        socketHandle->openCallback = socketOpenCallback;
-        socketHandle->pOpenCallbackContext = pCallbackContext;
+        uint8_t socketId;
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+
+        taskENTER_CRITICAL();
+
+        /* Verify the socket handle is still alive. */
+        for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+        {
+            if( pContext->pSocketData[ socketId ] == socketHandle )
+            {
+                socketHandle->openCallback = socketOpenCallback;
+                socketHandle->pOpenCallbackContext = pCallbackContext;
+                cellularStatus = CELLULAR_SUCCESS;
+                break;
+            }
+        }
+
+        taskEXIT_CRITICAL();
     }
 
     return cellularStatus;
@@ -556,8 +588,24 @@ CellularError_t Cellular_CommonSocketRegisterClosedCallback( CellularHandle_t ce
     }
     else
     {
-        socketHandle->closedCallback = closedCallback;
-        socketHandle->pClosedCallbackContext = pCallbackContext;
+        uint8_t socketId;
+        cellularStatus = CELLULAR_INVALID_HANDLE;
+
+        taskENTER_CRITICAL();
+
+        /* Verify the socket handle is still alive. */
+        for( socketId = 0; socketId < CELLULAR_NUM_SOCKET_MAX; socketId++ )
+        {
+            if( pContext->pSocketData[ socketId ] == socketHandle )
+            {
+                socketHandle->closedCallback = closedCallback;
+                socketHandle->pClosedCallbackContext = pCallbackContext;
+                cellularStatus = CELLULAR_SUCCESS;
+                break;
+            }
+        }
+
+        taskEXIT_CRITICAL();
     }
 
     return cellularStatus;
