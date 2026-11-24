@@ -146,6 +146,15 @@ static void * inputBufferCallbackContext = NULL;
 static int dataUrcPktHandlerCallbackIsCalled = 0;
 static char * pInputBufferPkthandlerString;
 
+/* Instrumentation for the _pktioReadThread shutdown ordering tests. The read
+ * thread must finish using pContext - which means calling pPktioShutdownCB -
+ * before it raises the PKTIO_EVT_MASK_ABORTED completion fence, because that
+ * bit is what releases the waiter that frees pContext. */
+static int shutdownCallbackCallCount = 0;
+static int abortedFenceSetCount = 0;
+static int shutdownCallbackCountAtAbortedFence = -1;
+static PlatformEventGroupHandle_t pAbortedFenceEventGroup = NULL;
+
 /* Try to Keep this map in Alphabetical order. */
 /* FreeRTOS Cellular Common Library porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
@@ -245,6 +254,11 @@ void setUp()
     testCommIfRecvType = COMM_IF_RECV_NORMAL;
     pCommIntfRecvCustomString = NULL;
     pCommIntfRecvCustomStringCallback = NULL;
+
+    shutdownCallbackCallCount = 0;
+    abortedFenceSetCount = 0;
+    shutdownCallbackCountAtAbortedFence = -1;
+    pAbortedFenceEventGroup = NULL;
 }
 
 /* Called after each test method. */
@@ -331,8 +345,15 @@ uint16_t MockPlatformEventGroup_WaitBits( PlatformEventGroupHandle_t groupEvent,
 uint16_t MockPlatformEventGroup_SetBits( PlatformEventGroupHandle_t groupEvent,
                                          EventBits_t event )
 {
-    ( void ) groupEvent;
-    ( void ) event;
+    /* PKTIO_EVT_MASK_ABORTED is only ever raised by _pktioReadThread, as its
+     * last action. Record the handle it was raised on and how many times the
+     * shutdown callback had run by that point. */
+    if( ( event & ( EventBits_t ) PKTIO_EVT_MASK_ABORTED ) != 0U )
+    {
+        abortedFenceSetCount++;
+        shutdownCallbackCountAtAbortedFence = shutdownCallbackCallCount;
+        pAbortedFenceEventGroup = groupEvent;
+    }
 
     return pktioEvtMask;
 }
@@ -686,6 +707,8 @@ static CellularCommInterface_t CellularCommInterface =
 
 static void _shutdownCallback( CellularContext_t * pContext )
 {
+    shutdownCallbackCallCount++;
+
     if( pContext != NULL )
     {
         pContext->bLibShutdown = true;
@@ -1128,6 +1151,74 @@ void test__Cellular_PktioInit_Thread_Receive_Abort_Event( void )
     /* Check that CELLULAR_PKT_STATUS_OK is returned. */
     pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
     TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+}
+
+/**
+ * @brief Test that _pktioReadThread calls the shutdown callback before raising
+ * PKTIO_EVT_MASK_ABORTED, on the path where opening the comm interface fails.
+ *
+ * PKTIO_EVT_MASK_ABORTED is the only gate on the free: neither
+ * _Cellular_PktioShutdown nor _PktioInitProcessReadThreadStatus can reach
+ * Platform_Free until it appears. Raising it before the last use of pContext
+ * lets a higher priority teardown task free the context while the read thread
+ * is still dereferencing it.
+ */
+void test__Cellular_PktioInit_Thread_Comm_Open_Fail_Shutdown_Callback_Precedes_Aborted( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    /* Leave pCommIntf NULL so the comm port open check fails and the thread
+     * takes its else branch straight to the shutdown sequence. */
+    context.pCommIntf = NULL;
+    context.pPktioShutdownCB = _shutdownCallback;
+
+    recvCount = 0;
+
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    /* The callback ran, and it had completed by the time the fence was raised. */
+    TEST_ASSERT_EQUAL( true, context.bLibShutdown );
+    TEST_ASSERT_EQUAL_INT( 1, abortedFenceSetCount );
+    TEST_ASSERT_EQUAL_INT( 1, shutdownCallbackCountAtAbortedFence );
+
+    /* The fence is raised on the handle the event group was created with. */
+    TEST_ASSERT_EQUAL_PTR( &evtGroup, pAbortedFenceEventGroup );
+}
+
+/**
+ * @brief Test that _pktioReadThread still raises PKTIO_EVT_MASK_ABORTED when no
+ * shutdown callback is registered.
+ */
+void test__Cellular_PktioInit_Thread_Null_Shutdown_Callback_Still_Raises_Aborted( void )
+{
+    CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
+    CellularContext_t context;
+    CellularCommInterface_t * pCommIntf = &CellularCommInterface;
+
+    threadReturn = true;
+    memset( &context, 0, sizeof( CellularContext_t ) );
+
+    context.pCommIntf = pCommIntf;
+    /* No shutdown callback registered. */
+    context.pPktioShutdownCB = NULL;
+
+    pktioEvtMask = PKTIO_EVT_MASK_ABORT;
+    recvCount = 0;
+
+    pktStatus = _Cellular_PktioInit( &context, PktioHandlePacketCallback_t );
+    TEST_ASSERT_EQUAL( CELLULAR_PKT_STATUS_OK, pktStatus );
+
+    TEST_ASSERT_EQUAL_INT( 0, shutdownCallbackCallCount );
+    TEST_ASSERT_EQUAL( false, context.bLibShutdown );
+
+    TEST_ASSERT_EQUAL_INT( 1, abortedFenceSetCount );
+    TEST_ASSERT_EQUAL_INT( 0, shutdownCallbackCountAtAbortedFence );
+    TEST_ASSERT_EQUAL_PTR( &evtGroup, pAbortedFenceEventGroup );
 }
 
 /**

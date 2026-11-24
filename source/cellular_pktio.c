@@ -1243,20 +1243,20 @@ static void _pktioReadThread( void * pUserData )
 
         ( void ) pContext->pCommIntf->close( pContext->hPktioCommIntf );
         pContext->hPktioCommIntf = NULL;
-        pContext->pPktioShutdownCB( pContext );
     }
     else
     {
         LogError( ( "Comm port open failed" ) );
     }
 
-    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED );
-
     /* Call the shutdown callback if it is defined. */
     if( pContext->pPktioShutdownCB != NULL )
     {
         pContext->pPktioShutdownCB( pContext );
     }
+
+    /* No statement below here may touch pContext. */
+    ( void ) PlatformEventGroup_SetBits( ( PlatformEventGroupHandle_t ) pContext->pPktioCommEvent, ( PlatformEventBits_t ) PKTIO_EVT_MASK_ABORTED );
 }
 
 /*-----------------------------------------------------------*/
